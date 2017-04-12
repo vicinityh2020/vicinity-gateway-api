@@ -1,0 +1,6 @@
+Apr 06, 2017 4:56:29 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/%s-gateway.log
+Apr 06, 2017 4:56:29 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway initialized.
+Apr 06, 2017 4:56:29 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.

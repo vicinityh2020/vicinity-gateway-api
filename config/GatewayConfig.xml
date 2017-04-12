@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<logging>
+		<!-- 
+		Set a relative or absolute (recommended) path to log file. 
+		In order to differentiate among multiple log files, a '%s' can be added
+		to arbitrary location in the string, which will be replaced by a time
+		stamp during runtime. 
+		-->
+		<file>/home/sulfo/Workspace/GatewayApi/log/%s-gateway.log</file>
+		
+		<!--
+		Set a log level - messages with severity level lower than this setting 
+		will not be recorded. The list of levels in descending order is 
+		following:
+		
+		SEVERE
+		WARNING
+		INFO
+		CONFIG
+		FINE
+		FINER
+		FINEST
+		
+		It corresponds with the levels used by class java.util.logging.Logger,
+		which the Vicinity Gateway utilizes for event logging. This value can also
+		be set to OFF, which will disable the logging mechanism completely. 
+		-->
+		<level>FINEST</level>
+		
+		<!-- 
+		Setting this value to 'true' will cause the application to log its output
+		to console, aside from logging it into file. This can be useful when 
+		debugging the software. 
+		
+		Setting it to 'false' will suppress this behavior, instead logging 
+		events solely to log file. This is the default behavior.
+		-->
+		<consoleOutput>true</consoleOutput>
+	</logging>
+
+
+	<server>
+		
+	</server>
+	
+	<api>
+		<!--
+		Set the port on which the API will be served. If not explicitly set, 
+		it defaults to 8181. Be aware that running the software on privileged
+		ports (<1024) needs root's privileges. 
+		-->
+		<port>8181</port>
+		
+		<!--
+		Set whether the API will be served via HTTP or HTTPS. Takes either true
+		or false value. Default is true, however in some installations it might
+		not be supported.
+		-->
+		<enableHttps>false</enableHttps>
+	</api>
+
+</configuration>
