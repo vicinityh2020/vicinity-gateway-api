@@ -1,18 +1,14 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
-import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 
-public class ResourceSparql extends ServerResource {
-	@Get
-	public String represent() {
-
-		return "ok";
-	}
+public class ResourceFeedsSparql extends ServerResource {
+	
 	
 	@Post
 	public void accept() {
 
 	}
+
 }

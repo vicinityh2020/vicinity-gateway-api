@@ -1,8 +1,0 @@
-Apr 12, 2017 2:17:42 PM eu.bavenir.vicinity.gatewayapi.App initialize
-CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-04-12T14:17:42.927-gateway.log
-Apr 12, 2017 2:17:43 PM eu.bavenir.vicinity.gatewayapi.App main
-FINE: Vicinity Gateway initialized.
-Apr 12, 2017 2:17:43 PM eu.bavenir.vicinity.gatewayapi.App main
-FINE: API thread started.
-Apr 12, 2017 2:17:43 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
-CONFIG: HTTP server configured.
