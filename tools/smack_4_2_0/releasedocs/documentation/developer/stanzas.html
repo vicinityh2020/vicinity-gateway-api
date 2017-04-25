@@ -1,0 +1,9 @@
+<h1>General Rules</h1><p>All classes which subclass <code>TopLevelStreamElement</code> and <code>ExtensionElement</code> must either</p>
+<ol>
+  <li>be immutable (and ideally provide a Builder)</li>
+  <li>implement <code>TypedCloneable</code></li>
+</ol><p>and must be <code>Serializable</code>. The reason that it must be either 1. or 2. is that it makes no sense to clone an inmutable instance. The preferred option is 1.</p><p>Note that there is legacy code in Smack which does not follow these rules. Patches are welcome.</p><h1>ExtensionElement</h1><p>Extension elements are XML elements that are used in various parts and levels of stanzas.</p><h2>The static <code>from(Stanza)</code> Method</h2><p>Every ExtensionElement class must have a static <code>from()</code> method that retrieves that extension for a given Stanza (if any).</p><p>Sample Code</p>
+<pre><code class="java">public static RSMSet from(Stanza) {
+  return packet.getExtension(ELEMENT, NAMESPACE);
+}
+</code></pre><p>Sometimes certain ExtensionElement's are only found in one stanza type, in that case, specify the parameter type. For example <code>public static CarbonExtension getFrom(Message)</code>.</p>

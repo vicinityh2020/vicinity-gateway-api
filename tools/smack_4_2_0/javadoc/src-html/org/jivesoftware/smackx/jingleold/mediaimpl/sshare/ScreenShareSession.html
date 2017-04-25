@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/**<a name="line.1"></a>
+<span class="sourceLineNo">002</span> *<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Copyright 2003-2006 Jive Software.<a name="line.3"></a>
+<span class="sourceLineNo">004</span> *<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Licensed under the Apache License, Version 2.0 (the "License");<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * you may not use this file except in compliance with the License.<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * You may obtain a copy of the License at<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *     http://www.apache.org/licenses/LICENSE-2.0<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Unless required by applicable law or agreed to in writing, software<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * distributed under the License is distributed on an "AS IS" BASIS,<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * See the License for the specific language governing permissions and<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * limitations under the License.<a name="line.15"></a>
+<span class="sourceLineNo">016</span> */<a name="line.16"></a>
+<span class="sourceLineNo">017</span>package org.jivesoftware.smackx.jingleold.mediaimpl.sshare;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import java.awt.Rectangle;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import java.awt.event.WindowAdapter;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.awt.event.WindowEvent;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.io.IOException;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import java.net.DatagramSocket;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import java.net.InetAddress;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.net.ServerSocket;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.net.UnknownHostException;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.logging.Level;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.logging.Logger;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>import javax.swing.JFrame;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import javax.swing.JPanel;<a name="line.31"></a>
+<span class="sourceLineNo">032</span><a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.jivesoftware.smackx.jingleold.JingleSession;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.jivesoftware.smackx.jingleold.media.JingleMediaSession;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.jivesoftware.smackx.jingleold.media.PayloadType;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.jivesoftware.smackx.jingleold.mediaimpl.sshare.api.ImageDecoder;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.jivesoftware.smackx.jingleold.mediaimpl.sshare.api.ImageEncoder;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.jivesoftware.smackx.jingleold.mediaimpl.sshare.api.ImageReceiver;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.jivesoftware.smackx.jingleold.mediaimpl.sshare.api.ImageTransmitter;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.jivesoftware.smackx.jingleold.nat.TransportCandidate;<a name="line.40"></a>
+<span class="sourceLineNo">041</span><a name="line.41"></a>
+<span class="sourceLineNo">042</span>/**<a name="line.42"></a>
+<span class="sourceLineNo">043</span> * This Class implements a complete JingleMediaSession.<a name="line.43"></a>
+<span class="sourceLineNo">044</span> * It sould be used to transmit and receive captured images from the Display.<a name="line.44"></a>
+<span class="sourceLineNo">045</span> * This Class should be automaticly controlled by JingleSession.<a name="line.45"></a>
+<span class="sourceLineNo">046</span> * For better NAT Traversal support this implementation don't support only receive or only transmit.<a name="line.46"></a>
+<span class="sourceLineNo">047</span> * To receive you MUST transmit. So the only implemented and functionally methods are startTransmit() and stopTransmit()<a name="line.47"></a>
+<span class="sourceLineNo">048</span> *<a name="line.48"></a>
+<span class="sourceLineNo">049</span> * @author Thiago Camargo<a name="line.49"></a>
+<span class="sourceLineNo">050</span> */<a name="line.50"></a>
+<span class="sourceLineNo">051</span>public class ScreenShareSession extends JingleMediaSession {<a name="line.51"></a>
+<span class="sourceLineNo">052</span><a name="line.52"></a>
+<span class="sourceLineNo">053</span>    private static final Logger LOGGER = Logger.getLogger(ScreenShareSession.class.getName());<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    private ImageTransmitter transmitter = null;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    private ImageReceiver receiver = null;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    private int width = 600;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    private int height = 600;<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    /**<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     * Creates a org.jivesoftware.jingleaudio.jmf.AudioMediaSession with defined payload type, remote and local candidates.<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     *<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * @param payloadType Payload of the jmf<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     * @param remote      the remote information. The candidate that the jmf will be sent to.<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * @param local       the local information. The candidate that will receive the jmf<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * @param locator     media locator<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     */<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    public ScreenShareSession(final PayloadType payloadType, final TransportCandidate remote, final TransportCandidate local,<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            final String locator, JingleSession jingleSession) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        super(payloadType, remote, local, "Screen", jingleSession);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        initialize();<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    }<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>    /**<a name="line.74"></a>
+<span class="sourceLineNo">075</span>     * Initialize the screen share channels.<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     */<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    @Override<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public void initialize() {<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>        JingleSession session = getJingleSession();<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        if ((session != null) &amp;&amp; (session.getInitiator().equals(session.getConnection().getUser()))) {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            // If the initiator of the jingle session is us then we transmit a screen share.<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            try {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                InetAddress remote = InetAddress.getByName(getRemote().getIp());<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                transmitter = new ImageTransmitter(new DatagramSocket(getLocal().getPort()), remote, getRemote().getPort(),<a name="line.85"></a>
+<span class="sourceLineNo">086</span>                        new Rectangle(0, 0, width, height));<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            } catch (Exception e) {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                LOGGER.log(Level.WARNING, "exception", e);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            }<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>        } else {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            // Otherwise we receive a screen share.<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            JFrame window = new JFrame();<a name="line.93"></a>
+<span class="sourceLineNo">094</span>            JPanel jp = new JPanel();<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            window.add(jp);<a name="line.95"></a>
+<span class="sourceLineNo">096</span><a name="line.96"></a>
+<span class="sourceLineNo">097</span>            window.setLocation(0, 0);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            window.setSize(600, 600);<a name="line.98"></a>
+<span class="sourceLineNo">099</span><a name="line.99"></a>
+<span class="sourceLineNo">100</span>            window.addWindowListener(new WindowAdapter() {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                @Override<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                public void windowClosed(WindowEvent e) {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                    receiver.stop();<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                }<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            });<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>            try {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                receiver = new ImageReceiver(InetAddress.getByName("0.0.0.0"), getRemote().getPort(), getLocal().getPort(), width,<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                        height);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                LOGGER.fine("Receiving on:" + receiver.getLocalPort());<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            } catch (UnknownHostException e) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                LOGGER.log(Level.WARNING, "exception", e);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            }<a name="line.113"></a>
+<span class="sourceLineNo">114</span><a name="line.114"></a>
+<span class="sourceLineNo">115</span>            jp.add(receiver);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            receiver.setVisible(true);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            window.setAlwaysOnTop(true);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>            window.setVisible(true);<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        }<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    }<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>    /**<a name="line.122"></a>
+<span class="sourceLineNo">123</span>     * Starts transmission and for NAT Traversal reasons start receiving also.<a name="line.123"></a>
+<span class="sourceLineNo">124</span>     */<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    @Override<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    public void startTrasmit() {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        new Thread(transmitter).start();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    }<a name="line.128"></a>
+<span class="sourceLineNo">129</span><a name="line.129"></a>
+<span class="sourceLineNo">130</span>    /**<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     * Set transmit activity. If the active is true, the instance should trasmit.<a name="line.131"></a>
+<span class="sourceLineNo">132</span>     * If it is set to false, the instance should pause transmit.<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     *<a name="line.133"></a>
+<span class="sourceLineNo">134</span>     * @param active active state<a name="line.134"></a>
+<span class="sourceLineNo">135</span>     */<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    @Override<a name="line.136"></a>
+<span class="sourceLineNo">137</span>    public void setTrasmit(boolean active) {<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        transmitter.setTransmit(true);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    }<a name="line.139"></a>
+<span class="sourceLineNo">140</span><a name="line.140"></a>
+<span class="sourceLineNo">141</span>    /**<a name="line.141"></a>
+<span class="sourceLineNo">142</span>     * For NAT Reasons this method does nothing. Use startTransmit() to start transmit and receive jmf<a name="line.142"></a>
+<span class="sourceLineNo">143</span>     */<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    @Override<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    public void startReceive() {<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        // Do nothing<a name="line.146"></a>
+<span class="sourceLineNo">147</span>    }<a name="line.147"></a>
+<span class="sourceLineNo">148</span><a name="line.148"></a>
+<span class="sourceLineNo">149</span>    /**<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     * Stops transmission and for NAT Traversal reasons stop receiving also.<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     */<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    @Override<a name="line.152"></a>
+<span class="sourceLineNo">153</span>    public void stopTrasmit() {<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        if (transmitter != null) {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            transmitter.stop();<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        }<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    }<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>    /**<a name="line.159"></a>
+<span class="sourceLineNo">160</span>     * For NAT Reasons this method does nothing. Use startTransmit() to start transmit and receive jmf<a name="line.160"></a>
+<span class="sourceLineNo">161</span>     */<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    @Override<a name="line.162"></a>
+<span class="sourceLineNo">163</span>    public void stopReceive() {<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        if (receiver != null) {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>            receiver.stop();<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        }<a name="line.166"></a>
+<span class="sourceLineNo">167</span>    }<a name="line.167"></a>
+<span class="sourceLineNo">168</span><a name="line.168"></a>
+<span class="sourceLineNo">169</span>    /**<a name="line.169"></a>
+<span class="sourceLineNo">170</span>     * Obtain a free port we can use.<a name="line.170"></a>
+<span class="sourceLineNo">171</span>     *<a name="line.171"></a>
+<span class="sourceLineNo">172</span>     * @return A free port number.<a name="line.172"></a>
+<span class="sourceLineNo">173</span>     */<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    protected int getFreePort() {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        ServerSocket ss;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        int freePort = 0;<a name="line.176"></a>
+<span class="sourceLineNo">177</span><a name="line.177"></a>
+<span class="sourceLineNo">178</span>        for (int i = 0; i &lt; 10; i++) {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            freePort = (int) (10000 + Math.round(Math.random() * 10000));<a name="line.179"></a>
+<span class="sourceLineNo">180</span>            freePort = freePort % 2 == 0 ? freePort : freePort + 1;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            try {<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                ss = new ServerSocket(freePort);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                freePort = ss.getLocalPort();<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                ss.close();<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                return freePort;<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            } catch (IOException e) {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                LOGGER.log(Level.WARNING, "exception", e);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>            }<a name="line.188"></a>
+<span class="sourceLineNo">189</span>        }<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        try {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>            ss = new ServerSocket(0);<a name="line.191"></a>
+<span class="sourceLineNo">192</span>            freePort = ss.getLocalPort();<a name="line.192"></a>
+<span class="sourceLineNo">193</span>            ss.close();<a name="line.193"></a>
+<span class="sourceLineNo">194</span>        } catch (IOException e) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>            LOGGER.log(Level.WARNING, "exception", e);<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        }<a name="line.196"></a>
+<span class="sourceLineNo">197</span>        return freePort;<a name="line.197"></a>
+<span class="sourceLineNo">198</span>    }<a name="line.198"></a>
+<span class="sourceLineNo">199</span><a name="line.199"></a>
+<span class="sourceLineNo">200</span>    public void setEncoder(ImageEncoder encoder) {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>        if (encoder != null) {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            this.transmitter.setEncoder(encoder);<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        }<a name="line.203"></a>
+<span class="sourceLineNo">204</span>    }<a name="line.204"></a>
+<span class="sourceLineNo">205</span><a name="line.205"></a>
+<span class="sourceLineNo">206</span>    public void setDecoder(ImageDecoder decoder) {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        if (decoder != null) {<a name="line.207"></a>
+<span class="sourceLineNo">208</span>            this.receiver.setDecoder(decoder);<a name="line.208"></a>
+<span class="sourceLineNo">209</span>        }<a name="line.209"></a>
+<span class="sourceLineNo">210</span>    }<a name="line.210"></a>
+<span class="sourceLineNo">211</span>}<a name="line.211"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

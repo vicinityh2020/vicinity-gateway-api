@@ -1,0 +1,35 @@
+<h1>Processing Incoming Stanzas</h1><p><a href="index.html">Back</a></p><p>Smack provides a flexible framework for processing incoming packets using two constructs:</p>
+<ul>
+  <li><code>org.jivesoftware.smack.PacketCollector</code> -- a class that lets you synchronously wait for new packets.</li>
+  <li><code>org.jivesoftware.smack.PacketListener</code> -- an interface for asynchronously notifying you of incoming packets. A packet listener is used for event style programming, while a packet collector has a result queue of packets that you can do polling and blocking operations on. So, a packet listener is useful when you want to take some action whenever a packet happens to come in, while a packet collector is useful when you want to wait for a specific packet to arrive. Packet collectors and listeners can be created using an <code>XMPPConnection</code> instance.</li>
+</ul><p>The <code>org.jivesoftware.smack.filter.StanzaFilter</code> interface determines which specific packets will be delivered to a <code>PacketCollector</code> or <code>PacketListener</code>. Many pre-defined filters can be found in the <code>org.jivesoftware.smack.filter</code> package.</p><p>The following code snippet demonstrates registering both a packet collector and a packet listener:</p>
+<pre><code>// Create a packet filter to listen for new messages from a particular
+// user. We use an AndFilter to combine two other filters._
+StanzaFilter filter = new AndFilter(new StanzaTypeFilter(Message.class),
+		new FromContainsFilter(&quot;mary@jivesoftware.com&quot;));
+// Assume we&#39;ve created an XMPPConnection name &quot;connection&quot;.
+
+// First, register a packet collector using the filter we created.
+PacketCollector myCollector = connection.createPacketCollector(filter);
+// Normally, you&#39;d do something with the collector, like wait for new packets.
+
+// Next, create a packet listener. We use an anonymous inner class for brevity.
+StanzaListener myListener = new StanzaListener() {
+		**public** **void** processStanza(Stanza stanza) {
+			// Do something with the incoming stanza here._
+		}
+	};
+// Register the listener._
+connection.addStanzaListener(myListener, filter);
+</code></pre><h2>Standard Stanza Filters</h2><p>A rich set of packet filters are included with Smack, or you can create your own filters by coding to the <code>StanzaFilter</code> interface. The default set of filters includes:</p>
+<ul>
+  <li><code>StanzaTypeFilter</code> -- filters for packets that are a particular Class type.</li>
+  <li><code>StanzaIdFilter</code> -- filters for packets with a particular packet ID.</li>
+  <li><code>ThreadFilter</code> -- filters for message packets with a particular thread ID.</li>
+  <li><code>ToContainsFilter</code> -- filters for packets that are sent to a particular address.</li>
+  <li><code>FromContainsFilter</code> -- filters for packets that are sent to a particular address.</li>
+  <li><code>StanzaExtensionFilter</code> -- filters for packets that have a particular packet extension.</li>
+  <li><code>AndFilter</code> -- implements the logical AND operation over two filters.</li>
+  <li><code>OrFilter</code> -- implements the logical OR operation over two filters.</li>
+  <li><code>NotFilter</code> -- implements the logical NOT operation on a filter.</li>
+</ul><p>Copyright (C) Jive Software 2002-2008</p>

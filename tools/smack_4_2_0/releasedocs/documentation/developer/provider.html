@@ -1,0 +1,53 @@
+<h1>Smack Providers</h1><p>Providers are responsible for parsing the XMPP XML stream into new Java objects.</p><h2>Provider Design</h2><p>Assume you want to parse the following stanza extension element</p>
+<pre><code class="xml">&lt;myExtension attrFoo=&#39;fourthyTwo&#39;&gt;
+  &lt;myElement&gt;Foo is greater then Bar&lt;/myElement&gt;
+  &lt;myInfo alpha=&#39;true&#39; delta=&#39;-1337&#39;/&gt;
+&lt;/myExtension&gt;
+</code></pre><p>then the related provider would look like this</p>
+<pre><code class="java">public MyExtension parse(XmlPullParser parser, int initialDepth) {
+  MyElement myElement = null;
+  MyInfo myInfo = null;
+  String attrFoo = parser.getAttributeValue(&quot;&quot;, &quot;attrFoo&quot;);
+
+  // Main parsing loop, use a loop label instead of &quot;boolean done&quot;
+  outerloop: while(true) {
+    // Make sure to have already parse all attributes of the outermost element,
+    // i.e. &#39;attrFoo&#39; of &#39;myExtension&#39; in this example. Then advance the parser
+    int event = parser.next();
+
+    // Use switch/case of int instead of a if/else-if cascade
+    switch (event) {
+    case XmlPullParser.START_TAG:
+      // Determine the name of the element which start tag we are seeing
+      String name = parser.getName();
+      // We can use switch/case of Strings since Java7, make use of its advantages
+      // and collect the values of the sub elements. If the sub elements are more
+      // complex then those of this example, consider creating extra *private static*
+      // parsing methods for them.
+      switch(name) {
+      case &quot;myElement&quot;:
+        // You should only use XmlPullParser.nextText() when the element is
+        // required to have a text.
+        myElement = new MyElement(parser.nextText());
+        break;
+      case &quot;myInfo&quot;;
+        // Use ParserUtils to parse Java primitives
+        boolenan alpha = ParserUtils.getBooleanAttribute(parser, &quot;alpha&quot;);
+        int delta = ParserUtils.getIntegerAttribute(parser, &quot;delta&quot;);
+        myInfo = new MyInfo(alpha, delta);
+        break;
+      }
+      break;
+    case XmlPullParser.END_TAG:
+      // The abort condition with the break labeled loop statement
+      if (parser.getDepth() == initialDepth) {
+        break outerloop;
+      }
+      break;
+    }
+  }
+
+  // Create the actual class at the very end, design the classes as immutable as possible
+  return new MyExtension(attrFoo, myElement, myInfo);
+}
+</code></pre><h2>Common Pitfalls</h2><p>Use a <code>long</code> instead of <code>int</code> when the XML schema says <code>xs:unsignedInt</code>, because Java's <code>int</code> range is to small for this XML numeric data type.</p>

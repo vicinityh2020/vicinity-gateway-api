@@ -1,0 +1,46 @@
+<h1>File Transfer</h1><p>The file transfer extension allows the user to transmit and receive files.</p>
+<ul>
+  <li>Send a file to another user</li>
+  <li>Recieving a file from another user</li>
+  <li>Monitoring the progress of a file transfer</li>
+</ul><p><strong>XEP related:</strong> <a href="http://www.xmpp.org/extensions/xep-0095.html">XEP-95</a> <a href="http://www.xmpp.org/extensions/xep-0096.html">XEP-96</a> <a href="http://www.xmpp.org/extensions/xep-0065.html">XEP-65</a> <a href="http://www.xmpp.org/extensions/xep-0047.html">XEP-47</a></p><h2>Send a file to another user</h2><p><strong>Description</strong></p><p>A user may wish to send a file to another user. The other user has the option of acception, rejecting, or ignoring the users request. Smack provides a simple interface in order to enable the user to easily send a file. <strong>Usage</strong></p><p>In order to send a file you must first construct an instance of the <strong><em>FileTransferManager</em></strong> class. In order to instantiate the manager you should call <em>FileTransferManager.getInstanceFor(connection)</em></p><p>Once you have your <strong><em>FileTransferManager</em></strong> you will need to create an outgoing file transfer to send a file. The method to use on the <strong><em>FileTransferManager</em></strong> is the <strong>createOutgoingFileTransfer(userID)</strong> method. The userID you provide to this method is the fully-qualified jabber ID of the user you wish to send the file to. A fully-qualified jabber ID consists of a node, a domain, and a resource, the user must be connected to the resource in order to be able to recieve the file transfer.</p><p>Now that you have your <strong><em>OutgoingFileTransfer</em></strong> instance you will want to send the file. The method to send a file is <strong>sendFile(file, description)</strong>. The file you provide to this method should be a readable file on the local file system, and the description is a short description of the file to help the user decide whether or not they would like to recieve the file.</p><p>For information on monitoring the progress of a file transfer see the monitoring progress section of this document.</p><p>Other means to send a file are also provided as part of the <strong><em>OutgoingFileTransfer</em></strong>. Please consult the Javadoc for more information. <strong>Examples</strong></p><p>In this example we can see how to send a file:</p>
+<pre><code>// Create the file transfer manager
+FileTransferManager manager = FileTransferManager.getInstanceFor(connection);
+// Create the outgoing file transfer
+OutgoingFileTransfer transfer = manager.createOutgoingFileTransfer(&quot;romeo@montague.net&quot;);
+// Send the file
+transfer.sendFile(new File(&quot;shakespeare_complete_works.txt&quot;), &quot;You won&#39;t believe this!&quot;);
+</code></pre><h2>Recieving a file from another user</h2><p><strong>Description</strong></p><p>The user may wish to recieve files from another user. The process of recieving a file is event driven, new file transfer requests are recieved from other users via a listener registered with the file transfer manager.</p><p><strong>Usage</strong></p><p>In order to recieve a file you must first construct an instance of the <strong><em>FileTransferManager</em></strong> class. This class has one constructor with one parameter which is your XMPPConnection. In order to instantiate the manager you should call <em>FileTransferManager.getInstanceFor(connection)</em></p><p>Once you have your <strong><em>FileTransferManager</em></strong> you will need to register a listener with it. The FileTransferListner interface has one method, <strong>fileTransferRequest(request)</strong>. When a request is recieved through this method, you can either accept or reject the request. To help you make your decision there are several methods in the <strong><em>FileTransferRequest</em></strong> class that return information about the transfer request.</p><p>To accept the file transfer, call the <strong>accept()</strong>, this method will create an <strong><em>IncomingFileTransfer</em></strong>. After you have the file transfer you may start to transfer the file by calling the <strong>recieveFile(file)</strong> method. The file provided to this method will be where the data from thefile transfer is saved.</p><p>Finally, to reject the file transfer the only method you need to call is <strong>reject()</strong> on the <strong><em>IncomingFileTransfer</em></strong>.</p><p>For information on monitoring the progress of a file transfer see the monitoring progress section of this document.</p><p>Other means to recieve a file are also provided as part of the <strong><em>IncomingFileTransfer</em></strong>. Please consult the Javadoc for more information. <strong>Examples</strong></p><p>In this example we can see how to approve or reject a file transfer request:</p>
+<pre><code>// Create the file transfer manager
+final FileTransferManager manager = FileTransferManager.getInstanceFor(connection);
+// Create the listener
+manager.addFileTransferListener(new FileTransferListener() {
+	public void fileTransferRequest(FileTransferRequest request) {
+	// Check to see if the request should be accepted
+	if(shouldAccept(request)) {
+		// Accept it
+		IncomingFileTransfer transfer = request.accept();
+		transfer.recieveFile(new File(&quot;shakespeare_complete_works.txt&quot;));
+	} else {
+		// Reject it
+		request.reject();
+	}
+}
+});
+</code></pre><h2>Monitoring the progress of a file transfer</h2><p><strong>Description</strong></p><p>While a file transfer is in progress you may wish to monitor the progress of a file transfer.</p><p><strong>Usage</strong></p><p>Both the <strong><em>IncomingFileTransfer</em></strong> and the <strong><em>OutgoingFileTransfer</em></strong> extend the <strong><em>FileTransfer</em></strong> class which provides several methods to monitor how a file transfer is progressing:</p>
+<ul>
+  <li><strong>getStatus()</strong> - The file transfer can be in several states, negotiating, rejected, canceled, in progress, error, and complete. This method will return which state the file transfer is currently in.</li>
+  <li><strong>getProgress()</strong> - if the status of the file transfer is in progress this method will return a number between 0 and 1, 0 being the transfer has not yet started and 1 being the transfer is complete. It may also return a -1 if the transfer is not in progress.</li>
+  <li><strong>isDone()</strong> - Similar to getProgress() except it returns a <em>boolean</em>. If the state is rejected, canceled, error, or complete then true will be returned and false otherwise.</li>
+  <li><strong>getError()</strong> - If there is an error during the file transfer this method will return the type of error that occured. <strong>Examples</strong></li>
+</ul><p>In this example we can see how to monitor a file transfer:</p>
+<pre><code>while(!transfer.isDone()) {
+	if(transfer.getStatus().equals(Status.ERROR)) {
+		System.out.println(&quot;ERROR!!! &quot; + transfer.getError());
+	} else {
+		System.out.println(transfer.getStatus());
+		System.out.println(transfer.getProgress());
+	}
+	sleep(1000);
+}
+</code></pre>

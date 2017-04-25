@@ -1,0 +1,91 @@
+<h1>Smack's Integration Test Framework</h1><h2>Introduction</h2><p>Smack's Integration Test Framwork is used to run a set of tests against a real XMPP service. The framework discovers on startup the available tests by reflection.</p><h2>Quickstart</h2><p>You can run the framework against an XMPP service with</p>
+<pre><code class="bash">$ gradle integrationTest -Dsinttest.service=my.xmppservice.org
+</code></pre><p>Note that the service needs to have In-Band Registration (IBR) enabled.</p><p>A better alternative to IBR is using XEP-0133: Service Administration to create the throw away accounts used by the integration test framework. Simply use</p>
+<pre><code class="bash">$ gradle integrationTest -Dsinttest.service=my.xmppservice.org \
+                         -Dsinttest.adminAccountUsername=admin \
+						 -Dsinttest.adminAccountPassword=aeR0Wuub
+</code></pre><p>to run Smack's integration test framework against <code>my.xmppservice.org</code> with an admin account named <code>admin</code> and <code>aeR0Wuub</code> as password.</p><h2>Configuration</h2><p>The framework is configured with a standard Java properties file. This file simply contains key/value pairs, which are separated by an equals sign ("="). The most important configuration value is the <code>service</code> value, it's also the only required setting.</p><p>The file properties can be overridden with Java system properties. The name of a system property that is used by the framework needs to be prefixed with <code>sinttest.</code> (*S*mack *Int*egration <em>Test</em> Framework). For example the <code>service</code> property becomes <code>sinttest.service</code>.</p><h3>Minimal example <strong>properties</strong> file</h3>
+<pre><code class="bash">service=example.org
+</code></pre><h3>Another example <strong>properties</strong> file</h3>
+<pre><code class="bash">service=example.org
+serviceTlsPin=CERTSHA256:2F:92:C9:4D:30:58:E1:05:21:9A:57:59:5F:6E:25:9A:0F:BF:FF:64:1A:C3:4B:EC:06:7D:4A:6F:0A:D5:21:85
+debug=true
+</code></pre><h3>Framework properties</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Name </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>service </td>
+      <td>XMPP service to run the tests on </td>
+    </tr>
+    <tr>
+      <td>serviceTlsPin </td>
+      <td>TLS Pin (used by <a href="https://github.com/Flowdalic/java-pinning">java-pinning</a>) </td>
+    </tr>
+    <tr>
+      <td>securityMode </td>
+      <td>Either 'required' or 'disabled' </td>
+    </tr>
+    <tr>
+      <td>replyTimeout </td>
+      <td>In milliseconds </td>
+    </tr>
+    <tr>
+      <td>adminAccountUsername </td>
+      <td>Username of the XEP-0133 Admin account </td>
+    </tr>
+    <tr>
+      <td>adminAccountPassword </td>
+      <td>Password of the XEP-0133 Admin account </td>
+    </tr>
+    <tr>
+      <td>accountOneUsername </td>
+      <td>Username of the first XMPP account </td>
+    </tr>
+    <tr>
+      <td>accountOnePassword </td>
+      <td>Password of the first XMPP account </td>
+    </tr>
+    <tr>
+      <td>accountTwoUsername </td>
+      <td>Username of the second XMPP account </td>
+    </tr>
+    <tr>
+      <td>accountTwoPassword </td>
+      <td>Password of the second XMPP account </td>
+    </tr>
+    <tr>
+      <td>accountThreeUsername </td>
+      <td>Username of the third XMPP account </td>
+    </tr>
+    <tr>
+      <td>accountThreePassword </td>
+      <td>Password of the third XMPP account </td>
+    </tr>
+    <tr>
+      <td>debug </td>
+      <td>'true' to enable debug output </td>
+    </tr>
+    <tr>
+      <td>enabledTests </td>
+      <td>List of enabled tests </td>
+    </tr>
+    <tr>
+      <td>disabledTests </td>
+      <td>List of disabled tests </td>
+    </tr>
+    <tr>
+      <td>testPackages </td>
+      <td>List of packages with tests </td>
+    </tr>
+  </tbody>
+</table><h3>Where to place the properties file</h3><p>The framework will first load the properties file from <code>~/.config/smack-integration-test/properties</code></p><h2>Overview of the components</h2><p>Package <code>org.igniterealtime.smack.inttest</code></p><h3><code>SmackIntegrationTestFramework</code></h3><p>Contains <code>public static void main</code> method, i.e. the entry point for the framework. Here the available integration tests are discovered by means of reflection, the configuration is read and a <code>IntegrationTestEnvironment</code> instance created, which includes the XMPPConnections.</p><h3><code>AbstractSmackIntegrationTest</code></h3><p>The base class that integration tests need to subclass.</p><h3><code>AbstractSmackLowLevelIntegrationTest</code></h3><p>Allows low level integration test, i.e. ever test method will have its on exclusive XMPPTCPConnection instances.</p><h3><code>IntegrationTestEnvironment</code></h3><p>The environment, e.g. the <code>XMPPConnections</code> provided to the integration tests by the framework. Note that for convenience <code>AbstractSmackIntegrationTest</code> contains some of those as protected members.</p><h3><code>SmackIntegrationTest</code></h3><p>An annotation that needs to be added to all methods that represent a single integration test. Annotated integration test methods must not take any arguments (i.e. their parameter count is 0), and should return void as it's not evaluated in any way. The methods are supposed to throw an exception if their integration test fails.</p><h3><code>TestNotPossibleException</code></h3><p>Can be thrown by test methods or constructors to signal that their test it no possible, e.g. because the service does not support the required feature.</p><h2>Running the integration tests</h2><p>Smack's Gradle build system is configured with a special task called <code>integrationTest</code>, which means you can run the tests simply with</p>
+<pre><code class="bash">$ gradle integrationTest -Dsinttest.service=my.xmppservice.org
+</code></pre><p>If one of <code>accountOneUsername</code>, <code>accountOnePassword</code>, <code>accountTwoUsername</code> or <code>accountTwoPassword</code> is not configured, then the framework will automatically create the accounts on the service. Of course this requires account registration (IBR) to be enabled. If the accounts got created automatically by the framework, then they will also be deleted at the end of the test.</p><h2>Implementing Integration Tests</h2><p>Create a new class which extends <code>AbstractSmackIntegrationTest</code>. Every non-static method, including the constructor, of this class will have two XMPPConnections available to perform the integration tests with: <code>conOne</code> and <code>conTwo</code>. You can use the constructor to check if the XMPP service does provide the required XMPP feature. If it does not, simply throw a <code>TestNotPossibleException</code>.</p><p>Test methods must be <code>public</code>, take zero arguments i.e. declare no parameters and be annoated with <code>@SmackIntegrationTest</code>. If the test method is not able to perform a test then it should throw a <code>TestNotPossibleException</code>.</p><h3>Rules for integration tests</h3><p>Tests should not leave any traces on the service if they are finished, i.e. the service state at the end of the test must be equal to the state of the beginning. It must be possible to run the tests in parallel.</p><h3>Why are there two mechanisms to signal that the test is not possible?</h3><p>Because the XMPP service may provide a component that is required to perform a certain integration test, but that component may not support all features. For example, the XMPP service may provides a PubSub (XEP-0060) component, but this component may not support all features of XEP-0060.</p><h3>Low-Level Integration Tests</h3><p>Classes that implement low-level integration tests need to sublcass <code>AbstractSmackLowLevelIntegrationTest</code>. The test methods can declare as many parameters as they need to, but every parameter must be of type <code>XMPPTCPConnection</code>. The framework will automatically create, register and login the connections. After the test is finished, the connections will be unregistered with the XMPP service and terminated.</p><h2>Running your own integration tests</h2><p>The framework can be used to run your own tests residing outside of the framework's default package scope. Simply set the <code>testPackages</code> property to a comma separated list of package names where the framework should look for integration tests.</p><p>Example:</p>
+<pre><code class="bash">$ gradle integrationTest -Dsinttest.service=my.xmppserivce.org -Dsinttest.testPackages=org.mypackage,org.otherpackage
+</code></pre>

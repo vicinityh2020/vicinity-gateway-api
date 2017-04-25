@@ -41,9 +41,44 @@
 	</logging>
 
 
-	<server>
+	<xmpp>
+	
+		<!--
+		URL/IP address of XMPP server. If not set, the application exits.
+		-->
+		<server>localhost</server>
 		
-	</server>
+		<!--
+		Server port uses STARTTLS. Defaults to 5222 if not set.
+		-->
+		<port>5222</port>
+		
+		<!-- 
+		Setting this parameter to true will enable security. The policy is to
+		try the strongest mechanisms first. Not having a valid certificate 
+		on server will always fail the connection.
+		
+		Setting it to false will disable the security all together (not 
+		recommended, only for debug purposes). Connecting to a server that 
+		accepts only TLS will fail the connection. Default is true.  
+		-->
+		<security>false</security>
+		
+		<!--
+		XMPP domain that is served by the server. Defaults to vicinity.eu.
+		-->
+		<domain>vicinity.eu</domain>
+		
+		<!--
+		Enables debugging of the XMPP communication between the Gateway and the
+		server / other Gateways. Note that this is to be used in conjunction
+		with the SMACK debugger, which is external tool.
+		See http://download.igniterealtime.org/smack/docs/latest/documentation/debugging.html.
+		
+		Default is false.
+		-->
+		<debugging>true</debugging>
+	</xmpp>
 	
 	<api>
 		<!--

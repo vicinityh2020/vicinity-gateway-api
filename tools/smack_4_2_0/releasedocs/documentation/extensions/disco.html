@@ -1,0 +1,74 @@
+<h1>Service Discovery</h1><p>The service discovery extension allows to discover items and information about XMPP entities. Follow these links to learn how to use this extension.</p>
+<ul>
+  <li>Manage XMPP entity features</li>
+  <li>Provide node information</li>
+  <li>Discover items associated with an XMPP entity</li>
+  <li>Discover information about an XMPP entity</li>
+  <li>Publish publicly available items</li>
+</ul><p><strong>XEP related:</strong> <a href="http://www.xmpp.org/extensions/xep-0030.html">XEP-30</a></p><h2>Manage XMPP entity features</h2><p><strong>Description</strong></p><p>Any XMPP entity may receive a discovery request and must answer with its associated items or information. Therefore, your Smack client may receive a discovery request that must respond to (i.e., if your client supports XHTML- IM). This extension automatically responds to a discovery request with the information that you previously configured.</p><p><strong>Usage</strong></p><p>In order to configure the supported features by your client you should first obtain the ServiceDiscoveryManager associated with your XMPPConnection. To get your ServiceDiscoveryManager send <strong>getInstanceFor(connection)</strong> to the class <em><strong>ServiceDiscoveryManager</strong></em> where connection is your XMPPConnection.</p><p>Once you have your ServiceDiscoveryManager you will be able to manage the supported features. To register a new feature send <strong>addFeature(feature)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where feature is a String that represents the supported feature. To remove a supported feature send <strong>removeFeature(feature)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where feature is a String that represents the feature to remove.</p><p><strong>Examples</strong></p><p>In this example we can see how to add and remove supported features:</p>
+<pre><code>// Obtain the ServiceDiscoveryManager associated with my XMPP connection
+ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+// Register that a new feature is supported by this XMPP entity
+discoManager.addFeature(namespace1);
+// Remove the specified feature from the supported features
+discoManager.removeFeature(namespace2);
+</code></pre><h2>Provide node information</h2><p><strong>Description</strong></p><p>Your XMPP entity may receive a discovery request for items non-addressable as a JID such as the MUC rooms where you are joined. In order to answer the correct information it is necessary to configure the information providers associated to the items/nodes within the Smack client.</p><p><strong>Usage</strong></p><p>In order to configure the associated nodes within the Smack client you will need to create a NodeInformationProvider and register it with the <em><strong>ServiceDiscoveryManager</strong></em>. To get your ServiceDiscoveryManager send <strong>getInstanceFor(connection)</strong> to the class <em><strong>ServiceDiscoveryManager</strong></em> where connection is your XMPPConnection.</p><p>Once you have your ServiceDiscoveryManager you will be able to register information providers for the XMPP entity's nodes. To register a new node information provider send <strong>setNodeInformationProvider(String node, NodeInformationProvider listener)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where node is the item non-addressable as a JID and listener is the <em><strong>NodeInformationProvider</strong></em> to register. To unregister a <em><strong>NodeInformationProvider</strong></em> send <strong>removeNodeInformationProvider(String node)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where node is the item non- addressable as a JID whose information provider we want to unregister.</p><p><strong>Examples</strong></p><p>In this example we can see how to register a NodeInformationProvider with a ServiceDiscoveryManager that will provide information concerning a node named "http://jabber.org/protocol/muc#rooms":</p>
+<pre><code>// Set the NodeInformationProvider that will provide information about the
+// joined rooms whenever a disco request is received
+ServiceDiscoveryManager.getInstanceFor(connection).setNodeInformationProvider(
+	&quot;http://jabber.org/protocol/muc#rooms&quot;,
+	new NodeInformationProvider() {
+		public List getNodeItems() {
+			ArrayList answer = new ArrayList();
+			Iterator rooms = MultiUserChat.getJoinedRooms(connection);
+			while (rooms.hasNext()) {
+				answer.add(new DiscoverItems.Item((String)rooms.next()));
+			}
+			return answer;
+		}
+});
+</code></pre><h2>Discover items associated with an XMPP entity</h2><p><strong>Description</strong></p><p>In order to obtain information about a specific item you have to first discover the items available in an XMPP entity.</p><p><strong>Usage</strong></p><p>Once you have your ServiceDiscoveryManager you will be able to discover items associated with an XMPP entity. To discover the items of a given XMPP entity send <strong>discoverItems(entityID)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where entityID is the ID of the entity. The message <strong>discoverItems(entityID)</strong> will answer an instance of <em><strong>DiscoverItems</strong></em> that contains the discovered items.</p><p><strong>Examples</strong></p><p>In this example we can see how to discover the items associated with an online catalog service:</p>
+<pre><code>// Obtain the ServiceDiscoveryManager associated with my XMPPConnection
+ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+// Get the items of a given XMPP entity
+// This example gets the items associated with online catalog service
+DiscoverItems discoItems = discoManager.discoverItems(&quot;plays.shakespeare.lit&quot;);
+// Get the discovered items of the queried XMPP entity
+Iterator it = discoItems.getItems();
+// Display the items of the remote XMPP entity
+while (it.hasNext()) {
+	DiscoverItems.Item item = (DiscoverItems.Item) it.next();
+	System.out.println(item.getEntityID());
+	System.out.println(item.getNode());
+	System.out.println(item.getName());
+}
+</code></pre><h2>Discover information about an XMPP entity</h2><p><strong>Description</strong></p><p>Once you have discovered the entity ID and name of an item, you may want to find out more about the item. The information desired generally is of two kinds: 1) The item's identity and 2) The features offered by the item.</p><p>This information helps you determine what actions are possible with regard to this item (registration, search, join, etc.) as well as specific feature types of interest, if any (e.g., for the purpose of feature negotiation).</p><p><strong>Usage</strong></p><p>Once you have your ServiceDiscoveryManager you will be able to discover information associated with an XMPP entity. To discover the information of a given XMPP entity send <strong>discoverInfo(entityID)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where entityID is the ID of the entity. The message <strong>discoverInfo(entityID)</strong> will answer an instance of <em><strong>DiscoverInfo</strong></em> that contains the discovered information.</p><p><strong>Examples</strong></p><p>In this example we can see how to discover the information of a conference room:</p>
+<pre><code>// Obtain the ServiceDiscoveryManager associated with my XMPPConnection
+ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+// Get the information of a given XMPP entity
+// This example gets the information of a conference room
+DiscoverInfo discoInfo = discoManager.discoverInfo(&quot;balconyscene@plays.shakespeare.lit&quot;);
+// Get the discovered identities of the remote XMPP entity
+Iterator it = discoInfo.getIdentities();
+// Display the identities of the remote XMPP entity
+while (it.hasNext()) {
+	DiscoverInfo.Identity identity = (DiscoverInfo.Identity) it.next();
+	System.out.println(identity.getName());
+	System.out.println(identity.getType());
+	System.out.println(identity.getCategory());
+}
+// Check if room is password protected
+discoInfo.containsFeature(&quot;muc_passwordprotected&quot;);
+</code></pre><h2>Publish publicly available items</h2><p><strong>Description</strong></p><p>Publish your entity items to some kind of persistent storage. This enables other entities to query that entity using the disco#items namespace and receive a result even when the entity being queried is not online (or available).</p><p><strong>Usage</strong></p><p>Once you have your ServiceDiscoveryManager you will be able to publish items to some kind of persistent storage. To publish the items of a given XMPP entity you have to first create an instance of <em><strong>DiscoverItems</strong></em> and configure it with the items to publish. Then you will have to send <strong>publishItems(String entityID, DiscoverItems discoverItems)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where entityID is the address of the XMPP entity that will persist the items and discoverItems contains the items to publish.</p><p><strong>Examples</strong></p><p>In this example we can see how to publish new items:</p>
+<pre><code>// Obtain the ServiceDiscoveryManager associated with my XMPPConnection
+ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+// Create a DiscoverItems with the items to publish
+DiscoverItems itemsToPublish = new DiscoverItems();
+DiscoverItems.Item itemToPublish = new DiscoverItems.Item(&quot;pubsub.shakespeare.lit&quot;);
+itemToPublish.setName(&quot;Avatar&quot;);
+itemToPublish.setNode(&quot;romeo/avatar&quot;);
+itemToPublish.setAction(DiscoverItems.Item.UPDATE_ACTION);
+itemsToPublish.addItem(itemToPublish);
+// Publish the new items by sending them to the server
+discoManager.publishItems(&quot;host&quot;, itemsToPublish);
+</code></pre>

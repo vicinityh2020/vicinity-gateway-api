@@ -1,0 +1,60 @@
+<h1>Message Archive Management</h1><p>Query and control an archive of messages stored on a server.</p>
+<ul>
+  <li>Check MAM support</li>
+  <li>Query archive</li>
+  <li>Paging</li>
+  <li>Get form fields</li>
+  <li>Get preferences</li>
+  <li>Update preferences</li>
+</ul><p><strong>XEP related:</strong> <a href="http://xmpp.org/extensions/xep-0313.html">XEP-0313</a></p><p>Get an instance of Message Archive Management Manager -----------------------------------------------------</p>
+<pre><code>MamManager mamManager = MamManager.getInstanceFor(connection);
+</code></pre><h2>Check MAM support</h2>
+<pre><code>boolean isSupported = mamManager.isSupportedByServer();
+</code></pre><h2>Query archive</h2>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchive(max);
+</code></pre><p><em>max</em> is an <code>Integer</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchive(withJid);
+</code></pre><p><em>withJid</em> is a <code>Jid</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchive(start, end);
+</code></pre><p><em>start</em> is a <code>Date</code></p><p><em>end</em> is a <code>Date</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchive(additionalFields);
+</code></pre><p><em>additionalFields</em> is a <code>List&lt;FormField&gt;</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchiveWithStartDate(start);
+</code></pre><p><em>start</em> is a <code>Date</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchiveWithEndDate(end);
+</code></pre><p><em>end</em> is a <code>Date</code></p><p>or</p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.queryArchive(max, start, end, withJid, additionalFields);
+</code></pre><p><em>max</em> is an <code>Integer</code></p><p><em>start</em> is a <code>Date</code></p><p><em>end</em> is a <code>Date</code></p><p><em>withJid</em> is a <code>Jid</code></p><p><em>additionalFields</em> is a <code>List&lt;FormField&gt;</code></p><p><strong>Get data from mamQueryResult object</strong></p>
+<pre><code>// Get forwarded messages
+List&lt;Forwarded&gt; forwardedMessages = mamQueryResult.forwardedMessages;
+
+// Get fin IQ
+MamFinIQ mamFinIQ = mamQueryResult.mamFinIQ;
+</code></pre><h2>Paging</h2><p><strong>Get a page</strong></p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.page(dataForm, rsmSet);
+</code></pre><p><em>dataForm</em> is a <code>DataForm</code></p><p><em>rsmSet</em> is a <code>RSMSet</code></p><p><strong>Get the next page</strong></p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.pageNext(previousMamQueryResult, count);
+</code></pre><p><em>previousMamQueryResult</em> is a <code>MamQueryResult</code></p><p><em>count</em> is an <code>int</code></p><p><strong>Get page before the first message saved (specific chat)</strong></p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.pageBefore(chatJid, firstMessageId, max);
+</code></pre><p><em>chatJid</em> is a <code>Jid</code></p><p><em>firstMessageId</em> is a <code>String</code></p><p><em>max</em> is an <code>int</code></p><p><strong>Get page after the last message saved (specific chat)</strong></p>
+<pre><code>MamQueryResult mamQueryResult = mamManager.pageAfter(chatJid, lastMessageId, max);
+</code></pre><p><em>chatJid</em> is a <code>Jid</code></p><p><em>lastMessageId</em> is a <code>String</code></p><p><em>max</em> is an <code>int</code></p><h2>Get form fields</h2>
+<pre><code>List&lt;FormField&gt; formFields = mamManager.retrieveFormFields();
+</code></pre><h2>Get preferences</h2>
+<pre><code>MamPrefsResult mamPrefsResult = mamManager.retrieveArchivingPreferences();
+
+// Get preferences IQ
+MamPrefsIQ mamPrefs = mamPrefsResult.mamPrefs;
+
+// Obtain always and never list
+List&lt;Jid&gt; alwaysJids = mamPrefs.getAlwaysJids();
+List&lt;Jid&gt; neverJids = mamPrefs.getNeverJids();
+
+// Obtain default behaviour (can be &#39;always&#39;, &#39;never&#39; or &#39;roster&#39;)
+DefaultBehavior defaultBehavior = mamPrefs.getDefault();
+
+// Get the data form
+DataForm dataForm = mamPrefs.form;
+</code></pre><h2>Update preferences</h2>
+<pre><code>MamPrefsResult mamPrefsResult = mamManager.updateArchivingPreferences(alwaysJids, neverJids, defaultBehavior);
+</code></pre><p><em>alwaysJids</em> is a <code>List&lt;Jid&gt;</code></p><p><em>neverJids</em> is a <code>List&lt;Jid&gt;</code></p><p><em>defaultBehavior</em> is a <code>DefaultBehavior</code></p>

@@ -16,6 +16,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import eu.bavenir.vicinity.gatewayapi.restapi.RestletThread;
 
 
+
 /**
  * Main class of the Gateway API program. Loads configuration, initializes logger and runs the threads. It also waits
  * for signal from the OS to run its shutdown hook and perform a cleanup.
@@ -96,7 +97,6 @@ public class App {
 	
 	// executing threads
 	private static RestletThread restletThread;
-	//private static CommProvider commProvider;
 	
 	
 	

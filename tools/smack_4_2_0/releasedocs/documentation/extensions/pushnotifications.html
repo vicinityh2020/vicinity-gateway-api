@@ -1,0 +1,33 @@
+<h1>Push Notifications</h1><p>Allows to manage how XMPP servers deliver information for use in push notifications to mobile and other devices.</p>
+<ul>
+  <li>Check push notifications support</li>
+  <li>Enable push notifications</li>
+  <li>Disable push notifications</li>
+  <li>Remote disabling of push notifications</li>
+</ul><p><strong>XEP related:</strong> <a href="http://xmpp.org/extensions/xep-0357.html">XEP-0357</a></p><h2>Get push notifications manager</h2>
+<pre><code>PushNotificationsManager pushNotificationsManager = PushNotificationsManager.getInstanceFor(connection);
+</code></pre><h2>Check push notifications support</h2>
+<pre><code>boolean isSupported = pushNotificationsManager.isSupportedByServer();
+</code></pre><h2>Enable push notifications</h2>
+<pre><code>pushNotificationsManager.enable(pushJid, node);
+</code></pre><p>or <code>
+pushNotificationsManager.enable(pushJid, node, publishOptions);
+</code> <em>pushJid</em> is a <code>Jid</code></p><p><em>node</em> is a <code>String</code></p><p><em>publishOptions</em> is a <code>HashMap&lt;String, String&gt;</code> (which means [option name, value])</p><h2>Disable push notifications</h2>
+<pre><code>pushNotificationsManager.disable(pushJid, node);
+</code></pre><p><em>pushJid</em> is a <code>Jid</code></p><p><em>node</em> is a <code>String</code></p><p><strong>Disable all</strong></p>
+<pre><code>pushNotificationsManager.disableAll(pushJid);
+</code></pre><p><em>pushJid</em> is a <code>Jid</code></p><h2>Remote disabling of push notifications</h2>
+<pre><code>// check if the message is because remote disabling of push notifications
+if (message.hasExtension(PushNotificationsElements.RemoteDisablingExtension.ELEMENT, PushNotificationsElements.RemoteDisablingExtension.NAMESPACE)) {
+  
+  // Get the remote disabling extension
+ PushNotificationsElements.RemoteDisablingExtension remoteDisablingExtension = PushNotificationsElements.RemoteDisablingExtension.from(message);
+
+  // Get the user Jid
+  Jid userJid = remoteDisablingExtension.getUserJid();
+
+  // Get the node
+  String node = remoteDisablingExtension.getNode();
+
+}
+</code></pre>

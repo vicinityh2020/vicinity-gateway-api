@@ -1,0 +1,76 @@
+<h1>XHTML Messages</h1><p>Provides the ability to send and receive formatted messages using XHTML.</p><p>Follow these links to learn how to compose, send, receive and discover support for XHTML messages:</p>
+<ul>
+  <li>Compose an XHTML Message</li>
+  <li>Send an XHTML Message</li>
+  <li>Receive an XHTML Message</li>
+  <li>Discover support for XHTML Messages</li>
+</ul><p><strong>XEP related:</strong> <a href="http://www.xmpp.org/extensions/xep-0071.html">XEP-71</a></p><h2>Compose an XHTML Message</h2><p><strong>Description</strong></p><p>The first step in order to send an XHTML message is to compose it. Smack provides a special class that helps to build valid XHTML messages hiding any low level complexity. For special situations, advanced users may decide not to use the helper class and generate the XHTML by themselves. Even for these situations Smack provides a well defined entry point in order to add the generated XHTML content to a given message.</p><p>Note: not all clients are able to view XHTML formatted messages. Therefore, it's recommended that you include a normal body in that message that is either an unformatted version of the text or a note that XHTML support is required to view the message contents.</p><p><strong>Usage</strong></p><p>Create an instance of <em><strong>XHTMLText</strong></em> specifying the style and language of the body. You can add several XHTML bodies to the message but each body should be for a different language. Once you have an XHTMLText you can start to append tags and text to it. In order to append tags there are several messages that you can use. For each XHTML defined tag there is a message that you can send. In order to add text you can send the message <strong>#append(String textToAppend)</strong>.</p><p>After you have configured the XHTML text, the last step you have to do is to add the XHTML text to the message you want to send. If you decided to create the XHTML text by yourself, you will have to follow this last step too. In order to add the XHTML text to the message send the message <strong>#addBody(Message message, String body)</strong> to the <em><strong>XHTMLManager</strong></em> class where <em>message</em> is the message that will receive the XHTML body and <em>body</em> is the string to add as an XHTML body to the message.**</p><p><strong>Example</strong></p><p>In this example we can see how to compose the following XHTML message:</p>
+<pre><code>&lt;body&gt;
+	&lt;p style=&#39;font-size:large&#39;&gt;Hey John, this is my new
+		&lt;span style=&#39;color:green&#39;&gt;green&lt;/span&gt;
+		&lt;em&gt;!!!!&lt;/em&gt;
+	&lt;/p&gt;
+&lt;/body&gt;
+</code></pre>
+<pre><code>// Create a message to send
+Message msg = chat.createMessage();
+msg.setSubject(&quot;Any subject you want&quot;);
+msg.setBody(&quot;Hey John, this is my new green!!!!&quot;);
+
+// Create an XHTMLText to send with the message
+XHTMLText xhtmlText = new XHTMLText(null, null);
+xhtmlText.appendOpenParagraphTag(&quot;font-size:large&quot;);
+xhtmlText.append(&quot;Hey John, this is my new &quot;);
+xhtmlText.appendOpenSpanTag(&quot;color:green&quot;);
+xhtmlText.append(&quot;green&quot;);
+xhtmlText.appendCloseSpanTag();
+xhtmlText.appendOpenEmTag();
+xhtmlText.append(&quot;!!!!&quot;);
+xhtmlText.appendCloseEmTag();
+xhtmlText.appendCloseParagraphTag();
+xhtmlText.appendCloseBodyTag();
+
+// Add the XHTML text to the message
+XHTMLManager.addBody(msg, xhtmlText);
+</code></pre><h2>Send an XHTML Message</h2><p><strong>Description</strong></p><p>After you have composed an XHTML message you will want to send it. Once you have added the XHTML content to the message you want to send you are almost done. The last step is to send the message as you do with any other message.</p><p><strong>Usage</strong></p><p>An XHTML message is like any regular message, therefore to send the message you can follow the usual steps you do in order to send a message. For example, to send a message as part of a chat just use the message <strong>#sendMessage(Message)</strong> of <em><strong>Chat</strong></em> or you can use the message <strong>#sendStanza(Stanza)</strong> of <em><strong>XMPPConnection</strong></em>.</p><p><strong>Example</strong></p><p>In this example we can see how to send a message with XHTML content as part of a chat.</p>
+<pre><code>// Create a message to send
+Message msg = chat.createMessage();
+// Obtain the XHTML text to send from somewhere
+XHTMLText xhtmlBody = getXHTMLTextToSend();
+
+// Add the XHTML text to the message
+XHTMLManager.addBody(msg, xhtmlBody);
+
+// Send the message that contains the XHTML
+chat.sendMessage(msg);
+</code></pre><h2>Receive an XHTML Message</h2><p><strong>Description</strong></p><p>It is also possible to obtain the XHTML content from a received message. Remember that the specification defines that a message may contain several XHTML bodies where each body should be for a different language.</p><p><strong>Usage</strong></p><p>To get the XHTML bodies of a given message just send the message <strong>#getBodies(Message)</strong> to the class <em><strong>XHTMLManager</strong></em>. The answer of this message will be an <em><strong>List</strong></em> with the different XHTML bodies of the message or null if none.</p><p><strong>Example</strong></p><p>In this example we can see how to create a PacketListener that obtains the XHTML bodies of any received message.</p>
+<pre><code>// Create a listener for the chat and display any XHTML content
+IncomingChatMessageListener listener = new IncomingChatMessageListener() {
+public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
+    // Obtain the XHTML bodies of the message
+    List&lt;CharSequence&gt; bodies = XHTMLManager.getBodies(message);
+    if (bodies == null) {
+        return;
+
+    // Display the bodies on the console
+    for (CharSequence body : bodies) {
+        System.out.println(body);
+    }
+}
+};
+chatManager.addListener(listener);
+</code></pre><h2>Discover support for XHTML Messages</h2><p><strong>Description</strong></p><p>Before you start to send XHTML messages to a user you should discover if the user supports XHTML messages. There are two ways to achieve the discovery, explicitly and implicitly. Explicit is when you first try to discover if the user supports XHTML before sending any XHTML message. Implicit is when you send XHTML messages without first discovering if the conversation partner's client supports XHTML and depenging on the answer (normal message or XHTML message) you find out if the user supports XHTML messages or not. This section explains how to explicitly discover for XHTML support.</p><p><strong>Usage</strong></p><p>In order to discover if a remote user supports XHTML messages send <strong>#isServiceEnabled(XMPPConnection connection, String userID)</strong> to the class <em><strong>XHTMLManager</strong></em> where connection is the connection to use to perform the service discovery and userID is the user to check (A fully qualified xmpp ID, e.g. jdoe@example.com). This message will return true if the specified user handles XHTML messages.</p><p><strong>Example</strong></p><p>In this example we can see how to discover if a remote user supports XHTML Messages.</p>
+<pre><code>Message msg = chat.createMessage();
+// Include a normal body in the message
+msg.setBody(getTextToSend());
+// Check if the other user supports XHTML messages
+if (XHTMLManager.isServiceEnabled(connection, chat.getParticipant())) {
+	// Obtain the XHTML text to send from somewhere
+	String xhtmlBody = getXHTMLTextToSend();
+	// Include an XHTML body in the message
+	qHTMLManager.addBody(msg, xhtmlBody);
+}
+
+// Send the message
+chat.sendMessage(msg);
+</code></pre>

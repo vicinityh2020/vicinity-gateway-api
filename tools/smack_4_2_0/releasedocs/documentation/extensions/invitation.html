@@ -1,0 +1,15 @@
+<h1>Group Chat Invitations</h1><p>The group chat invitation extension is used to invite other users to a group chat room.</p>
+<ul>
+  <li>Inviting Other Users</li>
+  <li>Listen for Invitations</li>
+</ul><p><strong>XEP related:</strong> N/A -- this protocol is outdated now that the Multi-User Chat (MUC) XEP is available (<a href="http://www.xmpp.org/extensions/xep-0045.html">XEP-45</a>). However, most existing clients still use this older protocol. Once MUC support becomes more widespread, this API may be deprecated. </p><h2>Inviting Other Users</h2><p>To use the GroupChatInvitation packet extension to invite another user to a group chat room, address a new message to the user and set the room name appropriately, as in the following code example:</p>
+<pre><code>Message message = new Message(&quot;user@chat.example.com&quot;);
+message.setBody(&quot;Join me for a group chat!&quot;);
+message.addExtension(new GroupChatInvitation(&quot;room@chat.example.com&quot;));
+con.sendStanza(message);
+</code></pre><p>The XML generated for the invitation portion of the code above would be:</p>
+<pre><code>&lt;x xmlns=&quot;jabber:x:conference&quot; jid=&quot;room@chat.example.com&quot;/&gt;
+</code></pre><h2>Listening for Invitations</h2><p>To listen for group chat invitations, use a StanzaExtensionFilter for the <code>x</code> element name and <code>jabber:x:conference</code> namespace, as in the following code example:</p>
+<pre><code>StanzaFilter filter = new StanzaExtensionFilter(&quot;x&quot;, &quot;jabber:x:conference&quot;);
+// Create a packet collector or packet listeners using the filter...
+</code></pre>

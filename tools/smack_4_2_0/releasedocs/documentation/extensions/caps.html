@@ -1,0 +1,13 @@
+<h1>Entity Capabilities</h1><p>This section details the usage of Smacks implementation of Entity Capabilities.</p><p><strong>XEP related:</strong> <a href="http://xmpp.org/extensions/xep-0115.html">XEP-0115: Entity Capabilities</a></p><p><strong>Description</strong></p><p>Entity Capabilities is an XMPP Protocol extension, which, in order to minimize network impact, caches the capabilities of XMPP entities. Those capabilities are determined with the help of the Service Discovery Protocol (<a href="http://xmpp.org/extensions/xep-0030.html">XEP-0030</a>).</p><p><strong>Usage</strong></p><p>Entity Capabilities work silenty in background when enabled. If the remote XMPP entity does not support XEP-0115 but XEP-0030 then XEP-0030 mechanisms are transparently used. You can enable or disable Entity Capabilities by using <em><strong>EntityCapsManager</strong></em>.</p><p>The cache used by Smack for Entity Capabilities is non-persistent as default. That is, the cache only uses memory. But it is also possible to set a persistent Entity Capabilities cache, which is recommended.</p><p><strong>Examples</strong></p><p>Enable Entity Capabilities</p>
+<pre><code>// Get an instance of entity caps manager for the specified connection
+EntityCapsManager mgr = EntityCapsManager.getInstanceFor(connection);
+// Enable entity capabilities
+mgr.enableEntityCaps();
+</code></pre><p>Configure a persistent cache for Entity Capabilities</p>
+<pre><code>// Get an instance of entity caps manager for the specified connection
+EntityCapsManager mgr = EntityCapsManager.getInstanceFor(connection);
+// Create an cache, see smackx.entitycaps.cache for pre-defined cache implementations
+EntityCapsPersistentCache cache = new SimpleDirectoryPersistentCache(new File(&quot;/foo/cachedir&quot;));
+// Set the cache
+mgr.setPersistentCache(cache);
+</code></pre>

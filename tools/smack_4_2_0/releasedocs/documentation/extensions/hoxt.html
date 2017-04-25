@@ -1,0 +1,59 @@
+<h1>HTTP over XMPP transport</h1><p>Allows to transport HTTP communication over XMPP peer-to-peer networks.</p>
+<ul>
+  <li>Discover HOXT support</li>
+  <li>IQ exchange</li>
+</ul><h2>Discover HOXT support</h2><p><strong>Description</strong></p><p>Before using this extension you must ensure that your counterpart supports it also.</p><p><strong>Usage</strong></p><p>Once you have your <em><strong>ServiceDiscoveryManager</strong></em> you will be able to discover information associated with an XMPP entity. To discover the information of a given XMPP entity send <strong>discoverInfo(entityID)</strong> to your <em><strong>ServiceDiscoveryManager</strong></em> where entityID is the ID of the entity. The message <strong>discoverInfo(entityID)</strong> will answer an instance of <em><strong>DiscoverInfo</strong></em> that contains the discovered information.</p><p><strong>Examples</strong></p><p>In this example we can see how to check if the counterpart supports HOXT:</p>
+<pre><code>// Obtain the ServiceDiscoveryManager associated with my XMPPConnection
+ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+// Get the information of a given XMPP entity
+DiscoverInfo discoInfo = discoManager.discoverInfo(&quot;juliet@capulet.com&quot;);
+// Check if room is HOXT is supported
+discoInfo.containsFeature(&quot;urn:xmpp:http&quot;);
+</code></pre><h2>IQ exchange</h2><p><strong>Description</strong></p><p>You can use IQ's to perform HTTP requests and responses. This is applicable to relatively short requests and responses (due to limitation of XMPP message size).</p><p><strong>Usage</strong></p><p>First you need to register a <em><strong>PacketListener</strong></em> to be able to handle intended IQs.</p><p>For the HTTP client you:</p>
+<ul>
+  <li>You create and send <em><strong>HttpOverXmppReq</strong></em> request.</li>
+  <li>Then you handle the <em><strong>HttpOverXmppResp</strong></em> response in your <em><strong>PacketListener</strong></em>. For the HTTP server you:</li>
+  <li><p>You handle the <em><strong>HttpOverXmppReq</strong></em> requests in your <em><strong>PacketListener</strong></em>.</p></li>
+  <li>And create and send <em><strong>HttpOverXmppResp</strong></em> responses.</li>
+</ul><p><strong>Examples</strong></p><p>In this example we are HTTP client, so we send request (POST) and handle the response:</p>
+<pre><code>// create a request body
+String urlEncodedMessage = &quot;I_love_you&quot;;
+
+// create request
+HttpOverXmppReq req = new HttpOverXmppReq(HttpMethod.POST, &quot;/mailbox&quot;);
+req.setVersion(&quot;1.1&quot;);
+
+// prepare headers
+List&lt;Header&gt; list = new ArrayList&lt;Header&gt;();
+list.add(new Header(&quot;Host&quot;, &quot;juliet.capulet.com&quot;));
+list.add(new Header(&quot;Content-Type&quot;, &quot;application/x-www-form- urlencoded&quot;));
+list.add(new Header(&quot;Content-Length&quot;, Integer.toString(urlEncodedMessage.length())));
+req.setHeaders(new HeadersExtension(list));
+
+// provide body or request (not mandatory, - empty body is used for GET)
+AbstractHttpOverXmpp.Text child = new AbstractHttpOverXmpp.Text(urlEncodedMessage);
+AbstractHttpOverXmpp.Data data = new AbstractHttpOverXmpp.Data(child);
+req.setData(data);
+
+// add to
+req.setTo(&quot;juliet@capulet.com/balcony&quot;);
+
+// send it
+connection.sendIqWithResponseCallback(req, new PacketListener() {
+   public void processStanza(Stanza iq) {
+		HttpOverXmppResp resp = (HttpOverXmppResp) iq;
+		// check HTTP response code
+		if (resp.getStatusCode() == 200) {
+			// get content of the response
+			NamedElement child = resp.getData().getChild();
+			// check which type of content of the response arrived
+			if (child instanceof AbstractHttpOverXmpp.Xml) {
+				// print the message and anxiously read if from console ;)
+				System.out.println(((AbstractHttpOverXmpp.Xml) child).getText());
+			} else {
+				// process other AbstractHttpOverXmpp.DataChild subtypes
+			}
+		}
+	}
+});
+</code></pre>

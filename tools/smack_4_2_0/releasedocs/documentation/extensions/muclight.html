@@ -1,0 +1,136 @@
+<h1>Multi-User Chat Light</h1><p>Allows configuration of, participation in, and administration of presence­less Multi­-User Chats. Its feature set is a response to mobile XMPP applications needs and specific environment.</p>
+<ul>
+  <li>Obtain the MUC Light Manager</li>
+  <li>Obtain a MUC Light</li>
+  <li>Create a new Room</li>
+  <li>Destroy a room</li>
+  <li>Leave a room</li>
+  <li>Change room name</li>
+  <li>Change room subject</li>
+  <li>Set room configurations</li>
+  <li>Manage changes on room name, subject and other configurations</li>
+  <li>Get room information</li>
+  <li>Manage room occupants</li>
+  <li>Manage occupants modifications</li>
+  <li>Discover MUC Light support</li>
+  <li>Get occupied rooms</li>
+  <li>Start a private chat</li>
+  <li>Send message to a room</li>
+  <li>Manage blocking list</li>
+</ul><p><strong>XEP related:</strong> <a href="http://mongooseim.readthedocs.io/en/latest/open-extensions/xeps/xep-muc-light.html">XEP-xxxx</a></p><h2>Obtain the MUC Light Manager</h2>
+<pre><code>MultiUserChatLightManager multiUserChatLightManager = MultiUserChatLightManager.getInstanceFor(connection);
+</code></pre><p>Obtain a MUC Light ------------------</p>
+<pre><code>MultiUserChatLight multiUserChatLight = multiUserChatLightManager.getMultiUserChatLight(roomJid);
+</code></pre><p><code>roomJid</code> is a EntityBareJid</p><h2>Create a new room</h2>
+<pre><code>multiUserChatLight.create(roomName, occupants);
+</code></pre><p>or <code>
+multiUserChatLight.create(roomName, subject, customConfigs, occupants);
+</code></p><p><em>roomName</em> is a <code>String</code></p><p><em>subject</em> is a <code>String</code></p><p><em>customConfigs</em> is a <code>HashMap&lt;String, String&gt;</code></p><p><em>occupants</em> is a <code>List&lt;Jid&gt;</code></p><h2>Destroy a room</h2>
+<pre><code>multiUserChatLight.destroy();
+</code></pre><h2>Leave a room</h2>
+<pre><code>multiUserChatLight.leave();
+</code></pre><h2>Change room name</h2>
+<pre><code>multiUserChatLight.changeRoomName(roomName);
+</code></pre><p><em>roomName</em> is a <code>String</code></p><h2>Change subject</h2>
+<pre><code>multiUserChatLight.changeSubject(subject);
+</code></pre><p><em>subject</em> is a <code>String</code></p><h2>Set room configurations</h2>
+<pre><code>multiUserChatLight.setRoomConfigs(customConfigs);
+</code></pre><p>or <code>
+multiUserChatLight.setRoomConfigs(roomName, customConfigs);
+</code> <em>customConfigs</em> is a <code>HashMap&lt;String, String&gt;</code> (which means [property name, value])</p><p><em>roomName</em> is a <code>String</code></p><h2>Manage changes on room name, subject and other configurations</h2>
+<pre><code>// check if the message is because of a configurations change
+if (message.hasExtension(MUCLightElements.ConfigurationsChangeExtension.ELEMENT, MUCLightElements.ConfigurationsChangeExtension.NAMESPACE)) {
+  
+  // Get the configurations extension
+  MUCLightElements.ConfigurationsChangeExtension configurationsChangeExtension = MUCLightElements.ConfigurationsChangeExtension.from(message);
+
+  // Get new room name
+  String roomName = configurationsChangeExtension.getRoomName();
+
+  // Get new subject
+  String subject = configurationsChangeExtension.getSubject();
+
+  // Get new custom configurations
+  HashMap&lt;String, String&gt; customConfigs = configurationsChangeExtension.getCustomConfigs();
+
+}
+</code></pre><h2>Get room information</h2><p><strong>Get configurations</strong> </p>
+<pre><code>MUCLightRoomConfiguration configuration = multiUserChatLight.getConfiguration(version);
+</code></pre><p><em>version</em> is a <code>String</code></p><p>or <code>
+MUCLightRoomConfiguration configuration = multiUserChatLight.getConfiguration();
+</code></p>
+<pre><code>  // Get room name
+  String roomName = configuration.getRoomName();
+
+  // Get subject
+  String subject = configuration.getSubject();
+
+  // Get custom configurations
+  HashMap&lt;String, String&gt; customConfigs = configuration.getCustomConfigs();
+</code></pre><p><strong>Get affiliations</strong></p>
+<pre><code>HashMap&lt;Jid, MUCLightAffiliation&gt; affiliations = multiUserChatLight.getAffiliations(version);
+</code></pre><p><em>version</em> is a <code>String</code></p><p>or <code>
+HashMap&lt;Jid, MUCLightAffiliation&gt; affiliations = multiUserChatLight.getAffiliations();
+</code></p><p><strong>Get full information</strong></p>
+<pre><code>MUCLightRoomInfo info = multiUserChatLight.getFullInfo(version);
+</code></pre><p><em>version</em> is a <code>String</code></p><p>or <code>
+MUCLightRoomInfo info = multiUserChatLight.getFullInfo();
+</code> ``` // Get version String version = info.getVersion();</p><p>// Get room Jid room = info.getRoom();</p><p>// Get configurations MUCLightRoomConfiguration configuration = info.getConfiguration();</p><p>// Get occupants HashMap&lt;Jid, MUCLightAffiliation&gt; occupants = info.getOccupants(); ```</p><h2>Manage room occupants</h2><p>To change room occupants: <code>
+multiUserChatLight.changeAffiliations(affiliations);
+</code> <em>affiliations</em> is a <code>HashMap&lt;Jid, MUCLightAffiliation&gt;</code></p><h2>Manage occupants modifications</h2>
+<pre><code>// check if the message is because of an affiliations change
+if (message.hasExtension(MUCLightElements.AffiliationsChangeExtension.ELEMENT, MUCLightElements.AffiliationsChangeExtension.NAMESPACE)) {
+  
+  // Get the affiliations change extension
+  MUCLightElements.AffiliationsChangeExtension affiliationsChangeExtension = MUCLightElements.AffiliationsChangeExtension.from(message);
+
+  // Get the new affiliations
+  HashMap&lt;EntityJid, MUCLightAffiliation&gt; affiliations = affiliationsChangeExtension.getAffiliations();
+
+}
+</code></pre><h2>Discover MUC Light support</h2><p><strong>Check if MUC Light feature is supported by the server</strong></p>
+<pre><code>boolean isSupported = multiUserChatLightManager.isFeatureSupported(mucLightService);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><strong>Get MUC Light services domains</strong></p>
+<pre><code>List&lt;DomainBareJid&gt; domains = multiUserChatLightManager.getLocalServices();
+</code></pre><h2>Get occupied rooms</h2>
+<pre><code>List&lt;Jid&gt; occupiedRooms = multiUserChatLightManager.getOccupiedRooms(mucLightService);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><h2>Start a private chat</h2>
+<pre><code>Chat chat = multiUserChatLight.createPrivateChat(occupant, listener);
+</code></pre><p><em>occupant</em> is a <code>EntityJid</code></p><p><em>listener</em> is a <code>ChatMessageListener</code></p><h2>Send message to a room</h2><p><strong>Create message for an specific MUC Light</strong></p>
+<pre><code>Message message = multiUserChatLight.createMessage();
+</code></pre><p><strong>Send a message to an specific MUC Light</strong></p>
+<pre><code>multiUserChatLight.sendMessage(message);
+</code></pre><p><em>message</em> is a <code>Message</code></p><h2>Manage blocking list</h2><p><strong>Get blocked list</strong></p>
+<pre><code>// Get users and rooms blocked
+List&lt;Jid&gt; jids = multiUserChatLightManager.getUsersAndRoomsBlocked(mucLightService);
+
+// Get rooms blocked
+List&lt;Jid&gt; jids = multiUserChatLightManager.getRoomsBlocked(mucLightService);
+
+// Get users blocked
+List&lt;Jid&gt; jids = multiUserChatLightManager.getUsersBlocked(mucLightService);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><strong>Block rooms</strong></p>
+<pre><code>// Block one room
+multiUserChatLightManager.blockRoom(mucLightService, roomJid);
+
+// Block several rooms
+multiUserChatLightManager.blockRooms(mucLightService, roomsJids);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><em>roomJid</em> is a <code>Jid</code></p><p><em>roomsJids</em> is a <code>List&lt;Jid&gt;</code></p><p><strong>Block users</strong></p>
+<pre><code>// Block one user
+multiUserChatLightManager.blockUser(mucLightService, userJid);
+
+// Block several users
+multiUserChatLightManager.blockUsers(mucLightService, usersJids);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><em>userJid</em> is a <code>Jid</code></p><p><em>usersJids</em> is a <code>List&lt;Jid&gt;</code></p><p><strong>Unblock rooms</strong></p>
+<pre><code>// Unblock one room
+multiUserChatLightManager.unblockRoom(mucLightService, roomJid);
+
+// Unblock several rooms
+multiUserChatLightManager.unblockRooms(mucLightService, roomsJids);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><em>roomJid</em> is a <code>Jid</code></p><p><em>roomsJids</em> is a <code>List&lt;Jid&gt;</code></p><p><strong>Unblock users</strong></p>
+<pre><code>// Unblock one user
+multiUserChatLightManager.unblockUser(mucLightService, userJid);
+
+// Unblock several users
+multiUserChatLightManager.unblockUsers(mucLightService, usersJids);
+</code></pre><p><em>mucLightService</em> is a <code>DomainBareJid</code></p><p><em>userJid</em> is a <code>Jid</code></p><p><em>usersJids</em> is a <code>List&lt;Jid&gt;</code></p>

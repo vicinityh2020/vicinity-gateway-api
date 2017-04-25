@@ -1,0 +1,23 @@
+<h1>Blocking Command</h1><p>Allows to manage communications blocking.</p>
+<ul>
+  <li>Check push notifications support</li>
+  <li>Get blocking list</li>
+  <li>Block contact</li>
+  <li>Unblock contact</li>
+  <li>Unblock all</li>
+  <li>Check if a message has a blocked error</li>
+</ul><p><strong>XEP related:</strong> <a href="http://xmpp.org/extensions/xep-0191.html">XEP-0191</a></p><h2>Get an instance of Blocking Command Manager</h2>
+<pre><code>BlockingCommandManager blockingCommandManager = BlockingCommandManager.getInstanceFor(connection);
+</code></pre><h2>Check blocking command support</h2>
+<pre><code>boolean isSupported = blockingCommandManager.isSupportedByServer();
+</code></pre><h2>Get block list</h2>
+<pre><code>List&lt;Jid&gt; blockList = blockingCommandManager.getBlockList();
+</code></pre><h2>Block contact</h2>
+<pre><code>blockingCommandManager.blockContact(jid);
+</code></pre><p><em>jid</em> is a <code>Jid</code></p><h2>Unblock contact</h2>
+<pre><code>blockingCommandManager.unblockContact(jid);
+</code></pre><p><em>jid</em> is a <code>Jid</code></p><h2>Unblock all</h2>
+<pre><code>blockingCommandManager.unblockAll();
+</code></pre><h2>Check if a message has a blocked error</h2>
+<pre><code>BlockedErrorExtension.isInside(message));
+</code></pre><p><em>message</em> is a <code>Message</code></p>

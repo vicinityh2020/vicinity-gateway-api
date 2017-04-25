@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/**<a name="line.1"></a>
+<span class="sourceLineNo">002</span> *<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Copyright 2003-2007 Jive Software, 2014 Florian Schmaus<a name="line.3"></a>
+<span class="sourceLineNo">004</span> *<a name="line.4"></a>
+<span class="sourceLineNo">005</span> * Licensed under the Apache License, Version 2.0 (the "License");<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * you may not use this file except in compliance with the License.<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * You may obtain a copy of the License at<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *     http://www.apache.org/licenses/LICENSE-2.0<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Unless required by applicable law or agreed to in writing, software<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * distributed under the License is distributed on an "AS IS" BASIS,<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * See the License for the specific language governing permissions and<a name="line.14"></a>
+<span class="sourceLineNo">015</span> * limitations under the License.<a name="line.15"></a>
+<span class="sourceLineNo">016</span> */<a name="line.16"></a>
+<span class="sourceLineNo">017</span>package org.jivesoftware.smackx.time.packet;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.jivesoftware.smack.packet.IQ;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import org.jxmpp.util.XmppDateTime;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.util.Calendar;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import java.util.Date;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import java.util.logging.Level;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import java.util.logging.Logger;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>/**<a name="line.27"></a>
+<span class="sourceLineNo">028</span> * A Time IQ packet, which is used by XMPP clients to exchange their respective local<a name="line.28"></a>
+<span class="sourceLineNo">029</span> * times. Clients that wish to fully support the entity time protocol should register<a name="line.29"></a>
+<span class="sourceLineNo">030</span> * a PacketListener for incoming time requests that then respond with the local time.<a name="line.30"></a>
+<span class="sourceLineNo">031</span> *<a name="line.31"></a>
+<span class="sourceLineNo">032</span> * @see &lt;a href="http://www.xmpp.org/extensions/xep-0202.html"&gt;XEP-202&lt;/a&gt;<a name="line.32"></a>
+<span class="sourceLineNo">033</span> * @author Florian Schmaus<a name="line.33"></a>
+<span class="sourceLineNo">034</span> */<a name="line.34"></a>
+<span class="sourceLineNo">035</span>public class Time extends IQ {<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    public static final String NAMESPACE = "urn:xmpp:time";<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public static final String ELEMENT = "time";<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>    private static final Logger LOGGER = Logger.getLogger(Time.class.getName());<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    private String utc;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    private String tzo;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>    public Time() {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>        super(ELEMENT, NAMESPACE);<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        setType(Type.get);<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    }<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>    /**<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     * Creates a new Time instance using the specified calendar instance as<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * the time value to send.<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     *<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     * @param cal the time value.<a name="line.53"></a>
+<span class="sourceLineNo">054</span>     */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    public Time(Calendar cal) {<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        super(ELEMENT, NAMESPACE);<a name="line.56"></a>
+<span class="sourceLineNo">057</span>        tzo = XmppDateTime.asString(cal.getTimeZone());<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        // Convert local time to the UTC time.<a name="line.58"></a>
+<span class="sourceLineNo">059</span>        utc = XmppDateTime.formatXEP0082Date(cal.getTime());<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    }<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    /**<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * Returns the local time or &lt;tt&gt;null&lt;/tt&gt; if the time hasn't been set.<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     *<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * @return the local time.<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     */<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    public Date getTime() {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        if (utc == null) {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            return null;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        }<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        Date date = null;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        try {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            date = XmppDateTime.parseDate(utc);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        catch (Exception e) {<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            LOGGER.log(Level.SEVERE, "Error getting local time", e);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        }<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        return date;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>    /**<a name="line.81"></a>
+<span class="sourceLineNo">082</span>     * Sets the time using the local time.<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     *<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     * @param time the current local time.<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     */<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    public void setTime(Date time) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    }<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>    /**<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     * Returns the time as a UTC formatted String using the format CCYY-MM-DDThh:mm:ssZ.<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     *<a name="line.91"></a>
+<span class="sourceLineNo">092</span>     * @return the time as a UTC formatted String.<a name="line.92"></a>
+<span class="sourceLineNo">093</span>     */<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    public String getUtc() {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        return utc;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    }<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    /**<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     * Sets the time using UTC formatted String in the format CCYY-MM-DDThh:mm:ssZ.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     *<a name="line.100"></a>
+<span class="sourceLineNo">101</span>     * @param utc the time using a formatted String.<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     */<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    public void setUtc(String utc) {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        this.utc = utc;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    }<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>    /**<a name="line.107"></a>
+<span class="sourceLineNo">108</span>     * Returns the time zone.<a name="line.108"></a>
+<span class="sourceLineNo">109</span>     *<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     * @return the time zone.<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     */<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    public String getTzo() {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        return tzo;<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    }<a name="line.114"></a>
+<span class="sourceLineNo">115</span><a name="line.115"></a>
+<span class="sourceLineNo">116</span>    /**<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     * Sets the time zone offset.<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     *<a name="line.118"></a>
+<span class="sourceLineNo">119</span>     * @param tzo the time zone offset.<a name="line.119"></a>
+<span class="sourceLineNo">120</span>     */<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    public void setTzo(String tzo) {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        this.tzo = tzo;<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    }<a name="line.123"></a>
+<span class="sourceLineNo">124</span><a name="line.124"></a>
+<span class="sourceLineNo">125</span>    public static Time createResponse(IQ request) {<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        Time time = new Time(Calendar.getInstance());<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        time.setType(Type.result);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        time.setTo(request.getFrom());<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        return time;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    }<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>    @Override<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    protected IQChildElementXmlStringBuilder getIQChildElementBuilder(IQChildElementXmlStringBuilder buf) {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>        if (utc != null) {<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            buf.rightAngleBracket();<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            buf.append("&lt;utc&gt;").append(utc).append("&lt;/utc&gt;");<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            buf.append("&lt;tzo&gt;").append(tzo).append("&lt;/tzo&gt;");<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        } else {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            buf.setEmptyElement();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        }<a name="line.140"></a>
+<span class="sourceLineNo">141</span><a name="line.141"></a>
+<span class="sourceLineNo">142</span>        return buf;<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    }<a name="line.143"></a>
+<span class="sourceLineNo">144</span>}<a name="line.144"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
