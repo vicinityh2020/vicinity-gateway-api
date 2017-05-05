@@ -247,7 +247,7 @@ public class App {
 		}
 		
 		// log message
-		logger.fine("Vicinity Gateway initialized.");
+		logger.fine("Vicinity Gateway API initialized.");
 		
 		// start threads
 		restletThread.start();

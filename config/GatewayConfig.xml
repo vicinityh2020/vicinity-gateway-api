@@ -78,6 +78,16 @@
 		Default is false.
 		-->
 		<debugging>true</debugging>
+		
+		<!--
+		Listen for changes in rosters (XMPP contact lists) of devices connected
+		to this Gateway. These changes include whether a partner device goes 
+		offline or online. It is recommended to have this feature turned on,
+		unless there are thousands of devices connected to this Gateway API. 
+		
+		Default is true.
+		-->
+		<listenForRosterChanges>true</listenForRosterChanges>
 	</xmpp>
 	
 	<api>

@@ -6,6 +6,13 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 
+/*
+ * STRUCTURE:
+ * - constants
+ * - fields
+ * - public methods
+ * - private methods
+ */
 
 /**
  * Thread that runs the RESTLET server for Gateway API.
@@ -57,6 +64,8 @@ public class RestletThread extends Thread {
 	
 	private Component component;
 	
+	
+	/* === PUBLIC METHODS === */
 	
 	/**
 	 * Constructor, initializes the configuration and logger instances.
@@ -145,5 +154,8 @@ public class RestletThread extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/* === PRIVATE METHODS === */
 
 }
