@@ -261,12 +261,12 @@ public class App {
 			public void run(){
 				
 				try {
-
-					////////////////
-					System.out.println("Shutdown hook run, terminating threads.");
+					
 					
 					// only system.out style logging can be executed at this phase
 					// (but there's nothing too much interesting anyway...)
+					System.out.println("Vicinity Gateway API: Shutdown hook run, terminating threads.");
+					
 					restletThread.terminateThread();				
 					restletThread.join();
 					

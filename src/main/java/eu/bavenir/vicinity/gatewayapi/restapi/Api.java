@@ -26,19 +26,29 @@ public class Api extends Application {
 		
 	
 		// define routes
-		// see https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/0.0.2
+		// see https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/
 		
 		// registry
+		router.attach("/adapters", ResourceAdapters.class);
+		router.attach("/adapters/{adid}", ResourceAdapters.class);
+		router.attach("/adapters/{adid}/objects", ResourceAdaptersObjects.class);
+		router.attach("/adapters/{adid}/subscriptions", ResourceAdaptersSubscriptions.class);
+		
+		router.attach("/objects", ResourceObjects.class);
 		router.attach("/objects/{oid}", ResourceObjects.class);
 		router.attach("/objects/{oid}/subscriptions", ResourceObjectsSubscriptions.class);
 		
+		router.attach("/subscriptions", ResourceSubscriptions.class);
+		router.attach("/subscriptions/{sid}", ResourceSubscriptions.class);
+		
 		// discovery
+		router.attach("/feeds", ResourceFeeds.class);
 		router.attach("/feeds/{fid}", ResourceFeeds.class);
-		router.attach("/feeds/sparql", ResourceFeedsSparql.class);
 		
 		// consumption
 		router.attach("/objects/{oid}/properties/{pid}", ResourceObjectsProperties.class);
 		router.attach("/objects/{oid}/actions/{aid}", ResourceObjectsActions.class);
+		router.attach("/objects/{oid}/actions/{aid}/tasks/{tid}", ResourceObjectsActionsTasks.class);
 		
 		// query
 		router.attach("/sparql", ResourceSparql.class);

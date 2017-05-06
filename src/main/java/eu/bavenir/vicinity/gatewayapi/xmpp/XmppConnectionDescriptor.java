@@ -307,7 +307,7 @@ public class XmppConnectionDescriptor {
 			chat.send(message);
 					
 		} catch (XmppStringprepException | NotConnectedException | InterruptedException e) {
-			// TODO - there's gotta be something better to do than just throw an exception... 
+			// TODO - throwing e is not enough!
 			e.printStackTrace();
 		}
 		

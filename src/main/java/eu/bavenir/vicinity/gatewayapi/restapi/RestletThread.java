@@ -137,9 +137,8 @@ public class RestletThread extends Thread {
 				// this logger call will probably never execute on OpenJDK VM because of the shutdown hook...
 				logger.fine("RESTLET thread stopping.");
 				
-				// ...but this should execute without too much of a fuss
-				////////////////////				
-				System.out.println("Stopping RESTLET component");
+				// ...but this should execute without too much of a fuss				
+				System.out.println("Vicinity Gateway API: Stopping RESTLET component.");
 				
 			} catch (Exception e) {
 				logger.warning("RESTLET thread threw an exception while stopping:\n" + e.getMessage());
