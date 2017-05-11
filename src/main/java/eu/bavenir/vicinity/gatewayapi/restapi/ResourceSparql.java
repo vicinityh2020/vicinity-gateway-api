@@ -1,7 +1,6 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
 import org.restlet.data.Status;
-import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
@@ -24,8 +23,8 @@ public class ResourceSparql extends ServerResource {
 		}
 	}
 	
-	@Post("json")
-	public void accept(Representation entity) {
+	@Post()
+	public void accept() {
 		//final Form form = new Form(entity);
 		
 		

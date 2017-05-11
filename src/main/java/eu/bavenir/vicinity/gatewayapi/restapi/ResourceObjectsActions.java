@@ -1,13 +1,15 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
+import java.io.IOException;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
@@ -39,23 +41,31 @@ public class ResourceObjectsActions extends ServerResource {
 	
 	
 	@Post("json")
-	public void accept(Representation entity) {
-		//final Form form = new Form(entity);
+	public String accept(Representation entity) {
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid action description");
+		}
 		
+		// get the json
+		String actionJsonString = null;
+		try {
+			actionJsonString = entity.getText();
+		} catch (IOException e) {
+			// TODO to logs
+			e.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid feed description");
+		}
 		
-		//String type = form.getFirstValue(ATTR_TYPE);
-		
-		
-		//System.out.println(form.toString());
-		
-		/*
-		if (null != getAttribute(ATTR_OID)){
-			
-		} else {
-			
-		}*/
+		return storeAction(actionJsonString);
 	}
 	
+	
+	private String storeAction(String jsonString){
+
+		return "Header: Location: http://gateway.vicinity.example.com/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/switch/tasks/ca43b079-0818-4c39-b896-699c2d31f2db\nBody: ca43b079-0818-4c39-b896-699c2d31f2db";
+	}
 	
 	
 	private String getObjectAction(String attrOid, String attrPid){

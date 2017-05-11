@@ -1,15 +1,17 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
-import java.io.StringWriter;
+import java.io.IOException;
+import java.io.StringReader;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
-import org.json.JSONObject;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
@@ -50,24 +52,36 @@ public class ResourceObjects extends ServerResource {
 	}
 	
 	
-	@Post
-	public void accept() {
-		if (null != getAttribute(ATTR_OID)){
-			
-		} else {
-			
+	@Put("json")
+	public void store(Representation entity) {
+		String attrOid = getAttribute(ATTR_OID);
+		
+		if (attrOid == null){
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+					"Object does not exist under given identifier.");
 		}
+		
+		
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid object description");
+		}
+		
+		// get the json
+		String objectJsonString = null;
+		try {
+			objectJsonString = entity.getText();
+		} catch (IOException e) {
+			// TODO to logs
+			e.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid object description");
+		}
+		
+		updateObject(objectJsonString);
+		
 	}
 	
-	
-	@Put
-	public void store() {
-		if (null != getAttribute(ATTR_OID)){
-			
-		} else {
-			
-		}
-	}
 	
 	@Delete
 	public void remove() {
@@ -81,6 +95,21 @@ public class ResourceObjects extends ServerResource {
 		}
 	}
 	
+	
+	private void updateObject(String jsonString){
+		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+		JsonObject jsonRequest = jsonReader.readObject();
+		
+		if (jsonRequest.containsKey(ATTR_OID)){
+			//TODO do something
+		} else {
+			jsonReader.close();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid object description");
+		}
+		
+		jsonReader.close();
+	}
 	
 	
 	private String getObject(String oid){

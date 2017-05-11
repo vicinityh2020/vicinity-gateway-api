@@ -1,8 +1,11 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
+import java.io.IOException;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
@@ -29,21 +32,25 @@ public class ResourceFeeds extends ServerResource {
 	
 	
 	@Post("json")
-	public void accept(Representation entity) {
-		//final Form form = new Form(entity);
+	public String accept(Representation entity) {
 		
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid feed description");
+		}
 		
-		//String type = form.getFirstValue(ATTR_TYPE);
+		// get the json
+		String feedJsonString = null;
+		try {
+			feedJsonString = entity.getText();
+		} catch (IOException e) {
+			// TODO to logs
+			e.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid feed description");
+		}
 		
-		
-		//System.out.println(form.toString());
-		
-		/*
-		if (null != getAttribute(ATTR_OID)){
-			
-		} else {
-			
-		}*/
+		return storeFeed(feedJsonString);
 	}
 	
 	
@@ -58,6 +65,12 @@ public class ResourceFeeds extends ServerResource {
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
+	}
+	
+	
+	private String storeFeed(String jsonString){
+
+		return "Header: Location: http://gateway.vicinity.example.com/feeds/66348b54-1609-11e7-93ae-92361f002671\nBody: 66348b54-1609-11e7-93ae-92361f002671";
 	}
 	
 	

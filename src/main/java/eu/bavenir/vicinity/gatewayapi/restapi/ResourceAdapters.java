@@ -1,13 +1,17 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
+import java.io.IOException;
+import java.io.StringReader;
+
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
@@ -22,8 +26,6 @@ public class ResourceAdapters extends ServerResource {
 	private static final String ATTR_ID = "id";
 	
 	private static final String ATTR_EVENTURI = "eventUri";
-
-	//private static final String ATTR_DESCRIPTION = "description";
 	
 	
 	@Get
@@ -40,32 +42,52 @@ public class ResourceAdapters extends ServerResource {
 	
 	
 	@Post("json")
-	public void accept(Representation entity) {
-		//final Form form = new Form(entity);
+	public String accept(Representation entity) {
 		
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid adapter description");
+		}
 		
-		//String type = form.getFirstValue(ATTR_TYPE);
+		// get the json
+		String adapterJsonString = null;
+		try {
+			adapterJsonString = entity.getText();
+		} catch (IOException e) {
+			// TODO to logs
+			e.printStackTrace();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid adapter description");
+		}
 		
-		
-		//System.out.println(form.toString());
-		
-		/*
-		if (null != getAttribute(ATTR_OID)){
-			
-		} else {
-			
-		}*/
+		return storeAdapter(adapterJsonString);
 	}
 	
 	
-	@Put
-	public void store() {
-		/*if (null != getAttribute(ATTR_OID)){
-			
+	
+	private String storeAdapter(String jsonString){
+		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+		JsonObject jsonRequest = jsonReader.readObject();
+		
+		String responseAdid;
+		
+		if (jsonRequest.containsKey(ATTR_ADID)){
+			responseAdid = jsonRequest.getString(ATTR_ADID);
 		} else {
-			
-		}*/
+			jsonReader.close();
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid adapter description");
+		}
+		
+		jsonReader.close();
+		
+		JsonObject jsonResponse = Json.createObjectBuilder()
+				.add(ATTR_ADID, responseAdid)
+				.build();
+		
+		return jsonResponse.toString();
 	}
+	
 	
 	
 	/**

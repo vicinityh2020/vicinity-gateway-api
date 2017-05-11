@@ -1,8 +1,5 @@
 package eu.bavenir.vicinity.gatewayapi.restapi;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -16,11 +13,11 @@ public class ResourceObjectsActionsTasks extends ServerResource {
 	
 	private static final String ATTR_TID = "tid";
 	
-	private static final String ATTR_VALUE = "value";
+//	private static final String ATTR_VALUE = "value";
 	
-	private static final String ATTR_TIMESTAMP = "timestamp";
+	//private static final String ATTR_TIMESTAMP = "timestamp";
 	
-	private static final String ATTR_STATUS = "status";
+	//private static final String ATTR_STATUS = "status";
 	
 	@Get
 	public String represent() {
