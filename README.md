@@ -16,7 +16,7 @@ This README would normally document whatever steps are necessary to get your app
 
 ### Registration of IoT objects under Adapters ###
 
-## Updating configuration of IoT objects ##
+### Updating configuration of IoT objects ###
 
 ### Performing query and discovery through VICINITY Gateway API ###
 
