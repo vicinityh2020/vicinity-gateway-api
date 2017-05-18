@@ -1,29 +1,27 @@
-# README #
+# VICINITY Open Gateway API #
 
 This README would normally document whatever steps are necessary to get your application up and running.
 
-### What is this repository for? ###
+## Getting started with VICINITY Open Gateway API ##
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### VICINITY Open Gateway API requirements ###
 
-### How do I get set up? ###
+### Installing VICINITY Open Gateway API from source code ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### Installing VICINITY Open Gateway API from using JAR package ###
 
-### Contribution guidelines ###
+## Performing requests to VICINITY Open Gateway API ##
 
-* Writing tests
-* Code review
-* Other guidelines
+### Configuration of Adapters ###
 
-### Who do I talk to? ###
+### Registration of IoT objects under Adapters ###
 
-* Repo owner or admin
-* Other community or team contact
+### Updating configuration of IoT objects ###
+
+### Performing query and discovery through VICINITY Gateway API ###
+
+### Consuming IoT objects from VICINITY Gateway API ###
+
+### Exposing IoT obejct in VICINITY Gateway API ###
+
+### VICINITY Open Gateway API Specification ###
