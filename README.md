@@ -47,6 +47,9 @@ which returns VICINITY Adapter configuration:
 }
 ```
 ***
+## Update the VICINITY Adapter configuration in VICINITY ##
+
+***
 ### Register and Expose the IoT objects provided by the integrated ecosystem ###
 
 
