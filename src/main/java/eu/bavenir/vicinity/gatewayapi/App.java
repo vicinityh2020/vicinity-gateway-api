@@ -98,8 +98,7 @@ public class App {
 	// executing threads
 	private static RestletThread restletThread;
 	
-	
-	
+
 	/* === METHODS === */
 	
 	/**
@@ -175,8 +174,7 @@ public class App {
 			
 		}
 		
-		
-		// === set up the threads ===
+		// === set up the API thread ===
 		restletThread = new RestletThread(config, logger);
 		
 		return true;

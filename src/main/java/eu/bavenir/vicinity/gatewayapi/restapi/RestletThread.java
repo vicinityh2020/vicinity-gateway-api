@@ -6,6 +6,7 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 
+
 /*
  * STRUCTURE:
  * - constants
@@ -112,9 +113,9 @@ public class RestletThread extends Thread {
 		
 		// log message
 		logger.config(serverType + " server configured.");
-		  
+
 		// attach the API application  
-		component.getDefaultHost().attach(API_URL_PATH, new Api());  
+		component.getDefaultHost().attach(API_URL_PATH, new Api(config, logger));  
 
 		// start the component
 		try {

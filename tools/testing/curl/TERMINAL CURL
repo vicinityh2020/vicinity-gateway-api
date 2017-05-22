@@ -1,0 +1,1236 @@
+sulfo@sulfo-worktop:~$ cd Workspace/
+sulfo@sulfo-worktop:~/Workspace$ cd GatewayApi/
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ ll
+total 48
+drwxrwxr-x 9 sulfo sulfo 4096 apr 19 10:01 ./
+drwxrwxr-x 8 sulfo sulfo 4096 apr 27 15:02 ../
+-rw-rw-r-- 1 sulfo sulfo  996 apr  3 10:24 .classpath
+drwxrwxr-x 2 sulfo sulfo 4096 apr  6 14:51 config/
+drwxrwxr-x 8 sulfo sulfo 4096 apr 25 16:24 .git/
+drwxrwxr-x 2 sulfo sulfo 4096 apr 13 17:16 log/
+-rw-rw-r-- 1 sulfo sulfo 2744 apr 25 16:18 pom.xml
+-rw-rw-r-- 1 sulfo sulfo  539 apr  6 14:41 .project
+drwxrwxr-x 2 sulfo sulfo 4096 apr  3 10:24 .settings/
+drwxrwxr-x 4 sulfo sulfo 4096 apr  3 10:24 src/
+drwxrwxr-x 9 sulfo sulfo 4096 apr  3 10:28 target/
+drwxrwxr-x 3 sulfo sulfo 4096 apr 19 10:01 tools/
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git add .
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git commit
+[master d8ff4f5] Improved connection manager for XMPP communication.
+ 14 files changed, 825 insertions(+), 429 deletions(-)
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor.java
+ delete mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnector.java
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/xmpp/XmppController.java
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor$1.class
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor$2.class
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor.class
+ delete mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnector.class
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/xmpp/XmppController.class
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git push -u bitbucket master
+Password for 'https://martin_horniak_bavenir_eu@bitbucket.org': 
+Counting objects: 36, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (25/25), done.
+Writing objects: 100% (36/36), 18.08 KiB | 0 bytes/s, done.
+Total 36 (delta 10), reused 0 (delta 0)
+To https://martin_horniak_bavenir_eu@bitbucket.org/bavenir/vicinity-open-gateway-api.git
+   42a3f4d..d8ff4f5  master -> master
+Branch master set up to track remote branch master from bitbucket.
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ ps -elf | grep java
+4 S openfire  1678     1  0  80   0 - 1406157 -    máj04 ?       00:02:49 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -server -DopenfireHome=/usr/share/openfire -Dopenfire.lib.dir=/usr/share/openfire/lib -classpath /usr/share/openfire/lib/startup.jar -jar /usr/share/openfire/lib/startup.jar
+0 S sulfo     3222  1829  3  80   0 - 1698078 futex_ máj04 ?     01:10:59 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar -os linux -ws gtk -arch x86_64 -showsplash -launcher /home/sulfo/Software/Installed/Eclipse/neon/eclipse/eclipse -name Eclipse --launcher.library /home/sulfo/.p2/pool/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.401.v20161122-1740/eclipse_1618.so -startup /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar --launcher.appendVmargs -exitdata 9f0035 -product org.eclipse.epp.package.jee.product -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -vmargs -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar
+0 S sulfo    26204  3222  2  80   0 - 1163130 futex_ 16:50 ?      00:00:01 /usr/lib/jvm/java-8-openjdk-amd64/bin/java -Dfile.encoding=UTF-8 -classpath /home/sulfo/Workspace/GatewayApi/target/classes:/home/sulfo/.m2/repository/org/restlet/jse/org.restlet/2.3.9/org.restlet-2.3.9.jar:/home/sulfo/.m2/repository/org/restlet/jse/org.restlet.ext.json/2.3.9/org.restlet.ext.json-2.3.9.jar:/home/sulfo/.m2/repository/org/json/json/20160212/json-20160212.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-core/4.2.0/smack-core-4.2.0.jar:/home/sulfo/.m2/repository/xpp3/xpp3/1.1.4c/xpp3-1.1.4c.jar:/home/sulfo/.m2/repository/org/jxmpp/jxmpp-core/0.5.0/jxmpp-core-0.5.0.jar:/home/sulfo/.m2/repository/org/jxmpp/jxmpp-util-cache/0.5.0/jxmpp-util-cache-0.5.0.jar:/home/sulfo/.m2/repository/org/jxmpp/jxmpp-jid/0.5.0/jxmpp-jid-0.5.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-extensions/4.2.0/smack-extensions-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-im/4.2.0/smack-im-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-java7/4.2.0/smack-java7-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-resolver-javax/4.2.0/smack-resolver-javax-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-sasl-javax/4.2.0/smack-sasl-javax-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-tcp/4.2.0/smack-tcp-4.2.0.jar:/home/sulfo/.m2/repository/org/igniterealtime/smack/smack-debug/4.2.0/smack-debug-4.2.0.jar:/home/sulfo/.m2/repository/org/apache/commons/commons-configuration2/2.1.1/commons-configuration2-2.1.1.jar:/home/sulfo/.m2/repository/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar:/home/sulfo/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/home/sulfo/.m2/repository/commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar:/home/sulfo/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar eu.bavenir.vicinity.gatewayapi.App
+0 S sulfo    26258  3342  0  80   0 -  3585 pipe_w 16:51 pts/18   00:00:00 grep --color=auto java
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ kill 26204
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ ps -elf | grep java
+4 S openfire  1678     1  0  80   0 - 1406157 -    máj04 ?       00:03:06 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -server -DopenfireHome=/usr/share/openfire -Dopenfire.lib.dir=/usr/share/openfire/lib -classpath /usr/share/openfire/lib/startup.jar -jar /usr/share/openfire/lib/startup.jar
+0 S sulfo     3222  1829  4  80   0 - 1715682 futex_ máj04 ?     01:18:01 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar -os linux -ws gtk -arch x86_64 -showsplash -launcher /home/sulfo/Software/Installed/Eclipse/neon/eclipse/eclipse -name Eclipse --launcher.library /home/sulfo/.p2/pool/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.401.v20161122-1740/eclipse_1618.so -startup /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar --launcher.appendVmargs -exitdata 9f0035 -product org.eclipse.epp.package.jee.product -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -vmargs -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar
+0 S sulfo    28927  3342  0  80   0 -  3585 pipe_w 18:51 pts/18   00:00:00 grep --color=auto java
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ ps -elf | grep java
+4 S openfire  1678     1  0  80   0 - 1406671 -    máj04 ?       00:03:43 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -server -DopenfireHome=/usr/share/openfire -Dopenfire.lib.dir=/usr/share/openfire/lib -classpath /usr/share/openfire/lib/startup.jar -jar /usr/share/openfire/lib/startup.jar
+0 S sulfo     3222  1829  2  80   0 - 1732619 futex_ máj04 ?     01:26:46 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar -os linux -ws gtk -arch x86_64 -showsplash -launcher /home/sulfo/Software/Installed/Eclipse/neon/eclipse/eclipse -name Eclipse --launcher.library /home/sulfo/.p2/pool/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.401.v20161122-1740/eclipse_1618.so -startup /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar --launcher.appendVmargs -exitdata 9f0035 -product org.eclipse.epp.package.jee.product -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -vmargs -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar
+0 S sulfo     5177  3342  0  80   0 -  3585 pipe_w 10:59 pts/18   00:00:00 grep --color=auto java
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ curl -H "Content-Type: application/json" -X POST -d '{"type":"xyz","name":"xyz"}' http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ curl -H "Content-Type: application/json" -X POST -d '{"type":"xyz","name":"xyz"}' http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ curl -H "Content-Type: application/json" -X POST -d '{"type":"xyz","name":"xyz"}' http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ cd ~/Desktop/
+sulfo@sulfo-worktop:~/Desktop$ ll
+total 16504
+drwxr-xr-x  2 sulfo sulfo     4096 máj  5 17:48 ./
+drwxr-xr-x 49 sulfo sulfo     4096 máj  5 23:08 ../
+-rwxr-xr-x  1 sulfo sulfo      225 mar 23 13:25 eID_Klient.desktop*
+-rwxr-xr-x  1 sulfo sulfo      285 mar 23 13:25 eID_Manual.desktop*
+-rw-rw-r--  1 sulfo sulfo      573 apr 20 19:16 gifs
+-rw-rw-r--  1 sulfo sulfo     9408 apr 18 09:16 KAVOVAR.ods
+-rw-rw-r--  1 sulfo sulfo      397 mar 27 13:58 notes
+-rw-rw-r--  1 sulfo sulfo      114 feb 27 22:40 poslat janke
+-rw-rw-r--  1 sulfo sulfo 16847296 apr  3 14:19 VID-20170403-WA0000.mp4
+-rw-rw-r--  1 sulfo sulfo       12 máj  5 17:48 websupport
+sulfo@sulfo-worktop:~/Desktop$ mkdir test
+sulfo@sulfo-worktop:~/Desktop$ ll
+total 16508
+drwxr-xr-x  3 sulfo sulfo     4096 máj  6 14:22 ./
+drwxr-xr-x 49 sulfo sulfo     4096 máj  5 23:08 ../
+-rwxr-xr-x  1 sulfo sulfo      225 mar 23 13:25 eID_Klient.desktop*
+-rwxr-xr-x  1 sulfo sulfo      285 mar 23 13:25 eID_Manual.desktop*
+-rw-rw-r--  1 sulfo sulfo      573 apr 20 19:16 gifs
+-rw-rw-r--  1 sulfo sulfo     9408 apr 18 09:16 KAVOVAR.ods
+-rw-rw-r--  1 sulfo sulfo      397 mar 27 13:58 notes
+-rw-rw-r--  1 sulfo sulfo      114 feb 27 22:40 poslat janke
+drwxrwxr-x  2 sulfo sulfo     4096 máj  6 14:22 test/
+-rw-rw-r--  1 sulfo sulfo 16847296 apr  3 14:19 VID-20170403-WA0000.mp4
+-rw-rw-r--  1 sulfo sulfo       12 máj  5 17:48 websupport
+sulfo@sulfo-worktop:~/Desktop$ cd test/
+sulfo@sulfo-worktop:~/Desktop/test$ ll
+total 8
+drwxrwxr-x 2 sulfo sulfo 4096 máj  6 14:22 ./
+drwxr-xr-x 3 sulfo sulfo 4096 máj  6 14:22 ../
+sulfo@sulfo-worktop:~/Desktop/test$ touch body.json
+sulfo@sulfo-worktop:~/Desktop/test$ vim body.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @body.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @body.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @body.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ vim body.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @body.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE http://localhost:8181/api/objects/
+curl: (7) Failed to connect to localhost port 8181: Connection refused
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE http://localhost:8181/api/objects/
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Not Found</p>
+<p>The server has not found anything matching the request URI</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b
+sulfo@sulfo-worktop:~/Desktop/test$ man curl
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b
+HTTP/1.1 204 No Content
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 15:41:24 GMT
+Content-length: 0
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51
+HTTP/1.1 404 Not Found
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 15:41:47 GMT
+Content-type: text/html; charset=UTF-8
+Content-length: 413
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b
+HTTP/1.1 204 No Content
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 15:41:51 GMT
+Content-length: 0
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/subscriptions/2734acea-9b8f-43f6-b17e-34f9c73e8513
+HTTP/1.1 204 No Content
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 15:49:33 GMT
+Content-length: 0
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/subscriptions/2734acea-9b8f-43f6-b17e-34f9c73e851
+HTTP/1.1 404 Not Found
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 15:49:35 GMT
+Content-type: text/html; charset=UTF-8
+Content-length: 413
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/feeds/2734acea-9b8f-43f6-b17e-34f9c73e851
+HTTP/1.1 404 Not Found
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 16:00:35 GMT
+Content-type: text/html; charset=UTF-8
+Content-length: 413
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/feeds/66348b54-1609-11e7-93ae-92361f002671
+HTTP/1.1 204 No Content
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 16:00:41 GMT
+Content-length: 0
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/switch/ca43b079-0818-4c39-b896-699c2d31f2db
+HTTP/1.1 404 Not Found
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 16:06:45 GMT
+Content-type: text/html; charset=UTF-8
+Content-length: 439
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ curl -X DELETE -I http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/switch/tasks/ca43b079-0818-4c39-b896-699c2d31f2db
+HTTP/1.1 204 No Content
+Server: Restlet-Framework/2.3.9
+Date: Sat, 06 May 2017 16:06:59 GMT
+Content-length: 0
+Accept-ranges: bytes
+
+sulfo@sulfo-worktop:~/Desktop/test$ cd ../../Workspace/GatewayApi/
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git add .
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git commit
+[master 3bfc22e] GET and DELETE API stubs are in line with specification.
+ 71 files changed, 1187 insertions(+), 59 deletions(-)
+ create mode 100644 log/2017-05-05T16:50:32.494-gateway.log
+ create mode 100644 log/2017-05-05T18:44:39.633-gateway.log
+ create mode 100644 log/2017-05-05T18:51:42.337-gateway.log
+ create mode 100644 log/2017-05-06T13:18:44.807-gateway.log
+ create mode 100644 log/2017-05-06T13:20:53.010-gateway.log
+ create mode 100644 log/2017-05-06T13:37:57.992-gateway.log
+ create mode 100644 log/2017-05-06T13:40:20.703-gateway.log
+ create mode 100644 log/2017-05-06T13:41:42.114-gateway.log
+ create mode 100644 log/2017-05-06T13:48:14.127-gateway.log
+ create mode 100644 log/2017-05-06T14:14:41.983-gateway.log
+ create mode 100644 log/2017-05-06T14:16:54.552-gateway.log
+ create mode 100644 log/2017-05-06T14:20:42.814-gateway.log
+ create mode 100644 log/2017-05-06T14:23:50.713-gateway.log
+ create mode 100644 log/2017-05-06T14:30:24.133-gateway.log
+ create mode 100644 log/2017-05-06T14:31:19.568-gateway.log
+ create mode 100644 log/2017-05-06T14:35:17.552-gateway.log
+ create mode 100644 log/2017-05-06T15:02:06.556-gateway.log
+ create mode 100644 log/2017-05-06T15:10:06.084-gateway.log
+ create mode 100644 log/2017-05-06T15:31:27.273-gateway.log
+ create mode 100644 log/2017-05-06T15:49:57.596-gateway.log
+ create mode 100644 log/2017-05-06T16:21:42.121-gateway.log
+ create mode 100644 log/2017-05-06T16:30:37.715-gateway.log
+ create mode 100644 log/2017-05-06T16:54:34.768-gateway.log
+ create mode 100644 log/2017-05-06T16:55:33.519-gateway.log
+ create mode 100644 log/2017-05-06T17:00:04.252-gateway.log
+ create mode 100644 log/2017-05-06T17:16:01.565-gateway.log
+ create mode 100644 log/2017-05-06T17:17:44.161-gateway.log
+ create mode 100644 log/2017-05-06T17:21:27.560-gateway.log
+ create mode 100644 log/2017-05-06T17:31:07.529-gateway.log
+ create mode 100644 log/2017-05-06T17:39:48.409-gateway.log
+ create mode 100644 log/2017-05-06T17:49:16.624-gateway.log
+ create mode 100644 log/2017-05-06T18:00:24.063-gateway.log
+ create mode 100644 log/2017-05-06T18:05:52.245-gateway.log
+ create mode 100644 log/2017-05-06T18:27:16.401-gateway.log
+ create mode 100644 log/2017-05-06T18:51:41.378-gateway.log
+ create mode 100644 log/2017-05-06T18:52:54.996-gateway.log
+ create mode 100644 log/2017-05-06T18:54:34.725-gateway.log
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdapters.java
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdaptersObjects.java
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdaptersSubscriptions.java
+ delete mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceFeedsSparql.java
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjectsActionsTasks.java
+ create mode 100644 src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/ResourceSubscriptions.java
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/Api.class (71%)
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdapters.class
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdaptersObjects.class
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceAdaptersSubscriptions.class
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceFeeds.class (100%)
+ delete mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceFeedsSparql.class
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjects.class (87%)
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjectsActions.class (80%)
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjectsActionsTasks.class
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjectsProperties.class (81%)
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceObjectsSubscriptions.class (83%)
+ rewrite target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceSparql.class (100%)
+ create mode 100644 target/classes/eu/bavenir/vicinity/gatewayapi/restapi/ResourceSubscriptions.class
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ git push -u bitbucket master
+Password for 'https://martin_horniak_bavenir_eu@bitbucket.org': 
+Counting objects: 91, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (81/81), done.
+Writing objects: 100% (91/91), 25.79 KiB | 0 bytes/s, done.
+Total 91 (delta 57), reused 0 (delta 0)
+To https://martin_horniak_bavenir_eu@bitbucket.org/bavenir/vicinity-open-gateway-api.git
+   d8ff4f5..3bfc22e  master -> master
+Branch master set up to track remote branch master from bitbucket.
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ ps -elf | grep java
+4 S openfire  1678     1  0  80   0 - 1406671 -    máj04 ?       00:05:07 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -server -DopenfireHome=/usr/share/openfire -Dopenfire.lib.dir=/usr/share/openfire/lib -classpath /usr/share/openfire/lib/startup.jar -jar /usr/share/openfire/lib/startup.jar
+0 S sulfo     3222  1829  1  80   0 - 1845069 futex_ máj04 ?     02:26:17 /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar -os linux -ws gtk -arch x86_64 -showsplash -launcher /home/sulfo/Software/Installed/Eclipse/neon/eclipse/eclipse -name Eclipse --launcher.library /home/sulfo/.p2/pool/plugins/org.eclipse.equinox.launcher.gtk.linux.x86_64_1.1.401.v20161122-1740/eclipse_1618.so -startup /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar --launcher.appendVmargs -exitdata 9f0035 -product org.eclipse.epp.package.jee.product -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java -vmargs -Dosgi.requiredJavaVersion=1.8 -XX:+UseG1GC -XX:+UseStringDeduplication -Dosgi.requiredJavaVersion=1.8 -Xms256m -Xmx1024m -Declipse.p2.max.threads=10 -Doomph.update.url=http://download.eclipse.org/oomph/updates/milestone/latest -Doomph.redirection.index.redirection=index:/->http://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/ -Duser.dir=/home/sulfo/Software/Installed/Eclipse/neon/eclipse -jar /home/sulfo/Software/Installed/Eclipse/neon/eclipse//plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar
+0 S sulfo    26153  3342  0  80   0 -  3585 pipe_w 10:25 pts/18   00:00:00 grep --color=auto java
+sulfo@sulfo-worktop:~/Workspace/GatewayApi$ cd ~/Desktop/
+sulfo@sulfo-worktop:~/Desktop$ ll
+total 99208
+drwxr-xr-x  4 sulfo sulfo     4096 máj  9 09:33 ./
+drwxr-xr-x 49 sulfo sulfo     4096 máj  5 23:08 ../
+-rwxr-xr-x  1 sulfo sulfo      225 mar 23 13:25 eID_Klient.desktop*
+-rwxr-xr-x  1 sulfo sulfo      285 mar 23 13:25 eID_Manual.desktop*
+-rw-rw-r--  1 sulfo sulfo      573 apr 20 19:16 gifs
+-rw-rw-r--  1 sulfo sulfo     9408 apr 18 09:16 KAVOVAR.ods
+-rw-rw-r--  1 sulfo sulfo      397 mar 27 13:58 notes
+-rw-rw-r--  1 sulfo sulfo 84672583 máj  1 20:17 php_skyreg20170417.tar.bz2
+drwxrwxr-x  3 sulfo sulfo     4096 apr 17 21:40 php_skyreg20170509/
+-rw-rw-r--  1 sulfo sulfo      114 feb 27 22:40 poslat janke
+drwxrwxr-x  4 sulfo sulfo     4096 máj 10 10:24 test/
+-rw-rw-r--  1 sulfo sulfo 16847296 apr  3 14:19 VID-20170403-WA0000.mp4
+-rw-rw-r--  1 sulfo sulfo       12 máj  5 17:48 websupport
+sulfo@sulfo-worktop:~/Desktop$ cd test/
+sulfo@sulfo-worktop:~/Desktop/test$ ll
+total 3808
+drwxrwxr-x 4 sulfo sulfo    4096 máj 10 10:24 ./
+drwxr-xr-x 4 sulfo sulfo    4096 máj  9 09:33 ../
+-rw-rw-r-- 1 sulfo sulfo     221 máj 10 10:24 adapters.json
+-rw-rw-r-- 1 sulfo sulfo      30 máj  6 14:34 body.json
+drwxrwxr-x 2 sulfo sulfo    4096 apr  6 14:51 config/
+-rw-rw-r-- 1 sulfo sulfo 3872694 máj  6 18:52 gatewayapi.jar
+drwxrwxr-x 2 sulfo sulfo    4096 máj  6 18:27 log/
+sulfo@sulfo-worktop:~/Desktop/test$ curl -I -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+Warning: You can only select one HTTP request method! You asked for both POST 
+Warning: (-d, --data) and HEAD (-I, --head).
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ cat adapters.json 
+adapter='{"type": "generic.adapter.vicinity.eu","name": "My VICINITY Adapter","id": "5603ff1b-e6cc-4897-8045-3724e8a3a56c","adid": "1dae4326-44ae-4b98-bb75-15aa82516cc3","eventUri": "adapter007.vicinity.exemple.org/eventHandler"}'
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+curl: (7) Failed to connect to localhost port 8181: Connection refused
+sulfo@sulfo-worktop:~/Desktop/test$ vim adapters.json 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ cd ..
+sulfo@sulfo-worktop:~/Desktop$ ll
+total 99208
+drwxr-xr-x  4 sulfo sulfo     4096 máj  9 09:33 ./
+drwxr-xr-x 49 sulfo sulfo     4096 máj  5 23:08 ../
+-rwxr-xr-x  1 sulfo sulfo      225 mar 23 13:25 eID_Klient.desktop*
+-rwxr-xr-x  1 sulfo sulfo      285 mar 23 13:25 eID_Manual.desktop*
+-rw-rw-r--  1 sulfo sulfo      573 apr 20 19:16 gifs
+-rw-rw-r--  1 sulfo sulfo     9408 apr 18 09:16 KAVOVAR.ods
+-rw-rw-r--  1 sulfo sulfo      397 mar 27 13:58 notes
+-rw-rw-r--  1 sulfo sulfo 84672583 máj  1 20:17 php_skyreg20170417.tar.bz2
+drwxrwxr-x  3 sulfo sulfo     4096 apr 17 21:40 php_skyreg20170509/
+-rw-rw-r--  1 sulfo sulfo      114 feb 27 22:40 poslat janke
+drwxrwxr-x  4 sulfo sulfo     4096 máj 10 14:06 test/
+-rw-rw-r--  1 sulfo sulfo 16847296 apr  3 14:19 VID-20170403-WA0000.mp4
+-rw-rw-r--  1 sulfo sulfo       12 máj  5 17:48 websupport
+sulfo@sulfo-worktop:~/Desktop$ mkdir testgit
+sulfo@sulfo-worktop:~/Desktop$ cd testgit/
+sulfo@sulfo-worktop:~/Desktop/testgit$ ll
+total 8
+drwxrwxr-x 2 sulfo sulfo 4096 máj 10 14:35 ./
+drwxr-xr-x 5 sulfo sulfo 4096 máj 10 14:35 ../
+sulfo@sulfo-worktop:~/Desktop/testgit$ cd ..
+sulfo@sulfo-worktop:~/Desktop$ ll
+total 99212
+drwxr-xr-x  5 sulfo sulfo     4096 máj 10 14:35 ./
+drwxr-xr-x 49 sulfo sulfo     4096 máj  5 23:08 ../
+-rwxr-xr-x  1 sulfo sulfo      225 mar 23 13:25 eID_Klient.desktop*
+-rwxr-xr-x  1 sulfo sulfo      285 mar 23 13:25 eID_Manual.desktop*
+-rw-rw-r--  1 sulfo sulfo      573 apr 20 19:16 gifs
+-rw-rw-r--  1 sulfo sulfo     9408 apr 18 09:16 KAVOVAR.ods
+-rw-rw-r--  1 sulfo sulfo      397 mar 27 13:58 notes
+-rw-rw-r--  1 sulfo sulfo 84672583 máj  1 20:17 php_skyreg20170417.tar.bz2
+drwxrwxr-x  3 sulfo sulfo     4096 apr 17 21:40 php_skyreg20170509/
+-rw-rw-r--  1 sulfo sulfo      114 feb 27 22:40 poslat janke
+drwxrwxr-x  4 sulfo sulfo     4096 máj 10 14:06 test/
+drwxrwxr-x  2 sulfo sulfo     4096 máj 10 14:35 testgit/
+-rw-rw-r--  1 sulfo sulfo 16847296 apr  3 14:19 VID-20170403-WA0000.mp4
+-rw-rw-r--  1 sulfo sulfo       12 máj  5 17:48 websupport
+sulfo@sulfo-worktop:~/Desktop$ rmdir testgit/
+sulfo@sulfo-worktop:~/Desktop$ cd test/
+sulfo@sulfo-worktop:~/Desktop/test$ ll
+total 3808
+drwxrwxr-x 4 sulfo sulfo    4096 máj 10 14:06 ./
+drwxr-xr-x 4 sulfo sulfo    4096 máj 10 15:07 ../
+-rw-rw-r-- 1 sulfo sulfo     216 máj 10 14:06 adapters.json
+-rw-rw-r-- 1 sulfo sulfo      30 máj  6 14:34 body.json
+drwxrwxr-x 2 sulfo sulfo    4096 apr  6 14:51 config/
+-rw-rw-r-- 1 sulfo sulfo 3872694 máj  6 18:52 gatewayapi.jar
+drwxrwxr-x 2 sulfo sulfo    4096 máj  6 18:27 log/
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: application/json
+> Content-Type: application/json
+> Content-Length: 215
+> 
+* upload completely sent off: 215 out of 215 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 13:13:40 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 47
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type data @adapters.json http://localhost:8181/api/adapters> 
+> bash: unexpected EOF while looking for matching `"'
+bash: syntax error: unexpected end of file
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: application/json
+> Content-Type: application/json
+> Content-Length: 215
+> 
+* upload completely sent off: 215 out of 215 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 13:15:12 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 47
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adapters.json http://localhost:8181/api/adapters
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 215
+> 
+* upload completely sent off: 215 out of 215 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 13:15:56 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 47
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+{"adid":"1dae4326-44ae-4b98-bb75-15aa82516cc3"}sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ ll
+total 3812
+drwxrwxr-x 4 sulfo sulfo    4096 máj 10 17:57 ./
+drwxr-xr-x 4 sulfo sulfo    4096 máj 10 15:07 ../
+-rw-rw-r-- 1 sulfo sulfo     216 máj 10 14:06 adapters.json
+-rw-rw-r-- 1 sulfo sulfo    1103 máj 10 17:57 adaptersObjects.json
+-rw-rw-r-- 1 sulfo sulfo      30 máj  6 14:34 body.json
+drwxrwxr-x 2 sulfo sulfo    4096 apr  6 14:51 config/
+-rw-rw-r-- 1 sulfo sulfo 3872694 máj  6 18:52 gatewayapi.jar
+drwxrwxr-x 2 sulfo sulfo    4096 máj  6 18:27 log/
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 500 Internal Server Error
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 15:59:02 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 486
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1065
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 500 Internal Server Error
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:00:43 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 486
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1065
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 500 Internal Server Error
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:00:58 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 486
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 500 Internal Server Error
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:01:30 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 486
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 500 Internal Server Error
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:15:10 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 486
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Internal Server Error</p>
+<p>The server encountered an unexpected condition which prevented it from fulfilling the request</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 204 No Content
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:24:03 GMT
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 0
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 2103
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 204 No Content
+< Server: Restlet-Framework/2.3.9
+< Date: Wed, 10 May 2017 16:24:59 GMT
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 0
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 09:55:30 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 42
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+org.glassfish.json.JsonWriterImpl@2a
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 2103
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 09:56:22 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 42
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+org.glassfish.json.JsonWriterImpl@109d3b6fsulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adpi/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 2103
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 11:20:43 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 42
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+org.glassfish.json.JsonWriterImpl@5356d526sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 2103
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 11:39:50 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 95
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"oid":"0729a580-2240-11e6-9eb5-0002a5d5c51b"},{"oid":"0729a580-2240-11e6-9eb5-0002a5d5c51b"}]sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersObjects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersObjects.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 1052
+> Expect: 100-continue
+> 
+< HTTP/1.1 100 Continue
+< Content-Length: 0
+* We are completely uploaded and fine
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 11:40:26 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 48
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"oid":"0729a580-2240-11e6-9eb5-0002a5d5c51b"}]sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adapters http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/objects
+@adapters.json               @adaptersObjects.json        @adaptersSubscriptions.json  
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersSubscriptions.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* connect to 127.0.0.1 port 8181 failed: Connection refused
+* Failed to connect to localhost port 8181: Connection refused
+* Closing connection 0
+curl: (7) Failed to connect to localhost port 8181: Connection refused
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersSubscriptions.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 71
+> 
+* upload completely sent off: 71 out of 71 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 13:41:29 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 48
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"sid":"2734acea-9b8f-43f6-b17e-34f9c73e8513"}]sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersSubscriptions.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 139
+> 
+* upload completely sent off: 139 out of 139 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 13:42:06 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 95
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"sid":"2734acea-9b8f-43f6-b17e-34f
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersSubscriptions.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 70
+> 
+* upload completely sent off: 70 out of 70 bytes
+< HTTP/1.1 400 Bad Request
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 13:42:35 GMT
+< Content-type: text/html; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 420
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Bad Request</p>
+<p>Invalid subscription hook description</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim adaptersSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @adaptersSubscriptions.json http://localhost:8181/api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/adapters/1dae4326-44ae-4b98-bb75-15aa82516cc3/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 71
+> 
+* upload completely sent off: 71 out of 71 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 13:43:09 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 48
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"sid":"2734acea-9b8f-43f6-b17e-34f9c73e8513"}]sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim objects.json
+sulfo@sulfo-worktop:~/Desktop/test$ vim objects.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X PUT --data @objects.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b
+*   Trying 127.0.0.1...
+* connect to 127.0.0.1 port 8181 failed: Connection refused
+* Failed to connect to localhost port 8181: Connection refused
+* Closing connection 0
+curl: (7) Failed to connect to localhost port 8181: Connection refused
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X PUT --data @objects.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> PUT /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 952
+> 
+* upload completely sent off: 952 out of 952 bytes
+< HTTP/1.1 204 No Content
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 14:11:31 GMT
+< Content-length: 0
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim objectsSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @objectsSubscriptions.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 71
+> 
+* upload completely sent off: 71 out of 71 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 14:46:51 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 48
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"sid":"2734acea-9b8f-43f6-b17e-34f
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim objectsSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @objectsSubscriptions.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/subscriptions
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/subscriptions HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 141
+> 
+* upload completely sent off: 141 out of 141 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 14:47:16 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 95
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+[{"sid":"2734acea-9b8f-43f6-b17e-34f9c73e8513"},{"sid":"2734acea-9b8f-43f6-b17e-34f9c73e8513"}]sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim objectsSubscriptions.json
+sulfo@sulfo-worktop:~/Desktop/test$ vim feeds.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @feeds.json http://localhost:8181/api/feeds
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/feeds HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 324
+> 
+* upload completely sent off: 324 out of 324 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 14:55:48 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 139
+< Accept-ranges: bytes
+< 
+Header: Location: http://gateway.vicinity.example.com/feeds/66348b54-1609-11e7-93ae-92361f002671
+* Connection #0 to host localhost left intact
+Body: 66348b54-1609-11e7-93ae-92361f002671sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @feeds.json http://localhost:8181/api/feeds
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/feeds HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 324
+> 
+* upload completely sent off: 324 out of 324 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 14:56:02 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 139
+< Accept-ranges: bytes
+< 
+Header: Location: http://gateway.vicinity.example.com/feeds/66348b54-1609-11e7-93ae-92361f002671
+* Connection #0 to host localhost left intact
+Body: 66348b54-1609-11e7-93ae-92361f002671sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ vim objectsProperties.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X PUT --data @objectsProperties.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/properties/0729a580-2240-11e6-9eb5-0002a5d5c51b
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> PUT /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/properties/0729a580-2240-11e6-9eb5-0002a5d5c51b HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 16
+> 
+* upload completely sent off: 16 out of 16 bytes
+< HTTP/1.1 415 Unsupported Media Type
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 15:13:18 GMT
+< Content-type: text/html; charset=UTF-8
+< Content-length: 554
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Unsupported Media Type</p>
+<p>The server is refusing to service the request because the entity of the request is in a format not supported by the requested resource for the requested method</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.16">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X PUT --data @objectsProperties.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/properties/0729a580-2240-11e6-9eb5-0002a5d5c51b
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> PUT /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/properties/0729a580-2240-11e6-9eb5-0002a5d5c51b HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 16
+> 
+* upload completely sent off: 16 out of 16 bytes
+< HTTP/1.1 204 No Content
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 15:14:08 GMT
+< Content-length: 0
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ vim objectsActions.json
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X PUT --data @objectsActions.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/0729a580-2240-11e6-9eb5-0002a5d5c51b
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> PUT /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/0729a580-2240-11e6-9eb5-0002a5d5c51b HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 17
+> 
+* upload completely sent off: 17 out of 17 bytes
+< HTTP/1.1 405 Method Not Allowed
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 15:19:50 GMT
+< Allow: GET, POST
+< Content-type: text/html; charset=UTF-8
+< Content-length: 487
+< Accept-ranges: bytes
+< 
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Method Not Allowed</p>
+<p>The method specified in the request is not allowed for the resource identified by the request URI</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.6">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @objectsActions.json http://localhost:8181/api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/0729a580-2240-11e6-9eb5-0002a5d5c51b
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/0729a580-2240-11e6-9eb5-0002a5d5c51b HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 17
+> 
+* upload completely sent off: 17 out of 17 bytes
+< HTTP/1.1 200 OK
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 15:20:15 GMT
+< Content-type: application/json; charset=UTF-8
+< Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+< Content-length: 199
+< Accept-ranges: bytes
+< 
+Header: Location: http://gateway.vicinity.example.com/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/actions/switch/tasks/ca43b079-0818-4c39-b896-699c2d31f2db
+* Connection #0 to host localhost left intact
+Body: ca43b079-0818-4c39-b896-699c2d31f2dbsulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ 
+sulfo@sulfo-worktop:~/Desktop/test$ curl -v -H "Content-Type: application/json" -X POST --data @objectsActions.json http://localhost:8181/api/sparql
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1...
+* Connected to localhost (127.0.0.1) port 8181 (#0)
+> POST /api/sparql HTTP/1.1
+> Host: localhost:8181
+> User-Agent: curl/7.47.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 17
+> 
+* upload completely sent off: 17 out of 17 bytes
+< HTTP/1.1 204 No Content
+< Server: Restlet-Framework/2.3.9
+< Date: Thu, 11 May 2017 15:21:57 GMT
+< Content-length: 0
+< Accept-ranges: bytes
+< 
+* Connection #0 to host localhost left intact
+sulfo@sulfo-worktop:~/Desktop/test$ curl -i "http://localhost:8181/api/adapters"
+HTTP/1.1 401 Unauthorized
+Server: Restlet-Framework/2.3.9
+Www-authenticate: Basic realm="Example site"
+Date: Wed, 17 May 2017 06:43:18 GMT
+Content-type: text/html; charset=UTF-8
+Content-length: 424
+Accept-ranges: bytes
+
+<html>
+<head>
+   <title>Status page</title>
+</head>
+<body style="font-family: sans-serif;">
+<p style="font-size: 1.2em;font-weight: bold;margin: 1em 0px;">Unauthorized</p>
+<p>The request requires user authentication</p>
+<p>You can get technical details <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.2">here</a>.<br>
+Please continue your visit at our <a href="/">home page</a>.
+</p>
+</body>
+</html>
+sulfo@sulfo-worktop:~/Desktop/test$ echo -n "user0:user0" | base64
+dXNlcjA6dXNlcjA=
+sulfo@sulfo-worktop:~/Desktop/test$ curl -i -H "Authorization: Basic c2NvdHQ6dGlnZXI=" "http://localhost:8181/api/adapters"
+HTTP/1.1 200 OK
+Server: Restlet-Framework/2.3.9
+Date: Wed, 17 May 2017 06:52:50 GMT
+Content-type: text/plain; charset=UTF-8
+Vary: Accept-Charset, Accept-Encoding, Accept-Language, Accept
+Content-length: 62
+Accept-ranges: bytes
+
+{"adapters":[{"adid":"1dae4326-44ae-4b98-bb75-15aa82516cc3"}]}sulfo@sulfo-worktop:~/Desktop/test$ 
+

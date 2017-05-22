@@ -1,0 +1,34 @@
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-05-22T14:36:17.415-gateway.log
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'localhost:5222' as 'user0@vicinity.eu'
+May 22, 2017 2:36:17 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+May 22, 2017 2:36:18 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+May 22, 2017 2:36:18 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController establishConnection
+INFO: XMPP connection for 'user0' was established.
+May 22, 2017 2:36:18 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController establishConnection
+FINEST: A new connection for 'user0' was added into connection pool.
+May 22, 2017 2:36:18 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: -- Roster for 'user0' --
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: uservas0@vicinity.eu Presence: Presence Stanza [to=user0@vicinity.eu/1mca3dyyqh,from=uservas0@vicinity.eu/6cxqti6myo,type=available,mode=away,status=I'm not here right now,]
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: uservas1@vicinity.eu Presence: Presence Stanza [to=user0@vicinity.eu/1mca3dyyqh,from=uservas1@vicinity.eu/1obolmgt0y,type=available,mode=away,status=I'm not here right now,]
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: user2@vicinity.eu Presence: Presence Stanza [to=user0@vicinity.eu/1mca3dyyqh,from=user2@vicinity.eu/47fhf9pmge,type=available,mode=away,status=I'm not here right now,]
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: user9@vicinity.eu Presence: Presence Stanza [to=user0@vicinity.eu/1mca3dyyqh,from=user9@vicinity.eu/560asu52d,type=available,mode=away,status=I'm not here right now,]
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: user1@vicinity.eu Presence: Presence Stanza [to=user0@vicinity.eu/1mca3dyyqh,from=user1@vicinity.eu/4ux2efqwr9,type=available,mode=away,status=I'm not here right now,]
+May 22, 2017 2:36:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController getRosterEntriesForUser
+FINEST: -- End of roster --

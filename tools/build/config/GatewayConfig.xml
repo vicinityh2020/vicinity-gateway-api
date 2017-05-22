@@ -104,12 +104,6 @@
 		not be supported.
 		-->
 		<enableHttps>false</enableHttps>
-		
-		<!--
-		Authentication realm for the RESTLET BEARER authentication schema. 
-		Defaults to vicinity.eu.
-		-->
-		<authRealm>vicinity.eu</authRealm>
 	</api>
 
 </configuration>

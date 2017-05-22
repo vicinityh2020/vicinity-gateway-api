@@ -1,0 +1,24 @@
+{
+  "ttl": 0,
+  "criteria": {
+    "properties": {
+      "$elemMatch": {
+        "monitors": {
+          "$in": [
+            "Temperature"
+          ]
+        }
+      }
+    },
+    "location": {
+      "latitude": {
+        "$gt": 34.22,
+        "$lt": 34.25
+      },
+      "longitude": {
+        "$gt": -3.4,
+        "$lt": -3.3
+      }
+    }
+  }
+}

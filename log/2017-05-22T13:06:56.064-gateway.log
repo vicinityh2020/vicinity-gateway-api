@@ -1,0 +1,22 @@
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-05-22T13:06:56.064-gateway.log
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.restapi.Api <init>
+WARNING: PICEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'localhost:5222' as 'user0@vicinity.eu'
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController establishConnection
+INFO: XMPP connection for 'user0' was established.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppController establishConnection
+FINEST: A new connection for 'user0' was added into connection pool.
+May 22, 2017 1:06:56 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.

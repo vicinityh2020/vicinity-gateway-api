@@ -46,6 +46,13 @@
 			<version>2.3.9</version>
 		</dependency>
 		
+		<!-- JWT -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+		
 		<!-- Json -->
 		<dependency>
 			<groupId>org.json</groupId>
@@ -62,7 +69,6 @@
 			<artifactId>javax.json</artifactId>
 			<version>1.0.4</version>
 		</dependency>
-		
 		
 		<!-- SMACK -->
 		<dependency>
