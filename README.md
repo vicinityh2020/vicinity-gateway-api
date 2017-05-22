@@ -12,7 +12,7 @@
 ## Register the VICINITY Adapter in VICINITY ##
 The VICINITY System integrator should log in [VICINITY](http://vicinity.bavenir.eu) to setup new VICINITY Adapter instance. The VICINITY will generate the VICINITY Adapter API.
 
-The current VICINITY Adapter configuration can be VISIBLE through `adapters` endpoint:
+The current VICINITY Adapter configuration can be VISIBLE through `adapters` endpoint of VICINITY Gateway API:
 ```
 #!shell
 
