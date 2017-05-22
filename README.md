@@ -16,6 +16,7 @@ The VICINITY Open Gateway API provides to VICINITY following set of services:
 * Register and Expose the IoT objects provided by the integrated ecosystem;
 * Discover and consume of IoT objects;
 
+***
 ### Configure the VICINITY Adapter ###
 1. Register the VICINITY Adapter in VICINITY
 
