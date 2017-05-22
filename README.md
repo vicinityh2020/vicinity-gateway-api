@@ -11,17 +11,20 @@ This README would normally document whatever steps are necessary to get your app
 ### Installing VICINITY Open Gateway API from using JAR package ###
 
 ## Performing requests to VICINITY Open Gateway API ##
+The VICINITY Open Gateway API provides to VICINITY following set of services:
+* Configure the VICINITY Adapter properties and features;
+* Register and Expose the IoT objects provided by the integrated ecosystem;
+* Discover and consume of IoT objects;
 
-### Configuration of Adapters ###
+### Configure the VICINITY Adapter ###
+1. Register the VICINITY Adapter in VICINITY
 
-### Registration of IoT objects under Adapters ###
+2. Update the configuration of the VICINITY Adapter
 
-### Updating configuration of IoT objects ###
+### Register and Expose the IoT objects provided by the integrated ecosystem ###
 
-### Performing query and discovery through VICINITY Gateway API ###
+### Discover and consume of IoT objects ###
 
-### Consuming IoT objects from VICINITY Gateway API ###
-
-### Exposing IoT obejct in VICINITY Gateway API ###
+### Exposing IoT objects in VICINITY Gateway API ###
 
 ### VICINITY Open Gateway API Specification ###
