@@ -58,7 +58,7 @@ We would like to expose the thermometer
 ```javascript
   {
     "type": "Thermostate",
-    "base": ""http://adapter.vicinity.example.com/objects/thermostate"
+    "base": "http://adapter.vicinity.example.com/objects/thermostate"
     "vicinityIdentity":{
         "secrete":"kjasdnlkj3n4lkjn3lk4n2lkndlidneiu"
     }
@@ -76,7 +76,7 @@ We would like to expose the thermometer
         "writable": false,
         "links": [
           {
-            "href": "properties/temp1",
+            "href": "http://adapter.vicinity.example.com/objects/thermostate/properties/temp1",
             "mediaType": "application/json"
           }
         ]
@@ -91,7 +91,7 @@ We would like to expose the thermometer
         "affects": "OnOffStatus",
         "links": [
           {
-            "href": "actions/switch",
+            "href": "http://adapter.vicinity.example.com/objects/thermostate/actions/switch",
             "mediaType": "application/json"
           }
         ],
