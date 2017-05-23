@@ -53,7 +53,10 @@ The VICINITY Adapter should update its configuration if needed, it is possible t
 # Register and Expose the IoT objects provided by the integrated ecosystem #
 Before IoT objects (device and service) can be accessed and shared within VICINITY they needs to be registered through `adapter\{aid}\objects` where the IoT objects configuration needs to be provided.
 
-We would like to expose the thermometer
+We would like to expose the thermometer which has two interaction patterns one property `temp1` and one action `switch`. These patterns can be accessed:
+* http://adapter.vicinity.example.com/objects/thermostate/properties/temp1
+* http://adapter.vicinity.example.com/objects/thermostate/actions/switch.
+
 
 ```javascript
   {
@@ -127,7 +130,6 @@ with the following response of IoT object ids:
   }
 ]
 ```
-## Expose IoT objects provided by the integrated ecosystem ##
 
 
 ***
