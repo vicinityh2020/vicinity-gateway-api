@@ -106,10 +106,34 @@
 		<enableHttps>false</enableHttps>
 		
 		<!--
-		Authentication realm for the RESTLET BEARER authentication schema. 
+		Authentication realm for the RESTLET BEARER authentication schema. It 
+		is only taken into account if the authMethod is set to bearer.
+		
 		Defaults to vicinity.eu.
 		-->
 		<authRealm>vicinity.eu</authRealm>
+		
+		<!--
+		Authentication method for objects logging into the Gateway API. Following
+		methods are valid:
+		
+		basic	-	Basic HTTP authentication standard.
+		
+		digest	-	Digest HTTP authentication standard.
+		
+		bearer	-	Token authentication (JWT/OAuth)
+		
+		none	-	No authentication. Experimental, for debugging purposes only.
+					Without authentication, there is no way of logging into the
+					XMPP network other than hard coded credentials (or other
+					kind of customization).
+		
+		Defaults to basic.
+		
+		-->
+		<authMethod>basic</authMethod>
+		
+		
 	</api>
 
 </configuration>

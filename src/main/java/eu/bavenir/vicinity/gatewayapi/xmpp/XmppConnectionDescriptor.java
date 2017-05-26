@@ -38,7 +38,9 @@ import org.jxmpp.stringprep.XmppStringprepException;
 /*
  * 1. construct an instance
  * 2. connect()
- * 3. use 
+ * 3. use - since the clients connecting to XMPP network are going to use HTTP authentication, they will send
+ * 		their credentials in every request. It is therefore necessary to verify, whether the password is correct. The 
+ * 		verifyPassword is used for this and is probably called by RESTLET every time a request is made.
  */
 
 /**
@@ -116,6 +118,7 @@ public class XmppConnectionDescriptor {
 	
 	// credentials and connection to XMPP server
 	private String xmppUsername;
+	private String xmppPassword;
 	private AbstractXMPPConnection connection;
 	
 	// chat manager for the current connection
@@ -139,6 +142,8 @@ public class XmppConnectionDescriptor {
 	public XmppConnectionDescriptor(String xmppUsername, String xmppPassword, XMLConfiguration config, Logger logger){
 		
 		this.xmppUsername = xmppUsername;
+		this.xmppPassword = xmppPassword;
+		
 		this.config = config;
 		this.logger = logger;
 		
@@ -159,6 +164,17 @@ public class XmppConnectionDescriptor {
 		return xmppUsername;
 	}
 
+	
+	/**
+	 * Verifies, whether the client using this descriptor is using correct password in its HTTP requests. 
+	 * 
+	 * @param passwordToVerify The password provided by client.
+	 * @return True if the password matches the one used by this connection.
+	 */
+	public boolean verifyPassword(String passwordToVerify) {
+		return passwordToVerify.equals(xmppPassword);
+	}
+	
 	
 	/**
 	 * Retrieves the connection to XMPP server in use by this descriptor.
@@ -389,7 +405,7 @@ public class XmppConnectionDescriptor {
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
 		// TODO Auto-generated method stub
 		for(Jid address : addresses){
-			System.out.println("processRosterEntriesAdded: " + address.toString());
+			//System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 	}
 	
@@ -402,7 +418,7 @@ public class XmppConnectionDescriptor {
 	private void processRosterEntriesDeleted(Collection<Jid> addresses){
 		// TODO Auto-generated method stub
 		for(Jid address : addresses){
-			System.out.println("processRosterEntriesDeleted: " + address.toString());
+			//System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 	}
 	
@@ -415,7 +431,7 @@ public class XmppConnectionDescriptor {
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
 		// TODO Auto-generated method stub
 		for(Jid address : addresses){
-			System.out.println("processRosterEntriesUpdated: " + address.toString());
+			//System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 	}
 	
@@ -427,6 +443,6 @@ public class XmppConnectionDescriptor {
 	 */
 	private void processRosterPresenceChanged(Presence presence) {
 		// TODO Auto-generated method stub
-		System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
+		//System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
 	}
 }

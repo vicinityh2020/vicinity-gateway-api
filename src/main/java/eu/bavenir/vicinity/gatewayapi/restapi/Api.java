@@ -5,29 +5,29 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.Application;
 import org.restlet.Context;
-import org.restlet.Request;
-import org.restlet.Response;
 import org.restlet.Restlet;
-import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.routing.Router;
 import org.restlet.security.ChallengeAuthenticator;
-import org.restlet.security.MapVerifier;
-import org.restlet.security.Verifier;
 
-import eu.bavenir.vicinity.gatewayapi.restapi.security.RestletJwtVerifier;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceAdapters;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceAdaptersObjects;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceAdaptersSubscriptions;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceFeeds;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjects;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjectsActions;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjectsActionsTasks;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjectsLogin;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjectsProperties;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceObjectsSubscriptions;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceSparql;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ResourceSubscriptions;
+import eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.Adapters;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdidObjects;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdidSubscriptions;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.Feeds;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.FeedsFid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.Objects;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogin;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogout;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAidTasksTid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidSubscriptions;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.Sparql;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.Subscriptions;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.SubscriptionsSid;
 import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
 
 
@@ -45,7 +45,7 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
  * RESTLET application that serves incoming calls for the Gateway API. After being instantialized, it initializes
  * objects necessary to be available to all API services (like XMPP controller). It routes the requests to their 
  * respective {@link org.restlet.resource.ServerResource Resources}. The HTTP authentication against Gateway API is 
- * also provided by this class.
+ * also checked this class.
  * 
  * @see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
  *   
@@ -74,14 +74,26 @@ public class Api extends Application {
 	public static final String CONTEXT_XMPPCONTROLLER = "xmppController";
 	
 	/**
-	 * Name of the configuration parameter for setting the realm of RESTLET BEARER authentication schema. 
+	 * Name of the configuration parameter for setting the realm of RESTLET BEARER authentication method. 
 	 */
-	private static final String CONF_PARAM_AUTHREALM = "authRealm";
+	private static final String CONF_PARAM_AUTHREALM = "api.authRealm";
+	
+	/**
+	 * Name of the configuration parameter for setting the authentication method.
+	 */
+	private static final String CONF_PARAM_AUTHMETHOD = "api.authMetod";
 	
 	/**
 	 * Default value for setting the realm of RESTLET BEARER authentication schema.
 	 */
 	private static final String CONF_DEF_AUTHREALM = "vicinity.eu";
+	
+	/**
+	 * Default value for setting the authentication method.
+	 */
+	private static final String CONF_DEF_AUTHMETHOD = "basic";
+	
+	
 	
 	
 	/* === FIELDS === */
@@ -93,7 +105,15 @@ public class Api extends Application {
 	// communication controller
 	private XmppController xmppController;
 	
+	// application context
 	private Context applicationContext;
+	
+	// whether to use authentication or not - not using authentication is considered to be for debugging purposes only
+	// as the credentials for XMPP network need to be hard coded in such case
+	private boolean useAuthentication;
+	
+	// challenge scheme to use 
+	private ChallengeScheme challengeScheme;
 	
 	
 	/* === PUBLIC METHODS === */
@@ -124,8 +144,8 @@ public class Api extends Application {
 		
 		setContext(applicationContext);
 		
-		// TODO - remove this after testing and move it to authentication call
-		xmppController.establishConnection("user0", "user0");
+		// load authentication challenge scheme method from configuration
+		configureChallengeScheme();
 	}
 	
 	
@@ -138,44 +158,46 @@ public class Api extends Application {
 		
 		// create a router Restlet that routes each call to a new instance of 
 		Router router = new Router(getContext());
-		
-		// authenticator
-		ChallengeAuthenticator authenticator = createAuthenticator();
-		
+
 		// define routes
 		// see https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/
-		
-		
-		router.attach("/objects/login", ResourceObjectsLogin.class);
+		router.attach("/objects/login", ObjectsLogin.class);
+		router.attach("/objects/logout", ObjectsLogout.class);
 		
 		// registry
-		router.attach("/adapters", ResourceAdapters.class);
-		router.attach("/adapters/{adid}", ResourceAdapters.class);
-		router.attach("/adapters/{adid}/objects", ResourceAdaptersObjects.class);
-		router.attach("/adapters/{adid}/subscriptions", ResourceAdaptersSubscriptions.class);
+		router.attach("/adapters", Adapters.class);
+		router.attach("/adapters/{adid}", AdaptersAdid.class);
+		router.attach("/adapters/{adid}/objects", AdaptersAdidObjects.class);
+		router.attach("/adapters/{adid}/subscriptions", AdaptersAdidSubscriptions.class);
 		
-		router.attach("/objects", ResourceObjects.class);
-		router.attach("/objects/{oid}", ResourceObjects.class);
-		router.attach("/objects/{oid}/subscriptions", ResourceObjectsSubscriptions.class);
+		router.attach("/objects", Objects.class);
+		router.attach("/objects/{oid}", ObjectsOid.class);
+		router.attach("/objects/{oid}/subscriptions", ObjectsOidSubscriptions.class);
 		
-		router.attach("/subscriptions", ResourceSubscriptions.class);
-		router.attach("/subscriptions/{sid}", ResourceSubscriptions.class);
+		router.attach("/subscriptions", Subscriptions.class);
+		router.attach("/subscriptions/{sid}", SubscriptionsSid.class);
 		
 		// discovery
-		router.attach("/feeds", ResourceFeeds.class);
-		router.attach("/feeds/{fid}", ResourceFeeds.class);
+		router.attach("/feeds", Feeds.class);
+		router.attach("/feeds/{fid}", FeedsFid.class);
 		
 		// consumption
-		router.attach("/objects/{oid}/properties/{pid}", ResourceObjectsProperties.class);
-		router.attach("/objects/{oid}/actions/{aid}", ResourceObjectsActions.class);
-		router.attach("/objects/{oid}/actions/{aid}/tasks/{tid}", ResourceObjectsActionsTasks.class);
+		router.attach("/objects/{oid}/properties/{pid}", ObjectsOidPropertiesPid.class);
+		router.attach("/objects/{oid}/actions/{aid}", ObjectsOidActionsAid.class);
+		router.attach("/objects/{oid}/actions/{aid}/tasks/{tid}", ObjectsOidActionsAidTasksTid.class);
 		
 		// query
-		router.attach("/sparql", ResourceSparql.class);
+		router.attach("/sparql", Sparql.class);
 		
-		// TODO uncomment to enable authentication
-		// authenticator.setNext(router);
-		// return authenticator;
+		// solve the question of API authentication
+		if (useAuthentication){
+			// create authenticator
+			ChallengeAuthenticator authenticator = createAuthenticator();
+			
+			// enable authentication
+			authenticator.setNext(router);
+			return authenticator;
+		} 
 		
 		return router;
 	}
@@ -183,7 +205,66 @@ public class Api extends Application {
 	
 	/* === PRIVATE METHODS === */
 	
-	// TODO
+	// TODO javadoc
+	private ChallengeAuthenticator createAuthenticator() {
+		
+		String realm = config.getString(CONF_PARAM_AUTHREALM, CONF_DEF_AUTHREALM);
+		
+		AuthenticationVerifier authVerifier = new AuthenticationVerifier(xmppController, logger);
+
+		ChallengeAuthenticator auth = new ChallengeAuthenticator(
+								applicationContext, false, challengeScheme, realm, authVerifier);
+		
+		return auth;
+    }
+
+	
+	
+	/**
+	 * Translates the authentication method string from configuration file into RESTLET readable authentication
+	 * scheme. If the string is not recognized as valid scheme, or if the configuration string says "none", null
+	 * is returned. 
+	 * 
+	 * @return RESTLET challenge scheme.
+	 */
+	private void configureChallengeScheme(){
+		
+		String challengeScheme = config.getString(CONF_PARAM_AUTHMETHOD, CONF_DEF_AUTHMETHOD);
+		
+		useAuthentication = true;
+		
+		switch (challengeScheme){
+		case "basic":
+			logger.config("HTTP Basic challenge authentication scheme configured.");
+			this.challengeScheme = ChallengeScheme.HTTP_BASIC;
+			break;
+			
+		case "digest":
+			logger.config("HTTP Digest challenge authentication scheme configured.");
+			this.challengeScheme = ChallengeScheme.HTTP_DIGEST;
+			break;
+			
+		case "bearer":
+			logger.config("HTTP Bearer challenge authentication scheme configured.");
+			this.challengeScheme = ChallengeScheme.HTTP_OAUTH_BEARER;
+			break;
+			
+		case "none":
+			logger.config("No authentication for API is configured.");
+			// this will disable the check for authentication method, otherwise exception is to be expected - that is
+			// how the program treats invalid authentication method 
+			useAuthentication = false;
+			this.challengeScheme = null;
+			break;
+			
+			default:
+				logger.config("Invalid API authentication scheme.");
+				this.challengeScheme = null;
+		}
+	}
+	
+	// TODO ordnung
+/*	
 	private ChallengeAuthenticator createAuthenticator() {
 		Context context = getContext();
 		final boolean optional = false;
@@ -195,12 +276,12 @@ public class Api extends Application {
 		//verifier.getLocalSecrets().put("scott", "tiger".toCharArray());
 		verifier.getLocalSecrets().put("user0", "user0".toCharArray());
 		
-		RestletJwtVerifier jwtVerifier = new RestletJwtVerifier();
+		AuthenticationVerifier jwtVerifier = new AuthenticationVerifier();
 
 		ChallengeAuthenticator auth = new ChallengeAuthenticator(
 								context, optional, challengeScheme, realm, jwtVerifier);
 		
 		return auth;
     }
-	
+*/	
 }

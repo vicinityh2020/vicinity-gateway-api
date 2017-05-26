@@ -231,6 +231,50 @@ public class XmppController {
 	}
 	
 	
+	/**
+	 * Checks whether the XMPP connection {@link XmppConnectionDescriptor descriptor} instance exists for given user and 
+	 * whether or not it is connected to the XMPP server. Returns true or false accordingly.  
+	 * 
+	 * @param xmppUsername XMPP user name in question. 
+	 * @return True if descriptor exists and the connection is established.
+	 */
+	public boolean isConnected(String xmppUsername){
+		XmppConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername);
+		
+		if (descriptor != null){
+			return descriptor.isConnected();
+		} else {
+			logger.warning("Null record in the connection descriptor pool. XMPP user: '" 
+					+ xmppUsername + "'.");
+			
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * Verifies the credentials of a client, (for example) trying to reach its XMPP connection 
+	 * {@link XmppConnectionDescriptor descriptor} instance via RESTLET API. This method should be called after 
+	 * {@link #isConnected(String) isConnected} is called first, otherwise will always return false. 
+	 * It is safe to use this method when processing authentication of every request.
+	 * 
+	 * @param xmppUsername XMPP user name in question.
+	 * @param xmppPassword The password that is to be verified. 
+	 * @return True, if the password is valid.
+	 */
+	public boolean verifyConnection(String xmppUsername, String xmppPassword){
+		XmppConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername);
+		
+		if (descriptor != null){
+			return descriptor.verifyPassword(xmppPassword);
+		} else {
+			logger.warning("Null record in the connection descriptor pool. XMPP user: '" 
+					+ xmppUsername + "'.");
+			
+			return false;
+		}
+	}
+	
 	
 	/**
 	 * Retrieves a collection of roster entries for given user name. If there is no connection established with the 
