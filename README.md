@@ -3,13 +3,39 @@
 ### VICINITY Open Gateway API requirements ###
 VICINITY Open Gateway API is able to run on any operating system which supports JAVA JDK 8.
 
-Connectivity requirements are:
-* VICINITY Open Gateway API should be visible  
+Connectivity requirements are: 
 
+* VICINITY Open Gateway API is running on port 8181 by default (can be configured in configuration file)
+* VICINITY Open Gateway API needs to have connectivity to VICINITY Communication Server on port 5222 (can be configured in configuration file)
+
+Hardware requirements are:
+
+* CPU: 1GHz;
+* RAM: 1GB;
+* HDD: 150 MB (JDK excluded);
 
 ### Installing VICINITY Open Gateway API from source code ###
+VICINITY Open Gateway API source code should be checkout from repository:
+```
+#!shell
+git clone git@cpsgit.informatik.uni-kl.de:VICINITY/vicinity-open-gateway-api.git
 
+```
+Afterwards source needs to be build:
+```
+#!shell
+
+mvn clean install
+```
 ### Installing VICINITY Open Gateway API from using JAR package ###
+TBD
+### Configure VICINITY Open Gateway API ###
+
+VICINITY Open Gateway API is configured by `config\GatewayConfig.xml`. This configuration includes:
+
+* configuration of the logging mechanism by setting `configuration\logging\file` to existing log file configuration;
+* configuration of the communication server;
+* configuration of the VICINITY Open Gateway API endpoints;
 
 ***
 # Configure the VICINITY Agent #
