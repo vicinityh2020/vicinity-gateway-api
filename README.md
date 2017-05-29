@@ -1,6 +1,11 @@
 # Getting started with VICINITY Open Gateway API #
 
 ### VICINITY Open Gateway API requirements ###
+VICINITY Open Gateway API is able to run on any operating system which supports JAVA JDK 8.
+
+Connectivity requirements are:
+* VICINITY Open Gateway API should be visible  
+
 
 ### Installing VICINITY Open Gateway API from source code ###
 
