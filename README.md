@@ -7,12 +7,12 @@
 ### Installing VICINITY Open Gateway API from using JAR package ###
 
 ***
-# Configure the VICINITY Adapter #
+# Configure the VICINITY Agent #
 ------
-## Register the VICINITY Adapter in VICINITY ##
-The VICINITY System integrator should log in [VICINITY](http://vicinity.bavenir.eu) to setup new VICINITY Adapter instance. The VICINITY will generate the VICINITY Adapter API.
+## Register the VICINITY Agent in VICINITY ##
+The VICINITY System integrator should log in [VICINITY](http://vicinity.bavenir.eu) to setup new VICINITY Agent instance. The VICINITY will generate the VICINITY Agent API.
 
-The current VICINITY Adapter configuration can be VISIBLE through `adapters` endpoint of VICINITY Gateway API:
+The current VICINITY Agent configuration can be VISIBLE through `adapters` endpoint of VICINITY Gateway API:
 ```
 #!shell
 
@@ -54,8 +54,8 @@ which returns VICINITY Adapter configuration:
 }
 ```
 ***
-## Update the VICINITY Adapter configuration in VICINITY ##
-The VICINITY Adapter should update its configuration if needed, it is possible to update it through [VICINITY](http://vicinity.bavenir.eu) only.
+## Update the VICINITY Agent configuration in VICINITY ##
+The VICINITY Agent should update its configuration if needed, it is possible to update it through [VICINITY](http://vicinity.bavenir.eu) only.
 
 ***
 # Register and Expose the IoT objects provided by the integrated ecosystem #
