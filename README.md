@@ -183,12 +183,12 @@ with the following response of IoT object ids:
 
 
 ***
-### Discover and consume of IoT objects ###
+# Discover and consume of IoT objects #
 
 
 ***
-### Exposing IoT objects in VICINITY Gateway API ###
+# Exposing IoT objects in VICINITY Gateway API #
 
 
 ***
-### VICINITY Open Gateway API Specification ###
+# VICINITY Open Gateway API Specification #
