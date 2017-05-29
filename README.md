@@ -192,7 +192,7 @@ with the following response of IoT object ids:
 
 ***
 # VICINITY Open Gateway API Specification #
-====================
+
 The semantic gateway API for the VICINITY Nodes
 
 **Version:** 0.0.3d
