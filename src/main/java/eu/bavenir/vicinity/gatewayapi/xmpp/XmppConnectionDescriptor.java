@@ -1,10 +1,16 @@
 package eu.bavenir.vicinity.gatewayapi.xmpp;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
@@ -25,6 +31,9 @@ import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
+import org.restlet.engine.header.StringWriter;
+import org.restlet.resource.ClientResource;
+import org.restlet.resource.ResourceException;
 
 
 /*
@@ -79,6 +88,16 @@ public class XmppConnectionDescriptor {
 	private static final String CONFIG_PARAM_XMPPLISTENFORROSTERCHANGES = "xmpp.listenForRosterChanges";
 	
 	/**
+	 * Name of the configuration parameter for adapter IP.
+	 */
+	private static final String CONFIG_PARAM_APIADAPTERIP = "api.adapterIP";
+	
+	/**
+	 * Name of the configuration parameter for adapter port.
+	 */
+	private static final String CONFIG_PARAM_APIADAPTERPORT = "api.adapterPort";
+	
+	/**
 	 * Default value of xmpp.server configuration parameter. This value is taken into account when no suitable
 	 * value is found in the configuration file. 
 	 */
@@ -108,7 +127,17 @@ public class XmppConnectionDescriptor {
 	 */
 	private static final boolean CONFIG_DEF_XMPPLISTENFORROSTERCHANGES = true;
 	
+	/**
+	 * Default value of api.adapterPort configuration parameter. This value is taken into account when no 
+	 * suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_APIADAPTERPORT = "9997";
 	
+	/**
+	 * Default value of api.adapterIP configuration parameter. This value is taken into account when no 
+	 * suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_APIADAPTERIP = "localhost";
 	
 	/* === FIELDS === */
 	
@@ -329,6 +358,31 @@ public class XmppConnectionDescriptor {
 		
 	}
 	
+	// TODO
+	public void sendMessage(EntityBareJid destinationJid, String message){
+		Chat chat = chatManager.chatWith(destinationJid);
+		try {
+			chat.send(message);
+		} catch (NotConnectedException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	// TODO
+	public Message retrieveMessage(){
+		
+		// TODO this only retrieves and removes one element in the queue. make it possible to specify from whom we want
+		// to retrieve the message (i.e. from who we are expecting a message to come)
+		
+		if (messageQueue.isEmpty()){
+			return null;
+		} else {
+			return messageQueue.remove();
+		} 
+	}
+	
 	
 	
 	/* === PRIVATE METHODS === */
@@ -393,7 +447,54 @@ public class XmppConnectionDescriptor {
 	 * @param chat A chat thread in which the message was received. 
 	 */
 	private void processMessage(EntityBareJid from, Message message, Chat chat){
+		
+		// TODO make normal log
 		System.out.println("New message from " + from + ": " + message.getBody());
+		
+		// make a json from the incoming String
+		JsonReader jsonReader = Json.createReader(new StringReader(message.getBody()));
+		JsonObject json = jsonReader.readObject();
+		
+		// TODO omfg...
+		// if the message is a request, execute action, otherwise store it into incoming message queue
+		if (json.containsKey("operation")){
+			// execute action
+			// TODO make noermal log
+			System.out.println("Got here 1");
+			
+			// TODO it can be done much better way - in the json there can be everything needed to send the message
+			// ClientResource resource = new ClientResource("http://160.40.206.250:9997/agent/objects/0d485748-cf2a-450c-bcf6-02ac1cb39a2d/properties/PowerConsumption");
+			//ClientResource resource = new ClientResource("http://160.40.206.250:9997/agent/objects/123/properties/123");
+			ClientResource resource = new ClientResource(
+					"http://"
+					+ config.getString(CONFIG_PARAM_APIADAPTERIP, CONFIG_DEF_APIADAPTERIP)
+					+ ":"
+					+ config.getString(CONFIG_PARAM_APIADAPTERPORT, CONFIG_DEF_APIADAPTERPORT)
+					+ "/agent/objects/"
+					+ json.getString("oid")
+					+ "/properties/"
+					+ json.getString("pid"));
+			
+			Writer writer = new StringWriter();
+			try {
+				resource.get().write(writer);
+			} catch (ResourceException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			System.out.println("Got response from Peter: " + writer.toString());
+			
+			System.out.println("And this: " + from.toString());
+			sendMessage(from, writer.toString());
+			
+			
+		} else {
+			System.out.println("Got here 2");
+			// TODO - change to offer - read javdoc for that
+			messageQueue.add(message);
+		}
+		
 	}
 	
 	

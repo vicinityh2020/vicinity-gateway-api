@@ -46,7 +46,7 @@
 		<!--
 		URL/IP address of XMPP server. If not set, the application exits.
 		-->
-		<server>localhost</server>
+		<server>138.201.156.73</server>
 		
 		<!--
 		Server port uses STARTTLS. Defaults to 5222 if not set.
@@ -133,6 +133,20 @@
 		-->
 		<authMethod>basic</authMethod>
 		
+		
+		<!--
+		TODO: FINISH THE DESCRIPTION
+		
+		IP address of the adapter.
+		-->
+		<adapterIP>160.40.206.250</adapterIP>
+		
+		<!-- 
+		TODO: FINISH THE DESCRIPTION
+		
+		Port on which the adapter listens.
+		-->
+		<adapterPort>9997</adapterPort>
 		
 	</api>
 

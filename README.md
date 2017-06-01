@@ -25,7 +25,7 @@ Afterwards source needs to be build:
 ```
 #!shell
 
-mvn clean install
+mvn clean compile assembly:single
 ```
 ### Installing VICINITY Open Gateway API from using JAR package ###
 TBD

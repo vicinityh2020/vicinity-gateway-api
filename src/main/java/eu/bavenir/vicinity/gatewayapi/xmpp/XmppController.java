@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 
@@ -308,7 +309,7 @@ public class XmppController {
 	
 	
 	// TODO Finish Javadoc when it is clear what the method is actually doing.
-	public void sendMessage(String sourceUsername, String destinationUsername, String message){
+	public boolean sendMessage(String sourceUsername, String destinationUsername, String message){
 		
 		// check the validity of source user
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(sourceUsername);
@@ -316,7 +317,7 @@ public class XmppController {
 		if (descriptor == null){
 			logger.warning("No descriptor exist for source username '" + sourceUsername + "'. The device has not logged"
 					+ " into the Gateway API yet.");
-			return;
+			return false;
 		}
 		
 		// if the connection disintegrated for some reason, be proactive and reconnect
@@ -325,11 +326,28 @@ public class XmppController {
 			
 			if (!descriptor.connect()){
 				logger.warning("The connection for username '" + sourceUsername + "' can't be established.");
-				return;
+				return false;
 			}
 		}
 		
 		descriptor.sendMessage(destinationUsername, message);
+		
+		return true;
+	}
+	
+	
+	// TODO
+	public Message retrieveSingleMessage(String forUsername){
+		// check the validity of source user
+		XmppConnectionDescriptor descriptor = descriptorPoolGet(forUsername);
+		
+		if (descriptor == null){
+			logger.warning("No descriptor exist for source username '" + forUsername + "'. The device has not logged"
+					+ " into the Gateway API yet.");
+			return null;
+		}
+		
+		return descriptor.retrieveMessage();
 	}
 	
 	

@@ -38,7 +38,7 @@ public class ObjectsLogin extends ServerResource{
 	/**
 	 * Answers the GET call, after it is authenticated.
 	 * 
-	 * @return A String indicating successful login.
+	 * @return A String indicating that login is successful.
 	 */
 	@Get
 	public String represent() {

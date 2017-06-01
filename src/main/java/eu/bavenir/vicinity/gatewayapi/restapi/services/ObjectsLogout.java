@@ -3,6 +3,9 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
+import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+
 
 /*
  * STRUCTURE
@@ -36,13 +39,21 @@ public class ObjectsLogout extends ServerResource{
 	@Get
 	public String represent() {
 		
-		// TODO
+		logoutObject();
+		
 		return "Logout successful.";
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	// none
+	private void logoutObject() {
+		
+		XmppController xmppController = (XmppController) getContext().getAttributes().get(Api.CONTEXT_XMPPCONTROLLER);
+		
+		xmppController.terminateConnection(
+				getRequest().getChallengeResponse().getIdentifier(), 
+				true);
+	}
 	
 }
