@@ -1,0 +1,26 @@
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-06-05T10:55:57.423-gateway.log
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Jun 05, 2017 10:55:57 AM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Jun 05, 2017 10:56:08 AM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'user0'.
+Jun 05, 2017 10:56:08 AM eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jun 05, 2017 10:56:08 AM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'user0@vicinity.eu'
+Jun 05, 2017 10:56:08 AM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jun 05, 2017 10:56:09 AM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: SASLError using PLAIN: not-authorized
+Jun 05, 2017 10:56:09 AM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'user0' was not established.
+Jun 05, 2017 10:56:09 AM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 127.0.0.1.

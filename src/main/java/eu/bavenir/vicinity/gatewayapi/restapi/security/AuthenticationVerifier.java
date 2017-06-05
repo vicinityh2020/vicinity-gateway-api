@@ -7,7 +7,7 @@ import org.restlet.Response;
 import org.restlet.data.ChallengeResponse;
 import org.restlet.security.Verifier;
 
-import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 // !!!!!!!!!!!! 
 // http://www.programcreek.com/java-api-examples/index.php?api=org.restlet.security.Verifier
@@ -20,12 +20,12 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
 // TODO javadoc
 public class AuthenticationVerifier implements Verifier {
 
-	private XmppController xmppController;
+	private CommunicationNode communicationNode;
 	private Logger logger;
 	
 	
-	public AuthenticationVerifier(XmppController xmppController, Logger logger){
-		this.xmppController = xmppController;
+	public AuthenticationVerifier(CommunicationNode communicationNode, Logger logger){
+		this.communicationNode = communicationNode;
 		this.logger = logger;
 	}
 	
@@ -44,16 +44,16 @@ public class AuthenticationVerifier implements Verifier {
 		String username = cr.getIdentifier();
 		String password = new String(cr.getSecret());
 		
-		if (xmppController.isConnected(username)){
+		if (communicationNode.isConnected(username)){
 			// if the client is already connected to XMPP, just verify the password
-			if (!xmppController.verifyConnection(username, password)){
+			if (!communicationNode.verifyConnection(username, password)){
 				logger.info("Invalid credentials in request from a client with IP " 
 						+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;
 			}
 		} else {
 			// if not, establish a connection
-			if (xmppController.establishConnection(username, password) == null){
+			if (communicationNode.establishConnection(username, password) == null){
 				logger.info("Invalid credentials in request from a client with IP " 
 											+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;

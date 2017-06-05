@@ -4,7 +4,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
-import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 
 /*
@@ -49,9 +49,9 @@ public class ObjectsLogout extends ServerResource{
 	
 	private void logoutObject() {
 		
-		XmppController xmppController = (XmppController) getContext().getAttributes().get(Api.CONTEXT_XMPPCONTROLLER);
+		CommunicationNode communicationNode = (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
-		xmppController.terminateConnection(
+		communicationNode.terminateConnection(
 				getRequest().getChallengeResponse().getIdentifier(), 
 				true);
 	}

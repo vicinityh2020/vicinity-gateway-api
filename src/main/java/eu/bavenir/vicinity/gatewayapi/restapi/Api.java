@@ -28,7 +28,7 @@ import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidSubscriptions;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.Sparql;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.Subscriptions;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.SubscriptionsSid;
-import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 
 /*
@@ -39,13 +39,11 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
  * - private methods
  */
 
-// TODO dopisat detaily autentifikacie
-
 /**
  * RESTLET application that serves incoming calls for the Gateway API. After being instantialized, it initializes
- * objects necessary to be available to all API services (like XMPP controller). It routes the requests to their 
+ * objects necessary to be available to all API services (like Communication Node). It routes the requests to their 
  * respective {@link org.restlet.resource.ServerResource Resources}. The HTTP authentication against Gateway API is 
- * also checked this class.
+ * also checked in the {@link eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier AuthenticationVerifier}.
  * 
  * @see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
  *   
@@ -68,10 +66,10 @@ public class Api extends Application {
 	public static final String CONTEXT_LOGGER = "logger";
 	
 	/**
-	 * Contextual name of the {@link eu.bavenir.vicinity.gatewayapi.xmpp.XmppController XMPPcontroller}, object
+	 * Contextual name of the {@link eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode CommunicationNode}, object
 	 * inserted into the context.
 	 */
-	public static final String CONTEXT_XMPPCONTROLLER = "xmppController";
+	public static final String CONTEXT_COMMNODE = "communicationNode";
 	
 	/**
 	 * Name of the configuration parameter for setting the realm of RESTLET BEARER authentication method. 
@@ -102,8 +100,8 @@ public class Api extends Application {
 	private XMLConfiguration config;
 	private Logger logger;
 	
-	// communication controller
-	private XmppController xmppController;
+	// communication node
+	private CommunicationNode communicationNode;
 	
 	// application context
 	private Context applicationContext;
@@ -120,8 +118,8 @@ public class Api extends Application {
 	
 	/**
 	 * Constructor, initializes necessary objects and inserts the {@link org.apache.commons.configuration2.XMLConfiguration
-	 * configuration}, {@link java.util.logging.Logger logger} and {@link eu.bavenir.vicinity.gatewayapi.xmpp.XmppController
-	 * XMPPcontroller} into the RESTLET {@link org.restlet.Context context}.
+	 * configuration}, {@link java.util.logging.Logger logger} and {@link eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode
+	 * CommunicationNode} into the RESTLET {@link org.restlet.Context context}.
 	 * 
 	 * All parameters are mandatory, failure to include them will lead to a swift end of application execution.
 	 * 
@@ -132,15 +130,15 @@ public class Api extends Application {
 		this.config = config;
 		this.logger = logger;
 		
-		// this will initialize the XMPP controller
-		xmppController = new XmppController(config, logger);
+		// this will initialize the CommunicationNode
+		communicationNode = new CommunicationNode(config, logger);
 		
 		// insert stuff into context
 		applicationContext = new Context();
 		
 		applicationContext.getAttributes().put(CONTEXT_CONFIG, config);
 		applicationContext.getAttributes().put(CONTEXT_LOGGER, logger);
-		applicationContext.getAttributes().put(CONTEXT_XMPPCONTROLLER, xmppController);
+		applicationContext.getAttributes().put(CONTEXT_COMMNODE, communicationNode);
 		
 		setContext(applicationContext);
 		
@@ -205,12 +203,16 @@ public class Api extends Application {
 	
 	/* === PRIVATE METHODS === */
 	
-	// TODO javadoc
+	/**
+	 * Returns an instance of ChallengeAuthenticator, that is able to authenticate requests against the XMPP network.
+	 * 
+	 * @return A custom ChallengeAuthenticator.
+	 */
 	private ChallengeAuthenticator createAuthenticator() {
 		
 		String realm = config.getString(CONF_PARAM_AUTHREALM, CONF_DEF_AUTHREALM);
 		
-		AuthenticationVerifier authVerifier = new AuthenticationVerifier(xmppController, logger);
+		AuthenticationVerifier authVerifier = new AuthenticationVerifier(communicationNode, logger);
 
 		ChallengeAuthenticator auth = new ChallengeAuthenticator(
 								applicationContext, false, challengeScheme, realm, authVerifier);
@@ -262,26 +264,4 @@ public class Api extends Application {
 				this.challengeScheme = null;
 		}
 	}
-	
-	// TODO ordnung
-/*	
-	private ChallengeAuthenticator createAuthenticator() {
-		Context context = getContext();
-		final boolean optional = false;
-		ChallengeScheme challengeScheme = ChallengeScheme.HTTP_OAUTH_BEARER;
-		String realm = config.getString(CONF_PARAM_AUTHREALM, CONF_DEF_AUTHREALM);
-
-		///////////////////
-		MapVerifier verifier = new MapVerifier();
-		//verifier.getLocalSecrets().put("scott", "tiger".toCharArray());
-		verifier.getLocalSecrets().put("user0", "user0".toCharArray());
-		
-		AuthenticationVerifier jwtVerifier = new AuthenticationVerifier();
-
-		ChallengeAuthenticator auth = new ChallengeAuthenticator(
-								context, optional, challengeScheme, realm, jwtVerifier);
-		
-		return auth;
-    }
-*/	
 }

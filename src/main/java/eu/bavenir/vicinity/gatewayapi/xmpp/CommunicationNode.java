@@ -60,10 +60,20 @@ import org.jivesoftware.smack.roster.RosterEntry;
  * @author sulfo
  *
  */
-public class XmppController {
+public class CommunicationNode {
 
 	
 	/* === CONSTANTS === */
+	
+	// TODO list valid values
+	/**
+	 * Insert this attribute at the beginning of a message JSON that needs to be processed as a request by receiving
+	 * connection {@link XmppConnectionDescriptor descriptor}. The value of the attribute should be the HTTP method
+	 * that needs to be performed.
+	 * 
+	 * @see XmppConnectionDescriptor#processMessage
+	 */
+	public static final String ATTR_REQUESTOPERATION = "requestOperation";
 	
 	/**
 	 * Name of the configuration parameter for XMPP .
@@ -98,7 +108,7 @@ public class XmppController {
 	 * @param config Configuration object.
 	 * @param logger Java logger.
 	 */
-	public XmppController(XMLConfiguration config, Logger logger){
+	public CommunicationNode(XMLConfiguration config, Logger logger){
 		descriptorPool = Collections.synchronizedMap(new HashMap<String, XmppConnectionDescriptor>());
 		 
 		this.config = config;
@@ -424,8 +434,4 @@ public class XmppController {
 			descriptorPool.clear();
 		}
 	}
-	
-	
-	
-
 }

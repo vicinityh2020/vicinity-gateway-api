@@ -17,7 +17,7 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
-import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 /*
  * STRUCTURE
@@ -52,6 +52,16 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * Name of the Process ID attribute.
 	 */
 	private static final String ATTR_PID = "pid";
+	
+	/**
+	 * Name of the 'objects' attribute.
+	 */
+	private static final String ATTR_OBJECTS = "objects";
+	
+	/**
+	 * Name of the 'properties' attribute.
+	 */
+	private static final String ATTR_PROPERTIES = "properties";
 	
 	/**
 	 * Name of the Value attribute.
@@ -146,15 +156,19 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	private String getObjectProperty(String sourceOid, String attrOid, String attrPid){
 		
 		// send message to the right object
-		XmppController xmppController = (XmppController) getContext().getAttributes().get(Api.CONTEXT_XMPPCONTROLLER);
+		CommunicationNode communicationNode = (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 
+		// we will bend the JSON attributes to our obedience... in /objects/{oid}, the 'objects' part is the key,
+		// {oid} is a value - it will be easier to re-assemble a URL in the XmppConnectionDescriptor
 		JsonObject json = Json.createObjectBuilder()
-				.add("operation", "get")
-				.add(ATTR_OID, attrOid)
-				.add(ATTR_PID, attrPid)
+				.add(CommunicationNode.ATTR_REQUESTOPERATION, "get")
+				.add(ATTR_OBJECTS, attrOid)
+				.add(ATTR_PROPERTIES, attrPid)
 				.build();
 		
-		xmppController.sendMessage(sourceOid, attrOid, json.toString());
+		if (!communicationNode.sendMessage(sourceOid, attrOid, json.toString())){
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Given identifier does not exist.");
+		}
 		
 		// TODO OMG OMFG WTF!?
 		
@@ -162,30 +176,17 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		do {
 			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 			System.out.println("And this 2: " + sourceOid);
-			message = xmppController.retrieveSingleMessage(sourceOid);
+			message = communicationNode.retrieveSingleMessage(sourceOid);
 		} while (message == null);
 		
 		return message.getBody();
-		/*
-		if (attrOid.equals("0729a580-2240-11e6-9eb5-0002a5d5c51b") && attrPid.equals("temp1")){
-			JsonObject json = Json.createObjectBuilder()
-					.add(ATTR_VALUE, 24.5)
-					.add(ATTR_TIMESTAMP, "2017-05-06T15:09:30.204Z")
-					.build();
-			
-			return json.toString();	
-		} else {
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
-		}*/
-		
 	}
 	
 }

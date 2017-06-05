@@ -13,6 +13,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -35,6 +36,8 @@ import org.restlet.engine.header.StringWriter;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
+import eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator;
+
 
 /*
  * STRUCTURE:
@@ -44,16 +47,18 @@ import org.restlet.resource.ResourceException;
  * - private methods
  */
 
-/*
+/**
+ * A representation of a connection to XMPP network. In essence, it is a client connected into XMPP network, able to 
+ * send / receive messages and process the requests that arrive in them. Basically, the flow is like this:
+ * 
  * 1. construct an instance
- * 2. connect()
+ * 2. {@link #connect() connect()}
  * 3. use - since the clients connecting to XMPP network are going to use HTTP authentication, they will send
  * 		their credentials in every request. It is therefore necessary to verify, whether the password is correct. The 
- * 		verifyPassword is used for this and is probably called by RESTLET every time a request is made.
- */
-
-/**
- * 
+ * 		{@link #verifyPassword() verifyPassword()} is used for this and is probably called by RESTLET every time a 
+ * 		request is made.
+ * 4. {@link #disconnect() disconnect()}
+ *  
  * @author sulfo
  *
  */
@@ -88,16 +93,6 @@ public class XmppConnectionDescriptor {
 	private static final String CONFIG_PARAM_XMPPLISTENFORROSTERCHANGES = "xmpp.listenForRosterChanges";
 	
 	/**
-	 * Name of the configuration parameter for adapter IP.
-	 */
-	private static final String CONFIG_PARAM_APIADAPTERIP = "api.adapterIP";
-	
-	/**
-	 * Name of the configuration parameter for adapter port.
-	 */
-	private static final String CONFIG_PARAM_APIADAPTERPORT = "api.adapterPort";
-	
-	/**
 	 * Default value of xmpp.server configuration parameter. This value is taken into account when no suitable
 	 * value is found in the configuration file. 
 	 */
@@ -127,23 +122,16 @@ public class XmppConnectionDescriptor {
 	 */
 	private static final boolean CONFIG_DEF_XMPPLISTENFORROSTERCHANGES = true;
 	
-	/**
-	 * Default value of api.adapterPort configuration parameter. This value is taken into account when no 
-	 * suitable value is found in the configuration file.
-	 */
-	private static final String CONFIG_DEF_APIADAPTERPORT = "9997";
 	
-	/**
-	 * Default value of api.adapterIP configuration parameter. This value is taken into account when no 
-	 * suitable value is found in the configuration file.
-	 */
-	private static final String CONFIG_DEF_APIADAPTERIP = "localhost";
 	
 	/* === FIELDS === */
 	
 	// logger and configuration
 	private XMLConfiguration config;
 	private Logger logger;
+	
+	// the thing that communicates with agent
+	private AgentCommunicator agentCommunicator;
 	
 	// credentials and connection to XMPP server
 	private String xmppUsername;
@@ -175,6 +163,8 @@ public class XmppConnectionDescriptor {
 		
 		this.config = config;
 		this.logger = logger;
+		
+		agentCommunicator = new AgentCommunicator(config, logger);
 		
 		messageQueue = new LinkedList<Message>();
 		
@@ -327,8 +317,6 @@ public class XmppConnectionDescriptor {
 			return null;
 		}
 		
-		//return Roster.getInstanceFor(connection);
-		
 		return roster;
 	}
 	
@@ -358,7 +346,14 @@ public class XmppConnectionDescriptor {
 		
 	}
 	
-	// TODO
+	
+	/**
+	 * Sends a string to the destination XMPP JID. The recommended approach is to get the roster first (by the 
+	 * {@link #getRoster() getRoster()} method and then send the message, if the contact is online.  
+	 * 
+	 * @param destinationJid Destination contact, for which the message is intended. 
+	 * @param message A string to send.
+	 */
 	public void sendMessage(EntityBareJid destinationJid, String message){
 		Chat chat = chatManager.chatWith(destinationJid);
 		try {
@@ -375,6 +370,7 @@ public class XmppConnectionDescriptor {
 		
 		// TODO this only retrieves and removes one element in the queue. make it possible to specify from whom we want
 		// to retrieve the message (i.e. from who we are expecting a message to come)
+		// this might be done by utilizing the chat objects
 		
 		if (messageQueue.isEmpty()){
 			return null;
@@ -440,7 +436,12 @@ public class XmppConnectionDescriptor {
 	
 	
 	/**
-	 * This is a callback method called when a message arrives. 
+	 * This is a callback method called when a message arrives. There are two main scenarios that need to be handled:
+	 * a. A message arrives ('unexpected') from another node with request for data or action - this need to be routed 
+	 * to a specific end point on agent side and then the result needs to be sent back to originating node. 
+	 * b. After sending a message with request to another node, the originating node expects an answer, which arrives
+	 * as a message. This is stored in a queue and is propagated back to RESTLET services, that are expecting the
+	 * results.
 	 * 
 	 * @param from A JID of the sender.
 	 * @param message Received message.
@@ -448,49 +449,26 @@ public class XmppConnectionDescriptor {
 	 */
 	private void processMessage(EntityBareJid from, Message message, Chat chat){
 		
-		// TODO make normal log
-		System.out.println("New message from " + from + ": " + message.getBody());
+		logger.finest("New message from " + from + ": " + message.getBody());
 		
-		// make a json from the incoming String
+		// make a json from the incoming String - IMPORTANT! any string that is not 
 		JsonReader jsonReader = Json.createReader(new StringReader(message.getBody()));
 		JsonObject json = jsonReader.readObject();
 		
-		// TODO omfg...
 		// if the message is a request, execute action, otherwise store it into incoming message queue
-		if (json.containsKey("operation")){
-			// execute action
-			// TODO make noermal log
-			System.out.println("Got here 1");
+		if (json.containsKey(CommunicationNode.ATTR_REQUESTOPERATION)){
+			// process the request
 			
-			// TODO it can be done much better way - in the json there can be everything needed to send the message
-			// ClientResource resource = new ClientResource("http://160.40.206.250:9997/agent/objects/0d485748-cf2a-450c-bcf6-02ac1cb39a2d/properties/PowerConsumption");
-			//ClientResource resource = new ClientResource("http://160.40.206.250:9997/agent/objects/123/properties/123");
-			ClientResource resource = new ClientResource(
-					"http://"
-					+ config.getString(CONFIG_PARAM_APIADAPTERIP, CONFIG_DEF_APIADAPTERIP)
-					+ ":"
-					+ config.getString(CONFIG_PARAM_APIADAPTERPORT, CONFIG_DEF_APIADAPTERPORT)
-					+ "/agent/objects/"
-					+ json.getString("oid")
-					+ "/properties/"
-					+ json.getString("pid"));
+			logger.finest("The message is a request. Processing...");
 			
-			Writer writer = new StringWriter();
-			try {
-				resource.get().write(writer);
-			} catch (ResourceException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			String agentResponse = agentCommunicator.processRequestJson(json);
 			
-			System.out.println("Got response from Peter: " + writer.toString());
-			
-			System.out.println("And this: " + from.toString());
-			sendMessage(from, writer.toString());
-			
+			sendMessage(from, agentResponse);
 			
 		} else {
-			System.out.println("Got here 2");
+			logger.finest("This message is a response. Adding to incoming queue...");
+			
+			
 			// TODO - change to offer - read javdoc for that
 			messageQueue.add(message);
 		}

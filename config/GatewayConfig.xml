@@ -46,7 +46,8 @@
 		<!--
 		URL/IP address of XMPP server. If not set, the application exits.
 		-->
-		<server>138.201.156.73</server>
+		<!-- <server>dev_be.bavenir.eu</server> -->
+		<server>localhost</server>
 		
 		<!--
 		Server port uses STARTTLS. Defaults to 5222 if not set.
@@ -135,18 +136,19 @@
 		
 		
 		<!--
-		TODO: FINISH THE DESCRIPTION
+		If the agent listens on a different interface (or a different machine),
+		it is necessary to set its IP address with this parameter.
 		
-		IP address of the adapter.
+		Defaults to localhost.
 		-->
-		<adapterIP>160.40.206.250</adapterIP>
+		<agentIP>160.40.206.250</agentIP>
 		
 		<!-- 
-		TODO: FINISH THE DESCRIPTION
-		
 		Port on which the adapter listens.
+		
+		Defaults to 9997.
 		-->
-		<adapterPort>9997</adapterPort>
+		<agentPort>9997</agentPort>
 		
 	</api>
 

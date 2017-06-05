@@ -1,0 +1,56 @@
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-06-05T13:11:16.045-gateway.log
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Jun 05, 2017 1:11:16 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Jun 05, 2017 1:11:24 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'user0'.
+Jun 05, 2017 1:11:24 PM eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jun 05, 2017 1:11:24 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'localhost:5222' as 'user0@vicinity.eu'
+Jun 05, 2017 1:11:25 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jun 05, 2017 1:11:25 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jun 05, 2017 1:11:25 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'user0' was established.
+Jun 05, 2017 1:11:25 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'user0' was added into connection pool.
+Jun 05, 2017 1:11:25 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: '0d485748-cf2a-450c-bcf6-02ac1cb39a2d'.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'localhost:5222' as '0d485748-cf2a-450c-bcf6-02ac1cb39a2d@vicinity.eu'
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for '0d485748-cf2a-450c-bcf6-02ac1cb39a2d' was established.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for '0d485748-cf2a-450c-bcf6-02ac1cb39a2d' was added into connection pool.
+Jun 05, 2017 1:11:59 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jun 05, 2017 1:12:16 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jun 05, 2017 1:12:16 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from 0d485748-cf2a-450c-bcf6-02ac1cb39a2d@vicinity.eu: {"requestOperation":"get","objects":"0d485748-cf2a-450c-bcf6-02ac1cb39a2d","properties":"PowerConsumption"}
+Jun 05, 2017 1:12:16 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jun 05, 2017 1:12:16 PM eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://160.40.206.250:9997/agent/objects/0d485748-cf2a-450c-bcf6-02ac1cb39a2d/properties/PowerConsumption
+Jun 05, 2017 1:12:16 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from 0d485748-cf2a-450c-bcf6-02ac1cb39a2d@vicinity.eu: {"oid": "0729a580-2240-11e6-9eb5-0002a5d5c51b"}
+Jun 05, 2017 1:12:17 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...

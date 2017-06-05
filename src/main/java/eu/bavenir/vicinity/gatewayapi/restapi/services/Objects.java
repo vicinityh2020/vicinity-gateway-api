@@ -12,7 +12,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
-import eu.bavenir.vicinity.gatewayapi.xmpp.XmppController;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 /*
  * STRUCTURE
@@ -93,9 +93,9 @@ public class Objects extends ServerResource {
 	// TODO documentation
 	private String getObjects(String queryType, String queryLimit, String queryOwn){
 		
-		XmppController xmppController = (XmppController) getContext().getAttributes().get(Api.CONTEXT_XMPPCONTROLLER);
+		CommunicationNode communicationNode = (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
-		Collection<RosterEntry> rosterObjects = xmppController.getRosterEntriesForUser(
+		Collection<RosterEntry> rosterObjects = communicationNode.getRosterEntriesForUser(
 							getRequest().getChallengeResponse().getIdentifier());
 		
 		// TODO logs!!!
