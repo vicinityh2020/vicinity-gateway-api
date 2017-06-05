@@ -181,8 +181,6 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			System.out.println("And this 2: " + sourceOid);
 			message = communicationNode.retrieveSingleMessage(sourceOid);
 		} while (message == null);
 		

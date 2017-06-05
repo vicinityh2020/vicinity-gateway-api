@@ -468,9 +468,9 @@ public class XmppConnectionDescriptor {
 		} else {
 			logger.finest("This message is a response. Adding to incoming queue...");
 			
-			
-			// TODO - change to offer - read javdoc for that
+
 			messageQueue.add(message);
+			// messageQueue.put(message);
 		}
 		
 	}
