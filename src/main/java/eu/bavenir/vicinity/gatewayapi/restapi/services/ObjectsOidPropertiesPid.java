@@ -1,13 +1,7 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
-import java.io.StringReader;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
-import org.jivesoftware.smack.packet.Message;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -18,6 +12,8 @@ import org.restlet.resource.ServerResource;
 
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
+import eu.bavenir.vicinity.gatewayapi.xmpp.NetworkMessageRequest;
+import eu.bavenir.vicinity.gatewayapi.xmpp.NetworkMessageResponse;
 
 /*
  * STRUCTURE
@@ -64,14 +60,9 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	private static final String ATTR_PROPERTIES = "properties";
 	
 	/**
-	 * Name of the Value attribute.
+	 * Name of the Object attribute.
 	 */
-	private static final String ATTR_VALUE = "value";
-	
-	/**
-	 * Name of the Time stamp attribute.
-	 */
-	private static final String ATTR_TIMESTAMP = "timestamp";
+	private static final String ATTR_OBJECT = "object";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -107,6 +98,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	public void store(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
+		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
 		if (attrOid == null || attrPid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
@@ -130,61 +122,73 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Invalid property description");
 		}
 		
-		updateProperty(propertyJsonString);
+		updateProperty(callerOid, attrOid, attrPid, propertyJsonString);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
 	// TODO documentation
-	private void updateProperty(String jsonString){
-		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
-		JsonObject jsonRequest = jsonReader.readObject();
+	private void updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString){
+		CommunicationNode communicationNode 
+								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
-		if (jsonRequest.containsKey(ATTR_VALUE)){
-			//TODO do something
-		} else {
-			jsonReader.close();
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description");
+		NetworkMessageRequest request = new NetworkMessageRequest();
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.REQUEST_OPERATION_PUT);
+		request.addAttribute(ATTR_OBJECTS, attrOid);
+		request.addAttribute(ATTR_PROPERTIES, attrPid);
+		
+		request.setRequestBody(jsonString);
+		
+		// all set
+		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
-		jsonReader.close();
+		// this will wait for response
+		NetworkMessageResponse response 
+						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
+		
+		// TODO solve issues with response code
+		response.getResponseCode();
+		
 	}
+	
 	
 	// TODO documentation
 	private String getObjectProperty(String sourceOid, String attrOid, String attrPid){
 		
 		// send message to the right object
-		CommunicationNode communicationNode = (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
+		CommunicationNode communicationNode 
+								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 
-		// we will bend the JSON attributes to our obedience... in /objects/{oid}, the 'objects' part is the key,
-		// {oid} is a value - it will be easier to re-assemble a URL in the XmppConnectionDescriptor
-		JsonObject json = Json.createObjectBuilder()
-				.add(CommunicationNode.ATTR_REQUESTOPERATION, "get")
-				.add(ATTR_OBJECTS, attrOid)
-				.add(ATTR_PROPERTIES, attrPid)
-				.build();
+		NetworkMessageRequest request = new NetworkMessageRequest();
 		
-		if (!communicationNode.sendMessage(sourceOid, attrOid, json.toString())){
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Given identifier does not exist.");
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.REQUEST_OPERATION_GET);
+		request.addAttribute(ATTR_OBJECTS, attrOid);
+		request.addAttribute(ATTR_PROPERTIES, attrPid);
+		
+		// all set
+		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
+	
+		// this will wait for response
+		NetworkMessageResponse response 
+						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO OMG OMFG WTF!?
+		// TODO solve issues with response code
 		
-		Message message = null;
-		do {
-			
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			message = communicationNode.retrieveSingleMessage(sourceOid);
-		} while (message == null);
-		
-		return message.getBody();
+		return response.getResponseBody();
 	}
 	
 }

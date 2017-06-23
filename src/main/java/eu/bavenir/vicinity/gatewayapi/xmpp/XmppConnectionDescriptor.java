@@ -1,19 +1,12 @@
 package eu.bavenir.vicinity.gatewayapi.xmpp;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.Writer;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedTransferQueue;
 import java.util.logging.Logger;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -32,11 +25,6 @@ import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
-import org.restlet.engine.header.StringWriter;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
-
-import eu.bavenir.vicinity.gatewayapi.agentservices.AgentCommunicator;
 
 
 /*
@@ -145,7 +133,7 @@ public class XmppConnectionDescriptor {
 	private Roster roster;
 	
 	// message queue, FIFO structure for holding incoming messages 
-	private Queue<Message> messageQueue;
+	private BlockingQueue<NetworkMessage> messageQueue;
 	
 	
 	
@@ -166,7 +154,7 @@ public class XmppConnectionDescriptor {
 		
 		agentCommunicator = new AgentCommunicator(config, logger);
 		
-		messageQueue = new LinkedList<Message>();
+		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
 		// build new connection
 		connection = buildNewConnection(xmppUsername, xmppPassword);
@@ -365,18 +353,41 @@ public class XmppConnectionDescriptor {
 	}
 	
 	
-	// TODO
-	public Message retrieveMessage(){
+	// TODO javadoc
+	public NetworkMessage retrieveMessage(int requestId){
 		
-		// TODO this only retrieves and removes one element in the queue. make it possible to specify from whom we want
-		// to retrieve the message (i.e. from who we are expecting a message to come)
-		// this might be done by utilizing the chat objects
 		
-		if (messageQueue.isEmpty()){
-			return null;
-		} else {
-			return messageQueue.remove();
-		} 
+		NetworkMessage message = null;
+		
+		do {
+
+			NetworkMessage helperMessage;
+			try {
+				// take the first element or wait for one
+				helperMessage = messageQueue.take();
+			} catch (InterruptedException e) {
+				// got interrupted - bail out
+				return null;
+			}
+			
+			// we have a message now
+			if (helperMessage.getRequestId() != requestId){
+				// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
+				
+				if (helperMessage.isValid()){
+					messageQueue.offer(helperMessage);
+				}
+				
+				// TODO solve the worst case scenario, where one message gets rotated until it is stale
+				// to test this scenario, just comment the line in agent communicator where requestid is set to response
+			} else {
+				// it is our message :-3
+				message = helperMessage;
+			}
+			
+		} while (message == null);
+	
+		return message;	
 	}
 	
 	
@@ -444,35 +455,65 @@ public class XmppConnectionDescriptor {
 	 * results.
 	 * 
 	 * @param from A JID of the sender.
-	 * @param message Received message.
+	 * @param xmppMessage Received message.
 	 * @param chat A chat thread in which the message was received. 
 	 */
-	private void processMessage(EntityBareJid from, Message message, Chat chat){
+	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat){
 		
-		logger.finest("New message from " + from + ": " + message.getBody());
+		logger.finest("New message from " + from + ": " + xmppMessage.getBody());
 		
-		// make a json from the incoming String - IMPORTANT! any string that is not 
-		JsonReader jsonReader = Json.createReader(new StringReader(message.getBody()));
-		JsonObject json = jsonReader.readObject();
+		// let's parse the xmpp message 
+		MessageParser messageParser = new MessageParser();
+		NetworkMessage networkMessage = messageParser.parseNetworkMessage(xmppMessage);
 		
-		// if the message is a request, execute action, otherwise store it into incoming message queue
-		if (json.containsKey(CommunicationNode.ATTR_REQUESTOPERATION)){
-			// process the request
+		if (networkMessage != null){
+			switch (networkMessage.getMessageType()){
 			
-			logger.finest("The message is a request. Processing...");
-			
-			String agentResponse = agentCommunicator.processRequestJson(json);
-			
-			sendMessage(from, agentResponse);
-			
+			case NetworkMessageRequest.MESSAGE_TYPE:
+				logger.finest("The message is a request. Processing...");
+				processMessageRequest(from, networkMessage);
+				break;
+				
+			case NetworkMessageResponse.MESSAGE_TYPE:
+				logger.finest("This message is a response. Adding to incoming queue...");
+				processMessageResponse(from, networkMessage);
+				break;
+			}
 		} else {
-			logger.finest("This message is a response. Adding to incoming queue...");
-			
-
-			messageQueue.add(message);
-			// messageQueue.put(message);
+			logger.warning("Invalid system message received from XMPP network.");
 		}
 		
+	}
+	
+	
+	/**
+	 * Processing method for {@link NetworkMessageRequest request} flavor of {@link NetworkMessage NetworkMessage}.
+	 * 
+	 * @param from Address of the object that sent the message.
+	 * @param networkMessage Message parsed from the XMPP message. 
+	 */
+	private void processMessageRequest(EntityBareJid from, NetworkMessage networkMessage){
+		
+		// cast it to request message first (it is safe and also necessary)
+		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
+		
+		//String agentResponse = agentCommunicator.processRequestMessage(requestMessage);
+		
+		NetworkMessageResponse agentResponse = agentCommunicator.processRequestMessage(requestMessage);
+		
+		// send it back
+		sendMessage(from, agentResponse.buildMessageString());
+	}
+	
+	
+	/**
+	 * Processing method for {@link NetworkMessageResponse response} flavor of {@link NetworkMessage NetworkMessage}.
+	 * 
+	 * @param from Address of the object that sent the message.
+	 * @param networkMessage Message parsed from the XMPP message.
+	 */
+	private void processMessageResponse(EntityBareJid from, NetworkMessage networkMessage){
+		messageQueue.add(networkMessage);
 	}
 	
 	
@@ -482,10 +523,12 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were added.
 	 */
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
-		// TODO Auto-generated method stub
+		// TODO uncomment
+		/*
 		for(Jid address : addresses){
-			//System.out.println("processRosterEntriesAdded: " + address.toString());
+			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
+		*/
 	}
 	
 	
@@ -495,10 +538,12 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were deleted.
 	 */
 	private void processRosterEntriesDeleted(Collection<Jid> addresses){
-		// TODO Auto-generated method stub
+		// TODO uncomment
+		/*
 		for(Jid address : addresses){
-			//System.out.println("processRosterEntriesDeleted: " + address.toString());
+			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
+		*/
 	}
 	
 	
@@ -508,10 +553,12 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were updated.
 	 */
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
-		// TODO Auto-generated method stub
+		// TODO uncomment
+		/*
 		for(Jid address : addresses){
-			//System.out.println("processRosterEntriesUpdated: " + address.toString());
+			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
+		*/
 	}
 	
 	
@@ -521,7 +568,7 @@ public class XmppConnectionDescriptor {
 	 * @param presence A new {@link org.jivesoftware.smack.packet.Presence presence}.
 	 */
 	private void processRosterPresenceChanged(Presence presence) {
-		// TODO Auto-generated method stub
+		// TODO uncomment
 		//System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
 	}
 }

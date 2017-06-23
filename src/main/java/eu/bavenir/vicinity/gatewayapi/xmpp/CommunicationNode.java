@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 
@@ -56,24 +55,48 @@ import org.jivesoftware.smack.roster.RosterEntry;
  *  4. terminateAllConnections - cleanup when the application shuts down. 
  *  
  *  After step 4, it is safe to start a new with step 1. 
+ *  
+ *  
+ *  MESSAGES
+ *  
+ *  All communication among connected XMPP clients is exchanged via XMPP messages. In general there are only 2 types
+ *  of messages that are exchanged:
+ *  
+ *  a) requests  -	An Object is requesting an access to a service of another Object (or Agent). This request needs to 
+ *  				be propagated across XMPP network and at the end of the communication pipe, the message has to be
+ *  				translated into valid HTTP request to an Agent service. Translating the message is as well as 
+ *  				their detailed structure is described in {@link AgentCommunicator AgentCommunicator}.
+ *  
+ *  b) responses -	The value returned by Object / Agent services in JSON, that is propagated back to the caller.
+ *  
  *    
  * @author sulfo
  *
  */
+// TODO update documentation
 public class CommunicationNode {
 
 	
 	/* === CONSTANTS === */
 	
-	// TODO list valid values
 	/**
 	 * Insert this attribute at the beginning of a message JSON that needs to be processed as a request by receiving
 	 * connection {@link XmppConnectionDescriptor descriptor}. The value of the attribute should be the HTTP method
-	 * that needs to be performed.
+	 * that needs to be performed. To ensure compatibility, use following constants:
+	 * 
+
+	 * 
 	 * 
 	 * @see XmppConnectionDescriptor#processMessage
 	 */
-	public static final String ATTR_REQUESTOPERATION = "requestOperation";
+	//public static final String ATTR_REQUESTOPERATION = "requestOperation";
+	
+
+	
+	/**
+	 * Attribute with a request ID.
+	 */
+	//public static final String ATTR_REQ_ID = "requestId";
 	
 	/**
 	 * Name of the configuration parameter for XMPP .
@@ -85,6 +108,8 @@ public class CommunicationNode {
 	 * value is found in the configuration file. 
 	 */
 	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
+	
+	
 
 	
 	/* === FIELDS === */
@@ -346,8 +371,8 @@ public class CommunicationNode {
 	}
 	
 	
-	// TODO
-	public Message retrieveSingleMessage(String forUsername){
+	// TODO javadoc
+	public NetworkMessage retrieveSingleMessage(String forUsername, int requestId){
 		// check the validity of source user
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(forUsername);
 		
@@ -357,7 +382,7 @@ public class CommunicationNode {
 			return null;
 		}
 		
-		return descriptor.retrieveMessage();
+		return descriptor.retrieveMessage(requestId);
 	}
 	
 	

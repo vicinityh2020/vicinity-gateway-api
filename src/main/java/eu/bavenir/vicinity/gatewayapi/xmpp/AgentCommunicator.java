@@ -1,21 +1,18 @@
-package eu.bavenir.vicinity.gatewayapi.agentservices;
+package eu.bavenir.vicinity.gatewayapi.xmpp;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.restlet.engine.header.StringWriter;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
-
-import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 
 /*
@@ -60,6 +57,8 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
  * @author sulfo
  *
  */
+
+// TODO
 public class AgentCommunicator {
 	
 	/* === CONSTANTS === */
@@ -159,37 +158,60 @@ public class AgentCommunicator {
 	
 	
 	/**
-	 * Processes the request that arrived in the message as JSON. After the URL of the required Agent service is 
+	 * Processes the request that arrived from the XMPP network. After the URL of the required Agent service is 
 	 * assembled, the URL is called with the necessary HTTP method and the result is returned. 
 	 * 
-	 * @param json JSON with request. 
-	 * @return Response from the Agent.
+	 * @param request Request that was assembled from the incoming JSON. 
+	 * @return {@link NetworkMessageResponse Response} from the Agent. 
 	 */
-	public String processRequestJson(JsonObject json){
+	public NetworkMessageResponse processRequestMessage(NetworkMessageRequest request){
 		
 		
 		// TODO make it possible to ignore the SSL certificate problems 
 		// https://stackoverflow.com/questions/9001351/how-to-make-restlet-client-ignore-ssl-certificate-problems
-		/*
-		ClientResource resource = new ClientResource(assembleAgentUrl(json));
+		
+		NetworkMessageResponse response = new NetworkMessageResponse();
+		
+		// always set the correlation ID of the request
+		response.setRequestId(request.getRequestId());
+		
+		ClientResource resource = new ClientResource(assembleAgentUrl(request));
+		
+		
+		
 		
 		Writer writer = new StringWriter();
 		try {
+			switch (request.getRequestOperation()){
 			
-			// TODO implement all the other methods
-			resource.get().write(writer);
+			case NetworkMessageRequest.REQUEST_OPERATION_GET:
+				// parameters
+				resource.get().write(writer);
+				break;
+				
+			case NetworkMessageRequest.REQUEST_OPERATION_POST:
+				break;
+				
+			case NetworkMessageRequest.REQUEST_OPERATION_PUT:
+				break;
+				
+			case NetworkMessageRequest.REQUEST_OPERATION_DEL:
+				break;
+				
+			}
 			
+			// TODO return code
 		} catch (ResourceException | IOException e) {
 			// TODO Auto-generated catch block - we HAVE TO solve various return codes!
 			e.printStackTrace();
 		}
 		
-		return writer.toString();
-		*/
+		response.setResponseBody(writer.toString());
 		
-		System.out.println(assembleAgentUrl(json));
+				response.setResponseCode(200);
+		// response.setResponseBody("{\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\"}");
 		
-		return "{\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\"}";
+		return response;
 	}
 	
 	
@@ -197,15 +219,15 @@ public class AgentCommunicator {
 	/* === PRIVATE METHODS === */
 	
 	/**
-	 * This method takes incoming JSON and parses it into URL of an Agent service. See the main Javadoc section for t
-	 * his class for more details.
+	 * This method takes incoming JSON and parses it into URL of an Agent service. See the main Javadoc section for
+	 * this class for more details.
 	 * 
-	 * @param json JSON with operation request, received in the incoming message. 
+	 * @param networkMessageRequest Message with action request.
 	 *  
 	 * @return URL on the Agent side that is to be called.
 	 * 
 	 */
-	private String assembleAgentUrl(JsonObject json){
+	private String assembleAgentUrl(NetworkMessageRequest networkMessageRequest){
 		
 		// resolve the protocol to use
 		String protocol;
@@ -223,26 +245,16 @@ public class AgentCommunicator {
 				+ AGENT_API_STRING
 		);
 		
-		Set<Entry<String,JsonValue>> entrySet = json.entrySet();
+		LinkedHashMap<String, String> attributesMap = networkMessageRequest.getAttributes();
 		
-		// we will bend the JSON attributes to our obedience... in /objects/{oid}, the 'objects' part is the key,
-		// {oid} is a value
-		for (Entry<String,JsonValue> entry : entrySet) {
-			// ignore the first attribute, that should indicate the request operation
-			if (!entry.getKey().equals(CommunicationNode.ATTR_REQUESTOPERATION)){
-				
+		if (!attributesMap.isEmpty()){
+			// in /objects/{oid}, the 'objects' part is the key, {oid} is a value - keep that example in mind
+			for (Map.Entry<String, String> entry : attributesMap.entrySet()){
 				agentServiceUrl = agentServiceUrl + "/" + entry.getKey();
-				
-				// some requests don't necessarily have a value on each attribute
+				// watch out for nulls
 				if (entry.getValue() != null){
-					// first and last characters are always quotes - get rid of them
-					JsonValue value = entry.getValue();
-					String stringValue = value.toString();
-					stringValue = stringValue.substring(1, stringValue.length() - 1);
-					
-					// and add it into the URL
-					agentServiceUrl = agentServiceUrl + "/" + stringValue;
-				}
+					agentServiceUrl = agentServiceUrl + "/" + entry.getValue();
+				} 
 			}
 		}
 		

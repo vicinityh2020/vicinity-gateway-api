@@ -46,8 +46,8 @@
 		<!--
 		URL/IP address of XMPP server. If not set, the application exits.
 		-->
-		<!-- <server>dev_be.bavenir.eu</server> -->
-		<server>localhost</server>
+		<server>dev_be.bavenir.eu</server>
+		<!-- <server>localhost</server> -->
 		
 		<!--
 		Server port uses STARTTLS. Defaults to 5222 if not set.
