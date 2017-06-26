@@ -184,10 +184,13 @@ public class NetworkMessageResponse extends NetworkMessage {
 		responseCode = json.getInt(ATTR_RESPONSECODE);
 		
 		// response body
-		String stringValue = removeQuotes(json.getString(ATTR_RESPONSEBODY));
+		String stringValue = new String();
+		if (!json.isNull(ATTR_RESPONSEBODY)){
+			stringValue = removeQuotes(json.getString(ATTR_RESPONSEBODY));
+		}
 				
 		// and the null value got transported more like string... we have to make a rule for it
-		if (stringValue.equals("null")){
+		if (stringValue == null || stringValue.equals("null")){
 			responseBody = null;
 		} else {
 			responseBody = stringValue;
@@ -212,30 +215,6 @@ public class NetworkMessageResponse extends NetworkMessage {
 				.add(ATTR_RESPONSECODE, responseCode)
 				.add(ATTR_RESPONSEBODY, responseBody)
 				.build();
-	}
-	
-	
-	/**
-	 * Inserting a string into JSON has a side effect of the string becoming quoted when extracted back from the JSON.
-	 * This toy just removes quotes if there are any (it tests for their existence first).
-	 *  
-	 * @param quotedString The original quoted string.
-	 * @return Unquoted string.
-	 */
-	private String removeQuotes(String quotedString){
-		
-		if (quotedString == null){
-			return null;
-		}
-		
-		char first = quotedString.charAt(0);
-		char last = quotedString.charAt(quotedString.length() - 1);
-		
-		if (first == '"' && last == '"'){
-			return quotedString.substring(1, quotedString.length() - 1);
-		} else {
-			return quotedString;
-		}
 	}
 
 }

@@ -95,7 +95,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param object Model.
 	 */
 	@Put("json")
-	public void store(Representation entity) {
+	public String store(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -122,14 +122,14 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Invalid property description");
 		}
 		
-		updateProperty(callerOid, attrOid, attrPid, propertyJsonString);
+		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
 	// TODO documentation
-	private void updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString){
+	private String updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString){
 		CommunicationNode communicationNode 
 								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
@@ -156,6 +156,8 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		
 		// TODO solve issues with response code
 		response.getResponseCode();
+		
+		return response.getResponseBody();
 		
 	}
 	

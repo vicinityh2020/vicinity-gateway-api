@@ -184,6 +184,27 @@ public class NetworkMessage {
 	}
 
 	
-	
+	/**
+	 * Inserting a string into JSON has a side effect of the string becoming quoted when extracted back from the JSON.
+	 * This toy just removes quotes if there are any (it tests for their existence first).
+	 *  
+	 * @param quotedString The original quoted string.
+	 * @return Unquoted string.
+	 */
+	public String removeQuotes(String quotedString){
+		
+		if (quotedString.isEmpty()){
+			return null;
+		}
+		
+		char first = quotedString.charAt(0);
+		char last = quotedString.charAt(quotedString.length() - 1);
+		
+		if (first == '"' && last == '"'){
+			return quotedString.substring(1, quotedString.length() - 1);
+		} else {
+			return quotedString;
+		}
+	}
 	/* === PRIVATE METHODS === */
 }

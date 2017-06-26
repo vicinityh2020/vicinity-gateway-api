@@ -10,7 +10,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.data.MediaType;
+import org.restlet.engine.Engine;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
@@ -177,9 +183,6 @@ public class AgentCommunicator {
 		
 		ClientResource resource = new ClientResource(assembleAgentUrl(request));
 		
-		
-		
-		
 		Writer writer = new StringWriter();
 		try {
 			switch (request.getRequestOperation()){
@@ -190,12 +193,63 @@ public class AgentCommunicator {
 				break;
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_POST:
+				
+				// this should always be json string
+				String requestBodyPost = request.getRequestBody();
+				
+				if (requestBodyPost != null){
+					/*
+					// create jsonobject from the string
+					JsonReader jsonReaderPost = Json.createReader(new StringReader(requestBodyPost));
+					JsonObject jsonObjectPost = jsonReaderPost.readObject();
+					jsonReaderPost.close();
+					
+					if (jsonObjectPost != null){
+						// make the actual post
+						resource.post(jsonObjectPost, MediaType.APPLICATION_JSON).write(writer);
+					} else {
+						logger.warning("Invalid JSON string in request nr. " + request.getRequestId() + "."
+								+ "Verbatim: " + request.getRequestBody());
+					}
+					*/
+					resource.post(requestBodyPost, MediaType.APPLICATION_JSON).write(writer);
+				} else {
+					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
+				}
+				
 				break;
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_PUT:
+				
+				// this should always be json string
+				String requestBodyPut = request.getRequestBody();
+				
+				if (requestBodyPut != null){
+					// create jsonobject from the string
+					/*
+					JsonReader jsonReaderPut = Json.createReader(new StringReader(requestBodyPut));
+					JsonObject jsonObjectPut = jsonReaderPut.readObject();
+					jsonReaderPut.close();
+					
+					
+					if (jsonObjectPut != null){
+						// make the actual post
+						resource.put(jsonObjectPut, MediaType.APPLICATION_JSON).write(writer);
+					} else {
+						logger.warning("Invalid JSON string in request nr. " + request.getRequestId() + "."
+								+ "Verbatim: " + request.getRequestBody());
+					}
+					*/
+					resource.put(requestBodyPut, MediaType.APPLICATION_JSON).write(writer);
+				} else {
+					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
+				}
+				
 				break;
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_DEL:
+				
+				// TODO finish
 				break;
 				
 			}
@@ -208,7 +262,8 @@ public class AgentCommunicator {
 		
 		response.setResponseBody(writer.toString());
 		
-				response.setResponseCode(200);
+		// TODO return value of the response code somehow
+		response.setResponseCode(200);
 		// response.setResponseBody("{\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\"}");
 		
 		return response;

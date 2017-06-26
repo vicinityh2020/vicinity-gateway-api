@@ -326,6 +326,23 @@ public class NetworkMessageRequest extends NetworkMessage {
 		}
 		
 		// build the thing
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
+		mainBuilder.add(ATTR_MESSAGETYPE, messageType)
+			.add(ATTR_REQUESTID, requestId)
+			.add(ATTR_REQUESTOPERATION, requestOperation);
+		
+		if (requestBody == null){
+			mainBuilder.addNull(ATTR_REQUESTBODY);
+		} else {
+			mainBuilder.add(ATTR_REQUESTBODY, requestBody);
+		}
+		
+		mainBuilder.add(ATTR_ATTRIBUTES, attributesBuilder)
+			.add(ATTR_PARAMETERS, parametersBuilder);
+		
+		jsonRepresentation = mainBuilder.build();
+		
+		/*
 		jsonRepresentation = jsonBuilderFactory.createObjectBuilder()
 				.add(ATTR_MESSAGETYPE, messageType)
 				.add(ATTR_REQUESTID, requestId)
@@ -334,6 +351,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 				.add(ATTR_ATTRIBUTES, attributesBuilder)
 				.add(ATTR_PARAMETERS, parametersBuilder)
 				.build();
+		*/		
 	}
 	
 	
@@ -348,10 +366,11 @@ public class NetworkMessageRequest extends NetworkMessage {
 		// figure out the message type
 		messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
 
+		/*
 		if (messageType != MESSAGE_TYPE){
 			// just a formality
 			return false;
-		}
+		}*/
 		
 		// the correlation ID of the request
 		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
@@ -368,7 +387,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 			return false;
 		}
 		
-		requestBody = removeQuotes(json.getString(NetworkMessageRequest.ATTR_REQUESTBODY));
+		if (!json.isNull(NetworkMessageRequest.ATTR_REQUESTBODY)){
+			requestBody = removeQuotes(json.getString(NetworkMessageRequest.ATTR_REQUESTBODY));
+		}
 		
 		// here both the parameters and attributes will during reading
 		Set<Entry<String,JsonValue>> entrySet;
@@ -416,27 +437,4 @@ public class NetworkMessageRequest extends NetworkMessage {
 		return true;
 	}
 	
-	
-	/**
-	 * Inserting a string into JSON has a side effect of the string becoming quoted when extracted back from the JSON.
-	 * This toy just removes quotes if there are any (it tests for their existence first).
-	 *  
-	 * @param quotedString The original quoted string.
-	 * @return Unquoted string.
-	 */
-	private String removeQuotes(String quotedString){
-		
-		if (quotedString == null){
-			return null;
-		}
-		
-		char first = quotedString.charAt(0);
-		char last = quotedString.charAt(quotedString.length() - 1);
-		
-		if (first == '"' && last == '"'){
-			return quotedString.substring(1, quotedString.length() - 1);
-		} else {
-			return quotedString;
-		}
-	}
 }
