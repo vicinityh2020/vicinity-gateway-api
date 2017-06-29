@@ -141,7 +141,8 @@
 		
 		Defaults to localhost.
 		-->
-		<agentIP>160.40.206.250</agentIP>
+		<!-- <agentIP>160.40.206.250</agentIP>  -->
+		<agentIP>localhost</agentIP>
 		
 		<!-- 
 		Port on which the adapter listens.

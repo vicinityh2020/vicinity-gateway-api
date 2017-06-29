@@ -172,10 +172,6 @@ public class AgentCommunicator {
 	 */
 	public NetworkMessageResponse processRequestMessage(NetworkMessageRequest request){
 		
-		
-		// TODO make it possible to ignore the SSL certificate problems 
-		// https://stackoverflow.com/questions/9001351/how-to-make-restlet-client-ignore-ssl-certificate-problems
-		
 		NetworkMessageResponse response = new NetworkMessageResponse();
 		
 		// always set the correlation ID of the request

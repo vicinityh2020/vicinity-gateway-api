@@ -523,7 +523,7 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were added.
 	 */
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
-		// TODO uncomment
+		
 		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesAdded: " + address.toString());
@@ -538,7 +538,6 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were deleted.
 	 */
 	private void processRosterEntriesDeleted(Collection<Jid> addresses){
-		// TODO uncomment
 		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
@@ -553,7 +552,6 @@ public class XmppConnectionDescriptor {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were updated.
 	 */
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
-		// TODO uncomment
 		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
@@ -568,7 +566,6 @@ public class XmppConnectionDescriptor {
 	 * @param presence A new {@link org.jivesoftware.smack.packet.Presence presence}.
 	 */
 	private void processRosterPresenceChanged(Presence presence) {
-		// TODO uncomment
 		//System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
 	}
 }

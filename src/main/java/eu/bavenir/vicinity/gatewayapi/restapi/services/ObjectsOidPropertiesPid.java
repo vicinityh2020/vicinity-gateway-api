@@ -59,11 +59,6 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 */
 	private static final String ATTR_PROPERTIES = "properties";
 	
-	/**
-	 * Name of the Object attribute.
-	 */
-	private static final String ATTR_OBJECT = "object";
-	
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
