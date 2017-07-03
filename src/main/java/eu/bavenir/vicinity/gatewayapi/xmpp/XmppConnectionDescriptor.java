@@ -328,8 +328,7 @@ public class XmppConnectionDescriptor {
 			chat.send(message);
 					
 		} catch (XmppStringprepException | NotConnectedException | InterruptedException e) {
-			// TODO - throwing e is not enough!
-			e.printStackTrace();
+			logger.warning("Message could not be sent. Exception: " + e.getMessage());
 		}
 		
 	}
@@ -347,20 +346,23 @@ public class XmppConnectionDescriptor {
 		try {
 			chat.send(message);
 		} catch (NotConnectedException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warning("Message could not be sent. Exception: " + e.getMessage());
 		}
 	}
 	
 	
-	// TODO javadoc
+	/**
+	 * Retrieves a {@link NetworkMessage NetworkMessage} from the queue of incoming messages based on the correlation 
+	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives.
+	 * 
+	 * @param requestId Correlation request ID. 
+	 * @return {@link NetworkMessage NetworkMessage} from the queue.
+	 */
 	public NetworkMessage retrieveMessage(int requestId){
-		
 		
 		NetworkMessage message = null;
 		
 		do {
-
 			NetworkMessage helperMessage;
 			try {
 				// take the first element or wait for one

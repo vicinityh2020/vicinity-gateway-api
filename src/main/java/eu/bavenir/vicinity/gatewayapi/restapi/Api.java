@@ -23,6 +23,8 @@ import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogout;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOid;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAid;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAidTasksTid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidEventsEid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidEventsEidAcknowledge;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidSubscriptions;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.Sparql;
@@ -183,6 +185,10 @@ public class Api extends Application {
 		router.attach("/objects/{oid}/properties/{pid}", ObjectsOidPropertiesPid.class);
 		router.attach("/objects/{oid}/actions/{aid}", ObjectsOidActionsAid.class);
 		router.attach("/objects/{oid}/actions/{aid}/tasks/{tid}", ObjectsOidActionsAidTasksTid.class);
+		router.attach("/objects/{oid}/events/{eid}/acknowledge", ObjectsOidEventsEidAcknowledge.class);
+		
+		// exposing service
+		router.attach("/objects/{oid}/events/{eid}", ObjectsOidEventsEid.class);
 		
 		// query
 		router.attach("/sparql", Sparql.class);

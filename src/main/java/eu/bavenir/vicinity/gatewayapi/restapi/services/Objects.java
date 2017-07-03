@@ -98,7 +98,6 @@ public class Objects extends ServerResource {
 		Collection<RosterEntry> rosterObjects = communicationNode.getRosterEntriesForUser(
 							getRequest().getChallengeResponse().getIdentifier());
 		
-		// TODO logs!!!
 		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
 		

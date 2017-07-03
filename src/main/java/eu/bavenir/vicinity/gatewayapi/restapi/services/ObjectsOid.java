@@ -154,7 +154,7 @@ public class ObjectsOid extends ServerResource{
 		JsonObject jsonRequest = jsonReader.readObject();
 		
 		if (jsonRequest.containsKey(ATTR_OID)){
-			//TODO do something
+			// do something
 		} else {
 			jsonReader.close();
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 

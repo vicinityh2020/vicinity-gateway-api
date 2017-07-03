@@ -86,14 +86,14 @@ public class Feeds extends ServerResource {
 	
 	// === PRIVATE METHODS ===
 	
-	// TODO
+	// TODO documentation
 	private String storeFeed(String jsonString){
 
 		return "Header: Location: http://gateway.vicinity.example.com/feeds/66348b54-1609-11e7-93ae-92361f002671\nBody: 66348b54-1609-11e7-93ae-92361f002671";
 	}
 	
 	
-	// TODO
+	// TODO documentation
 	private String getFeeds(){
 		JsonObject json = Json.createObjectBuilder()
 				.add("subscriptions", Json.createArrayBuilder()

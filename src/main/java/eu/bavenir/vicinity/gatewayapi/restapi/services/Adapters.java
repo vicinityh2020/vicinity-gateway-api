@@ -80,8 +80,6 @@ public class Adapters extends ServerResource {
 		try {
 			adapterJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid adapter description");
 		}

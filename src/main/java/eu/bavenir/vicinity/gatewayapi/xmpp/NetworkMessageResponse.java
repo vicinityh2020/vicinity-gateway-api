@@ -14,7 +14,10 @@ import javax.json.JsonObject;
 
 
 /**
- * Extended {@link NetworkMessage NetworkMessage} that represents a request. Use it like this:
+ * Extended {@link NetworkMessage NetworkMessage} that represents a request. Same as {@link NetworkMessageRequest request}
+ * but with HTTP response.
+ * 
+ * Use it like this:
  * 
  * In your Gateway API service:
  * 	1. Construct an instance of this class - use the constructor without parameter

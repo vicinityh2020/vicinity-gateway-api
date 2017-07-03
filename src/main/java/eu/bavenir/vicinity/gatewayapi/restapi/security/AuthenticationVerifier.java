@@ -17,19 +17,41 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 // https://restlet.com/open-source/documentation/javadocs/2.3/jse/api/org/restlet/security/Verifier.html#verify(org.restlet.Request,%20org.restlet.Response)
 // https://stackoverflow.com/questions/5199554/restful-authentication-resulting-poor-performance-on-high-load
 
-// TODO javadoc
+/**
+ * Verifier usable in Vicinity ecosystem. The credentials are verified two ways:
+ * 
+ *  1. The clients logs in for the first time:
+ *  	In such case, the credentials are verified by whether or not the 
+ *  	{@link eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor ConnectionDescriptor} can be created, i.e.
+ *  	whether it is possible to log into the XMPP network with provided credentials.
+ *  
+ *  2. The client is already logged and has a {@link eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor ConnectionDescriptor} created:
+ *  	ConnectionDescriptor, after successful login, contains the password that was used to connect to XMPP network 
+ *  	as one of its fields. Credentials are then compared when this verifier is called.
+ *  
+ * @author sulfo
+ *
+ */
 public class AuthenticationVerifier implements Verifier {
 
 	private CommunicationNode communicationNode;
 	private Logger logger;
 	
 	
+	/**
+	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
+	 * the descriptor will not be able to connect (in the best case scenario, the other being a storm of null pointer 
+	 * exceptions).
+	 */
 	public AuthenticationVerifier(CommunicationNode communicationNode, Logger logger){
 		this.communicationNode = communicationNode;
 		this.logger = logger;
 	}
 	
 	
+	/**
+	 * Overriden method from super class.  
+	 */
 	@Override
 	public int verify(Request request, Response response) {
 		
@@ -63,79 +85,4 @@ public class AuthenticationVerifier implements Verifier {
 		logger.fine("Valid credentials received from a client with IP " + request.getClientInfo().getAddress() + ".");
 		return Verifier.RESULT_VALID;
 	}
-
-	
-	
-	/*
-	 * 	@Override
-	public int verify(Request request, Response response) {
-		
-		ChallengeResponse cr = request.getChallengeResponse();
-		
-		
-		String token = cr.getRawValue();
-		
-		//checkToken(token);
-		
-		return 0;
-		
-	}
-	 */
-	
-	//HMAC
-	//private Algorithm algorithmHS;
-
-	// TODO - not a good way doing it in ctor. something like 'if it exist, use it, if not, create it and throw exc if
-	// not in a mood'...
-	
-	/*
-	public RestletJwtVerifier(){
-		 try {
-			algorithmHS = Algorithm.HMAC256("secret");
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
-	
-	//RSA
-	//RSAPublicKey publicKey = //Get the key instance
-	//RSAPrivateKey privateKey = //Get the key instance
-	//Algorithm algorithmRS = Algorithm.RSA256(publicKey, privateKey);
-	
-	
-	
-	
-	
-	
-	
-	/* 
-	 * (non-Javadoc)
-	 * @see org.restlet.security.Verifier#verify(org.restlet.Request, org.restlet.Response)
-	 * 
-	 * 
-	 * toto bolo v objectslogin
-	 * 
-	 * 	@Get
-	public String represent() {
-
-		String testBefore = (String) this.getContext().getAttributes().get("TEST_STRING");
-		
-		String testAfter = testBefore + " and again";
-		
-		this.getContext().getAttributes().put("TEST_STRING", testAfter);
-		
-		return testBefore;
-	}
-	 * 
-	 * 
-	 */
-	
-	
-	
-
-	
 }

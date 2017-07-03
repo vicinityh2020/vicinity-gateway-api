@@ -1,22 +1,14 @@
 package eu.bavenir.vicinity.gatewayapi.xmpp;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
-import org.restlet.engine.Engine;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
@@ -31,40 +23,14 @@ import org.restlet.resource.ResourceException;
 
 
 /**
- * Class that processes a request received in JSON message. The reasoning behind this is, that in
- * order to invoke the required action on the Agent, a REST service on its side has to be called. By receiving the
- * pieces of the URL in the incoming JSON, the URL can be assembled without a need to hard code it. Consider the 
- * need to assemble following URL:
- * 
- * https://192.168.1.1:9997/agent/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b/properties/PowerConsumption
- * 
- * or
- * 
- * [1]://[2]:[3]/[4]/[5]/[6]/[7]/[8]
- * 
- * [1] - Protocol - from configuration.
- * [2] - IP - from configuration.
- * [3] - Port - from configuration.
- * [4] - API String - hard coded.
- * [5] - Key 1 - from JSON.
- * [6] - Value 1 - from JSON.
- * [7] - Key 2 - from JSON.
- * [8] - Value 2 - from JSON.
- * 
- * This URL was assembled from following JSON:
- * 
- * {
- * 		"requestOperation": "get",
- * 		"objects": "0729a580-2240-11e6-9eb5-0002a5d5c51b",
- * 		"properties": "PowerConsumption"
- * }
- * 
+ * Class that processes a request received in {@link NetworkMessageRequest NetworkMessageRequest}. The reasoning behind 
+ * this is, that in order to invoke the required action on the Agent, a REST service on its side has to be called. By 
+ * receiving the pieces of the URL and its parameters in the incoming message, the URL can be assembled without a need 
+ * to hard code it. 
  * 
  * @author sulfo
  *
  */
-
-// TODO
 public class AgentCommunicator {
 	
 	/* === CONSTANTS === */
@@ -73,12 +39,6 @@ public class AgentCommunicator {
 	 * Name of the configuration parameter for whether Agent utilizes HTTPS or HTTP.
 	 */
 	private static final String CONFIG_PARAM_APIAGENTUSEHTTPS = "api.agentUseHttps";
-	
-	/**
-	 * Name of the configuration parameter for whether the Gateway should ignore self-signed certificate when
-	 * when communicating over HTTPS with the Agent.
-	 */
-	private static final String CONFIG_PARAM_APIAGENTDISABLESSLVALIDATION = "api.agentDisableSSLValidation";
 	
 	/**
 	 * Name of the configuration parameter for Agent IP.
@@ -95,12 +55,6 @@ public class AgentCommunicator {
 	 * This value is taken into account when no suitable value is found in the configuration file.
 	 */
 	private static final boolean CONFIG_DEF_APIAGENTUSEHTTPS = false;
-	
-	/**
-	 * Default value of {@link #CONFIG_PARAM_APIAGENTDISABLESSLVALIDATION CONFIG_PARAM_APIAGENTDISABLESSLVALIDATION} 
-	 * configuration parameter. This value is taken into account when no suitable value is found in the configuration file.
-	 */
-	private static final boolean CONFIG_DEF_APIAGENTDISABLESSLVALIDATION = false;
 	
 	/**
 	 * Default value of api.agentPort configuration parameter. This value is taken into account when no 
@@ -164,10 +118,10 @@ public class AgentCommunicator {
 	
 	
 	/**
-	 * Processes the request that arrived from the XMPP network. After the URL of the required Agent service is 
-	 * assembled, the URL is called with the necessary HTTP method and the result is returned. 
+	 * Processes the {@link NetworkMessageRequest request} that arrived from the XMPP network. After the URL of the 
+	 * required Agent service is assembled, the URL is called with the necessary HTTP method and the result is returned. 
 	 * 
-	 * @param request Request that was assembled from the incoming JSON. 
+	 * @param request {@link NetworkMessageRequest Message} received over XMPP network. 
 	 * @return {@link NetworkMessageResponse Response} from the Agent. 
 	 */
 	public NetworkMessageResponse processRequestMessage(NetworkMessageRequest request){
@@ -194,20 +148,6 @@ public class AgentCommunicator {
 				String requestBodyPost = request.getRequestBody();
 				
 				if (requestBodyPost != null){
-					/*
-					// create jsonobject from the string
-					JsonReader jsonReaderPost = Json.createReader(new StringReader(requestBodyPost));
-					JsonObject jsonObjectPost = jsonReaderPost.readObject();
-					jsonReaderPost.close();
-					
-					if (jsonObjectPost != null){
-						// make the actual post
-						resource.post(jsonObjectPost, MediaType.APPLICATION_JSON).write(writer);
-					} else {
-						logger.warning("Invalid JSON string in request nr. " + request.getRequestId() + "."
-								+ "Verbatim: " + request.getRequestBody());
-					}
-					*/
 					resource.post(requestBodyPost, MediaType.APPLICATION_JSON).write(writer);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
@@ -221,21 +161,6 @@ public class AgentCommunicator {
 				String requestBodyPut = request.getRequestBody();
 				
 				if (requestBodyPut != null){
-					// create jsonobject from the string
-					/*
-					JsonReader jsonReaderPut = Json.createReader(new StringReader(requestBodyPut));
-					JsonObject jsonObjectPut = jsonReaderPut.readObject();
-					jsonReaderPut.close();
-					
-					
-					if (jsonObjectPut != null){
-						// make the actual post
-						resource.put(jsonObjectPut, MediaType.APPLICATION_JSON).write(writer);
-					} else {
-						logger.warning("Invalid JSON string in request nr. " + request.getRequestId() + "."
-								+ "Verbatim: " + request.getRequestBody());
-					}
-					*/
 					resource.put(requestBodyPut, MediaType.APPLICATION_JSON).write(writer);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
@@ -245,7 +170,8 @@ public class AgentCommunicator {
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_DEL:
 				
-				// TODO finish
+				resource.delete().write(writer);
+				
 				break;
 				
 			}
@@ -260,7 +186,6 @@ public class AgentCommunicator {
 		
 		// TODO return value of the response code somehow
 		response.setResponseCode(200);
-		// response.setResponseBody("{\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\"}");
 		
 		return response;
 	}
@@ -270,11 +195,10 @@ public class AgentCommunicator {
 	/* === PRIVATE METHODS === */
 	
 	/**
-	 * This method takes incoming JSON and parses it into URL of an Agent service. See the main Javadoc section for
-	 * this class for more details.
+	 * This method takes incoming {@link NetworkMessageRequest request} and parses it into URL of an Agent service. 
+	 * See the main Javadoc section for the {@link NetworkMessageRequest request} class for more details.
 	 * 
 	 * @param networkMessageRequest Message with action request.
-	 *  
 	 * @return URL on the Agent side that is to be called.
 	 * 
 	 */

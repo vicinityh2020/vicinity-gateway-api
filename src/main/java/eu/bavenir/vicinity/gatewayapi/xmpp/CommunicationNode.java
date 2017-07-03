@@ -65,38 +65,20 @@ import org.jivesoftware.smack.roster.RosterEntry;
  *  a) requests  -	An Object is requesting an access to a service of another Object (or Agent). This request needs to 
  *  				be propagated across XMPP network and at the end of the communication pipe, the message has to be
  *  				translated into valid HTTP request to an Agent service. Translating the message is as well as 
- *  				their detailed structure is described in {@link AgentCommunicator AgentCommunicator}.
+ *  				their detailed structure is described in {@link AgentCommunicator AgentCommunicator}. See
+ *  				{@link NetworkMessageRequest NetworkMessageRequest}.
  *  
- *  b) responses -	The value returned by Object / Agent services in JSON, that is propagated back to the caller.
+ *  b) responses -	The value returned by Object / Agent services in JSON, that is propagated back to the caller. See
+ *  				{@link NetworkMessageResponse NetworkMessageResponse}.
  *  
  *    
  * @author sulfo
  *
  */
-// TODO update documentation
 public class CommunicationNode {
 
 	
 	/* === CONSTANTS === */
-	
-	/**
-	 * Insert this attribute at the beginning of a message JSON that needs to be processed as a request by receiving
-	 * connection {@link XmppConnectionDescriptor descriptor}. The value of the attribute should be the HTTP method
-	 * that needs to be performed. To ensure compatibility, use following constants:
-	 * 
-
-	 * 
-	 * 
-	 * @see XmppConnectionDescriptor#processMessage
-	 */
-	//public static final String ATTR_REQUESTOPERATION = "requestOperation";
-	
-
-	
-	/**
-	 * Attribute with a request ID.
-	 */
-	//public static final String ATTR_REQ_ID = "requestId";
 	
 	/**
 	 * Name of the configuration parameter for XMPP .
@@ -108,8 +90,7 @@ public class CommunicationNode {
 	 * value is found in the configuration file. 
 	 */
 	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
-	
-	
+		
 
 	
 	/* === FIELDS === */
@@ -343,7 +324,20 @@ public class CommunicationNode {
 	}
 	
 	
-	// TODO Finish Javadoc when it is clear what the method is actually doing.
+	/**
+	 * Sends a message (string) from source user name, to destination user name. In case there are some doubts about
+	 * security in sending the message this way (especially by having the option to define from which user name the 
+	 * message originates), they are not much justified. The safety is inherent in the fact, that the source user name 
+	 * must have established connection on this instance of CommunicationNode first (i.e. the credentials must be known,
+	 * so the connection descriptor can be created). Moreover the device is authenticated with every request.  
+	 * 
+	 * It is thus impossible to act as a device from some other gateway/owner.
+	 *  
+	 * @param sourceUsername User name of the originating device (without the XMPP domain).
+	 * @param destinationUsername User name of the destination device (without the XMPP domain).
+	 * @param message Message string.
+	 * @return True on success.
+	 */
 	public boolean sendMessage(String sourceUsername, String destinationUsername, String message){
 		
 		// check the validity of source user
@@ -371,7 +365,15 @@ public class CommunicationNode {
 	}
 	
 	
-	// TODO javadoc
+	/**
+	 * Retrieves a single {@link NetworkMessage NetworkMessage} from the queue of incoming messages. It is important
+	 * to provide a user name of the recipient and correlation request ID. This method blocks the thread when there are
+	 * no messages in the queue and waits for the arrival.
+	 * 
+	 * @param forUsername Recipient user name.
+	 * @param requestId Correlation request ID.
+	 * @return {@link NetworkMessage NetworkMessage} received over XMPP message.
+	 */
 	public NetworkMessage retrieveSingleMessage(String forUsername, int requestId){
 		// check the validity of source user
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(forUsername);
@@ -452,7 +454,7 @@ public class CommunicationNode {
 	 * 
 	 *    IMPORTANT: It is imperative to use only this method to interact with the descriptor pool when adding
 	 *    or modifying functionality of this class and avoid the original HashMap's
-	 *    {@link java.util.HashMap#get(Object) get()} method. 
+	 *    {@link java.util.HashMap#clear() clear()} method. 
 	 */
 	private void descriptorPoolClear(){
 		synchronized (descriptorPool){

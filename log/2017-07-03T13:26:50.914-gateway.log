@@ -1,0 +1,394 @@
+Jul 03, 2017 1:26:50 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/2017-07-03T13:26:50.914-gateway.log
+Jul 03, 2017 1:26:50 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Jul 03, 2017 1:26:50 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Jul 03, 2017 1:26:51 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Jul 03, 2017 1:26:51 PM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Jul 03, 2017 1:26:51 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Jul 03, 2017 1:26:52 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'plugwise__000D6F0005B10494'.
+Jul 03, 2017 1:26:52 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:26:52 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'plugwise__000D6F0005B10494@vicinity.eu'
+Jul 03, 2017 1:26:52 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'plugwise__000D6F0005B10494'.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'plugwise__000D6F0005B10494@vicinity.eu'
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'plugwise__000D6F0005B10494' was established.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'plugwise__000D6F0005B10494' was added into connection pool.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'plugwise__000D6F0005B10494' disconnected.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'plugwise__000D6F0005B10494' destroyed.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'plugwise__000D6F0005B10494' was established.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'plugwise__000D6F0005B10494' was added into connection pool.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'test_vcnt0' disconnected.
+Jul 03, 2017 1:26:53 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'test_vcnt0' destroyed.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'hvacs__HVAC_LG_02 created'.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'hvacs__HVAC_LG_02 created@vicinity.eu'
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: SASLError using PLAIN: not-authorized
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'hvacs__HVAC_LG_02 created' was not established.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:02 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'hvacs__HVAC_LG_02 created'.
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'hvacs__HVAC_LG_02 created@vicinity.eu'
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: SASLError using PLAIN: not-authorized
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'hvacs__HVAC_LG_02 created' was not established.
+Jul 03, 2017 1:27:22 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'plugwise__000D6F0005B10494' disconnected.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'plugwise__000D6F0005B10494' destroyed.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'test_vcnt0' disconnected.
+Jul 03, 2017 1:27:23 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'test_vcnt0' destroyed.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Jul 03, 2017 1:27:26 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'hvacs__HVAC_LG_02'.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'hvacs__HVAC_LG_02@vicinity.eu'
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'hvacs__HVAC_LG_02' was established.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'hvacs__HVAC_LG_02' was added into connection pool.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'plugwise__000D6F0005B10494'.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'plugwise__000D6F0005B10494@vicinity.eu'
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'plugwise__000D6F0005B10494' was established.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'plugwise__000D6F0005B10494' was added into connection pool.
+Jul 03, 2017 1:27:27 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt4'.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt4@vicinity.eu'
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt4' was established.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt4' was added into connection pool.
+Jul 03, 2017 1:29:12 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:30:03 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:30:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":695283130,"requestOperation":"get","requestBody":null,"attributes":{"objects":"plugwise__000D6F0005B10494","properties":"consumption"},"parameters":{}}
+Jul 03, 2017 1:30:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:30:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/plugwise__000D6F0005B10494/properties/consumption
+Jul 03, 2017 1:30:05 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from plugwise__000d6f0005b10494@vicinity.eu: {"messageType":2,"requestId":695283130,"responseCode":200,"responseBody":"{\"data\":{\"value\":38.3846,\"timestamp\":\"2017-07-03T11:29:46.123Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:30:05 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:30:49 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:30:49 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":658387445,"requestOperation":"get","requestBody":null,"attributes":{"objects":"plugwise__000D6F0005B10494","actions":"status"},"parameters":{}}
+Jul 03, 2017 1:30:49 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:30:49 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/plugwise__000D6F0005B10494/actions/status
+Jul 03, 2017 1:30:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from plugwise__000d6f0005b10494@vicinity.eu: {"messageType":2,"requestId":658387445,"responseCode":200,"responseBody":"{\"data\":{\"value\":1,\"timestamp\":\"2017-07-03T11:29:46.123Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:30:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:31:33 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:31:33 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":1829619684,"requestOperation":"get","requestBody":null,"attributes":{"objects":"plugwise__000D6F0005B10494","actions":"status"},"parameters":{}}
+Jul 03, 2017 1:31:33 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:31:33 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/plugwise__000D6F0005B10494/actions/status
+Jul 03, 2017 1:31:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from plugwise__000d6f0005b10494@vicinity.eu: {"messageType":2,"requestId":1829619684,"responseCode":200,"responseBody":"{\"data\":{\"value\":1,\"timestamp\":\"2017-07-03T11:30:46.102Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:31:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:32:50 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:32:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":359525917,"requestOperation":"get","requestBody":null,"attributes":{"objects":"hvacs__HVAC_LG_02","properties":"setTemp"},"parameters":{}}
+Jul 03, 2017 1:32:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:32:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/setTemp
+Jul 03, 2017 1:32:51 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":359525917,"responseCode":200,"responseBody":"{\"data\":{\"value\":25,\"timestamp\":\"2017-07-03T08:51:54.988Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:32:51 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:33:13 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:33:13 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":221517839,"requestOperation":"get","requestBody":null,"attributes":{"objects":"hvacs__HVAC_LG_02","properties":"tempAct"},"parameters":{}}
+Jul 03, 2017 1:33:13 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:33:13 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/tempAct
+Jul 03, 2017 1:33:15 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":221517839,"responseCode":200,"responseBody":"{\"data\":{\"value\":26.5,\"timestamp\":\"2017-07-03T08:51:54.988Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:33:15 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:33:43 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:33:43 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":554669131,"requestOperation":"get","requestBody":null,"attributes":{"objects":"hvacs__HVAC_LG_02","properties":"userControl"},"parameters":{}}
+Jul 03, 2017 1:33:43 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:33:43 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/userControl
+Jul 03, 2017 1:33:44 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":554669131,"responseCode":200,"responseBody":"{\"data\":{\"value\":1,\"timestamp\":\"2017-07-03T08:51:54.988Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:33:44 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:39:26 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:39:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":811331985,"requestOperation":"put","requestBody":"{\n  \"value\": 42\n}","attributes":{"objects":"hvacs__HVAC_LG_02","properties":"setTemp"},"parameters":{}}
+Jul 03, 2017 1:39:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:39:26 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/setTemp
+Jul 03, 2017 1:39:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":811331985,"responseCode":200,"responseBody":"{\"data\":{\"message\":\"HVAC_LG_02|UCtrlTempSetPoint|42\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:39:27 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:39:34 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:39:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":976881371,"requestOperation":"get","requestBody":null,"attributes":{"objects":"hvacs__HVAC_LG_02","properties":"userControl"},"parameters":{}}
+Jul 03, 2017 1:39:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:39:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/userControl
+Jul 03, 2017 1:39:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":976881371,"responseCode":200,"responseBody":"{\"data\":{\"value\":1,\"timestamp\":\"2017-07-03T08:51:54.988Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:39:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:39:50 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:39:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":1170081322,"requestOperation":"get","requestBody":null,"attributes":{"objects":"hvacs__HVAC_LG_02","properties":"setTemp"},"parameters":{}}
+Jul 03, 2017 1:39:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:39:50 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/setTemp
+Jul 03, 2017 1:39:51 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":1170081322,"responseCode":200,"responseBody":"{\"data\":{\"value\":25,\"timestamp\":\"2017-07-03T08:51:54.988Z\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:39:51 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:40:54 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Jul 03, 2017 1:40:54 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from test_vcnt4@vicinity.eu: {"messageType":1,"requestId":1078374908,"requestOperation":"put","requestBody":"{\n  \"test\": \"hallo\"\n}","attributes":{"objects":"hvacs__HVAC_LG_02","properties":"setTemp"},"parameters":{}}
+Jul 03, 2017 1:40:54 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: The message is a request. Processing...
+Jul 03, 2017 1:40:54 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator assembleAgentUrl
+FINEST: Assembled URL: http://192.168.0.110:9997/agent/objects/hvacs__HVAC_LG_02/properties/setTemp
+Jul 03, 2017 1:40:55 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: New message from hvacs__hvac_lg_02@vicinity.eu: {"messageType":2,"requestId":1078374908,"responseCode":200,"responseBody":"{\"data\":{\"message\":\"HVAC_LG_02|UCtrlTempSetPoint|\"},\"status\":\"success\"}"}
+Jul 03, 2017 1:40:55 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor processMessage
+FINEST: This message is a response. Adding to incoming queue...
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'hvacs__HVAC_LG_02' disconnected.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'hvacs__HVAC_LG_02' destroyed.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'plugwise__000D6F0005B10494' disconnected.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'plugwise__000D6F0005B10494' destroyed.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'test_vcnt0' disconnected.
+Jul 03, 2017 1:44:04 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'test_vcnt0' destroyed.
+Jul 03, 2017 1:44:09 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Jul 03, 2017 1:44:09 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:44:09 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Jul 03, 2017 1:44:09 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'hvacs__HVAC_LG_02'.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'hvacs__HVAC_LG_02@vicinity.eu'
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'hvacs__HVAC_LG_02' was established.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'hvacs__HVAC_LG_02' was added into connection pool.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'plugwise__000D6F0005B10494'.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'plugwise__000D6F0005B10494@vicinity.eu'
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+CONFIG: Listening for changes in roster is enabled.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'plugwise__000D6F0005B10494' was established.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'plugwise__000D6F0005B10494' was added into connection pool.
+Jul 03, 2017 1:44:10 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'hvacs__HVAC_LG_02' disconnected.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'hvacs__HVAC_LG_02' destroyed.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'plugwise__000D6F0005B10494' disconnected.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'plugwise__000D6F0005B10494' destroyed.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 192.168.0.110.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'test_vcnt0' disconnected.
+Jul 03, 2017 3:40:00 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'test_vcnt0' destroyed.

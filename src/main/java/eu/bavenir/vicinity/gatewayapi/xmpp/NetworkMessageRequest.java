@@ -21,16 +21,22 @@ import javax.json.JsonValue;
  */
 
 /**
- * Extended {@link NetworkMessage NetworkMessage} that represents a request. Use it like this:
+ * Extended {@link NetworkMessage NetworkMessage} that represents a request. In order to transport a request across XMPP
+ * network, it has to be disassembled at the place of origin (HTTP method, URL attributes, parameters, etc. have to 
+ * be parsed), sent over the XMPP network (in this case as JSON string) and then reassembled at the destination into
+ * valid HTTP request.
+ * 
+ * Use it like this:
  * 
  * In your Gateway API Service implementation:
- *  1. Construct an instance of this class - use the constructor without parameter
+ *  1. Construct an instance of this class - use the constructor without parameter.
  *  2. Call {@link #setRequestOperation(String) setRequestOperation} and set GET, POST, etc.
- *  3. Call {@link #addAttribute(String, String) addAttribute} as many times as needed
- *  4. Do the same as 3 for parameters
+ *  3. Call {@link #addAttribute(String, String) addAttribute} as many times as needed.
+ *  4. Do the same as for parameters.
  *  5. Build the message by {@link #buildMessageJson buildMessageJson}. By calling its toString you obtain a string to 
  *  	be sent through {@link CommunicationNode CommunicationNode}.
- *  6. Expect {@link NetworkMessageResponse NetworkMessageResponse}.
+ *  6. Expect {@link NetworkMessageResponse NetworkMessageResponse} by using 
+ *  {@link CommunicationNode#retrieveSingleMessage(String, int) retireveSingleMessage} method.
  *  
  * @author sulfo
  *
@@ -342,16 +348,6 @@ public class NetworkMessageRequest extends NetworkMessage {
 		
 		jsonRepresentation = mainBuilder.build();
 		
-		/*
-		jsonRepresentation = jsonBuilderFactory.createObjectBuilder()
-				.add(ATTR_MESSAGETYPE, messageType)
-				.add(ATTR_REQUESTID, requestId)
-				.add(ATTR_REQUESTOPERATION, requestOperation)
-				.add(ATTR_REQUESTBODY, requestBody)
-				.add(ATTR_ATTRIBUTES, attributesBuilder)
-				.add(ATTR_PARAMETERS, parametersBuilder)
-				.build();
-		*/		
 	}
 	
 	
@@ -366,12 +362,6 @@ public class NetworkMessageRequest extends NetworkMessage {
 		// figure out the message type
 		messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
 
-		/*
-		if (messageType != MESSAGE_TYPE){
-			// just a formality
-			return false;
-		}*/
-		
 		// the correlation ID of the request
 		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
 		
