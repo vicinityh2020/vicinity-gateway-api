@@ -14,6 +14,7 @@ eu/bavenir/vicinity/gatewayapi/restapi/services/Subscriptions.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsLogout.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidSubscriptions.class
 eu/bavenir/vicinity/gatewayapi/App.class
+eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidEventsEid.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/Sparql.class
 eu/bavenir/vicinity/gatewayapi/xmpp/NetworkMessageResponse.class
 eu/bavenir/vicinity/gatewayapi/restapi/security/AuthenticationVerifier.class
@@ -22,6 +23,7 @@ eu/bavenir/vicinity/gatewayapi/restapi/services/Objects.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidPropertiesPid.class
 eu/bavenir/vicinity/gatewayapi/xmpp/AgentCommunicator.class
 eu/bavenir/vicinity/gatewayapi/restapi/RestletThread.class
+eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidEventsEidAcknowledge.class
 eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsLogin.class
 eu/bavenir/vicinity/gatewayapi/restapi/services/AdaptersAdidObjects.class

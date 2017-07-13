@@ -3,6 +3,7 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -19,6 +20,8 @@ import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 
 
 /*
@@ -59,7 +62,7 @@ public class AdaptersAdidObjects extends ServerResource {
 	 * Name of the ID attribute.
 	 */
 	private static final String ATTR_ID = "id";
-	
+
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
@@ -96,13 +99,19 @@ public class AdaptersAdidObjects extends ServerResource {
 	public String accept(Representation entity) {
 		
 		String attrAdid = getAttribute(ATTR_ADID);
+		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrAdid == null){
+			logger.info("ADID: " + attrAdid + " Adapter does not exist under given identifier.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Adapter does not exist under given identifier.");
 		}
 		
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.info("ADID: " + attrAdid + " Invalid object description.");
+			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid object description");
 		}
@@ -112,13 +121,12 @@ public class AdaptersAdidObjects extends ServerResource {
 		try {
 			objectsJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid object description");
 		}
 		
-		return storeObjects(objectsJsonString);
+		return storeObjects(callerOid, attrAdid, objectsJsonString, logger);
 	}
 	
 	
@@ -182,7 +190,7 @@ public class AdaptersAdidObjects extends ServerResource {
 	
 	
 	// TODO documentation
-	private String storeObjects(String jsonString){
+	private String storeObjects(String sourceOid, String attrAdid, String jsonString, Logger logger){
 		
 		JsonArrayBuilder jsonResponseArrayBuilder = Json.createArrayBuilder();
 		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));

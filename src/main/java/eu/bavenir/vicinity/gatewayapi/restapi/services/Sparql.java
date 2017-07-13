@@ -1,5 +1,6 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
+
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;

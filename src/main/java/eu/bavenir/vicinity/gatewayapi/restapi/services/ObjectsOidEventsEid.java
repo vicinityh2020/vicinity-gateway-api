@@ -1,6 +1,7 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -76,6 +77,8 @@ public class ObjectsOidEventsEid extends ServerResource {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null || attrEid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
@@ -91,8 +94,8 @@ public class ObjectsOidEventsEid extends ServerResource {
 		try {
 			actionJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			
+			logger.warning(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid event description");
 		}
@@ -108,8 +111,8 @@ public class ObjectsOidEventsEid extends ServerResource {
 	private String storeEvent(String sourceOid, String attrOid, String attrEid, String jsonString){
 
 		CommunicationNode communicationNode 
-			= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
-
+							= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
+		
 		NetworkMessageRequest request = new NetworkMessageRequest();
 		
 		// we will need this newly generated ID, so we keep it
@@ -131,7 +134,10 @@ public class ObjectsOidEventsEid extends ServerResource {
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve return code
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 2) != 1){
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 	}

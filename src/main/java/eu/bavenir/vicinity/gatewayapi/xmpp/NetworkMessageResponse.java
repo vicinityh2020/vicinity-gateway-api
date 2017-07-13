@@ -3,6 +3,7 @@ package eu.bavenir.vicinity.gatewayapi.xmpp;
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 /*
  * STRUCTURE:
@@ -40,9 +41,14 @@ public class NetworkMessageResponse extends NetworkMessage {
 	public static final int MESSAGE_TYPE = 0x02;
 	
 	/**
-	 * Name of the response code attribute.
+	 * Name of the response status code attribute.
 	 */
 	public static final String ATTR_RESPONSECODE = "responseCode";
+	
+	/**
+	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
+	 */
+	public static final String ATTR_RESPONSECODEREASON = "responseCodeReason";
 	
 	/**
 	 * Name of the response body attribute.
@@ -56,6 +62,11 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * HTTP response code from the remote object.
 	 */
 	private int responseCode;
+	
+	/**
+	 * HTTP response code reason, in other words the status description.
+	 */
+	private String responseCodeReason;
 	
 	/**
 	 * If this NetworkMessage was constructed from incoming XMPP message, here is the HTTP response body from the remote
@@ -110,7 +121,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 	
 
 	/**
-	 * If this NetworkMessage instance is a response, returns the HTTP response status code from the remote object.
+	 * Returns the HTTP response status code from the remote object.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
 	 * @return HTTP response status code from the remote object.
@@ -121,13 +132,35 @@ public class NetworkMessageResponse extends NetworkMessage {
 
 
 	/**
-	 * If this NetworkMessage instance is a response, sets the HTTP response status code from the remote object.
+	 * Sets the HTTP response status code from the remote object.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
 	 * @param responseCode Response status code of the remote object.
 	 */
 	public void setResponseCode(int responseCode) {
 		this.responseCode = responseCode;
+	}
+	
+	
+	/**
+	 * Returns the HTTP response status code reason from the remote object.
+	 * 
+	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
+	 * @return HTTP response status code reason phrase from the remote object.
+	 */
+	public String getResponseCodeReason(){
+		return responseCodeReason;
+	}
+	
+	
+	/**
+	 * Sets the HTTP response status code reason from the remote object.
+	 * 
+	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
+	 * @param responseCode Response status code reason phrase of the remote object.
+	 */
+	public void setResponseCodeReason(String responseCodeReason){
+		this.responseCodeReason = responseCodeReason;
 	}
 
 
@@ -186,13 +219,26 @@ public class NetworkMessageResponse extends NetworkMessage {
 		// response code
 		responseCode = json.getInt(ATTR_RESPONSECODE);
 		
-		// response body
 		String stringValue = new String();
+		
+		// response code reason phrase
+		if (!json.isNull(ATTR_RESPONSECODEREASON)){
+			stringValue = removeQuotes(json.getString(ATTR_RESPONSECODEREASON));
+		}
+				
+		// and the null value got transported more like string... we have to make a rule for it
+		if (stringValue == null || stringValue.equals("null")){
+			responseCodeReason = null;
+		} else {
+			responseCodeReason = stringValue;
+		}
+		
+		
+		// the same for response body
 		if (!json.isNull(ATTR_RESPONSEBODY)){
 			stringValue = removeQuotes(json.getString(ATTR_RESPONSEBODY));
 		}
 				
-		// and the null value got transported more like string... we have to make a rule for it
 		if (stringValue == null || stringValue.equals("null")){
 			responseBody = null;
 		} else {
@@ -212,12 +258,26 @@ public class NetworkMessageResponse extends NetworkMessage {
 		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
 		
 		// build the thing
-		jsonRepresentation = jsonBuilderFactory.createObjectBuilder()
-				.add(ATTR_MESSAGETYPE, messageType)
-				.add(ATTR_REQUESTID, requestId)
-				.add(ATTR_RESPONSECODE, responseCode)
-				.add(ATTR_RESPONSEBODY, responseBody)
-				.build();
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
+		
+		mainBuilder.add(ATTR_MESSAGETYPE, messageType);
+		mainBuilder.add(ATTR_REQUESTID, requestId);
+		mainBuilder.add(ATTR_RESPONSECODE, responseCode);
+		
+		if (responseCodeReason == null){
+			mainBuilder.addNull(ATTR_RESPONSECODEREASON);
+		} else {
+			mainBuilder.add(ATTR_RESPONSECODEREASON, responseCodeReason);
+		}
+		
+		if (responseBody == null){
+			mainBuilder.addNull(ATTR_RESPONSEBODY);
+		} else {
+			mainBuilder.add(ATTR_RESPONSEBODY, responseBody);
+		}
+				
+		// build the thing
+		jsonRepresentation = mainBuilder.build(); 
 	}
 
 }

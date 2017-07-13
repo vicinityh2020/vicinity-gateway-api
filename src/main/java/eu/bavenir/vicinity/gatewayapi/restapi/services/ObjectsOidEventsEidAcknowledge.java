@@ -60,6 +60,7 @@ public class ObjectsOidEventsEidAcknowledge extends ServerResource {
 	private static final String ATTR_EVENTS = "events";
 	
 	
+
 	// === OVERRIDEN HTTP METHODS ===
 	/**
 	 * Acknowledge IoT object event from client.
@@ -128,7 +129,10 @@ public class ObjectsOidEventsEidAcknowledge extends ServerResource {
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve return code
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 2) != 1){
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 	}

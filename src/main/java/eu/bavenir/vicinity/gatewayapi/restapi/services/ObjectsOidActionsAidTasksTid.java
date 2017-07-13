@@ -1,5 +1,8 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
+
+import java.util.logging.Logger;
+
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -67,8 +70,6 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	private static final String ATTR_TID = "tid";
 	
 
-	
-	
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**
@@ -83,13 +84,16 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		String attrTid = getAttribute(ATTR_TID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
-		if (attrOid != null && attrAid != null && attrTid != null){
-			return getObjectActionTask(callerOid, attrOid, attrAid, attrTid);
-		} else {			
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		if (attrOid == null || attrAid == null || attrTid == null){
+			logger.info("OID: " + attrOid + " AID: " + attrAid + " TID: " + attrTid 
+					+ " Given identifier does not exist.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
 		
+		return getObjectActionTask(callerOid, attrOid, attrAid, attrTid, logger);
 	}
 	
 	
@@ -101,20 +105,35 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
+		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
-		if (attrOid != null && attrAid != null && attrTid != null){
-			deleteObjectActionTask(attrOid, attrAid, attrTid);
-		} else {			
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		if (attrOid == null || attrAid == null || attrTid == null){
+			logger.info("OID: " + attrOid + " AID: " + attrAid + " TID: " + attrTid 
+					+ " Given identifier does not exist.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
+		
+		deleteObjectActionTask(callerOid, attrOid, attrAid, attrTid, logger);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	// TODO documentation
-	private String getObjectActionTask(String sourceOid, String attrOid, String attrAid, String attrTid){
+	/**
+	 * Retrieves the Task status.
+	 * 
+	 * @param sourceOid OID of the caller. 
+	 * @param attrOid OID of the destination.
+	 * @param attrAid AID of the Action.
+	 * @param attrTid TID of the Task.
+	 * @param logger Logger taken previously from Context.
+	 * 
+	 * @return Response from the remote station. 
+	 */
+	private String getObjectActionTask(String sourceOid, String attrOid, String attrAid, String attrTid, Logger logger){
 		
 		// send message to the right object
 		CommunicationNode communicationNode 
@@ -133,6 +152,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		
 		// all set
 		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 	
@@ -140,14 +160,21 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		NetworkMessageResponse response 
 						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve issues with response code
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 		
 	}
 	
+	
 	// TODO documentation
-	private void deleteObjectActionTask(String attrOid, String attrAid, String attrTid){
+	private void deleteObjectActionTask(
+						String SourceOid, String attrOid, String attrAid, String attrTid, Logger logger){
 		if (attrOid.equals("0729a580-2240-11e6-9eb5-0002a5d5c51b") && attrAid.equals("switch")
 				&& attrTid.equals("ca43b079-0818-4c39-b896-699c2d31f2db")){
 			//return "Object deleted.";

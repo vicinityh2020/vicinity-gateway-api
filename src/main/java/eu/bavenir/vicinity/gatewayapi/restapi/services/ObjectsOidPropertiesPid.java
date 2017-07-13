@@ -1,6 +1,7 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -59,7 +60,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 */
 	private static final String ATTR_PROPERTIES = "properties";
 	
-	
+
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**
@@ -73,12 +74,15 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
-		if (attrOid != null && attrPid != null){
-			return getObjectProperty(callerOid, attrOid, attrPid);
-		} else {			
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		if (attrOid == null || attrPid == null){
+			logger.info("OID: " + attrOid + " PID: " + attrPid + " Given identifier does not exist.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
+		
+		return getObjectProperty(callerOid, attrOid, attrPid, logger);
 		
 	}
 	
@@ -95,15 +99,22 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null || attrPid == null){
+			logger.info("OID: " + attrOid + " PID: " + attrPid 
+									+ " Object or property does not exist under given identifier.");
+			
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Object or property does not exist under given identifier.");
 		}
 		
-		
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.info("OID: " + attrOid + " PID: " + attrPid 
+					+ " Invalid property description.");
+			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description");
+					"Invalid property description.");
 		}
 		
 		// get the json
@@ -111,20 +122,28 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		try {
 			propertyJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid property description");
 		}
 		
-		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString);
+		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, logger);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	// TODO documentation
-	private String updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString){
+	/**
+	 * Updates the property defined as PID.
+	 * 
+	 * @param sourceOid Caller OID.
+	 * @param attrOid Called OID.
+	 * @param attrPid Property ID.
+	 * @param jsonString New representation of the property.
+	 * @param logger Logger taken previously from Context.
+	 * @return Response text.
+	 */
+	private String updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, Logger logger){
 		CommunicationNode communicationNode 
 								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
@@ -142,6 +161,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		
 		// all set
 		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
@@ -149,21 +169,33 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		NetworkMessageResponse response 
 						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve issues with response code
-		response.getResponseCode();
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 		
 	}
 	
 	
-	// TODO documentation
-	private String getObjectProperty(String sourceOid, String attrOid, String attrPid){
+	/**
+	 * Retrieves the property defined as PID.
+	 * 
+	 * @param sourceOid Caller OID.
+	 * @param attrOid Called OID.
+	 * @param attrPid Property ID.
+	 * @param logger Logger taken previously from Context.
+	 * @return Response text.
+	 */
+	private String getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
 		
 		// send message to the right object
 		CommunicationNode communicationNode 
 								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
-
+		
 		NetworkMessageRequest request = new NetworkMessageRequest();
 		
 		// we will need this newly generated ID, so we keep it
@@ -176,6 +208,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		
 		// all set
 		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 	
@@ -183,7 +216,12 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		NetworkMessageResponse response 
 						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve issues with response code
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 	}

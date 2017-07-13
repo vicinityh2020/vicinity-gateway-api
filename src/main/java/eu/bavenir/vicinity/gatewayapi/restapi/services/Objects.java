@@ -62,7 +62,7 @@ public class Objects extends ServerResource {
 	 */
 	private static final String QUERY_OWN = "own";
 	
-	
+
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**

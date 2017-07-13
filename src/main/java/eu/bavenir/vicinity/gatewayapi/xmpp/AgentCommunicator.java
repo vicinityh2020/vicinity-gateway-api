@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
+import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
@@ -131,15 +132,18 @@ public class AgentCommunicator {
 		// always set the correlation ID of the request
 		response.setRequestId(request.getRequestId());
 		
-		ClientResource resource = new ClientResource(assembleAgentUrl(request));
+		ClientResource clientResource = new ClientResource(assembleAgentUrl(request));
 		
 		Writer writer = new StringWriter();
+		Representation responseRepresentation = null;
+		
 		try {
+			
 			switch (request.getRequestOperation()){
 			
 			case NetworkMessageRequest.REQUEST_OPERATION_GET:
 				// parameters
-				resource.get().write(writer);
+				responseRepresentation = clientResource.get();
 				break;
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_POST:
@@ -148,7 +152,7 @@ public class AgentCommunicator {
 				String requestBodyPost = request.getRequestBody();
 				
 				if (requestBodyPost != null){
-					resource.post(requestBodyPost, MediaType.APPLICATION_JSON).write(writer);
+					responseRepresentation = clientResource.post(requestBodyPost, MediaType.APPLICATION_JSON);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
 				}
@@ -161,7 +165,7 @@ public class AgentCommunicator {
 				String requestBodyPut = request.getRequestBody();
 				
 				if (requestBodyPut != null){
-					resource.put(requestBodyPut, MediaType.APPLICATION_JSON).write(writer);
+					responseRepresentation = clientResource.put(requestBodyPut, MediaType.APPLICATION_JSON);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
 				}
@@ -170,23 +174,25 @@ public class AgentCommunicator {
 				
 			case NetworkMessageRequest.REQUEST_OPERATION_DEL:
 				
-				resource.delete().write(writer);
-				
+				responseRepresentation = clientResource.delete();
 				break;
 				
 			}
 			
-			// TODO return code
+			if (responseRepresentation != null){
+				responseRepresentation.write(writer);
+				response.setResponseBody(writer.toString());
+			}
+			
 		} catch (ResourceException | IOException e) {
-			// TODO Auto-generated catch block - we HAVE TO solve various return codes!
-			e.printStackTrace();
+			
+			logger.warning(e.getMessage());
+
+		} finally {
+			response.setResponseCode(clientResource.getStatus().getCode());
+			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
 		}
-		
-		response.setResponseBody(writer.toString());
-		
-		// TODO return value of the response code somehow
-		response.setResponseCode(200);
-		
+
 		return response;
 	}
 	

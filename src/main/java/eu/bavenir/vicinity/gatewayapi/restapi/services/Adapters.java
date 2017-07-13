@@ -44,7 +44,6 @@ public class Adapters extends ServerResource {
 	 */
 	private static final String ATTR_ADID = "adid";
 	
-	
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**

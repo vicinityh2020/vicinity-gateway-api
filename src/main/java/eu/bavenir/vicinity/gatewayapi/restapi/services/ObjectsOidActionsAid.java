@@ -1,6 +1,7 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -60,6 +61,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 */
 	private static final String ATTR_ACTIONS = "actions";
 	
+
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**
@@ -73,13 +75,15 @@ public class ObjectsOidActionsAid extends ServerResource {
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
-		if (attrOid != null && attrAid != null){
-			return getObjectAction(callerOid, attrOid, attrAid);
-		} else {			
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		if (attrOid == null || attrAid == null){
+			logger.info("OID: " + attrOid + " AID: " + attrAid + " Given identifier does not exist.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
 		
+		return getObjectAction(callerOid, attrOid, attrAid, logger);
 	}
 	
 	
@@ -88,7 +92,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * 
 	 * @param entity Representation of the incoming JSON.
 	 * @param object Model (from request).
-	 * @return A task to perform the action was submitted.
+	 * @return A task to perform an action was submitted.
 	 */
 	@Post("json")
 	public String accept(Representation entity) {
@@ -96,14 +100,18 @@ public class ObjectsOidActionsAid extends ServerResource {
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null || attrAid == null){
+			logger.info("OID: " + attrOid + " AID: " + attrAid + " Given identifier does not exist.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
 		}
 
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.info("OID: " + attrOid + " AID: " + attrAid + " Invalid action description.");
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid action description");
+					"Invalid action description.");
 		}
 		
 		// get the json
@@ -111,20 +119,28 @@ public class ObjectsOidActionsAid extends ServerResource {
 		try {
 			actionJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid action description");
 		}
 		
-		return storeAction(callerOid, attrOid, attrAid, actionJsonString);
+		return storeAction(callerOid, attrOid, attrAid, actionJsonString, logger);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	// TODO documentation
-	private String storeAction(String sourceOid, String attrOid, String attrAid, String jsonString){
+	/**
+	 * Stores new action.
+	 * 
+	 * @param sourceOid Caller OID.
+	 * @param attrOid Called OID.
+	 * @param attrAid Action ID.
+	 * @param jsonString New representation of the Action.
+	 * @param logger Logger taken previously from Context.
+	 * @return Response text.
+	 */
+	private String storeAction(String sourceOid, String attrOid, String attrAid, String jsonString, Logger logger){
 
 		CommunicationNode communicationNode 
 			= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
@@ -143,6 +159,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 		
 		// all set
 		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
@@ -150,14 +167,27 @@ public class ObjectsOidActionsAid extends ServerResource {
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
-		// TODO solve return code
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 	}
 	
 	
-	// TODO documentation
-	private String getObjectAction(String sourceId, String attrOid, String attrAid){
+	/**
+	 * Retrieves the Action defined as AID.
+	 * 
+	 * @param sourceOid Caller OID.
+	 * @param attrOid Called OID.
+	 * @param attrAid Action ID.
+	 * @param logger Logger taken previously from Context.
+	 * @return Response text.
+	 */
+	private String getObjectAction(String sourceOid, String attrOid, String attrAid, Logger logger){
 		
 		// send message to the right object
 		CommunicationNode communicationNode 
@@ -174,13 +204,21 @@ public class ObjectsOidActionsAid extends ServerResource {
 		request.addAttribute(ATTR_ACTIONS, attrAid);
 		
 		// all set
-		if (!communicationNode.sendMessage(sourceId, attrOid, request.buildMessageString())){
+		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
 		// this will wait for response
 		NetworkMessageResponse response 
-						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceId, requestId);
+						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
+		
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			return response.getResponseCode() + " " + response.getResponseCodeReason();
+		}
 		
 		return response.getResponseBody();
 		

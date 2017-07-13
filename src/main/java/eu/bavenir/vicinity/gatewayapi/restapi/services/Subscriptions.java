@@ -34,6 +34,7 @@ public class Subscriptions extends ServerResource {
 	 */
 	private static final String ATTR_SID = "sid";
 	
+	
 	// === OVERRIDEN HTTP METHODS ===
 	
 	/**
