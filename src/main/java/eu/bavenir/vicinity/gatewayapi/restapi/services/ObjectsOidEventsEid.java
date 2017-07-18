@@ -109,7 +109,14 @@ public class ObjectsOidEventsEid extends ServerResource {
 	
 	// TODO documentation
 	private String storeEvent(String sourceOid, String attrOid, String attrEid, String jsonString){
+		/*
+		 * generovanie eventu:
+agent: test_vcnt0
+oid: 235ad597-008a-41eb-9d94-3efe646e37f2
 
+prijatie eventu - ten isty agent: test_vcnt0
+		 */
+		
 		CommunicationNode communicationNode 
 							= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
@@ -126,7 +133,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		request.setRequestBody(jsonString);
 		
 		// all set
-		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
+		if (!communicationNode.sendMessage("test_vcnt0", "235ad597-008a-41eb-9d94-3efe646e37f2", request.buildMessageString())){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		

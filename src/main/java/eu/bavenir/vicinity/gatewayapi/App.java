@@ -27,6 +27,18 @@ import eu.bavenir.vicinity.gatewayapi.restapi.RestletThread;
 public class App {
 
 	/* === CONSTANTS === */
+	
+	/**
+	 * Name of the configuration parameter for a domain served by the XMPP server.
+	 */
+	public static final String CONFIG_PARAM_XMPPDOMAIN = "xmpp.domain";
+	
+	/**
+	 * Default value of xmpp.domain configuration parameter. This value is taken into account when no suitable
+	 * value is found in the configuration file. 
+	 */
+	public static final String CONFIG_DEF_XMPPDOMAIN = "vicinity.eu";
+	
 	/**
 	 * Path to configuration file.
 	 */

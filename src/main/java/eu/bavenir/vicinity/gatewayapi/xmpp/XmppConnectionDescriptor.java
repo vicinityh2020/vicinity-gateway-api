@@ -26,6 +26,8 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
+import eu.bavenir.vicinity.gatewayapi.App;
+
 
 /*
  * STRUCTURE:
@@ -66,11 +68,6 @@ public class XmppConnectionDescriptor {
 	private static final String CONFIG_PARAM_XMPPPORT = "xmpp.port";
 	
 	/**
-	 * Name of the configuration parameter for a domain served by the XMPP server.
-	 */
-	private static final String CONFIG_PARAM_XMPPDOMAIN = "xmpp.domain";
-	
-	/**
 	 * Name of the configuration parameter for enabling security.
 	 */
 	private static final String CONFIG_PARAM_XMPPSECURITY = "xmpp.security";
@@ -91,12 +88,6 @@ public class XmppConnectionDescriptor {
 	 * value is found in the configuration file. 
 	 */
 	private static final int CONFIG_DEF_XMPPPORT = 5222;
-	
-	/**
-	 * Default value of xmpp.domain configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
-	 */
-	private static final String CONFIG_DEF_XMPPDOMAIN = "vicinity.eu";
 	
 	/**
 	 * Default value of xmpp.security configuration parameter. This value is taken into account when no suitable
@@ -319,7 +310,7 @@ public class XmppConnectionDescriptor {
 	public void sendMessage(String destinationUsername, String message){
 
 		destinationUsername = destinationUsername + "@" 
-								+ config.getString(CONFIG_PARAM_XMPPDOMAIN, CONFIG_DEF_XMPPDOMAIN);
+								+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
 		
 		EntityBareJid jid;
 		try {
@@ -409,7 +400,7 @@ public class XmppConnectionDescriptor {
 		
 		String xmppServer = config.getString(CONFIG_PARAM_XMPPSERVER, CONFIG_DEF_XMPPSERVER);
 		int xmppPort = config.getInt(CONFIG_PARAM_XMPPPORT, CONFIG_DEF_XMPPPORT);
-		String xmppDomain = config.getString(CONFIG_PARAM_XMPPDOMAIN, CONFIG_DEF_XMPPDOMAIN);
+		String xmppDomain = config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
 		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_XMPPSECURITY, CONFIG_DEF_XMPPSECURITY);
 		
 		logger.config("Creating a new connection to XMPP server '" + xmppServer + ":" + xmppPort + "' as '" 

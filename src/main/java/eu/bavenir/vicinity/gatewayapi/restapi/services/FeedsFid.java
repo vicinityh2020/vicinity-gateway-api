@@ -1,10 +1,31 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.jivesoftware.smack.roster.RosterEntry;
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.App;
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
+import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 
 /*
@@ -34,6 +55,11 @@ public class FeedsFid extends ServerResource {
 	 * Name of the Subscription ID attribute.
 	 */
 	private static final String ATTR_FID = "fid";
+	
+	/**
+	 * Name of the Object ID attribute.
+	 */
+	private static final String ATTR_OIDS = "oids";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -76,20 +102,45 @@ public class FeedsFid extends ServerResource {
 	// TODO documentation
 	private String getFeed(String sid){
 		
-		if (sid.equals("66348b54-1609-11e7-93ae-92361f002671")){
-			/*JsonObject json = Json.createObjectBuilder()
-					.add(ATTR_URI, "http://adapter007.example.com/subscriptionListener")
-					.build();
-			
-			return json.toString();*/
-			
-			return new String("{\"id\": \"66348b54-1609-11e7-93ae-92361f002671\",\"criteria\": {\"properties\": {\"$elemMatch\": {\"monitors\": {\"$in\": [\"Temperature\"]}}},\"location\": {\"latitude\": {\"$gt\": 34.22,\"$lt\": 34.25},\"longitude\": {\"$gt\":-3.4,\"$lt\": -3.3}}},\"created\": \"2017-05-06T14:33:08.695Z\",\"results\": [{\"type\": \"Thermostate\",\"base\":\"http://gateway.vicinity.example.com/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"oid\":\"0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"owner\": \"d27ad211-cf1f-4cc9-9c22-238e7b46677d\",\"properties\": [{\"type\": [\"Property\"],\"pid\": \"temp1\",\"monitors\": \"Temperature\",\"output\": {\"units\": \"Celsius\",\"datatype\": \"float\"},\"writable\": false,\"links\": [{\"href\": \"properties/temp1\",\"mediaType\": \"application/json\"}]}],\"actions\": [{\"type\": [\"Action\"],\"aid\": \"switch\",\"affects\": \"OnOffStatus\",{\"id\":\"66348b54-1609-11e7-93ae-92361f002671\",\"criteria\": {\"properties\":{\"$elemMatch\": {\"monitors\": {\"$in\": [\"Temperature\"]}}},\"location\": {\"latitude\": {\"$gt\": 34.22,\"$lt\": 34.25},\"longitude\": {\"$gt\": -3.4,\"$lt\": -3.3}}},\"created\": \"2017-05-06T14:33:08.695Z\",\"results\": [{\"type\": \"Thermostate\",\"base\": \"http://gateway.vicinity.example.com/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"owner\": \"d27ad211-cf1f-4cc9-9c22-238e7b46677d\",\"properties\": [{\"type\": [\"Property\"],\"pid\": \"temp1\",\"monitors\": \"Temperature\",\"output\": {\"units\": \"Celsius\",\"datatype\": \"float\"},\"writable\": false,\"links\": [{\"href\": \"properties/temp1\",\"mediaType\": \"application/json\"}]}],\"actions\": [{\"type\": [\"Action\"],\"aid\": \"switch\",\"affects\": \"OnOffStatus\",\"links\": [{\"href\": \"actions/switch\",\"mediaType\": \"application/json\"}],\"input\": {\"units\": \"Adimensional\",\"datatype\": \"boolean\"}}],\"location\": {\"latitude\": 34.43234,\"longitude\": -3.869}}],\"ttl\": 0}\"links\": [{\"href\": \"actions/switch\",\"mediaType\": \"application/json\"}],\"input\": {\"units\": \"Adimensional\",\"datatype\": \"boolean\"}}],\"location\": {\"latitude\": 34.43234,\"longitude\": -3.869}}],\"ttl\": 0}");
-			
-		} else {
-			
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		CommunicationNode communicationNode 
+				= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
+		
+		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
+		String xmppDomain = config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
+		
+		Collection<RosterEntry> rosterObjects = communicationNode.getRosterEntriesForUser(
+				getRequest().getChallengeResponse().getIdentifier());
+		
+		// create an array list of the oids - and remove the domain from each oid
+		JsonArrayBuilder oidsArrayBuilder = Json.createArrayBuilder();
+		
+		// TODO - this is just for testing
+		//oidsArrayBuilder.add("12345");
+		
+		for (RosterEntry entry : rosterObjects) {
+			oidsArrayBuilder.add(entry.getJid().toString().replace(xmppDomain, ""));
 		}
+		
+		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+		mainObjectBuilder.add(ATTR_OIDS, oidsArrayBuilder.build());
+		JsonObject object = mainObjectBuilder.build();
+		
+		// send the thing
+		ClientResource clientResource = new ClientResource("http://vicinity.bavenir.eu:3000/commServer/search");
+		Writer writer = new StringWriter();
+		
+		// TODO make it this way in the agent communicator
+		Representation responseRepresentation = clientResource.post(new JsonRepresentation(object.toString()), MediaType.APPLICATION_JSON);
+		
+		try {
+			responseRepresentation.write(writer);
+		} catch (IOException e) {
+			logger.warning(e.getMessage());
+		}
+		
+		return writer.toString();
 		
 	}
 	
