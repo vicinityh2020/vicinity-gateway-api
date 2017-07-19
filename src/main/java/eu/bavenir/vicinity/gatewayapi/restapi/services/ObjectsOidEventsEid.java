@@ -133,7 +133,7 @@ prijatie eventu - ten isty agent: test_vcnt0
 		request.setRequestBody(jsonString);
 		
 		// all set
-		if (!communicationNode.sendMessage("test_vcnt0", "235ad597-008a-41eb-9d94-3efe646e37f2", request.buildMessageString())){
+		if (!communicationNode.sendMessage(sourceOid, "iliolousta_2", request.buildMessageString())){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
