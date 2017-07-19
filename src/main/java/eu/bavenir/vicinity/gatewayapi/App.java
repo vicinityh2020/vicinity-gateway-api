@@ -2,6 +2,7 @@ package eu.bavenir.vicinity.gatewayapi;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -161,7 +162,8 @@ public class App {
 		if (confLoggingFile != null && !confLoggingFile.isEmpty()){
 			
 			// create the filename string (essentially adding the time stamp to the string)
-			String logFileName = String.format(confLoggingFile, LocalDateTime.now());
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd'T'HH_mm_ss.SSS");
+			String logFileName = String.format(confLoggingFile, LocalDateTime.now().format(formatter));
 			
 			// this is for the application itself - the RESTLET needs to be taken care of later
 			try {

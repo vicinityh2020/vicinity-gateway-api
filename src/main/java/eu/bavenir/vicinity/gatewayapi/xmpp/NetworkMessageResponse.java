@@ -222,8 +222,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 		String stringValue = new String();
 		
 		// response code reason phrase
-		if (!json.isNull(ATTR_RESPONSECODEREASON)){
-			stringValue = removeQuotes(json.getString(ATTR_RESPONSECODEREASON));
+		if (json.containsKey(ATTR_RESPONSECODEREASON)){
+			if (!json.isNull(ATTR_RESPONSECODEREASON)){
+				stringValue = removeQuotes(json.getString(ATTR_RESPONSECODEREASON));
+			}	
 		}
 				
 		// and the null value got transported more like string... we have to make a rule for it
