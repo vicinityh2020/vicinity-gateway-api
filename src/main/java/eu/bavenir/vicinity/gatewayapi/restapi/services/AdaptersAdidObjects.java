@@ -3,18 +3,17 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.logging.Logger;
 
 import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.json.JsonWriter;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
+import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
@@ -117,6 +116,7 @@ public class AdaptersAdidObjects extends ServerResource {
 		}
 		
 		// get the json
+		/* TODO delete this after testing
 		String objectsJsonString = null;
 		try {
 			objectsJsonString = entity.getText();
@@ -124,9 +124,9 @@ public class AdaptersAdidObjects extends ServerResource {
 			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid object description");
-		}
+		}*/
 		
-		return storeObjects(callerOid, attrAdid, objectsJsonString, logger);
+		return storeObjects(callerOid, attrAdid, entity, logger);
 	}
 	
 	
@@ -190,8 +190,11 @@ public class AdaptersAdidObjects extends ServerResource {
 	
 	
 	// TODO documentation
-	private String storeObjects(String sourceOid, String attrAdid, String jsonString, Logger logger){
-		
+	//private String storeObjects(String sourceOid, String attrAdid, String jsonString, Logger logger){
+	private String storeObjects(String sourceOid, String attrAdid, Representation json, Logger logger){
+		/* this is how the stub looked like
+		 * TODO delete this
+		 
 		JsonArrayBuilder jsonResponseArrayBuilder = Json.createArrayBuilder();
 		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
 		JsonArray jsonMainArrayFromRequest = jsonReader.readArray();
@@ -219,6 +222,22 @@ public class AdaptersAdidObjects extends ServerResource {
 		jsonWriter.close();
 		
 		return stringWriter.toString();
+		*/
+		
+		
+		ClientResource clientResource = new ClientResource("http://vicinity.bavenir.eu:3000/commServer/registration");
+		Writer writer = new StringWriter();
+		
+		// TODO make it this way in the agent communicator
+		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
+		
+		try {
+			responseRepresentation.write(writer);
+		} catch (IOException e) {
+			logger.warning(e.getMessage());
+		}
+		
+		return writer.toString();
 	}
 	
 	

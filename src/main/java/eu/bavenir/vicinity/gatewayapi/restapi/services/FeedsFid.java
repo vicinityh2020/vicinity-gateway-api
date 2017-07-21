@@ -132,7 +132,8 @@ public class FeedsFid extends ServerResource {
 		Writer writer = new StringWriter();
 		
 		// TODO make it this way in the agent communicator
-		Representation responseRepresentation = clientResource.post(new JsonRepresentation(object.toString()), MediaType.APPLICATION_JSON);
+		Representation responseRepresentation = clientResource.post(new JsonRepresentation(object.toString()), 
+					MediaType.APPLICATION_JSON);
 		
 		try {
 			responseRepresentation.write(writer);
