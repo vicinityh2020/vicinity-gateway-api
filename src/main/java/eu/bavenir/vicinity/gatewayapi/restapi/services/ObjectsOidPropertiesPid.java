@@ -82,6 +82,8 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
+		System.out.println("STABILITY DEBUG: GET ObjectOidPropertiesPid.");
+		
 		return getObjectProperty(callerOid, attrOid, attrPid, logger);
 		
 	}
@@ -126,6 +128,8 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid property description");
 		}
+		
+		System.out.println("STABILITY DEBUG: PUT ObjectOidPropertiesPid.");
 		
 		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, logger);
 	}
@@ -211,7 +215,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 			logger.info("Destination object " + attrOid + " is not online.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
-	
+		
 		// this will wait for response
 		NetworkMessageResponse response 
 						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);

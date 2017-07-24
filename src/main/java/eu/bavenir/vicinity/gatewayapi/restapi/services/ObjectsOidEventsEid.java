@@ -100,6 +100,8 @@ public class ObjectsOidEventsEid extends ServerResource {
 					"Invalid event description");
 		}
 		
+		System.out.println("STABILITY DEBUG: POST ObjectOidEventsEid.");
+		
 		return storeEvent(callerOid, attrOid, attrEid, actionJsonString);
 	}
 	

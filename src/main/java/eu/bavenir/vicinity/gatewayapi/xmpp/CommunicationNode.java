@@ -384,7 +384,16 @@ public class CommunicationNode {
 			return null;
 		}
 		
-		return descriptor.retrieveMessage(requestId);
+		// TODO enable this and delete later construct
+		//return descriptor.retrieveMessage(requestId);
+		
+		NetworkMessage networkMessage = descriptor.retrieveMessage(requestId); 
+		if (networkMessage != null){
+			NetworkMessageResponse helperMessage = (NetworkMessageResponse) networkMessage;
+			System.out.println("STABILITY DEBUG: Response message body: " + helperMessage.getResponseBody());
+		}
+		
+		return networkMessage;
 	}
 	
 	

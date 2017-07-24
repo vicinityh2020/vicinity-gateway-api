@@ -317,6 +317,8 @@ public class XmppConnectionDescriptor {
 			jid = JidCreate.entityBareFrom(destinationUsername);
 			Chat chat = chatManager.chatWith(jid);
 			chat.send(message);
+			
+			System.out.println("STABILITY DEBUG: Message sent. To: " + destinationUsername + "\nMessage body: " + message);
 					
 		} catch (XmppStringprepException | NotConnectedException | InterruptedException e) {
 			logger.warning("Message could not be sent. Exception: " + e.getMessage());
@@ -336,6 +338,7 @@ public class XmppConnectionDescriptor {
 		Chat chat = chatManager.chatWith(destinationJid);
 		try {
 			chat.send(message);
+			System.out.println("STABILITY DEBUG: Message sent. To: " + destinationJid.getLocalpart().toString() + "\nMessage body: " + message);
 		} catch (NotConnectedException | InterruptedException e) {
 			logger.warning("Message could not be sent. Exception: " + e.getMessage());
 		}
@@ -353,29 +356,41 @@ public class XmppConnectionDescriptor {
 		
 		NetworkMessage message = null;
 		
+		System.out.println("STABILITY DEBUG: Retrieving message " + requestId);
+		
 		do {
-			NetworkMessage helperMessage;
+			NetworkMessage helperMessage = null;
 			try {
 				// take the first element or wait for one
 				helperMessage = messageQueue.take();
 			} catch (InterruptedException e) {
-				// got interrupted - bail out
+				// bail out
+				System.out.println("STABILITY DEBUG: Recieveing thread got interrupted while waiting for " + requestId);
 				return null;
 			}
 			
-			// we have a message now
-			if (helperMessage.getRequestId() != requestId){
-				// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
-				
-				if (helperMessage.isValid()){
-					messageQueue.offer(helperMessage);
+			if (helperMessage != null){
+				// we have a message now
+				if (helperMessage.getRequestId() != requestId){
+					// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
+					System.out.println("STABILITY DEBUG: This message does not have expected ID (this one reads " 
+							+ helperMessage.getRequestId() + ").");
+					
+					if (helperMessage.isValid()){
+						messageQueue.offer(helperMessage);
+						System.out.println("STABILITY DEBUG: However, it is valid.");
+					} else {
+						System.out.println("STABILITY DEBUG: Moreover, it is not valid.");
+					}
+					
+					// TODO solve the worst case scenario, where one message gets rotated until it is stale
+					// to test this scenario, just comment the line in agent communicator where requestid is set to 
+					// response
+				} else {
+					// it is our message :-3
+					System.out.println("STABILITY DEBUG: Correct message found. ");
+					message = helperMessage;
 				}
-				
-				// TODO solve the worst case scenario, where one message gets rotated until it is stale
-				// to test this scenario, just comment the line in agent communicator where requestid is set to response
-			} else {
-				// it is our message :-3
-				message = helperMessage;
 			}
 			
 		} while (message == null);
@@ -455,6 +470,8 @@ public class XmppConnectionDescriptor {
 		
 		logger.finest("New message from " + from + ": " + xmppMessage.getBody());
 		
+		System.out.println("STABILITY DEBUG: Message received. From: " + from + "\nMessage body: " + xmppMessage.getBody());
+		
 		// let's parse the xmpp message 
 		MessageParser messageParser = new MessageParser();
 		NetworkMessage networkMessage = messageParser.parseNetworkMessage(xmppMessage);
@@ -468,7 +485,8 @@ public class XmppConnectionDescriptor {
 				break;
 				
 			case NetworkMessageResponse.MESSAGE_TYPE:
-				logger.finest("This message is a response. Adding to incoming queue...");
+				logger.finest("This message is a response. Adding to incoming queue. Message count: " 
+						+ messageQueue.size());
 				processMessageResponse(from, networkMessage);
 				break;
 			}
