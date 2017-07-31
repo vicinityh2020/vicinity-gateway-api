@@ -171,6 +171,12 @@ public class ObjectsOidActionsAid extends ServerResource {
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
 		
+		if (response == null){
+			logger.info("Destination object " + attrOid + " is unreachable - message timeout.");
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+					"Destination object is unreachable - message timeout.");
+		}
+		
 		// if the return code is different than 2xx, make it visible
 		if ((response.getResponseCode() / 200) != 1){
 			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 

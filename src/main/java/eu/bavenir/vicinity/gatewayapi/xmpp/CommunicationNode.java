@@ -143,6 +143,8 @@ public class CommunicationNode {
 	 */
 	public XmppConnectionDescriptor establishConnection(String xmppUsername, String xmppPassword){
 		
+		System.out.println("STABILITY DEBUG: establishConnection - Start - Count of connection descriptors: " + descriptorPool.size());
+		
 		// if there is a previous descriptor we should close the connection first, before reopening it again
 		XmppConnectionDescriptor descriptor = descriptorPoolRemove(xmppUsername);
 		if (descriptor != null){
@@ -166,6 +168,8 @@ public class CommunicationNode {
 		descriptorPoolPut(xmppUsername, descriptor);
 		logger.finest("A new connection for '" + xmppUsername +"' was added into connection pool.");
 		
+		System.out.println("STABILITY DEBUG: establishConnection - End - Count of connection descriptors: " + descriptorPool.size());
+		
 		return descriptor;
 	}
 	
@@ -182,7 +186,9 @@ public class CommunicationNode {
 	 * @param destroyConnectionDescriptor Whether the connection descriptor should also be destroyed or not. 
 	 */
 	public void terminateConnection(String xmppUsername, boolean destroyConnectionDescriptor){
-			
+		
+		System.out.println("STABILITY DEBUG: terminateConnection - Start - Count of connection descriptors: " + descriptorPool.size());
+		
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername); 
 		
 		if (descriptor != null){
@@ -199,6 +205,8 @@ public class CommunicationNode {
 			// this will keep the connection in the pool
 			logger.info("Connection to XMPP for user '" + xmppUsername + "' closed.");
 		}
+		
+		System.out.println("STABILITY DEBUG: terminateConnection - End - Count of connection descriptors: " + descriptorPool.size());
 	}
 	
 	
@@ -336,9 +344,11 @@ public class CommunicationNode {
 	 * @param sourceUsername User name of the originating device (without the XMPP domain).
 	 * @param destinationUsername User name of the destination device (without the XMPP domain).
 	 * @param message Message string.
-	 * @return True on success.
+	 * @return True on success, false if the destination was offline or if some error occurred.
 	 */
 	public boolean sendMessage(String sourceUsername, String destinationUsername, String message){
+		
+		System.out.println("STABILITY DEBUG: sendMessage - Start - Count of connection descriptors: " + descriptorPool.size());
 		
 		// check the validity of source user
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(sourceUsername);
@@ -358,10 +368,10 @@ public class CommunicationNode {
 				return false;
 			}
 		}
+
+		System.out.println("STABILITY DEBUG: sendMessage - End - Count of connection descriptors: " + descriptorPool.size());
 		
-		descriptor.sendMessage(destinationUsername, message);
-		
-		return true;
+		return descriptor.sendMessage(destinationUsername, message);
 	}
 	
 	
@@ -375,6 +385,9 @@ public class CommunicationNode {
 	 * @return {@link NetworkMessage NetworkMessage} received over XMPP message.
 	 */
 	public NetworkMessage retrieveSingleMessage(String forUsername, int requestId){
+		
+		System.out.println("STABILITY DEBUG: retrieveSingleMessage - Start - Count of connection descriptors: " + descriptorPool.size());
+		
 		// check the validity of source user
 		XmppConnectionDescriptor descriptor = descriptorPoolGet(forUsername);
 		
@@ -392,6 +405,8 @@ public class CommunicationNode {
 			NetworkMessageResponse helperMessage = (NetworkMessageResponse) networkMessage;
 			System.out.println("STABILITY DEBUG: Response message body: " + helperMessage.getResponseBody());
 		}
+		
+		System.out.println("STABILITY DEBUG: retrieveSingleMessage - End - Count of connection descriptors: " + descriptorPool.size());
 		
 		return networkMessage;
 	}
@@ -416,6 +431,8 @@ public class CommunicationNode {
 	 */
 	private XmppConnectionDescriptor descriptorPoolPut(String xmppUsername, XmppConnectionDescriptor descriptor){
 		synchronized (descriptorPool){
+			
+			System.out.println("STABILITY DEBUG: descriptorPoolPut - Before operation - Count of connection descriptors: " + descriptorPool.size());
 			return descriptorPool.put(xmppUsername, descriptor);
 		}
 	}
@@ -434,6 +451,9 @@ public class CommunicationNode {
 	 */
 	private XmppConnectionDescriptor descriptorPoolGet(String xmppUsername){
 		synchronized (descriptorPool){
+			
+			System.out.println("STABILITY DEBUG: descriptorPoolGet - Before operation - Count of connection descriptors: " + descriptorPool.size());
+			
 			return descriptorPool.get(xmppUsername);
 		}
 	}
@@ -452,6 +472,9 @@ public class CommunicationNode {
 	 */
 	private XmppConnectionDescriptor descriptorPoolRemove(String xmppUsername){
 		synchronized (descriptorPool){
+			
+			System.out.println("STABILITY DEBUG: descriptorPoolRemove - Before operation - Count of connection descriptors: " + descriptorPool.size());
+			
 			return descriptorPool.remove(xmppUsername);
 		}
 	}

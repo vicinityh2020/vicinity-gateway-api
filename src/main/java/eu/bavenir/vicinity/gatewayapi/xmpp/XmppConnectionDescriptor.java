@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.SmackException.NotLoggedInException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.chat2.Chat;
@@ -306,24 +308,44 @@ public class XmppConnectionDescriptor {
 	 * 
 	 * @param destinationUsername Destination contact, for which the message is intended. 
 	 * @param message A string to send.
+	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
-	public void sendMessage(String destinationUsername, String message){
+	public boolean sendMessage(String destinationUsername, String message){
 
 		destinationUsername = destinationUsername + "@" 
 								+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
 		
+		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
+		
 		EntityBareJid jid;
 		try {
 			jid = JidCreate.entityBareFrom(destinationUsername);
-			Chat chat = chatManager.chatWith(jid);
-			chat.send(message);
 			
-			System.out.println("STABILITY DEBUG: Message sent. To: " + destinationUsername + "\nMessage body: " + message);
-					
+			// check whether the destination is online
+			try {
+				roster.reloadAndWait();
+			} catch (NotLoggedInException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			}
+			Presence presence = roster.getPresence(jid);
+			
+			if (presence.isAvailable()){
+				Chat chat = chatManager.chatWith(jid);
+				chat.send(message);
+				
+				System.out.println("STABILITY DEBUG: Message sent. To: " + destinationUsername + "\nMessage body: " + message);
+				
+			} else {
+				System.out.println("STABILITY DEBUG: Message not sent. Destination unavailable.");
+				return false;
+			}
+			
 		} catch (XmppStringprepException | NotConnectedException | InterruptedException e) {
 			logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			return false;
 		}
 		
+		return true;
 	}
 	
 	
@@ -333,15 +355,36 @@ public class XmppConnectionDescriptor {
 	 * 
 	 * @param destinationJid Destination contact, for which the message is intended. 
 	 * @param message A string to send.
+	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
-	public void sendMessage(EntityBareJid destinationJid, String message){
-		Chat chat = chatManager.chatWith(destinationJid);
+	public boolean sendMessage(EntityBareJid destinationJid, String message){
+		
+		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
+		
+		// check whether the destination is online
 		try {
-			chat.send(message);
-			System.out.println("STABILITY DEBUG: Message sent. To: " + destinationJid.getLocalpart().toString() + "\nMessage body: " + message);
-		} catch (NotConnectedException | InterruptedException e) {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Message could not be sent. Exception: " + e.getMessage());
 		}
+		Presence presence = roster.getPresence(destinationJid);
+		
+		if (presence.isAvailable()){
+		
+			Chat chat = chatManager.chatWith(destinationJid);
+			try {
+				chat.send(message);
+				System.out.println("STABILITY DEBUG: Message sent. To: " + destinationJid.getLocalpart().toString() + "\nMessage body: " + message);
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+				return false;
+			}
+		} else {
+			System.out.println("STABILITY DEBUG: Message not sent. Destination unavailable.");
+			return false;
+		}
+		
+		return true;
 	}
 	
 	
@@ -358,11 +401,15 @@ public class XmppConnectionDescriptor {
 		
 		System.out.println("STABILITY DEBUG: Retrieving message " + requestId);
 		
-		do {
+		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
+		
+		//do {
+		// TODO this has to be repeated a few times - because of the worst case scenario and its rotation 
 			NetworkMessage helperMessage = null;
 			try {
-				// take the first element or wait for one
+				// take the first element or wait for one TODO
 				helperMessage = messageQueue.take();
+				//helperMessage = messageQueue.poll(5, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				// bail out
 				System.out.println("STABILITY DEBUG: Recieveing thread got interrupted while waiting for " + requestId);
@@ -393,7 +440,7 @@ public class XmppConnectionDescriptor {
 				}
 			}
 			
-		} while (message == null);
+		//} while (message == null);
 	
 		return message;	
 	}
@@ -426,6 +473,13 @@ public class XmppConnectionDescriptor {
 		xmppConfigBuilder.setUsernameAndPassword(xmppUsername, xmppPassword);
 		xmppConfigBuilder.setHost(xmppServer);
 		xmppConfigBuilder.setPort(xmppPort);
+		// TODO delete if not working
+		try {
+			xmppConfigBuilder.setResource("vicinity");
+		} catch (XmppStringprepException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		if (!xmppSecurity) {
 			xmppConfigBuilder.setSecurityMode(SecurityMode.disabled);
@@ -471,6 +525,7 @@ public class XmppConnectionDescriptor {
 		logger.finest("New message from " + from + ": " + xmppMessage.getBody());
 		
 		System.out.println("STABILITY DEBUG: Message received. From: " + from + "\nMessage body: " + xmppMessage.getBody());
+		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
 		
 		// let's parse the xmpp message 
 		MessageParser messageParser = new MessageParser();
