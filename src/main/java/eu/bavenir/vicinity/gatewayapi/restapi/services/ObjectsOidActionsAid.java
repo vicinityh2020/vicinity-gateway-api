@@ -83,8 +83,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		System.out.println("STABILITY DEBUG: GET ObjectOidActionsAid.");
-		
 		return getObjectAction(callerOid, attrOid, attrAid, logger);
 	}
 	
@@ -125,9 +123,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid action description");
 		}
-		
-		System.out.println("STABILITY DEBUG: POST ObjectOidActionsAid.");
-		
+	
 		return storeAction(callerOid, attrOid, attrAid, actionJsonString, logger);
 	}
 	

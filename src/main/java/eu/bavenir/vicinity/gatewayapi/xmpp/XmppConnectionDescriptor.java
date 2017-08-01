@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -102,6 +101,12 @@ public class XmppConnectionDescriptor {
 	 * suitable value is found in the configuration file.
 	 */
 	private static final boolean CONFIG_DEF_XMPPLISTENFORROSTERCHANGES = true;
+	
+	/**
+	 * This is the resource part of the full JID used in the communication. It is necessary to set it and not leave it
+	 * to default value, which is auto generated to random string. 
+	 */
+	private static final String XMPP_RESOURCE = "communicationNode";
 	
 	
 	
@@ -315,8 +320,6 @@ public class XmppConnectionDescriptor {
 		destinationUsername = destinationUsername + "@" 
 								+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
 		
-		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
-		
 		EntityBareJid jid;
 		try {
 			jid = JidCreate.entityBareFrom(destinationUsername);
@@ -333,10 +336,7 @@ public class XmppConnectionDescriptor {
 				Chat chat = chatManager.chatWith(jid);
 				chat.send(message);
 				
-				System.out.println("STABILITY DEBUG: Message sent. To: " + destinationUsername + "\nMessage body: " + message);
-				
 			} else {
-				System.out.println("STABILITY DEBUG: Message not sent. Destination unavailable.");
 				return false;
 			}
 			
@@ -359,8 +359,6 @@ public class XmppConnectionDescriptor {
 	 */
 	public boolean sendMessage(EntityBareJid destinationJid, String message){
 		
-		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
-		
 		// check whether the destination is online
 		try {
 			roster.reloadAndWait();
@@ -374,13 +372,11 @@ public class XmppConnectionDescriptor {
 			Chat chat = chatManager.chatWith(destinationJid);
 			try {
 				chat.send(message);
-				System.out.println("STABILITY DEBUG: Message sent. To: " + destinationJid.getLocalpart().toString() + "\nMessage body: " + message);
 			} catch (NotConnectedException | InterruptedException e) {
 				logger.warning("Message could not be sent. Exception: " + e.getMessage());
 				return false;
 			}
 		} else {
-			System.out.println("STABILITY DEBUG: Message not sent. Destination unavailable.");
 			return false;
 		}
 		
@@ -399,10 +395,6 @@ public class XmppConnectionDescriptor {
 		
 		NetworkMessage message = null;
 		
-		System.out.println("STABILITY DEBUG: Retrieving message " + requestId);
-		
-		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
-		
 		//do {
 		// TODO this has to be repeated a few times - because of the worst case scenario and its rotation 
 			NetworkMessage helperMessage = null;
@@ -412,7 +404,6 @@ public class XmppConnectionDescriptor {
 				//helperMessage = messageQueue.poll(5, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 				// bail out
-				System.out.println("STABILITY DEBUG: Recieveing thread got interrupted while waiting for " + requestId);
 				return null;
 			}
 			
@@ -420,14 +411,11 @@ public class XmppConnectionDescriptor {
 				// we have a message now
 				if (helperMessage.getRequestId() != requestId){
 					// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
-					System.out.println("STABILITY DEBUG: This message does not have expected ID (this one reads " 
-							+ helperMessage.getRequestId() + ").");
-					
 					if (helperMessage.isValid()){
 						messageQueue.offer(helperMessage);
-						System.out.println("STABILITY DEBUG: However, it is valid.");
 					} else {
-						System.out.println("STABILITY DEBUG: Moreover, it is not valid.");
+						logger.fine("Discarding stale message: ID = " + helperMessage.getRequestId() 
+							+ "; Timestamp = " + helperMessage.timeStamp);
 					}
 					
 					// TODO solve the worst case scenario, where one message gets rotated until it is stale
@@ -435,7 +423,6 @@ public class XmppConnectionDescriptor {
 					// response
 				} else {
 					// it is our message :-3
-					System.out.println("STABILITY DEBUG: Correct message found. ");
 					message = helperMessage;
 				}
 			}
@@ -473,12 +460,14 @@ public class XmppConnectionDescriptor {
 		xmppConfigBuilder.setUsernameAndPassword(xmppUsername, xmppPassword);
 		xmppConfigBuilder.setHost(xmppServer);
 		xmppConfigBuilder.setPort(xmppPort);
-		// TODO delete if not working
+		
 		try {
-			xmppConfigBuilder.setResource("vicinity");
-		} catch (XmppStringprepException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			xmppConfigBuilder.setResource(XMPP_RESOURCE);
+		} catch (XmppStringprepException e) {
+			logger.severe("Exiting due to exception during building a connection to XMPP server. Message: " 
+					+ e.getMessage());
+			
+			return null;
 		}
 		
 		if (!xmppSecurity) {
@@ -523,9 +512,6 @@ public class XmppConnectionDescriptor {
 	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat){
 		
 		logger.finest("New message from " + from + ": " + xmppMessage.getBody());
-		
-		System.out.println("STABILITY DEBUG: Message received. From: " + from + "\nMessage body: " + xmppMessage.getBody());
-		System.out.println("STABILITY DEBUG: Message queue: " + messageQueue.size());
 		
 		// let's parse the xmpp message 
 		MessageParser messageParser = new MessageParser();

@@ -99,9 +99,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid event description");
 		}
-		
-		System.out.println("STABILITY DEBUG: POST ObjectOidEventsEid.");
-		
+	
 		return storeEvent(callerOid, attrOid, attrEid, actionJsonString);
 	}
 	

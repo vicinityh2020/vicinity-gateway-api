@@ -82,8 +82,6 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		System.out.println("STABILITY DEBUG: GET ObjectOidPropertiesPid.");
-		
 		return getObjectProperty(callerOid, attrOid, attrPid, logger);
 		
 	}
@@ -128,8 +126,6 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid property description");
 		}
-		
-		System.out.println("STABILITY DEBUG: PUT ObjectOidPropertiesPid.");
 		
 		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, logger);
 	}
