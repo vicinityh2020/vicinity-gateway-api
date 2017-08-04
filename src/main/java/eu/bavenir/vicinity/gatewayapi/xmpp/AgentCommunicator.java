@@ -58,14 +58,14 @@ public class AgentCommunicator {
 	private static final boolean CONFIG_DEF_APIAGENTUSEHTTPS = false;
 	
 	/**
-	 * Default value of api.agentPort configuration parameter. This value is taken into account when no 
-	 * suitable value is found in the configuration file.
+	 * Default value of {@link #CONFIG_PARAM_APIAGENTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file.
 	 */
 	private static final String CONFIG_DEF_APIAGENTPORT = "80";
 	
 	/**
-	 * Default value of api.agentIP configuration parameter. This value is taken into account when no 
-	 * suitable value is found in the configuration file.
+	 * Default value of {@link #CONFIG_PARAM_APIAGENTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file.
 	 */
 	private static final String CONFIG_DEF_APIAGENTIP = "localhost";
 	
@@ -127,10 +127,10 @@ public class AgentCommunicator {
 	 */
 	public NetworkMessageResponse processRequestMessage(NetworkMessageRequest request){
 		
-		NetworkMessageResponse response = new NetworkMessageResponse();
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
 		
-		// always set the correlation ID of the request
-		response.setRequestId(request.getRequestId());
+		// always set the correlation ID of the request TODO
+		//response.setRequestId(request.getRequestId());
 		
 		ClientResource clientResource = new ClientResource(assembleAgentUrl(request));
 		

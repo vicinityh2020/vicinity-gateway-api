@@ -1,5 +1,6 @@
 package eu.bavenir.vicinity.gatewayapi.xmpp;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 
 /*
  * STRUCTURE:
@@ -18,8 +19,8 @@ package eu.bavenir.vicinity.gatewayapi.xmpp;
  * The subclasses of this class, extended with the right fields and methods, should then be used in the actual 
  * communication.
  * 
- * NOTE: When handling freshly parsed message of any type, always check for validity and (after optional examination)
- * discard it.
+ * NOTE: When handling freshly parsed message of any type, always check for {@link #isValid() validity} and (after 
+ * optional further examination) discard it.
  * 
  * @author sulfo
  *
@@ -44,11 +45,17 @@ public class NetworkMessage {
 	public static final String ATTR_REQUESTID = "requestId";
 	
 	/**
-	 * Number of milliseconds to consider the message a stale, so it can be discarded at the nearest 
-	 * opportunity.
+	 * Name of the configuration parameter for message timeout (expiration will make the message 'stale' and will
+	 * be discarded at nearest opportunity). 
 	 */
-	public static final int STALE_MESSAGE_TIMEOUT = 600000;
+	public static final String CONFIG_PARAM_XMPPMESSAGETIMEOUT = "xmpp.messageTimeout";
 	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_XMPPMESSAGETIMEOUT CONFIG_PARAM_XMPPMESSAGETIMEOUT} 
+	 * configuration parameter. This value is taken into account when no suitable value is found in the configuration
+	 * file.
+	 */
+	public static final int CONFIG_DEF_XMPPMESSAGETIMEOUT = 30;
 	
 	
 	/* === FIELDS === */
@@ -86,6 +93,11 @@ public class NetworkMessage {
 	 * UNIX time stamp generated in the moment the instance of this class is constructed. 
 	 */
 	protected long timeStamp;
+	
+	/**
+	 * Configuration - necessary to obtain a timeout value. 
+	 */
+	protected XMLConfiguration config;
 
 	
 	/* === PUBLIC METHODS === */
@@ -93,11 +105,12 @@ public class NetworkMessage {
 	/**
 	 * Basic constructor for the message. Only time stamp is computed.
 	 */
-	public NetworkMessage(){
+	public NetworkMessage(XMLConfiguration config){
 		timeStamp = System.currentTimeMillis();
 		valid = true;
 		stale = false;
 		messageType = NetworkMessage.MESSAGE_TYPE;
+		this.config = config;
 	}
 	
 	
@@ -144,7 +157,8 @@ public class NetworkMessage {
 	 */
 	public boolean isValid() {
 		
-		if ((System.currentTimeMillis() - timeStamp) > STALE_MESSAGE_TIMEOUT){
+		if ((System.currentTimeMillis() - timeStamp) 
+				> (config.getInt(CONFIG_PARAM_XMPPMESSAGETIMEOUT, CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000)){
 			stale = true;
 		} else {
 			stale = false;

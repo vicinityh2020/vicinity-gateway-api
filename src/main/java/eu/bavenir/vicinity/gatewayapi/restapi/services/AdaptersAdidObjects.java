@@ -190,40 +190,7 @@ public class AdaptersAdidObjects extends ServerResource {
 	
 	
 	// TODO documentation
-	//private String storeObjects(String sourceOid, String attrAdid, String jsonString, Logger logger){
 	private String storeObjects(String sourceOid, String attrAdid, Representation json, Logger logger){
-		/* this is how the stub looked like
-		 * TODO delete this
-		 
-		JsonArrayBuilder jsonResponseArrayBuilder = Json.createArrayBuilder();
-		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
-		JsonArray jsonMainArrayFromRequest = jsonReader.readArray();
-		
-		// iterate over the incoming array of jsons, extract the ATTR_OID values and build separate response json for
-		// each of them
-		for (int i = 0; i < jsonMainArrayFromRequest.size(); i++){
-		
-			JsonObject singleRequestObject = jsonMainArrayFromRequest.getJsonObject(i);
-			
-			if (singleRequestObject.containsKey(ATTR_OID)){
-				jsonResponseArrayBuilder.add(Json.createObjectBuilder()
-						.add(ATTR_OID, singleRequestObject.get(ATTR_OID)));
-			} else {
-				throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-						"Invalid object description");
-			}
-		}
-
-		// json magic
-		JsonArray responseArray = jsonResponseArrayBuilder.build();
-		StringWriter stringWriter = new StringWriter();
-		JsonWriter jsonWriter = Json.createWriter(stringWriter);
-		jsonWriter.writeArray(responseArray);
-		jsonWriter.close();
-		
-		return stringWriter.toString();
-		*/
-		
 		
 		ClientResource clientResource = new ClientResource("http://vicinity.bavenir.eu:3000/commServer/registration");
 		Writer writer = new StringWriter();

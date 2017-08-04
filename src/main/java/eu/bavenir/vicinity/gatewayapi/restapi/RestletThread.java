@@ -36,12 +36,12 @@ public class RestletThread extends Thread {
 	private static final String CONF_PARAM_APIENABLEHTTPS = "api.enableHttps";
 	
 	/**
-	 * Default value for API port parameter.
+	 * Default value for {@link #CONF_PARAM_APIPORT CONF_PARAM_APIPORT} parameter.
 	 */
 	private static final int CONF_DEF_APIPORT = 8181;
 	
 	/**
-	 * Default value for enabling HTTPS protocol while serving the Gateway API.
+	 * Default value for {@link #CONF_PARAM_APIENABLEHTTPS CONF_PARAM_APIENABLEHTTPS} parameter.
 	 */
 	private static final Boolean CONF_DEF_APIENABLEHTTPS = true;
 	

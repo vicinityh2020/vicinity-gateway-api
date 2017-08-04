@@ -86,8 +86,8 @@ public class CommunicationNode {
 	private static final String CONFIG_PARAM_XMPPDEBUG = "xmpp.debug";
 	
 	/**
-	 * Default value of xmpp.debug configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_XMPPDEBUG CONFIG_PARAM_XMPPDEBUG} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
 	 */
 	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
 		

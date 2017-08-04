@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -74,39 +75,43 @@ public class XmppConnectionDescriptor {
 	private static final String CONFIG_PARAM_XMPPSECURITY = "xmpp.security";
 	
 	/**
-	 * Name of the configuration parameter for XMPP .
-	 */
-	private static final String CONFIG_PARAM_XMPPLISTENFORROSTERCHANGES = "xmpp.listenForRosterChanges";
-	
-	/**
-	 * Default value of xmpp.server configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_XMPPSERVER CONFIG_PARAM_XMPPSERVER} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
 	 */
 	private static final String CONFIG_DEF_XMPPSERVER = "";
 	
 	/**
-	 * Default value of xmpp.port configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_XMPPPORT CONFIG_PARAM_XMPPPORT} configuration parameter. This value is 
+	 * taken into account when no suitable value is found in the configuration file. 
 	 */
 	private static final int CONFIG_DEF_XMPPPORT = 5222;
 	
 	/**
-	 * Default value of xmpp.security configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file.
+	 * Default value of {@link #CONFIG_PARAM_XMPPSECURITY CONFIG_PARAM_XMPPSECURITY} configuration parameter. This value
+	 * is taken into account when no suitable value is found in the configuration file.
 	 */
 	private static final boolean CONFIG_DEF_XMPPSECURITY = true;
-	
-	/**
-	 * Default value of xmpp.listenForRosterChanges configuration parameter. This value is taken into account when no 
-	 * suitable value is found in the configuration file.
-	 */
-	private static final boolean CONFIG_DEF_XMPPLISTENFORROSTERCHANGES = true;
 	
 	/**
 	 * This is the resource part of the full JID used in the communication. It is necessary to set it and not leave it
 	 * to default value, which is auto generated to random string. 
 	 */
 	private static final String XMPP_RESOURCE = "communicationNode";
+	
+	/**
+	 * How long is the thread supposed to wait for message arrival before checking whether timeout was reached. After
+	 * the check, the thread resumes to waiting for message and the cycle repeats until either message arrives or
+	 * timeout is reached. 
+	 */
+	private static final long POLL_INTERRUPT_INTERVAL_MILLIS = 500;
+	
+	/**
+	 * Worst case scenario is, when there is a single message in the queue that nobody wants and is just waiting for 
+	 * expiration. Until the timeout is reached it would eat all CPU on message queue's polling call. Although unlikely,
+	 * the remedy would be to sleep a little if there is just one message in the queue before checking again. To 
+	 * sleep this long... 
+	 */
+	private static final long THREAD_SLEEP_MILLIS = 100;
 	
 	
 	
@@ -232,34 +237,27 @@ public class XmppConnectionDescriptor {
 		// spawn a roster and associate calls for changes in roster - if set
 		roster = Roster.getInstanceFor(connection);
 		
-		if (config.getBoolean(CONFIG_PARAM_XMPPLISTENFORROSTERCHANGES, CONFIG_DEF_XMPPLISTENFORROSTERCHANGES)){
+		roster.addRosterListener(new RosterListener() {
+			@Override
+			public void entriesAdded(Collection<Jid> addresses) {
+				processRosterEntriesAdded(addresses);
+			}
 			
-			logger.config("Listening for changes in roster is enabled.");
+			@Override
+			public void entriesDeleted(Collection<Jid> addresses) {
+				processRosterEntriesDeleted(addresses);
+			}
 			
-			roster.addRosterListener(new RosterListener() {
-				@Override
-				public void entriesAdded(Collection<Jid> addresses) {
-					processRosterEntriesAdded(addresses);
-				}
-				
-				@Override
-				public void entriesDeleted(Collection<Jid> addresses) {
-					processRosterEntriesDeleted(addresses);
-				}
-				
-				@Override
-				public void entriesUpdated(Collection<Jid> addresses) {
-					processRosterEntriesUpdated(addresses);
-				}
-				
-				@Override
-				public void presenceChanged(Presence presence) {
-					processRosterPresenceChanged(presence);
-				}
-			});
-		} else {
-			logger.config("Listening for changes in roster is disabled.");
-		}
+			@Override
+			public void entriesUpdated(Collection<Jid> addresses) {
+				processRosterEntriesUpdated(addresses);
+			}
+			
+			@Override
+			public void presenceChanged(Presence presence) {
+				processRosterPresenceChanged(presence);
+			}
+		});
 		
 		return true;
 	}
@@ -386,7 +384,8 @@ public class XmppConnectionDescriptor {
 	
 	/**
 	 * Retrieves a {@link NetworkMessage NetworkMessage} from the queue of incoming messages based on the correlation 
-	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives.
+	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives or until timeout
+	 * is reached. The check for timeout is scheduled every {@link #POLL_INTERRUPT_INTERVAL_MILLIS POLL_INTERRUPT_INTERVAL_MILLIS}.
 	 * 
 	 * @param requestId Correlation request ID. 
 	 * @return {@link NetworkMessage NetworkMessage} from the queue.
@@ -395,13 +394,15 @@ public class XmppConnectionDescriptor {
 		
 		NetworkMessage message = null;
 		
-		//do {
-		// TODO this has to be repeated a few times - because of the worst case scenario and its rotation 
+		// retrieve the timeout from configuration
+		long startTime = System.currentTimeMillis();
+		boolean timeoutReached = false;
+		
+		do {
 			NetworkMessage helperMessage = null;
 			try {
-				// take the first element or wait for one TODO
-				helperMessage = messageQueue.take();
-				//helperMessage = messageQueue.poll(5, TimeUnit.SECONDS);
+				// take the first element or wait for one
+				helperMessage = messageQueue.poll(POLL_INTERRUPT_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				// bail out
 				return null;
@@ -418,16 +419,27 @@ public class XmppConnectionDescriptor {
 							+ "; Timestamp = " + helperMessage.timeStamp);
 					}
 					
-					// TODO solve the worst case scenario, where one message gets rotated until it is stale
-					// to test this scenario, just comment the line in agent communicator where requestid is set to 
-					// response
+					// in order not to iterate thousand times a second over one single message, that don't belong
+					// to us (or anybody), let's sleep a little to optimize performance
+					if (messageQueue.size() == 1){
+						try {
+							Thread.sleep(THREAD_SLEEP_MILLIS);
+						} catch (InterruptedException e) {
+							return null;
+						}
+					}
 				} else {
 					// it is our message :-3
 					message = helperMessage;
 				}
 			}
 			
-		//} while (message == null);
+			timeoutReached = ((System.currentTimeMillis() - startTime) 
+							> (config.getInt(NetworkMessage.CONFIG_PARAM_XMPPMESSAGETIMEOUT, 
+									NetworkMessage.CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000));
+			
+		// until we get our message or the timeout expires
+		} while (message == null && !timeoutReached);
 	
 		return message;	
 	}
@@ -514,7 +526,7 @@ public class XmppConnectionDescriptor {
 		logger.finest("New message from " + from + ": " + xmppMessage.getBody());
 		
 		// let's parse the xmpp message 
-		MessageParser messageParser = new MessageParser();
+		MessageParser messageParser = new MessageParser(config);
 		NetworkMessage networkMessage = messageParser.parseNetworkMessage(xmppMessage);
 		
 		if (networkMessage != null){

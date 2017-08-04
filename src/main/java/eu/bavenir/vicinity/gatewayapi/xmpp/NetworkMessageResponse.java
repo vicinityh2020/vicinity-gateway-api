@@ -5,6 +5,8 @@ import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import org.apache.commons.configuration2.XMLConfiguration;
+
 /*
  * STRUCTURE:
  * - constants
@@ -94,8 +96,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 *  
 	 * @param xmppMessage A 'raw' XMPP message. 
 	 */
-	public NetworkMessageResponse(){
-		super();
+	public NetworkMessageResponse(XMLConfiguration config){
+		super(config);
 		
 		jsonRepresentation = null;
 		
@@ -109,9 +111,9 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * 
 	 * @param json JSON that arrived from the XMPP network. 
 	 */
-	public NetworkMessageResponse(JsonObject json){
+	public NetworkMessageResponse(JsonObject json, XMLConfiguration config){
 		// always call this guy
-		super();
+		super(config);
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){

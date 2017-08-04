@@ -35,8 +35,8 @@ public class App {
 	public static final String CONFIG_PARAM_XMPPDOMAIN = "xmpp.domain";
 	
 	/**
-	 * Default value of xmpp.domain configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_XMPPDOMAIN CONFIG_PARAM_XMPPDOMAIN} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
 	 */
 	public static final String CONFIG_DEF_XMPPDOMAIN = "vicinity.eu";
 	
@@ -62,14 +62,14 @@ public class App {
 	private static final String CONFIG_PARAM_LOGGINGLEVEL = "logging.level";
 	
 	/**
-	 * Default value of logging.consoleOutput configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_LOGGINGCONSOLEOUTPUT CONFIG_PARAM_LOGGINGCONSOLEOUTPUT} configuration 
+	 * parameter. This value is taken into account when no suitable value is found in the configuration file. 
 	 */
 	private static final Boolean CONFIG_DEF_LOGGINGCONSOLEOUTPUT = false;
 	
 	/**
-	 * Default value of logging.level configuration parameter. This value is taken into account when no suitable
-	 * value is found in the configuration file. 
+	 * Default value of {@link #CONFIG_PARAM_LOGGINGLEVEL CONFIG_PARAM_LOGGINGLEVEL} configuration parameter. This 
+	 * value is taken into account when no suitable value is found in the configuration file. 
 	 */
 	private static final String CONFIG_DEF_LOGGINGLEVEL = "INFO";
 	

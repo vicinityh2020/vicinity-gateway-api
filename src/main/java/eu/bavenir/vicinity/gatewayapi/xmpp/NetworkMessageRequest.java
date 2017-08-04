@@ -12,6 +12,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import org.apache.commons.configuration2.XMLConfiguration;
+
 /*
  * STRUCTURE:
  * - constants
@@ -138,9 +140,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * object's construction. The rest of attributes, codes, parameters, etc. need to be filled as needed.  
 	 * 
 	 */
-	public NetworkMessageRequest(){
+	public NetworkMessageRequest(XMLConfiguration config){
 		// always call this guy
-		super();
+		super(config);
 
 		jsonRepresentation = null;
 		
@@ -156,9 +158,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * 
 	 * @param json JSON that arrived from the XMPP network. 
 	 */
-	public NetworkMessageRequest(JsonObject json){
+	public NetworkMessageRequest(JsonObject json, XMLConfiguration config){
 		// always call this guy
-		super();
+		super(config);
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
@@ -374,6 +376,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 				|| requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_POST)
 				|| requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_PUT))
 			){
+				
+			setValid(false);
 			return false;
 		}
 		
@@ -386,7 +390,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 		String stringValue;
 
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the hashmap clear
+		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
 		JsonObject attributesJson = json.getJsonObject(ATTR_ATTRIBUTES);
 		if (attributesJson != null){
 			
@@ -405,7 +409,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 			}
 		}
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the hashmap clear
+		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
 		JsonObject parametersJson = json.getJsonObject(ATTR_PARAMETERS);
 		if (parametersJson != null){
 			

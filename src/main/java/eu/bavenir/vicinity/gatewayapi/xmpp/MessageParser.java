@@ -6,6 +6,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.packet.Message;
 
 /*
@@ -31,9 +32,15 @@ public class MessageParser {
 	
 	
 	/* === FIELDS === */
-	
+	private XMLConfiguration config;
 	
 	/* === PUBLIC METHODS === */
+	
+	public MessageParser(XMLConfiguration config){
+		this.config = config;
+	}
+	
+	
 	/**
 	 * Parses the XmppMessage that arrived from the XMPP network. A valid network message will contain a JSON that
 	 * can be decoded as one of the {@link NetworkMessage NetworkMessage} types. 
@@ -62,10 +69,10 @@ public class MessageParser {
 		switch (json.getInt(NetworkMessage.ATTR_MESSAGETYPE)){
 		
 		case NetworkMessageRequest.MESSAGE_TYPE:
-			return new NetworkMessageRequest(json);
+			return new NetworkMessageRequest(json, config);
 			
 		case NetworkMessageResponse.MESSAGE_TYPE:
-			return new NetworkMessageResponse(json);
+			return new NetworkMessageResponse(json, config);
 			
 			default:
 				return null;

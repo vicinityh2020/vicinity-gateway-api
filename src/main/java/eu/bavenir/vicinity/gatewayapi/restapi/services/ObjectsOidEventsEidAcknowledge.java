@@ -1,7 +1,9 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -75,6 +77,8 @@ public class ObjectsOidEventsEidAcknowledge extends ServerResource {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null || attrEid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
@@ -90,25 +94,28 @@ public class ObjectsOidEventsEidAcknowledge extends ServerResource {
 		try {
 			actionJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			
+			logger.warning(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid event description");
 		}
 		
-		return storeEventAcknowledgement(callerOid, attrOid, attrEid, actionJsonString);
+		return storeEventAcknowledgement(callerOid, attrOid, attrEid, actionJsonString, logger);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
 	// TODO documentation
-	private String storeEventAcknowledgement(String sourceOid, String attrOid, String attrEid, String jsonString){
+	private String storeEventAcknowledgement(String sourceOid, String attrOid, String attrEid, String jsonString, 
+						Logger logger){
 
 		CommunicationNode communicationNode 
 			= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 
-		NetworkMessageRequest request = new NetworkMessageRequest();
+		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
 		
 		// we will need this newly generated ID, so we keep it
 		int requestId = request.getRequestId();
@@ -128,6 +135,14 @@ public class ObjectsOidEventsEidAcknowledge extends ServerResource {
 		// this will wait for response
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
+		
+		if (response == null){
+			logger.info("No response message received. Source ID: " 
+				+ sourceOid + " Destination ID: " + attrOid + " Event ID: " + attrEid  
+				+ " Request ID: " + requestId);
+			throw new ResourceException(Status.CONNECTOR_ERROR_CONNECTION,
+					"No valid response from remote object, possible message timeout.");
+		}
 		
 		// if the return code is different than 2xx, make it visible
 		if ((response.getResponseCode() / 2) != 1){

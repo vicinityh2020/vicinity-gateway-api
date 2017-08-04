@@ -3,6 +3,7 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -100,20 +101,31 @@ public class ObjectsOidEventsEid extends ServerResource {
 					"Invalid event description");
 		}
 	
-		return storeEvent(callerOid, attrOid, attrEid, actionJsonString);
+		return storeEvent(callerOid, attrOid, attrEid, actionJsonString, logger);
 	}
 	
 	
 	
 	// === PRIVATE METHODS ===
 	
-	// TODO documentation
-	private String storeEvent(String sourceOid, String attrOid, String attrEid, String jsonString){
+	/**
+	 * Distributes Event among subscribed nodes.
+	 * 
+	 * @param sourceOid OID of the caller.
+	 * @param attrOid OID of the destination.
+	 * @param attrEid Event ID.
+	 * @param jsonString Event JSON.
+	 * @param logger Logger.
+	 * @return Response from the remote station.
+	 */
+	private String storeEvent(String sourceOid, String attrOid, String attrEid, String jsonString, Logger logger){
 		
 		CommunicationNode communicationNode 
 							= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
-		NetworkMessageRequest request = new NetworkMessageRequest();
+		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
 		
 		// we will need this newly generated ID, so we keep it
 		int requestId = request.getRequestId();
@@ -133,6 +145,14 @@ public class ObjectsOidEventsEid extends ServerResource {
 		// this will wait for response
 		NetworkMessageResponse response 
 			= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
+		
+		if (response == null){
+			logger.info("No response message received. Source ID: " 
+				+ sourceOid + " Destination ID: " + attrOid + " Event ID: " + attrEid  
+				+ " Request ID: " + requestId);
+			throw new ResourceException(Status.CONNECTOR_ERROR_CONNECTION,
+					"No valid response from remote object, possible message timeout.");
+		}
 		
 		// if the return code is different than 2xx, make it visible
 		if ((response.getResponseCode() / 2) != 1){
