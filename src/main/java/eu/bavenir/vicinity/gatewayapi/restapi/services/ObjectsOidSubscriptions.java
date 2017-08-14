@@ -3,6 +3,7 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -18,6 +19,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 
 
 /*
@@ -93,6 +96,8 @@ public class ObjectsOidSubscriptions extends ServerResource {
 	public String accept(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Given identifier does not exist.");
@@ -108,8 +113,7 @@ public class ObjectsOidSubscriptions extends ServerResource {
 		try {
 			subscriptionsJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid subscription hook description");
 		}

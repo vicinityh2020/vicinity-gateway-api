@@ -75,22 +75,22 @@ public class NetworkMessageRequest extends NetworkMessage {
 	/**
 	 * Value that is used, when the requested operation is HTTP GET.
 	 */
-	public static final String REQUEST_OPERATION_GET = "get";
+	public static final int REQUEST_OPERATION_GET = 0x00;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP PUT.
 	 */
-	public static final String REQUEST_OPERATION_PUT = "put";
+	public static final int REQUEST_OPERATION_PUT = 0x01;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP DELETE.
 	 */
-	public static final String REQUEST_OPERATION_DEL = "delete";
+	public static final int REQUEST_OPERATION_DEL = 0x02;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP POST.
 	 */
-	public static final String REQUEST_OPERATION_POST = "post";
+	public static final int REQUEST_OPERATION_POST = 0x03;
 	
 	
 	/* === FIELDS === */
@@ -103,7 +103,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 *  {@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
 	 *  {@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
 	 */
-	private String requestOperation;
+	private int requestOperation;
 	
 	/**
 	 * Linked hash map with attribute names and their values.
@@ -209,7 +209,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 *  		{@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
 	 *  		{@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
 	 */
-	public String getRequestOperation() {
+	public int getRequestOperation() {
 		return requestOperation;
 	}
 
@@ -223,7 +223,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 *  		{@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
 	 *  		{@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
 	 */
-	public void setRequestOperation(String requestOperation) {
+	public void setRequestOperation(int requestOperation) {
 		this.requestOperation = requestOperation;
 	}
 	
@@ -368,13 +368,13 @@ public class NetworkMessageRequest extends NetworkMessage {
 		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
 		
 		// get and validate the request operation
-		requestOperation = json.getString(NetworkMessageRequest.ATTR_REQUESTOPERATION);
+		requestOperation = json.getInt(NetworkMessageRequest.ATTR_REQUESTOPERATION);
 		
 		if (
-				!(requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_GET)
-				|| requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_DEL)
-				|| requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_POST)
-				|| requestOperation.equals(NetworkMessageRequest.REQUEST_OPERATION_PUT))
+				!(requestOperation == NetworkMessageRequest.REQUEST_OPERATION_GET
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_DEL
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_POST
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_PUT)
 			){
 				
 			setValid(false);

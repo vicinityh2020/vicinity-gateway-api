@@ -2,6 +2,7 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -15,6 +16,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 
 
 /*
@@ -77,6 +80,8 @@ public class ObjectsOid extends ServerResource{
 	public void store(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrOid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Object does not exist under given identifier.");
@@ -93,8 +98,7 @@ public class ObjectsOid extends ServerResource{
 		try {
 			objectJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid object description");
 		}

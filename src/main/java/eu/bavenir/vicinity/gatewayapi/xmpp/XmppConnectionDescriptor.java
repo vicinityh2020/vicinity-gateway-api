@@ -11,7 +11,6 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
-import org.jivesoftware.smack.SmackException.NotLoggedInException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.chat2.Chat;
@@ -47,8 +46,8 @@ import eu.bavenir.vicinity.gatewayapi.App;
  * 2. {@link #connect() connect()}
  * 3. use - since the clients connecting to XMPP network are going to use HTTP authentication, they will send
  * 		their credentials in every request. It is therefore necessary to verify, whether the password is correct. The 
- * 		{@link #verifyPassword() verifyPassword()} is used for this and is probably called by RESTLET every time a 
- * 		request is made.
+ * 		{@link #verifyPassword() verifyPassword()} is used for this and it should be called by RESTLET authorization 
+ * 		verifier every time a request is made.
  * 4. {@link #disconnect() disconnect()}
  *  
  * @author sulfo
@@ -323,11 +322,6 @@ public class XmppConnectionDescriptor {
 			jid = JidCreate.entityBareFrom(destinationUsername);
 			
 			// check whether the destination is online
-			try {
-				roster.reloadAndWait();
-			} catch (NotLoggedInException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-			}
 			Presence presence = roster.getPresence(jid);
 			
 			if (presence.isAvailable()){
@@ -358,11 +352,6 @@ public class XmppConnectionDescriptor {
 	public boolean sendMessage(EntityBareJid destinationJid, String message){
 		
 		// check whether the destination is online
-		try {
-			roster.reloadAndWait();
-		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-			logger.warning("Message could not be sent. Exception: " + e.getMessage());
-		}
 		Presence presence = roster.getPresence(destinationJid);
 		
 		if (presence.isAvailable()){
@@ -593,6 +582,12 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 		*/
+		/*
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}*/
 	}
 	
 	
@@ -607,6 +602,12 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 		*/
+		/*
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}*/
 	}
 	
 	
@@ -621,6 +622,13 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 		*/
+		/*
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}*/
+		
 	}
 	
 	

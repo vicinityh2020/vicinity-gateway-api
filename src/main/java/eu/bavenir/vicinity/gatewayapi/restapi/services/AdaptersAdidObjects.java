@@ -115,17 +115,6 @@ public class AdaptersAdidObjects extends ServerResource {
 					"Invalid object description");
 		}
 		
-		// get the json
-		/* TODO delete this after testing
-		String objectsJsonString = null;
-		try {
-			objectsJsonString = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid object description");
-		}*/
-		
 		return storeObjects(callerOid, attrAdid, entity, logger);
 	}
 	
@@ -143,6 +132,8 @@ public class AdaptersAdidObjects extends ServerResource {
 		
 		String attrAdid = getAttribute(ATTR_ADID);
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrAdid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Adapter does not exist under given identifier.");
@@ -159,8 +150,8 @@ public class AdaptersAdidObjects extends ServerResource {
 		try {
 			adapterJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid object description");
 		}
@@ -194,8 +185,7 @@ public class AdaptersAdidObjects extends ServerResource {
 		
 		ClientResource clientResource = new ClientResource("http://vicinity.bavenir.eu:3000/commServer/registration");
 		Writer writer = new StringWriter();
-		
-		// TODO make it this way in the agent communicator
+
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
 		try {

@@ -116,9 +116,6 @@ public class FeedsFid extends ServerResource {
 		// create an array list of the oids - and remove the domain from each oid
 		JsonArrayBuilder oidsArrayBuilder = Json.createArrayBuilder();
 		
-		// TODO - this is just for testing
-		//oidsArrayBuilder.add("12345");
-		
 		for (RosterEntry entry : rosterObjects) {
 			oidsArrayBuilder.add(entry.getJid().toString().replace(xmppDomain, ""));
 		}
@@ -131,7 +128,6 @@ public class FeedsFid extends ServerResource {
 		ClientResource clientResource = new ClientResource("http://vicinity.bavenir.eu:3000/commServer/search");
 		Writer writer = new StringWriter();
 		
-		// TODO make it this way in the agent communicator
 		Representation responseRepresentation = clientResource.post(new JsonRepresentation(object.toString()), 
 					MediaType.APPLICATION_JSON);
 		

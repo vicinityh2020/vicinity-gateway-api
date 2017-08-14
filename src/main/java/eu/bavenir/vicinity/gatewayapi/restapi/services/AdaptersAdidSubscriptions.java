@@ -3,6 +3,7 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -18,6 +19,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 
 
 /*
@@ -93,6 +96,8 @@ public class AdaptersAdidSubscriptions extends ServerResource {
 	public String accept(Representation entity) {
 		String attrAdid = getAttribute(ATTR_ADID);
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (attrAdid == null){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
 					"Adapter does not exist under given identifier.");
@@ -108,8 +113,7 @@ public class AdaptersAdidSubscriptions extends ServerResource {
 		try {
 			subscriptionJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid subscription hook description");
 		}

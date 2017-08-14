@@ -1,6 +1,7 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -12,6 +13,8 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 
 
 /*
@@ -65,6 +68,8 @@ public class Feeds extends ServerResource {
 	@Post("json")
 	public String accept(Representation entity) {
 		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid feed description");
@@ -75,8 +80,7 @@ public class Feeds extends ServerResource {
 		try {
 			feedJsonString = entity.getText();
 		} catch (IOException e) {
-			// TODO to logs
-			e.printStackTrace();
+			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid feed description");
 		}

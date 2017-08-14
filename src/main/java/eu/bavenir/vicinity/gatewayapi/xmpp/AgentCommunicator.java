@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
@@ -129,8 +130,7 @@ public class AgentCommunicator {
 		
 		NetworkMessageResponse response = new NetworkMessageResponse(config);
 		
-		// always set the correlation ID of the request TODO
-		//response.setRequestId(request.getRequestId());
+		response.setRequestId(request.getRequestId());
 		
 		ClientResource clientResource = new ClientResource(assembleAgentUrl(request));
 		
@@ -152,7 +152,8 @@ public class AgentCommunicator {
 				String requestBodyPost = request.getRequestBody();
 				
 				if (requestBodyPost != null){
-					responseRepresentation = clientResource.post(requestBodyPost, MediaType.APPLICATION_JSON);
+					responseRepresentation = clientResource.post(new JsonRepresentation(requestBodyPost), 
+							MediaType.APPLICATION_JSON);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
 				}
@@ -165,7 +166,8 @@ public class AgentCommunicator {
 				String requestBodyPut = request.getRequestBody();
 				
 				if (requestBodyPut != null){
-					responseRepresentation = clientResource.put(requestBodyPut, MediaType.APPLICATION_JSON);
+					responseRepresentation = clientResource.put(new JsonRepresentation(requestBodyPut), 
+							MediaType.APPLICATION_JSON);
 				} else {
 					logger.warning("Request nr. " + request.getRequestId() + " contains no body.");
 				}

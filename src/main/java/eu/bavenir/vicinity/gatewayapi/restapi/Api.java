@@ -142,6 +142,8 @@ public class Api extends Application {
 		applicationContext.getAttributes().put(CONTEXT_LOGGER, logger);
 		applicationContext.getAttributes().put(CONTEXT_COMMNODE, communicationNode);
 		
+		applicationContext.setLogger(logger);
+		
 		setContext(applicationContext);
 		
 		// load authentication challenge scheme method from configuration
