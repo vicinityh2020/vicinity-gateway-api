@@ -138,6 +138,7 @@ public class FeedsFid extends ServerResource {
 		}
 		
 		return writer.toString();
+		//return responseRepresentation;
 		
 	}
 	

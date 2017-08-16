@@ -11,6 +11,7 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.SmackException.NotLoggedInException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.chat2.Chat;
@@ -582,12 +583,11 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 		*/
-		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
 	}
 	
 	
@@ -602,12 +602,11 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 		*/
-		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
 	}
 	
 	
@@ -622,12 +621,11 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 		*/
-		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
 		
 	}
 	
