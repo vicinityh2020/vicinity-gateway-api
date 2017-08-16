@@ -117,7 +117,7 @@ public class FeedsFid extends ServerResource {
 		JsonArrayBuilder oidsArrayBuilder = Json.createArrayBuilder();
 		
 		for (RosterEntry entry : rosterObjects) {
-			oidsArrayBuilder.add(entry.getJid().toString().replace(xmppDomain, ""));
+			oidsArrayBuilder.add(entry.getJid().toString().replace("@" + xmppDomain, ""));
 		}
 		
 		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
