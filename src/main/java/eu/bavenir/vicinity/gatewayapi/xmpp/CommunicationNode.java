@@ -312,6 +312,12 @@ public class CommunicationNode {
 		}
 		
 		Roster roster = descriptor.getRoster();
+		
+		if (roster == null){
+			logger.warning("Roster is null.");
+			return Collections.emptyList();
+		}
+		
 		Collection<RosterEntry> entries = roster.getEntries();
 		
 		// log it

@@ -301,6 +301,12 @@ public class XmppConnectionDescriptor {
 			return null;
 		}
 		
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}
+		
 		return roster;
 	}
 	
@@ -321,6 +327,12 @@ public class XmppConnectionDescriptor {
 		EntityBareJid jid;
 		try {
 			jid = JidCreate.entityBareFrom(destinationUsername);
+			
+			try {
+				roster.reloadAndWait();
+			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+				logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+			}
 			
 			// check whether the destination is online
 			Presence presence = roster.getPresence(jid);
@@ -351,6 +363,12 @@ public class XmppConnectionDescriptor {
 	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
 	public boolean sendMessage(EntityBareJid destinationJid, String message){
+		
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}
 		
 		// check whether the destination is online
 		Presence presence = roster.getPresence(destinationJid);
@@ -583,11 +601,12 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 		*/
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 	}
 	
 	
@@ -602,11 +621,12 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 		*/
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 	}
 	
 	
@@ -621,11 +641,12 @@ public class XmppConnectionDescriptor {
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 		*/
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 		
 	}
 	
