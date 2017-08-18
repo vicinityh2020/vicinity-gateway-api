@@ -138,7 +138,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		request.setRequestBody(jsonString);
 		
 		// all set
-		if (!communicationNode.sendMessage(sourceOid, "iliolousta_2", request.buildMessageString())){
+		if (!communicationNode.sendMessage(sourceOid, "53678712-44b1-4b13-9fc7-b60cfff85d27", request.buildMessageString())){
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
 		}
 		
