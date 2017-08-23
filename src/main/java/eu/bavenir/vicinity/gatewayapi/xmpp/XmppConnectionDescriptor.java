@@ -317,37 +317,59 @@ public class XmppConnectionDescriptor {
 	 * 
 	 * @param destinationUsername Destination contact, for which the message is intended. 
 	 * @param message A string to send.
+	 * @param chat An instance of {@link org.jivesoftware.smack.chat2.Chat Chat} class. When a message is to be sent
+	 * over network as a new request, this should be left as null - a new chat will be created automatically and it
+	 * will check whether the receiving station is in the transmitting station roster (which serves as an 
+	 * authorization method - you can't send messages to stations that are not visible to you). However if the message
+	 * is to be sent as a response, the Chat object that was created when the request message arrived should be provided
+	 * (as a way to overcome the roster authorization - a station should be able to respond to a request, even if it 
+	 * does not see the requesting station).
 	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
-	public boolean sendMessage(String destinationUsername, String message){
+	public boolean sendMessage(String destinationUsername, String message, Chat chat){
 
 		destinationUsername = destinationUsername + "@" 
 								+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
 		
 		EntityBareJid jid;
+		
 		try {
 			jid = JidCreate.entityBareFrom(destinationUsername);
-			
-			try {
-				roster.reloadAndWait();
-			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-				logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-			}
-			
-			// check whether the destination is online
-			Presence presence = roster.getPresence(jid);
-			
-			if (presence.isAvailable()){
-				Chat chat = chatManager.chatWith(jid);
-				chat.send(message);
-				
-			} else {
-				return false;
-			}
-			
-		} catch (XmppStringprepException | NotConnectedException | InterruptedException e) {
+		} catch (XmppStringprepException e) {
 			logger.warning("Message could not be sent. Exception: " + e.getMessage());
 			return false;
+		}
+		
+		// distinguish between this call being a new request a response to one
+		if (chat == null){
+			try {
+				try {
+					roster.reloadAndWait();
+				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+				}
+				
+				// check whether the destination is online
+				Presence presence = roster.getPresence(jid);
+				
+				if (presence.isAvailable()){
+					chat = chatManager.chatWith(jid);
+					chat.send(message);
+					
+				} else {
+					return false;
+				}
+				
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+				return false;
+			}
+		} else {
+			try {
+				chat.send(message);
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			}
 		}
 		
 		return true;
@@ -360,30 +382,47 @@ public class XmppConnectionDescriptor {
 	 * 
 	 * @param destinationJid Destination contact, for which the message is intended. 
 	 * @param message A string to send.
+	 * @param chat An instance of {@link org.jivesoftware.smack.chat2.Chat Chat} class. When a message is to be sent
+	 * over network as a new request, this should be left as null - a new chat will be created automatically and it
+	 * will check whether the receiving station is in the transmitting station roster (which serves as an 
+	 * authorization method - you can't send messages to stations that are not visible to you). However if the message
+	 * is to be sent as a response, the Chat object that was created when the request message arrived should be provided
+	 * (as a way to overcome the roster authorization - a station should be able to respond to a request, even if it 
+	 * does not see the requesting station).
 	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
-	public boolean sendMessage(EntityBareJid destinationJid, String message){
+	public boolean sendMessage(EntityBareJid destinationJid, String message, Chat chat){
 		
-		try {
-			roster.reloadAndWait();
-		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
-		
-		// check whether the destination is online
-		Presence presence = roster.getPresence(destinationJid);
-		
-		if (presence.isAvailable()){
-		
-			Chat chat = chatManager.chatWith(destinationJid);
+		// distinguish between this call being a new request a response to one
+		if (chat == null){
 			try {
-				chat.send(message);
+				try {
+					roster.reloadAndWait();
+				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+				}
+				
+				// check whether the destination is online
+				Presence presence = roster.getPresence(destinationJid);
+				
+				if (presence.isAvailable()){
+					chat = chatManager.chatWith(destinationJid);
+					chat.send(message);
+					
+				} else {
+					return false;
+				}
+				
 			} catch (NotConnectedException | InterruptedException e) {
 				logger.warning("Message could not be sent. Exception: " + e.getMessage());
 				return false;
 			}
 		} else {
-			return false;
+			try {
+				chat.send(message);
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			}
 		}
 		
 		return true;
@@ -542,7 +581,7 @@ public class XmppConnectionDescriptor {
 			
 			case NetworkMessageRequest.MESSAGE_TYPE:
 				logger.finest("The message is a request. Processing...");
-				processMessageRequest(from, networkMessage);
+				processMessageRequest(from, networkMessage, chat);
 				break;
 				
 			case NetworkMessageResponse.MESSAGE_TYPE:
@@ -564,7 +603,7 @@ public class XmppConnectionDescriptor {
 	 * @param from Address of the object that sent the message.
 	 * @param networkMessage Message parsed from the XMPP message. 
 	 */
-	private void processMessageRequest(EntityBareJid from, NetworkMessage networkMessage){
+	private void processMessageRequest(EntityBareJid from, NetworkMessage networkMessage, Chat chat){
 		
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
@@ -574,7 +613,7 @@ public class XmppConnectionDescriptor {
 		NetworkMessageResponse agentResponse = agentCommunicator.processRequestMessage(requestMessage);
 		
 		// send it back
-		sendMessage(from, agentResponse.buildMessageString());
+		sendMessage(from, agentResponse.buildMessageString(), chat);
 	}
 	
 	

@@ -366,7 +366,7 @@ public class CommunicationNode {
 			}
 		}
 		
-		return descriptor.sendMessage(destinationUsername, message);
+		return descriptor.sendMessage(destinationUsername, message, null);
 	}
 	
 	
