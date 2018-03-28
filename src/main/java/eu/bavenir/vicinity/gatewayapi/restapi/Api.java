@@ -11,25 +11,20 @@ import org.restlet.routing.Router;
 import org.restlet.security.ChallengeAuthenticator;
 
 import eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.Adapters;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdid;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdidObjects;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.AdaptersAdidSubscriptions;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.Feeds;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.FeedsFid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.AgentsAgidObjects;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.AgentsAgidObjectsDelete;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.Objects;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogin;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogout;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActions;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAid;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidActionsAidTasksTid;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidEvents;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidEventsEid;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidEventsEidAcknowledge;
+import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidProperties;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidSubscriptions;
 import eu.bavenir.vicinity.gatewayapi.restapi.services.Sparql;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.Subscriptions;
-import eu.bavenir.vicinity.gatewayapi.restapi.services.SubscriptionsSid;
 import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
 
@@ -47,7 +42,6 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
  * respective {@link org.restlet.resource.ServerResource Resources}. The HTTP authentication against Gateway API is 
  * also checked in the {@link eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier AuthenticationVerifier}.
  * 
- * @see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
  *   
  * @author sulfo
  *
@@ -162,37 +156,42 @@ public class Api extends Application {
 		Router router = new Router(getContext());
 
 		// define routes
-		// see https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/
+		
+		
+		// AUTHENTICATION
 		router.attach("/objects/login", ObjectsLogin.class);
 		router.attach("/objects/logout", ObjectsLogout.class);
 		
-		// registry
-		router.attach("/adapters", Adapters.class);
-		router.attach("/adapters/{adid}", AdaptersAdid.class);
-		router.attach("/adapters/{adid}/objects", AdaptersAdidObjects.class);
-		router.attach("/adapters/{adid}/subscriptions", AdaptersAdidSubscriptions.class);
 		
-		router.attach("/objects", Objects.class);
-		router.attach("/objects/{oid}", ObjectsOid.class);
-		router.attach("/objects/{oid}/subscriptions", ObjectsOidSubscriptions.class);
-		
-		router.attach("/subscriptions", Subscriptions.class);
-		router.attach("/subscriptions/{sid}", SubscriptionsSid.class);
-		
-		// discovery
-		router.attach("/feeds", Feeds.class);
-		router.attach("/feeds/{fid}", FeedsFid.class);
-		
-		// consumption
+		// CONSUMPTION
+		router.attach("/objects/{oid}/properties", ObjectsOidProperties.class);
 		router.attach("/objects/{oid}/properties/{pid}", ObjectsOidPropertiesPid.class);
+		router.attach("/objects/{oid}/actions", ObjectsOidActions.class);
 		router.attach("/objects/{oid}/actions/{aid}", ObjectsOidActionsAid.class);
 		router.attach("/objects/{oid}/actions/{aid}/tasks/{tid}", ObjectsOidActionsAidTasksTid.class);
-		router.attach("/objects/{oid}/events/{eid}/acknowledge", ObjectsOidEventsEidAcknowledge.class);
 		
-		// exposing service
+		
+		// EXPOSING
+		router.attach("/objects/{oid}/events", ObjectsOidEvents.class);
 		router.attach("/objects/{oid}/events/{eid}", ObjectsOidEventsEid.class);
+		router.attach("/events/{eid}", ObjectsOidEventsEid.class);
 		
-		// query
+		
+		// DISCOVERY
+		router.attach("/objects", Objects.class);
+		router.attach("/objects/{oid}", ObjectsOid.class);
+		//get
+		router.attach("/agents/{agid}/objects", AgentsAgidObjects.class);
+		
+		
+		// REGISTRY
+		// post, put
+		router.attach("/agents/{agid}/objects", AgentsAgidObjects.class);
+		// post
+		router.attach("/agents/{agid}/objects/delete", AgentsAgidObjectsDelete.class);
+		
+		
+		// QUERY
 		router.attach("/sparql", Sparql.class);
 		
 		// solve the question of API authentication

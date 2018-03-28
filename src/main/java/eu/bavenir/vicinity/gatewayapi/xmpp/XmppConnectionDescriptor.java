@@ -47,7 +47,7 @@ import eu.bavenir.vicinity.gatewayapi.App;
  * 2. {@link #connect() connect()}
  * 3. use - since the clients connecting to XMPP network are going to use HTTP authentication, they will send
  * 		their credentials in every request. It is therefore necessary to verify, whether the password is correct. The 
- * 		{@link #verifyPassword() verifyPassword()} is used for this and it should be called by RESTLET authorization 
+ * 		{@link #verifyPassword() verifyPassword()} is used for this and it should be called by RESTLET authorisation 
  * 		verifier every time a request is made.
  * 4. {@link #disconnect() disconnect()}
  *  

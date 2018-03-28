@@ -50,7 +50,7 @@ public class AuthenticationVerifier implements Verifier {
 	
 	
 	/**
-	 * Overriden method from super class.  
+	 * Overridden method from super class.  
 	 */
 	@Override
 	public int verify(Request request, Response response) {

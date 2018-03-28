@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+	<general>
+
+	</general>
+
 	<logging>
 		<!-- 
 		Set a relative or absolute (recommended) path to log file. 
 		In order to differentiate among multiple log files, a '%s' can be added
 		to arbitrary location in the string, which will be replaced by a time
-		stamp during runtime. 
+		stamp during start. Each start of the Gateway will produce a new log file
+		with a new time stamp.  
 		-->
 		<file>/home/sulfo/Workspace/GatewayApi/log/%s-gateway.log</file>
 		
@@ -34,8 +39,8 @@
 		to console, aside from logging it into file. This can be useful when 
 		debugging the software. 
 		
-		Setting it to 'false' will suppress this behavior, instead logging 
-		events solely to log file. This is the default behavior.
+		Setting it to 'false' will suppress this behaviour, instead logging 
+		events solely to log file. This is the default behaviour.
 		-->
 		<consoleOutput>true</consoleOutput>
 	</logging>
@@ -50,12 +55,12 @@
 		<!-- <server>localhost</server> -->
 		
 		<!--
-		Server port uses STARTTLS. Defaults to 5222 if not set.
+		Defaults to 5222 if not set. Server port uses STARTTLS.
 		-->
 		<port>5222</port>
 		
 		<!-- 
-		Setting this parameter to true will enable security. The policy is to
+		Setting this parameter to true will enable encryption of communication. The policy is to
 		try the strongest mechanisms first. Not having a valid certificate 
 		on server will always fail the connection.
 		
@@ -79,16 +84,6 @@
 		Default is false.
 		-->
 		<debugging>true</debugging>
-		
-		<!--
-		Listen for changes in rosters (XMPP contact lists) of devices connected
-		to this Gateway. These changes include whether a partner device goes 
-		offline or online. It is recommended to have this feature turned on,
-		unless there are thousands of devices connected to this Gateway API. 
-		
-		Default is true.
-		-->
-		<listenForRosterChanges>true</listenForRosterChanges>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
@@ -138,7 +133,7 @@
 		
 		none	-	No authentication. Experimental, for debugging purposes only.
 					Without authentication, there is no way of logging into the
-					XMPP network other than hard coded credentials (or other
+					network other than hard coded credentials (or other
 					kind of customization).
 		
 		Defaults to basic.
