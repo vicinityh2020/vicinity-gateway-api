@@ -8,6 +8,7 @@
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/xmpp/NetworkMessageResponse.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/services/AgentsAgidObjects.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidEventsEid.java
+/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/messages/LocalMessage.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/services/ObjectsOidActions.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/xmpp/XmppConnectionDescriptor.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/vicinity/gatewayapi/restapi/services/AgentsAgidObjectsDelete.java

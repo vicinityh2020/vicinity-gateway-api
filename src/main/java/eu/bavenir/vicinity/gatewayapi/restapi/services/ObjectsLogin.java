@@ -21,7 +21,6 @@ import org.restlet.resource.ServerResource;
  * 
  *   URL: 				[server]:[port]/api/objects/login
  *   METHODS: 			GET
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
  *   
  * @author sulfo
  *

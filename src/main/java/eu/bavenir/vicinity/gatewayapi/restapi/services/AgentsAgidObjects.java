@@ -147,7 +147,7 @@ public class AgentsAgidObjects extends ServerResource {
 	 * 
 	 */
 	@Put("json")
-	public void store(Representation entity) {
+	public Representation store(Representation entity) {
 		
 		String attrAgid = getAttribute(ATTR_AGID);
 		
@@ -166,7 +166,7 @@ public class AgentsAgidObjects extends ServerResource {
 					"Invalid object descriptions");
 		}
 		
-		updateObjects(entity, logger);
+		return updateObjects(entity, logger);
 	}
 	
 	

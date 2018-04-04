@@ -22,7 +22,6 @@ import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
  * 
  *   URL: 				[server]:[port]/api/objects/logout
  *   METHODS: 			GET
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
  *   
  * @author sulfo
  *
