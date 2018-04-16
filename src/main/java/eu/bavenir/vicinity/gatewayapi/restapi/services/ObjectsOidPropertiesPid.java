@@ -6,12 +6,14 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 import eu.bavenir.vicinity.gatewayapi.xmpp.NetworkMessageRequest;
@@ -70,7 +72,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @return Latest property value.
 	 */
 	@Get
-	public String represent() {
+	public Representation represent() {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -95,7 +97,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param object Model.
 	 */
 	@Put("json")
-	public String store(Representation entity) {
+	public Representation store(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -144,7 +146,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private String updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, Logger logger){
+	private Representation updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, Logger logger){
 		CommunicationNode communicationNode 
 								= (CommunicationNode) getContext().getAttributes().get(Api.CONTEXT_COMMNODE);
 		
@@ -184,10 +186,16 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		if ((response.getResponseCode() / 200) != 1){
 			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
 					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			return response.getResponseCode() + " " + response.getResponseCodeReason();
+			
+			StatusMessage statusMessage = new StatusMessage();
+			statusMessage.setError(true);
+			statusMessage.addMessage(StatusMessage.MESSAGE_CODE, String.valueOf(response.getResponseCode()));
+			statusMessage.addMessage(StatusMessage.MESSAGE_REASON, response.getResponseCodeReason());
+			
+			return new JsonRepresentation(statusMessage.buildMessage().toString());
 		}
 		
-		return response.getResponseBody();
+		return new JsonRepresentation(response.getResponseBody());
 		
 	}
 	
@@ -201,7 +209,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private String getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
+	private Representation getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
 		
 		// send message to the right object
 		CommunicationNode communicationNode 
@@ -241,10 +249,16 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		if ((response.getResponseCode() / 200) != 1){
 			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
 					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			return response.getResponseCode() + " " + response.getResponseCodeReason();
+			
+			StatusMessage statusMessage = new StatusMessage();
+			statusMessage.setError(true);
+			statusMessage.addMessage(StatusMessage.MESSAGE_CODE, String.valueOf(response.getResponseCode()));
+			statusMessage.addMessage(StatusMessage.MESSAGE_REASON, response.getResponseCodeReason());
+			
+			return new JsonRepresentation(statusMessage.buildMessage().toString());
 		}
 		
-		return response.getResponseBody();
+		return new JsonRepresentation(response.getResponseBody());
 	}
 	
 }

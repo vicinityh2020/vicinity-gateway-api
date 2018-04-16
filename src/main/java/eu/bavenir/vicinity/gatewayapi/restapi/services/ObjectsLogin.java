@@ -1,7 +1,11 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
+
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 /*
  * STRUCTURE
@@ -40,10 +44,13 @@ public class ObjectsLogin extends ServerResource{
 	 * @return A String indicating that login is successful.
 	 */
 	@Get
-	public String represent() {
+	public Representation represent() {
 		
 		// if the login is unsuccessful, the execution will never reach this place
-		return "Login successful.";
+		
+		StatusMessage statusMessage = new StatusMessage(false, "login", "success");
+		
+		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
 	
 	// === PRIVATE METHODS ===

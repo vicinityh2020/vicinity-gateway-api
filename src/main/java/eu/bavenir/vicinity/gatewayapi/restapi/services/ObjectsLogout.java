@@ -1,8 +1,11 @@
 package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.vicinity.gatewayapi.restapi.Api;
 import eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode;
 
@@ -36,11 +39,13 @@ public class ObjectsLogout extends ServerResource{
 	// === OVERRIDEN HTTP METHODS ===
 	
 	@Get
-	public String represent() {
+	public Representation represent() {
 		
 		logoutObject();
 		
-		return "Logout successful.";
+		StatusMessage statusMessage = new StatusMessage(false, "logout", "success");
+		
+		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
 	
 	

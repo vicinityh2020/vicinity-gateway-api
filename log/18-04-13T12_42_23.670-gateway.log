@@ -1,0 +1,429 @@
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/18-04-13T12_42_23.670-gateway.log
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Apr 13, 2018 12:42:23 PM org.restlet.Application start
+INFO: Starting eu.bavenir.vicinity.gatewayapi.restapi.Api application
+Apr 13, 2018 12:42:23 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+Apr 13, 2018 12:42:23 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt1'.
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt1@vicinity.eu'
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: SASLError using PLAIN: not-authorized
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt1' was not established.
+Apr 13, 2018 12:42:41 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 127.0.0.1.
+Apr 13, 2018 12:42:41 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication failed. Invalid credentials provided.
+Apr 13, 2018 12:42:41 PM org.restlet.security.ChallengeAuthenticator challenge
+FINE: An authentication challenge was requested.
+Apr 13, 2018 12:42:41 PM org.restlet.security.Authenticator unauthenticated
+FINE: The authentication failed for the identifer "test_vcnt1" using the HTTP_Basic scheme.
+Apr 13, 2018 12:42:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+Apr 13, 2018 12:42:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+Apr 13, 2018 12:42:41 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Apr 13, 2018 12:43:03 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Apr 13, 2018 12:43:03 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Apr 13, 2018 12:43:03 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 13, 2018 12:43:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+Apr 13, 2018 12:43:03 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+Apr 13, 2018 12:43:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+Apr 13, 2018 12:43:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+Apr 13, 2018 12:43:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Apr 13, 2018 12:43:03 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogin, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Apr 13, 2018 12:43:03 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Apr 13, 2018 12:43:03 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Apr 13, 2018 12:44:10 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Apr 13, 2018 12:44:10 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Apr 13, 2018 12:44:10 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 13, 2018 12:44:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Apr 13, 2018 12:44:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 1.0
+Apr 13, 2018 12:44:10 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/logout" -> Finder for ObjectsLogout
+Apr 13, 2018 12:44:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 15 characters were matched
+Apr 13, 2018 12:44:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/logout". No remaining part to match
+Apr 13, 2018 12:44:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Apr 13, 2018 12:44:10 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogout.represent(), javaClass: class eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsLogout, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Apr 13, 2018 12:44:10 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Apr 13, 2018 12:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor disconnect
+FINE: XMPP user 'test_vcnt0' disconnected.
+Apr 13, 2018 12:44:10 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode terminateConnection
+INFO: Connection to XMPP for user 'test_vcnt0' destroyed.
+Apr 13, 2018 12:44:10 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was established.
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'test_vcnt0' was added into connection pool.
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Apr 13, 2018 12:44:21 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Apr 13, 2018 12:44:21 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 1.0
+Apr 13, 2018 12:44:21 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects" -> Finder for Objects
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 8 characters were matched
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects". No remaining part to match
+Apr 13, 2018 12:44:21 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Apr 13, 2018 12:44:21 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.vicinity.gatewayapi.restapi.services.Objects.represent(), javaClass: class eu.bavenir.vicinity.gatewayapi.restapi.services.Objects, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Apr 13, 2018 12:44:21 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: -- Roster for 'test_vcnt0' --
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: bbbbb6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=bbbbb6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-29,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: gnomon-charger@vicinity.eu Presence: Presence Stanza [from=gnomon-charger@vicinity.eu,id=kFdVy-30,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: nnnnn6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=nnnnn6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-31,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ttttt6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ttttt6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-32,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: kkkkk6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=kkkkk6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-33,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: eeeee6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [to=test_vcnt0@vicinity.eu/communicationNode,from=eeeee6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu/communicationNode,id=fXo2F-6,type=available,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: lego_1@vicinity.eu Presence: Presence Stanza [from=lego_1@vicinity.eu,id=kFdVy-34,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 0916e774-f7cc-4c4a-bf26-0cf5ed782a24@vicinity.eu Presence: Presence Stanza [from=0916e774-f7cc-4c4a-bf26-0cf5ed782a24@vicinity.eu,id=kFdVy-35,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: dc5bfe59-8aaf-4302-802f-6e76fa94f3a3@vicinity.eu Presence: Presence Stanza [from=dc5bfe59-8aaf-4302-802f-6e76fa94f3a3@vicinity.eu,id=kFdVy-36,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: hhhhh6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=hhhhh6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-37,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: plugwise__000d6f0005b0fcce@vicinity.eu Presence: Presence Stanza [from=plugwise__000d6f0005b0fcce@vicinity.eu,id=kFdVy-38,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: test_vcnt3@vicinity.eu Presence: Presence Stanza [from=test_vcnt3@vicinity.eu,id=kFdVy-39,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: enocean__01a82356@vicinity.eu Presence: Presence Stanza [from=enocean__01a82356@vicinity.eu,id=kFdVy-40,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: test_vcnt4@vicinity.eu Presence: Presence Stanza [from=test_vcnt4@vicinity.eu,id=kFdVy-41,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 92c6c3f2-c679-45f7-b21a-585a8ea0e16f@vicinity.eu Presence: Presence Stanza [from=92c6c3f2-c679-45f7-b21a-585a8ea0e16f@vicinity.eu,id=kFdVy-42,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: b47b4c78-5b79-4136-a56b-959176957489@vicinity.eu Presence: Presence Stanza [from=b47b4c78-5b79-4136-a56b-959176957489@vicinity.eu,id=kFdVy-43,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: plugwise__000d6f00019f0ca4@vicinity.eu Presence: Presence Stanza [from=plugwise__000d6f00019f0ca4@vicinity.eu,id=kFdVy-44,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: bavenir_1@vicinity.eu Presence: Presence Stanza [from=bavenir_1@vicinity.eu,id=kFdVy-45,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d9100add-030f-40b7-a6e4-05e5494e14de@vicinity.eu Presence: Presence Stanza [from=d9100add-030f-40b7-a6e4-05e5494e14de@vicinity.eu,id=kFdVy-46,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 682f665a-bed1-402e-91ec-029abaa35bb0@vicinity.eu Presence: Presence Stanza [from=682f665a-bed1-402e-91ec-029abaa35bb0@vicinity.eu,id=kFdVy-47,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 6a662e35-4b9a-448c-89eb-391cb2f174fa@vicinity.eu Presence: Presence Stanza [to=test_vcnt0@vicinity.eu/communicationNode,from=6a662e35-4b9a-448c-89eb-391cb2f174fa@vicinity.eu/communicationNode,id=by9g3-6,type=available,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: bavenir_2@vicinity.eu Presence: Presence Stanza [from=bavenir_2@vicinity.eu,id=kFdVy-48,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: qqqqq6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=qqqqq6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-49,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__humidity@vicinity.eu Presence: Presence Stanza [from=d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__humidity@vicinity.eu,id=kFdVy-50,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: hvacs__hvac_lg_03@vicinity.eu Presence: Presence Stanza [from=hvacs__hvac_lg_03@vicinity.eu,id=kFdVy-51,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: mariasuser2@vicinity.eu Presence: Presence Stanza [from=mariasuser2@vicinity.eu,id=kFdVy-52,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: bavenir_3@vicinity.eu Presence: Presence Stanza [from=bavenir_3@vicinity.eu,id=kFdVy-53,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: mariasuser1@vicinity.eu Presence: Presence Stanza [from=mariasuser1@vicinity.eu,id=kFdVy-54,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: mariasuser3@vicinity.eu Presence: Presence Stanza [from=mariasuser3@vicinity.eu,id=kFdVy-55,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__thermometer@vicinity.eu Presence: Presence Stanza [from=d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__thermometer@vicinity.eu,id=kFdVy-56,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: enocean__01a7316e@vicinity.eu Presence: Presence Stanza [from=enocean__01a7316e@vicinity.eu,id=kFdVy-57,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 93cba752-b9ec-4a92-b983-93c749b76b2e@vicinity.eu Presence: Presence Stanza [from=93cba752-b9ec-4a92-b983-93c749b76b2e@vicinity.eu,id=kFdVy-58,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: plugwise__000d6f0005b1076e@vicinity.eu Presence: Presence Stanza [from=plugwise__000d6f0005b1076e@vicinity.eu,id=kFdVy-59,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: tinym_vas@vicinity.eu Presence: Presence Stanza [from=tinym_vas@vicinity.eu,id=kFdVy-60,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ooooo6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ooooo6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-61,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ddddd6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ddddd6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-62,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: iliolousta_25@vicinity.eu Presence: Presence Stanza [from=iliolousta_25@vicinity.eu,id=kFdVy-63,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: prosumer_0@vicinity.eu Presence: Presence Stanza [from=prosumer_0@vicinity.eu,id=kFdVy-64,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 872df6ad-51a4-4325-8afd-1dcf5b20ac21@vicinity.eu Presence: Presence Stanza [from=872df6ad-51a4-4325-8afd-1dcf5b20ac21@vicinity.eu,id=kFdVy-65,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: prosumer_1@vicinity.eu Presence: Presence Stanza [from=prosumer_1@vicinity.eu,id=kFdVy-66,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ppppp6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ppppp6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-67,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: upm_dev1@vicinity.eu Presence: Presence Stanza [from=upm_dev1@vicinity.eu,id=kFdVy-68,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: prosumer_2@vicinity.eu Presence: Presence Stanza [from=prosumer_2@vicinity.eu,id=kFdVy-69,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: upm_dev0@vicinity.eu Presence: Presence Stanza [from=upm_dev0@vicinity.eu,id=kFdVy-70,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: org1dev1@vicinity.eu Presence: Presence Stanza [from=org1dev1@vicinity.eu,id=kFdVy-71,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: prosumer_3@vicinity.eu Presence: Presence Stanza [from=prosumer_3@vicinity.eu,id=kFdVy-72,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: jjjjj6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=jjjjj6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-73,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 4a647e4f-1c80-485d-b1e2-a2e4a2b451a5@vicinity.eu Presence: Presence Stanza [from=4a647e4f-1c80-485d-b1e2-a2e4a2b451a5@vicinity.eu,id=kFdVy-74,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: f6d8f0a0-f784-4bd0-a538-4d157bfeb2c5@vicinity.eu Presence: Presence Stanza [from=f6d8f0a0-f784-4bd0-a538-4d157bfeb2c5@vicinity.eu,id=kFdVy-75,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d77ec6b0-f039-4734-925e-0a90ce7d1b5b__018bd53d@vicinity.eu Presence: Presence Stanza [from=d77ec6b0-f039-4734-925e-0a90ce7d1b5b__018bd53d@vicinity.eu,id=kFdVy-76,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: asbjornsuser1@vicinity.eu Presence: Presence Stanza [from=asbjornsuser1@vicinity.eu,id=kFdVy-77,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 9a5c8dfd-c7c8-4f00-b21f-f54846fcd303@vicinity.eu Presence: Presence Stanza [from=9a5c8dfd-c7c8-4f00-b21f-f54846fcd303@vicinity.eu,id=kFdVy-78,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: asbjornsuser2@vicinity.eu Presence: Presence Stanza [from=asbjornsuser2@vicinity.eu,id=kFdVy-79,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: rwthuser0@vicinity.eu Presence: Presence Stanza [from=rwthuser0@vicinity.eu,id=kFdVy-80,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: plugwise__000d6f00019f0ea8@vicinity.eu Presence: Presence Stanza [from=plugwise__000d6f00019f0ea8@vicinity.eu,id=kFdVy-81,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: rwthuser1@vicinity.eu Presence: Presence Stanza [from=rwthuser1@vicinity.eu,id=kFdVy-82,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: cerknica_1@vicinity.eu Presence: Presence Stanza [from=cerknica_1@vicinity.eu,id=kFdVy-83,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: sssss6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=sssss6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-84,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: cerknica_0@vicinity.eu Presence: Presence Stanza [from=cerknica_0@vicinity.eu,id=kFdVy-85,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: c3434d31-407a-43ce-95ba-992d316e520d@vicinity.eu Presence: Presence Stanza [from=c3434d31-407a-43ce-95ba-992d316e520d@vicinity.eu,id=kFdVy-86,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: aaaaa6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=aaaaa6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-87,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: davidsuser3@vicinity.eu Presence: Presence Stanza [from=davidsuser3@vicinity.eu,id=kFdVy-88,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: iiiii6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=iiiii6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-89,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ccccc6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ccccc6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-90,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 0a6f31ed-0592-4455-b7b0-badba79e132a@vicinity.eu Presence: Presence Stanza [from=0a6f31ed-0592-4455-b7b0-badba79e132a@vicinity.eu,id=kFdVy-91,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: asbjornsuser3@vicinity.eu Presence: Presence Stanza [from=asbjornsuser3@vicinity.eu,id=kFdVy-92,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 53678712-44b1-4b13-9fc7-b60cfff85d27@vicinity.eu Presence: Presence Stanza [from=53678712-44b1-4b13-9fc7-b60cfff85d27@vicinity.eu,id=kFdVy-93,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: davidsuser1@vicinity.eu Presence: Presence Stanza [from=davidsuser1@vicinity.eu,id=kFdVy-94,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: davidsuser2@vicinity.eu Presence: Presence Stanza [from=davidsuser2@vicinity.eu,id=kFdVy-95,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: fffff6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=fffff6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-96,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d321a6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=d321a6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-97,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: hvacs__hvac_lg_02@vicinity.eu Presence: Presence Stanza [from=hvacs__hvac_lg_02@vicinity.eu,id=kFdVy-98,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__co2@vicinity.eu Presence: Presence Stanza [from=d77ec6b0-f039-4734-925e-0a90ce7d1b5b__0184a96b__co2@vicinity.eu,id=kFdVy-99,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: bavenir_0@vicinity.eu Presence: Presence Stanza [from=bavenir_0@vicinity.eu,id=kFdVy-100,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: lllll6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=lllll6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-101,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: upm_vas@vicinity.eu Presence: Presence Stanza [from=upm_vas@vicinity.eu,id=kFdVy-102,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: c49cd562-7cc2-4a33-95c8-ca086c2b77de@vicinity.eu Presence: Presence Stanza [from=c49cd562-7cc2-4a33-95c8-ca086c2b77de@vicinity.eu,id=kFdVy-103,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 813dfa90-d05f-463e-a481-94eb43e0d416@vicinity.eu Presence: Presence Stanza [from=813dfa90-d05f-463e-a481-94eb43e0d416@vicinity.eu,id=kFdVy-104,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: smartplug@vicinity.eu Presence: Presence Stanza [from=smartplug@vicinity.eu,id=kFdVy-105,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: mmmmm6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=mmmmm6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-106,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: cbc414ca-9512-4339-895b-ebc4175de2f3@vicinity.eu Presence: Presence Stanza [from=cbc414ca-9512-4339-895b-ebc4175de2f3@vicinity.eu,id=kFdVy-107,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: upm_agent@vicinity.eu Presence: Presence Stanza [from=upm_agent@vicinity.eu,id=kFdVy-108,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: ggggg6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=ggggg6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-109,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: 5a09eec2-e142-4787-9c9d-8f9b0dd5404b@vicinity.eu Presence: Presence Stanza [from=5a09eec2-e142-4787-9c9d-8f9b0dd5404b@vicinity.eu,id=kFdVy-110,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: rrrrr6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu Presence: Presence Stanza [from=rrrrr6b7-f9fd-4815-979d-fdb4be2abc88@vicinity.eu,id=kFdVy-111,type=unavailable,]
+Apr 13, 2018 12:44:21 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode getRosterEntriesForUser
+FINEST: -- End of roster --
+Apr 13, 2018 12:44:21 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Apr 13, 2018 12:44:34 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Apr 13, 2018 12:44:34 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Apr 13, 2018 12:44:34 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 1.0
+Apr 13, 2018 12:44:34 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/properties/{pid}" -> Finder for ObjectsOidPropertiesPid
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 71 characters were matched
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/d9100add-030f-40b7-a6e4-05e5494e14de/properties/device-1-pid-1". No remaining part to match
+Apr 13, 2018 12:44:34 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Apr 13, 2018 12:44:34 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid.represent(), javaClass: class eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Apr 13, 2018 12:44:34 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Apr 13, 2018 12:44:34 PM eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid getObjectProperty
+INFO: Destination object d9100add-030f-40b7-a6e4-05e5494e14de is not online.
+Apr 13, 2018 12:44:34 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Not Found (404) - Destination object is not online.
+	at eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid.getObjectProperty(ObjectsOidPropertiesPid.java:233)
+	at eu.bavenir.vicinity.gatewayapi.restapi.services.ObjectsOidPropertiesPid.represent(ObjectsOidPropertiesPid.java:88)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:511)
+	at org.restlet.resource.ServerResource.get(ServerResource.java:723)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:603)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:79)
+	at sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:83)
+	at com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:82)
+	at sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:675)
+	at com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:79)
+	at sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:647)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at java.lang.Thread.run(Thread.java:748)
+
+Apr 13, 2018 12:44:34 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+Apr 13, 2018 12:44:34 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+Apr 13, 2018 12:44:34 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
