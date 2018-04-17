@@ -2,6 +2,9 @@ package eu.bavenir.vicinity.gatewayapi.restapi.services;
 
 import java.util.logging.Logger;
 
+import javax.json.JsonObject;
+
+import org.json.JSONObject;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -53,7 +56,7 @@ public class AgentsAgidObjects extends ServerResource {
 	 *  SERVER_URL + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
 	 *  
 	 */
-	private static final String SERVER_URL = "http://vicinity.bavenir.eu:3000/commServer/";
+	private static final String SERVER_URL = "https://vicinity.bavenir.eu:3000/commServer/";
 	
 	
 	/**
@@ -229,7 +232,7 @@ public class AgentsAgidObjects extends ServerResource {
 		ClientResource clientResource = new ClientResource(endpointUrl);
 		
 		Representation representation = clientResource.get(MediaType.APPLICATION_JSON);
-
+		
 		return representation;
 	
 	}

@@ -1,0 +1,80 @@
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/18-04-17T15_16_30.709-gateway.log
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Apr 17, 2018 3:16:30 PM org.restlet.Application start
+INFO: Starting eu.bavenir.vicinity.gatewayapi.restapi.Api application
+Apr 17, 2018 3:16:30 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+Apr 17, 2018 3:16:30 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'f31e6c8b-eaa4-4fd6-b32b-bad97496b24f'.
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'dev_be.bavenir.eu:5222' as 'f31e6c8b-eaa4-4fd6-b32b-bad97496b24f@vicinity.eu'
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP SECURE CONNECTION IS DISABLED.
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'f31e6c8b-eaa4-4fd6-b32b-bad97496b24f' was established.
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+FINEST: A new connection for 'f31e6c8b-eaa4-4fd6-b32b-bad97496b24f' was added into connection pool.
+Apr 17, 2018 3:16:35 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Apr 17, 2018 3:16:35 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: f31e6c8b-eaa4-4fd6-b32b-bad97496b24f.
+Apr 17, 2018 3:16:35 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "f31e6c8b-eaa4-4fd6-b32b-bad97496b24f" using the HTTP_Basic scheme.
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+Apr 17, 2018 3:16:35 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/f31e6c8b-eaa4-4fd6-b32b-bad97496b24f/objects". No remaining part to match
+Apr 17, 2018 3:16:35 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Apr 17, 2018 3:16:35 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.vicinity.gatewayapi.restapi.services.AgentsAgidObjects.represent(), javaClass: class eu.bavenir.vicinity.gatewayapi.restapi.services.AgentsAgidObjects, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Apr 17, 2018 3:16:35 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Apr 17, 2018 3:16:35 PM org.restlet.engine.application.ApplicationHelper$1 handle
+FINE: Added runtime client for protocol: HTTPS
+Apr 17, 2018 3:16:35 PM org.restlet.engine.connector.HttpClientHelper start
+INFO: Starting the internal HTTP client
+Apr 17, 2018 3:16:36 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for ConnectionClosingRepresentation: DefaultConverter
+Apr 17, 2018 3:16:36 PM org.restlet.resource.ServerResource handle
+FINE: A response with a 200 (Ok) status should have an entity. Changing the status to 204 (No content).

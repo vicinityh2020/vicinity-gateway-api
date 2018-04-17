@@ -51,7 +51,7 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 	 *  SERVER_URL + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
 	 *  
 	 */
-	private static final String SERVER_URL = "http://vicinity.bavenir.eu:3000/commServer/";
+	private static final String SERVER_URL = "https://vicinity.bavenir.eu:3000/commServer/";
 	
 	
 	/**
