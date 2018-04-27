@@ -1,0 +1,68 @@
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.App initialize
+CONFIG: Log file: /home/sulfo/Workspace/GatewayApi/log/18-04-17T17_27_33.065-gateway.log
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: Vicinity Gateway API initialized.
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.App main
+FINE: API thread started.
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Apr 17, 2018 5:27:33 PM org.restlet.Application start
+INFO: Starting eu.bavenir.vicinity.gatewayapi.restapi.Api application
+Apr 17, 2018 5:27:33 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+Apr 17, 2018 5:27:33 PM eu.bavenir.vicinity.gatewayapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Apr 17, 2018 5:27:40 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Apr 17, 2018 5:27:40 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 17, 2018 5:27:40 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'commserver.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Apr 17, 2018 5:27:40 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP secure connection is enabled.
+Apr 17, 2018 5:27:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: java.security.cert.CertificateException: Hostname verification of certificate failed. Certificate does not authenticate vicinity.eu
+Apr 17, 2018 5:27:41 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was not established.
+Apr 17, 2018 5:27:41 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 127.0.0.1.
+Apr 17, 2018 5:27:41 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication failed. Invalid credentials provided.
+Apr 17, 2018 5:27:41 PM org.restlet.security.ChallengeAuthenticator challenge
+FINE: An authentication challenge was requested.
+Apr 17, 2018 5:27:41 PM org.restlet.security.Authenticator unauthenticated
+FINE: The authentication failed for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 17, 2018 5:27:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+Apr 17, 2018 5:27:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+Apr 17, 2018 5:27:41 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+Apr 17, 2018 5:27:48 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode isConnected
+WARNING: Null record in the connection descriptor pool. XMPP user: 'test_vcnt0'.
+Apr 17, 2018 5:27:48 PM eu.bavenir.vicinity.gatewayapi.xmpp.AgentCommunicator <init>
+CONFIG: HTTPS protocol disabled for Agent communication
+Apr 17, 2018 5:27:48 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'commserver.bavenir.eu:5222' as 'test_vcnt0@vicinity.eu'
+Apr 17, 2018 5:27:48 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor buildNewConnection
+CONFIG: XMPP secure connection is enabled.
+Apr 17, 2018 5:27:49 PM eu.bavenir.vicinity.gatewayapi.xmpp.XmppConnectionDescriptor connect
+SEVERE: Exiting due to exception during establishing a connection to XMPP server. Message: java.security.cert.CertificateException: Hostname verification of certificate failed. Certificate does not authenticate vicinity.eu
+Apr 17, 2018 5:27:49 PM eu.bavenir.vicinity.gatewayapi.xmpp.CommunicationNode establishConnection
+INFO: XMPP connection for 'test_vcnt0' was not established.
+Apr 17, 2018 5:27:49 PM eu.bavenir.vicinity.gatewayapi.restapi.security.AuthenticationVerifier verify
+INFO: Invalid credentials in request from a client with IP 127.0.0.1.
+Apr 17, 2018 5:27:49 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication failed. Invalid credentials provided.
+Apr 17, 2018 5:27:49 PM org.restlet.security.ChallengeAuthenticator challenge
+FINE: An authentication challenge was requested.
+Apr 17, 2018 5:27:49 PM org.restlet.security.Authenticator unauthenticated
+FINE: The authentication failed for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Apr 17, 2018 5:27:49 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+Apr 17, 2018 5:27:49 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+Apr 17, 2018 5:27:49 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter

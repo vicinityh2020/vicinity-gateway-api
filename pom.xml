@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
   
-	<groupId>eu.bavenir.vicinity</groupId>
-	<artifactId>GatewayApi</artifactId>
+	<groupId>eu.bavenir</groupId>
+	<artifactId>OpenGatewayAPI</artifactId>
 	<version>0.5</version>
 	<packaging>jar</packaging>
 
-	<name>GatewayApi</name>
+	<name>OpenGatewayAPI</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -135,7 +135,7 @@
 	
 	<!-- Build an executable JAR -->
 	<build>
-		<finalName>gatewayapi</finalName>
+		<finalName>ogwapi</finalName>
 		<plugins>
 			<plugin>
 			
@@ -144,7 +144,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>eu.bavenir.vicinity.gatewayapi.App</mainClass>
+							<mainClass>eu.bavenir.ogwapi.App</mainClass>
 						</manifest>
 					</archive>
 					

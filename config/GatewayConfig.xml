@@ -51,7 +51,7 @@
 		<!--
 		URL/IP address of XMPP server. If not set, the application exits.
 		-->
-		<server>dev_be.bavenir.eu</server>
+		<server>commserver.bavenir.eu</server>
 		<!-- <server>localhost</server> -->
 		
 		<!--
