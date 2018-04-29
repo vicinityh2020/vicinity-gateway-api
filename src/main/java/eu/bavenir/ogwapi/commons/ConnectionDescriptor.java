@@ -30,6 +30,7 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import eu.bavenir.ogwapi.App;
+import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
 import eu.bavenir.ogwapi.commons.messages.MessageParser;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
@@ -195,106 +196,9 @@ public class ConnectionDescriptor {
 	
 
 	// TODO
-	public boolean sendMessage(String destinationUsername, String message, Chat chat){
-
-		destinationUsername = destinationUsername + "@" 
-								+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
+	public boolean sendMessage(String destinationUsername, String message){
 		
-		EntityBareJid jid;
-		
-		try {
-			jid = JidCreate.entityBareFrom(destinationUsername);
-		} catch (XmppStringprepException e) {
-			logger.warning("Message could not be sent. Exception: " + e.getMessage());
-			return false;
-		}
-		
-		// distinguish between this call being a new request a response to one
-		if (chat == null){
-			try {
-				try {
-					roster.reloadAndWait();
-				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-				}
-				
-				// check whether the destination is online
-				Presence presence = roster.getPresence(jid);
-				
-				if (presence.isAvailable()){
-					chat = chatManager.chatWith(jid);
-					chat.send(message);
-					
-				} else {
-					return false;
-				}
-				
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-				return false;
-			}
-		} else {
-			try {
-				chat.send(message);
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-			}
-		}
-		
-		return true;
-	}
-	
-	
-	/**
-	 * Sends a string to the destination XMPP JID. The recommended approach is to get the roster first (by the 
-	 * {@link #getRoster() getRoster()} method and then send the message, if the contact is online.  
-	 * 
-	 * @param destinationJid Destination contact, for which the message is intended. 
-	 * @param message A string to send.
-	 * @param chat An instance of {@link org.jivesoftware.smack.chat2.Chat Chat} class. When a message is to be sent
-	 * over network as a new request, this should be left as null - a new chat will be created automatically and it
-	 * will check whether the receiving station is in the transmitting station roster (which serves as an 
-	 * authorization method - you can't send messages to stations that are not visible to you). However if the message
-	 * is to be sent as a response, the Chat object that was created when the request message arrived should be provided
-	 * (as a way to overcome the roster authorization - a station should be able to respond to a request, even if it 
-	 * does not see the requesting station).
-	 * @return True on success, false if the destination object is offline or if error occurred.
-	 */
-	public boolean sendMessage(EntityBareJid destinationJid, String message, Chat chat){
-		
-		// distinguish between this call being a new request a response to one
-		if (chat == null){
-			try {
-				try {
-					roster.reloadAndWait();
-				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-				}
-				
-				// check whether the destination is online
-				Presence presence = roster.getPresence(destinationJid);
-				
-				if (presence.isAvailable()){
-					chat = chatManager.chatWith(destinationJid);
-					chat.send(message);
-					
-				} else {
-					return false;
-				}
-				
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-				return false;
-			}
-		} else {
-			try {
-				chat.send(message);
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-			}
-		}
-		
-		return true;
+		return false;
 	}
 	
 	
@@ -361,10 +265,7 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	/* === PRIVATE METHODS === */
-	
-	
+
 	
 	/**
 	 * This is a callback method called when a message arrives. There are two main scenarios that need to be handled:
@@ -373,6 +274,8 @@ public class ConnectionDescriptor {
 	 * b. After sending a message with request to another node, the originating node expects an answer, which arrives
 	 * as a message. This is stored in a queue and is propagated back to originating services, that are expecting the
 	 * results.
+	 * 
+	 * NOTE: This method is to be called by the {@link CommunicationEngine engine } subclass instance.
 	 * 
 	 * @param from Object ID of the sender.
 	 * @param message Received message.
@@ -394,7 +297,7 @@ public class ConnectionDescriptor {
 				break;
 				
 			case NetworkMessageResponse.MESSAGE_TYPE:
-				logger.finest("This message is a response. Adding to incoming queue. Message count: " 
+				logger.finest("This message is a response. Adding to incoming queue - message count: " 
 						+ messageQueue.size());
 				processMessageResponse(from, networkMessage);
 				break;
@@ -404,6 +307,12 @@ public class ConnectionDescriptor {
 		}
 		
 	}
+	
+	
+	
+	/* === PRIVATE METHODS === */
+	
+	
 	
 	
 	/**

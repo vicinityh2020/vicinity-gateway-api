@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.commons.engines.xmpp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,15 +26,12 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
+import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import eu.bavenir.ogwapi.App;
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
 import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
-import eu.bavenir.ogwapi.commons.messages.MessageParser;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
 
 /*
@@ -102,6 +100,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 	// roster for current connection
 	private Roster roster;
 	
+	// a list of opened chats
+	private ArrayList<Chat> openedChats;
+	
 	
 	
 	/* === PUBLIC METHODS === */
@@ -110,6 +111,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	public XmppMessageEngine(String objectID, String password, XMLConfiguration config, Logger logger, 
 																		ConnectionDescriptor connectionDescriptor) {
 		super(objectID, password, config, logger, connectionDescriptor);
+		
+		openedChats = new ArrayList<Chat>();
 	}
 
 	
@@ -268,8 +271,78 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	@Override
 	public boolean sendMessage(String destinationObjectID, String message) {
-		// TODO Auto-generated method stub
-		return false;
+		destinationObjectID = destinationObjectID + "@" 
+									+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
+
+		EntityBareJid jid;
+
+		try {
+			jid = JidCreate.entityBareFrom(destinationObjectID);
+		} catch (XmppStringprepException e) {
+			logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			return false;
+		}
+
+		// TODO Try to make it working with the chat objects - related methods are process message and send message
+		
+		try {
+			try {
+				roster.reloadAndWait();
+			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+				logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+			}
+
+			// check whether the destination is online
+			Presence presence = roster.getPresence(jid);
+
+			if (presence.isAvailable()){
+				Chat chat = chatManager.chatWith(jid);
+				chat.send(message);
+
+			} else {
+				return false;
+			}
+
+		} catch (NotConnectedException | InterruptedException e) {
+			logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			return false;
+		}
+		
+		
+		/*
+		// distinguish between this call being a new request or a response to one
+		if (chat == null){
+			try {
+				try {
+					roster.reloadAndWait();
+				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+				}
+
+				// check whether the destination is online
+				Presence presence = roster.getPresence(jid);
+
+				if (presence.isAvailable()){
+					chat = chatManager.chatWith(jid);
+					chat.send(message);
+	
+				} else {
+					return false;
+				}
+
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+				return false;
+			}
+		} else {
+			try {
+				chat.send(message);
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			}
+		} */
+
+		return true;
 	}
 	
 	
@@ -341,17 +414,30 @@ public class XmppMessageEngine extends CommunicationEngine {
 	}
 	
 	
-	//TODO
+	//TODO documentation
 	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat) {
 		
-		// TODO solve the chat issue
+		// TODO observe the behaviour
+		
+		// go through the list of chats to find out whether there is already a chat started
+		for (Chat openedChat : openedChats) {
+			// are they the same objects?
+			if (openedChat.equals(chat)) {
+				System.out.println("One of the already opened chats equals the one provided by SMACK.");
+			}
+			
+			// is there the same addressee?
+			if (openedChat.getXmppAddressOfChatPartner().toString().equals(chat.getXmppAddressOfChatPartner().toString())) {
+				System.out.println("One of the already opened chats has the same addressee.");
+			}
+		}
 		
 		connectionDescriptor.processIncommingMessage(from.toString(), xmppMessage.getBody());
 	}
 	
 	
 	
-	
+	// TODO make reloading the roster more efficient
 	/**
 	 * A callback method called when entries are added into the {@link org.jivesoftware.smack.roster.Roster roster}.
 	 * 
