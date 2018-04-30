@@ -3,6 +3,7 @@ package eu.bavenir.ogwapi.commons.engines.xmpp;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -112,6 +113,10 @@ public class XmppMessageEngine extends CommunicationEngine {
 																		ConnectionDescriptor connectionDescriptor) {
 		super(objectID, password, config, logger, connectionDescriptor);
 		
+		connection = null;
+		chatManager = null;
+		roster = null;
+		
 		openedChats = new ArrayList<Chat>();
 	}
 
@@ -152,6 +157,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			return false;
 		}
 		
+		// TODO test whether this should be done only once, for effectiveness - also for the roster
 		// spawn a chat manager and associate a call for incoming messages
 		chatManager = ChatManager.getInstanceFor(connection);
 		chatManager.addIncomingListener(new IncomingChatMessageListener(){
@@ -229,12 +235,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 	@Override
 	public Set<String> getRoster() {
 		
+		Set<String> rosterSet = new HashSet<String>();
 		
 		// TODO this needs to be tested - especially whether or not we have the domain at end.
 		
 		if (connection == null || !connection.isConnected()){
 			logger.warning("Invalid connection in descriptor for username '" + objectID + "'.");
-			return null;
+			return Collections.emptySet();
 		}
 		
 		try {
@@ -243,11 +250,17 @@ public class XmppMessageEngine extends CommunicationEngine {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 		}
 		
-		Set<String> rosterSet = new HashSet<String>();
 		
 		Collection<RosterEntry> entries = roster.getEntries();
 		for (RosterEntry entry : entries) {
-			rosterSet.add(entry.getJid().toString());
+		
+			
+			//rosterSet.add(entry.getJid().asBareJid().toString());
+			rosterSet.add(entry.getJid().getLocalpartOrNull().toString());
+			
+			// TODO 
+			System.out.println("XmppMessageEngine.getRoster: " + entry.getJid().getLocalpartOrNull().toString() + " was added to set.");
+			
 		}
 		
 		return rosterSet;
@@ -298,6 +311,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 			if (presence.isAvailable()){
 				Chat chat = chatManager.chatWith(jid);
 				chat.send(message);
+				
+				// TODO this is where we put it there
+				openedChats.add(chat);
 
 			} else {
 				return false;
@@ -417,7 +433,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	//TODO documentation
 	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat) {
 		
-		// TODO observe the behaviour
+		// TODO observe the behaviour and try to add it to the set if possible
+		
 		
 		// go through the list of chats to find out whether there is already a chat started
 		for (Chat openedChat : openedChats) {
@@ -432,7 +449,10 @@ public class XmppMessageEngine extends CommunicationEngine {
 			}
 		}
 		
-		connectionDescriptor.processIncommingMessage(from.toString(), xmppMessage.getBody());
+		openedChats.add(chat);
+		
+		
+		connectionDescriptor.processIncommingMessage(from.getLocalpart().toString(), xmppMessage.getBody());
 	}
 	
 	

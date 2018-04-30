@@ -10,8 +10,6 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.SmackConfiguration;
-import org.jivesoftware.smack.roster.Roster;
-import org.jivesoftware.smack.roster.RosterEntry;
 
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 
@@ -272,7 +270,7 @@ public class CommunicationManager {
 		
 		Collection<ConnectionDescriptor> descriptors = descriptorPool.values();
 		
-		logger.info("Closing all connections to XMPP server.");
+		logger.info("Closing all connections.");
 		
 		for (ConnectionDescriptor descriptor: descriptors){
 			if (descriptor != null){
@@ -285,7 +283,7 @@ public class CommunicationManager {
 		}
 		
 		descriptorPoolClear();
-		logger.finest("XMPP connection descriptor pool flushed.");
+		logger.finest("Connection descriptor pool flushed.");
 	}
 	
 	
@@ -300,7 +298,7 @@ public class CommunicationManager {
 		
 		Set<String> usernames = descriptorPool.keySet();
 		
-		logger.finest("-- XMPP users connected to the server: --");
+		logger.finest("-- Object IDs connected to network: --");
 		for (String string : usernames) {
 			logger.finest(string);
 		}
@@ -358,37 +356,31 @@ public class CommunicationManager {
 	 * Retrieves a collection of roster entries for given user name. If there is no connection established with the 
 	 * given user name, returns empty {@link java.util.Collection Collection}. 
 	 * 
-	 * @param username XMPP user name the roster is to be retrieved for. 
+	 * @param objectID XMPP user name the roster is to be retrieved for. 
 	 * @return Collection of roster entries. If no connection is established for the user name, the collection is empty
 	 * (not null). 
 	 */
 	// TODO change documentation
-	public Set<String> getRosterEntriesForUser(String username){
+	// TODO make it possible for the roster to return presence!
+	public Set<String> getRosterEntriesForObject(String objectID){
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(username);
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
 			logger.warning("Null record in the connection descriptor pool.");
-			return Collections.emptyList();
+			return Collections.emptySet();
 		}
 		
-		Roster roster = descriptor.getRoster();
-		
-		if (roster == null){
-			logger.warning("Roster is null.");
-			return Collections.emptyList();
-		}
-		
-		Collection<RosterEntry> entries = roster.getEntries();
+		Set<String> entries = descriptor.getRoster();
 		
 		// log it
-		logger.finest("-- Roster for '" + username +"' --");
-		for (RosterEntry entry : entries) {
-			logger.finest(entry.getJid().toString() + " Presence: " + roster.getPresence(entry.getJid()).toString());
+		logger.finest("-- Roster for '" + objectID +"' --");
+		for (String entry : entries) {
+			logger.finest(entry + " Presence: " + "UNKNOWN");
 		}
 		logger.finest("-- End of roster --");
 		
-		return roster.getEntries();
+		return entries;
 	}
 	
 	
@@ -427,7 +419,7 @@ public class CommunicationManager {
 			}
 		}
 		
-		return descriptor.sendMessage(destinationUsername, message, null);
+		return descriptor.sendMessage(destinationUsername, message);
 	}
 	
 	

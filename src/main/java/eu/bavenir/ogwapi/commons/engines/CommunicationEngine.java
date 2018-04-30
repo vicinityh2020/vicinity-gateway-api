@@ -1,6 +1,6 @@
 package eu.bavenir.ogwapi.commons.engines;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -66,7 +66,7 @@ public abstract class CommunicationEngine {
 	
 	public abstract boolean isConnected();
 	
-	public abstract Collection<String> getRoster();
+	public abstract Set<String> getRoster();
 
 	/**
 	 * 

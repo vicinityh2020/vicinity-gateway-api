@@ -1,7 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
-import java.io.IOException;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -9,28 +8,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.jivesoftware.smack.AbstractXMPPConnection;
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.SmackException.NotConnectedException;
-import org.jivesoftware.smack.SmackException.NotLoggedInException;
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
-import org.jivesoftware.smack.chat2.Chat;
-import org.jivesoftware.smack.chat2.ChatManager;
-import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
-import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.roster.Roster;
-import org.jivesoftware.smack.roster.RosterListener;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
-import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
-import org.jxmpp.jid.EntityBareJid;
-import org.jxmpp.jid.Jid;
-import org.jxmpp.jid.impl.JidCreate;
-import org.jxmpp.stringprep.XmppStringprepException;
 
-import eu.bavenir.ogwapi.App;
 import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
+import eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine;
 import eu.bavenir.ogwapi.commons.messages.MessageParser;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
@@ -107,6 +87,8 @@ public class ConnectionDescriptor {
 	// message queue, FIFO structure for holding incoming messages 
 	private BlockingQueue<NetworkMessage> messageQueue;
 	
+	// the engine to use
+	private CommunicationEngine commEngine;
 	
 	
 	/* === PUBLIC METHODS === */
@@ -135,8 +117,12 @@ public class ConnectionDescriptor {
 		
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
+		eventChannels = new HashSet<EventChannel>();
+		
 		// build new connection
 		// TODO spawn a comm engine and connect
+		// this is also the place, where it should decide what engine to use
+		commEngine = new XmppMessageEngine(objectID, password, config, logger, this);
 		
 		
 	}
@@ -165,40 +151,33 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	public boolean connect(){
-		// TODO
-		return false;
+		return commEngine.connect(objectID, password);
 	}
 	
 	
-	// TODO
+	// TODO documentation
 	public void disconnect(){
-		
-		// TODO
-		
+		commEngine.disconnect();
 	}
 
 
-	// TODO
+	// TODO documentation
 	public boolean isConnected(){
-		// TODO
-		return false;
+		return commEngine.isConnected();
 	}
 	
 	
 
-	// TODO
-	public Collection<String> getRoster(){
-		
-		// TODO  
-		return null;
+	// TODO documentation
+	public Set<String> getRoster(){
+		return commEngine.getRoster();
 	}
 	
 	
 
-	// TODO
-	public boolean sendMessage(String destinationUsername, String message){
-		
-		return false;
+	// TODO documentation
+	public boolean sendMessage(String destinationObjectID, String message){
+		return commEngine.sendMessage(destinationObjectID, message);
 	}
 	
 	

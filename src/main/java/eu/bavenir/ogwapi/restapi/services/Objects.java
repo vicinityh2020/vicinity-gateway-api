@@ -1,12 +1,11 @@
 package eu.bavenir.ogwapi.restapi.services;
 
-import java.util.Collection;
+import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
-import org.jivesoftware.smack.roster.RosterEntry;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
@@ -77,17 +76,17 @@ public class Objects extends ServerResource {
 		
 		CommunicationManager communicationManager = (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		Collection<RosterEntry> rosterObjects = communicationManager.getRosterEntriesForUser(
+		Set<String> rosterObjects = communicationManager.getRosterEntriesForObject(
 							getRequest().getChallengeResponse().getIdentifier());
 		
 		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
 		
 		
-		for (RosterEntry entry : rosterObjects) {
+		for (String entry : rosterObjects) {
 			
 			mainArrayBuilder.add(
-						Json.createObjectBuilder().add(ATTR_OID, entry.getJid().toString())
+						Json.createObjectBuilder().add(ATTR_OID, entry)
 					);
 		}
 		
