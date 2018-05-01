@@ -67,8 +67,8 @@ public class AuthenticationVerifier implements Verifier {
 		String password = new String(cr.getSecret());
 		
 		if (communicationNode.isConnected(username)){
-			// if the client is already connected to XMPP, just verify the password
-			if (!communicationNode.verifyConnection(username, password)){
+			// if the client is already connected, just verify the password
+			if (!communicationNode.verifyPassword(username, password)){
 				logger.info("Invalid credentials in request from a client with IP " 
 						+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;

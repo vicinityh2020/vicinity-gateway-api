@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.jivesoftware.smack.AbstractXMPPConnection;
-import org.jivesoftware.smack.SmackConfiguration;
 
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 
@@ -36,6 +34,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
  */
 
 
+// TODO documentation (this main one - the others are good unless stated otherwise)
 /**
  * 
  * This class serves as a connection manager for XMPP communication over P2P network. There is usually only need
@@ -80,17 +79,6 @@ public class CommunicationManager {
 	
 	/* === CONSTANTS === */
 	
-	/**
-	 * Name of the configuration parameter for XMPP .
-	 */
-	private static final String CONFIG_PARAM_XMPPDEBUG = "xmpp.debug";
-	
-	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPDEBUG CONFIG_PARAM_XMPPDEBUG} configuration parameter. This value is
-	 * taken into account when no suitable value is found in the configuration file. 
-	 */
-	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
-		
 
 	
 	/* === FIELDS === */
@@ -121,21 +109,228 @@ public class CommunicationManager {
 	public CommunicationManager(XMLConfiguration config, Logger logger){
 		descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
-		
-		
 		this.config = config;
 		this.logger = logger;
-		 
-		// enable debugging if desired
-		boolean debuggingEnabled = config.getBoolean(CONFIG_PARAM_XMPPDEBUG, CONFIG_DEF_XMPPDEBUG);
-		if (debuggingEnabled) {
-			SmackConfiguration.DEBUG = debuggingEnabled;
-			logger.config("XMPP debugging enabled.");
+		
+	}
+	
+	
+	
+	// ADMINISTRATION METHODS - not directly related to interfaces
+	
+	/**
+	 * Retrieves the object IDs that has open connections to network. Based on these strings, the respective
+	 * connections can be retrieved from the connection descriptor pool.
+	 * 
+	 * @return Set of object IDs. 
+	 */
+	public Set<String> getConnectionList(){
+		
+		Set<String> usernames = descriptorPool.keySet();
+		
+		logger.finest("-- Object IDs connected to network: --");
+		for (String string : usernames) {
+			logger.finest(string);
+		}
+		logger.finest("-- End of list. --");
+		return usernames;
+	}
+	
+	
+	/**
+	 * Checks whether the object ID connection {@link ConnectionDescriptor descriptor} instance exists for given object and 
+	 * whether or not it is connected to the network. Returns true or false accordingly.  
+	 * 
+	 * @param objectID Object ID in question. 
+	 * @return True if descriptor exists and the connection is established.
+	 */
+	public boolean isConnected(String objectID){
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor != null){
+			return descriptor.isConnected();
+		} else {
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
+					+ objectID + "'.");
+			
+			return false;
 		}
 	}
 	
 	
-	///////////////////////////////////// this should remain here
+	/**
+	 * Verifies the credentials of an object, when (for example) trying to reach its connection 
+	 * {@link ConnectionDescriptor descriptor} instance via RESTLET API Authenticator. This method should be called after 
+	 * {@link #isConnected(String) isConnected} is called first, otherwise will always return false. 
+	 * It is safe to use this method when processing authentication of every request, even in quick succession.
+	 * 
+	 * @param objectID Object ID in question.
+	 * @param password The password that is to be verified. 
+	 * @return True, if the password is valid.
+	 */
+	public boolean verifyPassword(String objectID, String password){
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor != null){
+			return descriptor.verifyPassword(password);
+		} else {
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
+					+ objectID + "'.");
+			
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * Closes all open connections to network. It will also clear these connection handlers off the connection 
+	 * descriptor pool table, preventing the re-connection (they have to be reconfigured to be opened again).
+	 */
+	public void terminateAllConnections(){
+		
+		Collection<ConnectionDescriptor> descriptors = descriptorPool.values();
+		
+		logger.info("Closing all connections.");
+		
+		for (ConnectionDescriptor descriptor: descriptors){
+			if (descriptor != null){
+				
+				descriptor.disconnect();
+				
+			} else {
+				logger.warning("Null record in the connection descriptor pool.");
+			}
+		}
+		
+		descriptorPoolClear();
+		logger.finest("Connection descriptor pool flushed.");
+	}
+	
+	
+	
+	
+	
+	
+	// AUTHENTICATION INTERFACE
+	
+	
+	/**
+	 * Establishes a single connection for given object  with preferences from configuration file and provided credentials. 
+	 * The connection descriptor is then stored in a hash map.
+	 * 
+	 * If the connection descriptor for given object already exists, it get terminated, discarded and then recreated.
+	 * 
+	 * NOTE: This is the equivalent of GET /objects/login in the REST API.
+	 * 
+	 * @param objectID Object ID.
+	 * @param password Password.
+	 * @return The established connection descriptor if the attempt was successful, null otherwise.
+	 */
+	public ConnectionDescriptor establishConnection(String objectID, String password){
+		
+		// if there is a previous descriptor we should close the connection first, before reopening it again
+		ConnectionDescriptor descriptor = descriptorPoolRemove(objectID);
+		if (descriptor != null){
+	
+			descriptor.disconnect();
+			
+			logger.info("Reconnecting '" + objectID + "' to network.");
+		}
+		
+		descriptor = new ConnectionDescriptor(objectID, password, config, logger);
+		
+		if (descriptor.connect()){
+			logger.info("Connection for '" + objectID +"' was established.");
+		} else {
+			
+			logger.info("Connection for '" + objectID +"' was not established.");
+			return null;
+		}
+		
+		// insert the connection descriptor into the pool
+		descriptorPoolPut(objectID, descriptor);
+		logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
+		
+		return descriptor;
+	}
+	
+	
+	
+	/**
+	 * Disconnects a single connection identified by the connection object ID given as the first parameter. 
+	 * The second parameter specifies, whether the connection descriptor is to be destroyed after it is disconnected.
+	 * If not, the descriptor will remain in the pool and it is possible to use it during eventual reconnection.
+	 * Otherwise connection will have to be build a new (which can be useful when the connection needs to be 
+	 * reconfigured). 
+	 * 
+	 * This is the equivalent of GET /objects/logout in the REST API.
+	 * 
+	 * @param objectID User name used to establish the connection.
+	 * @param destroyConnectionDescriptor Whether the connection descriptor should also be destroyed or not. 
+	 */
+	public void terminateConnection(String objectID, boolean destroyConnectionDescriptor){
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID); 
+		
+		if (descriptor != null){
+			descriptor.disconnect();
+		} else {
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
+					+ objectID + "'.");
+		}
+		
+		if (destroyConnectionDescriptor){
+			descriptorPoolRemove(objectID);
+			logger.info("Connection for object ID '" + objectID + "' destroyed.");
+		} else {
+			// this will keep the connection in the pool
+			logger.info("Connection for object ID '" + objectID + "' closed.");
+		}
+
+	}
+	
+	
+	// CONSUMPTION INTERFACE
+	
+	
+	
+	
+	// DISCOVERY INTERFACE
+	
+	
+	/**
+	 * Retrieves a collection of roster entries for object ID (i.e. its contact list). If there is no connection 
+	 * established for the given object ID, returns empty {@link java.util.Set Set}. 
+	 * 
+	 * NOTE: This is the equivalent of GET /objects in the REST API.
+	 * 
+	 * @param objectID Object ID the roster is to be retrieved for. 
+	 * @return Set of roster entries. If no connection is established for the object ID, the collection is empty
+	 * (not null). 
+	 */
+	public Set<String> getRosterEntriesForObject(String objectID){
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool.");
+			return Collections.emptySet();
+		}
+		
+		Set<String> entries = descriptor.getRoster();
+		
+		// log it
+		logger.finest("-- Roster for '" + objectID +"' --");
+		for (String entry : entries) {
+			// TODO make it possible for the roster to return presence!
+			logger.finest(entry + " Presence: " + "UNKNOWN");
+		}
+		logger.finest("-- End of roster --");
+		
+		return entries;
+	}
+	
+	
 	
 	
 	
@@ -163,11 +358,38 @@ public class CommunicationManager {
 		// TODO
 	}
 	
-	public void activateEventChannel(String objectID, String eventID) {
+	
+	
+	/**
+	 * Activates the event channel identified by the eventID. From the moment of activation, other devices in the 
+	 * network will be able to subscribe to it and will receive events in case they are generated. 
+	 * 
+	 * If the event channel was never activated before (or there is other reason why it was not saved previously), it 
+	 * gets created anew. In that case, the list of subscribers is empty.  
+	 * 
+	 * NOTE: This is the equivalent of POST /objects/[oid]/events/[eid] in the REST API.
+	 * 
+	 * @param objectID Object ID of the event channel owner.
+	 * @param eventID Event ID.
+	 * @return False if the owner object is not logged into the network. Otherwise true.
+	 */
+	public boolean activateEventChannel(String objectID, String eventID) {
 		
-		// TODO
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
+		if (descriptor == null){
+			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
+					+ " into the Gateway yet.");
+			return false;
+		}
+		
+		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
+		
+		return true;
 	}
+	
+	
 	
 	public void sendEventToSubscribedObjects(String eventID) {
 		
@@ -175,271 +397,112 @@ public class CommunicationManager {
 		
 	}
 	
-	public void deactivateEventChannel(String objectID, String eventID) {
-		// TODO
-	}
-	
-	
-	/////////////////////////////////// this should remain here
-	
-	
-	
-	
-	
-	
 	
 	/**
-	 * Establishes a connection to XMPP server with preferences from configuration file and provided credentials. 
-	 * The connection descriptor is then stored in a hash map.
+	 * De-activates the event channel identified by the eventID. From the moment of de-activation, other devices in the
+	 * network will not be able to subscribe to it. Also no events are sent in case they are generated. 
 	 * 
-	 * If the connection descriptor for given user already exists, it is closed by the SMACK 
-	 * {@link AbstractXMPPConnection#disconnect() disconnect()} call, discarded and then recreated.
+	 * The channel will still exist though along with the list of subscribers. If it gets re-activated, the list of
+	 * subscribers will be the same as in the moment of de-activation.  
 	 * 
-	 * @param xmppUsername XMPP user name without the served domain (i.e. just 'user' instead of 'user@xmpp.server').
-	 * @param xmppPassword Password of the user.
-	 * @return The established connection descriptor if the attempt was successful, null otherwise.
-	 */
-	public ConnectionDescriptor establishConnection(String xmppUsername, String xmppPassword){
-		
-		// if there is a previous descriptor we should close the connection first, before reopening it again
-		ConnectionDescriptor descriptor = descriptorPoolRemove(xmppUsername);
-		if (descriptor != null){
-	
-			descriptor.disconnect();
-			
-			logger.info("Reconnecting '" + xmppUsername + "' to XMPP.");
-		}
-		
-		descriptor = new ConnectionDescriptor(xmppUsername, xmppPassword, config, logger);
-		
-		if (descriptor.connect()){
-			logger.info("XMPP connection for '" + xmppUsername +"' was established.");
-		} else {
-			
-			logger.info("XMPP connection for '" + xmppUsername +"' was not established.");
-			return null;
-		}
-		
-		// insert the connection descriptor into the pool
-		descriptorPoolPut(xmppUsername, descriptor);
-		logger.finest("A new connection for '" + xmppUsername +"' was added into connection pool.");
-		
-		return descriptor;
-	}
-	
-	
-	
-	/**
-	 * Disconnects a single XMPP connection identified by the connection user name given as the first parameter. 
-	 * The second parameter specifies, whether the connection descriptor is to be destroyed after it is disconnected.
-	 * If not, the descriptor will remain in the pool and it is possible to use it during eventual reconnection.
-	 * Otherwise connection will have to be build a new (which can be useful when the connection needs to be 
-	 * reconfigured). 
+	 * NOTE: This is the equivalent of DELETE /objects/[oid]/events/[eid] in the REST API.
 	 * 
-	 * @param xmppUsername User name used to establish the connection.
-	 * @param destroyConnectionDescriptor Whether the connection descriptor should also be destroyed or not. 
+	 * @param objectID Object ID of the event channel owner
+	 * @param eventID Event ID.
+	 * @return False if the owner object is not logged into the network. Otherwise true.
 	 */
-	public void terminateConnection(String xmppUsername, boolean destroyConnectionDescriptor){
+	public boolean deactivateEventChannel(String objectID, String eventID) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername); 
-		
-		if (descriptor != null){
-			descriptor.disconnect();
-		} else {
-			logger.warning("Null record in the connection descriptor pool. XMPP user: '" 
-					+ xmppUsername + "'.");
-		}
-		
-		if (destroyConnectionDescriptor){
-			descriptorPoolRemove(xmppUsername);
-			logger.info("Connection to XMPP for user '" + xmppUsername + "' destroyed.");
-		} else {
-			// this will keep the connection in the pool
-			logger.info("Connection to XMPP for user '" + xmppUsername + "' closed.");
-		}
-
-	}
-	
-	
-	
-	/**
-	 * Closes all open connections to XMPP server. It will also clear these connection handlers off the connection 
-	 * descriptor pool table, preventing the re-connection (they have to be reconfigured to be opened again).
-	 */
-	public void terminateAllConnections(){
-		
-		Collection<ConnectionDescriptor> descriptors = descriptorPool.values();
-		
-		logger.info("Closing all connections.");
-		
-		for (ConnectionDescriptor descriptor: descriptors){
-			if (descriptor != null){
-				
-				descriptor.disconnect();
-				
-			} else {
-				logger.warning("Null record in the connection descriptor pool.");
-			}
-		}
-		
-		descriptorPoolClear();
-		logger.finest("Connection descriptor pool flushed.");
-	}
-	
-	
-	
-	/**
-	 * Retrieves the XMPP user names that has open connections to XMPP server. Based on these strings, the respective
-	 * connections can be retrieved from the connection descriptor pool.
-	 * 
-	 * @return Set of user names. 
-	 */
-	public Set<String> getConnectionList(){
-		
-		Set<String> usernames = descriptorPool.keySet();
-		
-		logger.finest("-- Object IDs connected to network: --");
-		for (String string : usernames) {
-			logger.finest(string);
-		}
-		logger.finest("-- End of list. --");
-		return usernames;
-	}
-	
-	
-	/**
-	 * Checks whether the XMPP connection {@link ConnectionDescriptor descriptor} instance exists for given user and 
-	 * whether or not it is connected to the XMPP server. Returns true or false accordingly.  
-	 * 
-	 * @param xmppUsername XMPP user name in question. 
-	 * @return True if descriptor exists and the connection is established.
-	 */
-	public boolean isConnected(String xmppUsername){
-		ConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername);
-		
-		if (descriptor != null){
-			return descriptor.isConnected();
-		} else {
-			logger.warning("Null record in the connection descriptor pool. XMPP user: '" 
-					+ xmppUsername + "'.");
-			
-			return false;
-		}
-	}
-	
-	
-	/**
-	 * Verifies the credentials of a client, (for example) trying to reach its XMPP connection 
-	 * {@link ConnectionDescriptor descriptor} instance via RESTLET API. This method should be called after 
-	 * {@link #isConnected(String) isConnected} is called first, otherwise will always return false. 
-	 * It is safe to use this method when processing authentication of every request.
-	 * 
-	 * @param xmppUsername XMPP user name in question.
-	 * @param xmppPassword The password that is to be verified. 
-	 * @return True, if the password is valid.
-	 */
-	public boolean verifyConnection(String xmppUsername, String xmppPassword){
-		ConnectionDescriptor descriptor = descriptorPoolGet(xmppUsername);
-		
-		if (descriptor != null){
-			return descriptor.verifyPassword(xmppPassword);
-		} else {
-			logger.warning("Null record in the connection descriptor pool. XMPP user: '" 
-					+ xmppUsername + "'.");
-			
-			return false;
-		}
-	}
-	
-	
-	/**
-	 * Retrieves a collection of roster entries for given user name. If there is no connection established with the 
-	 * given user name, returns empty {@link java.util.Collection Collection}. 
-	 * 
-	 * @param objectID XMPP user name the roster is to be retrieved for. 
-	 * @return Collection of roster entries. If no connection is established for the user name, the collection is empty
-	 * (not null). 
-	 */
-	// TODO change documentation
-	// TODO make it possible for the roster to return presence!
-	public Set<String> getRosterEntriesForObject(String objectID){
-		
+		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool.");
-			return Collections.emptySet();
+			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
+					+ " into the Gateway yet.");
+			return false;
 		}
 		
-		Set<String> entries = descriptor.getRoster();
+		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
 		
-		// log it
-		logger.finest("-- Roster for '" + objectID +"' --");
-		for (String entry : entries) {
-			logger.finest(entry + " Presence: " + "UNKNOWN");
-		}
-		logger.finest("-- End of roster --");
-		
-		return entries;
+		return true;
 	}
 	
 	
+	
+	
+	
+	// REGISTRY INTERFACE
+	
+	
+	
+	
+	
+	
+	
+	// QUERY INTERFACE
+	
+	
+	
+	
+	
+	
+	// TODO move this to consumption interface
 	/**
-	 * Sends a message (string) from source user name, to destination user name. In case there are some doubts about
+	 * Sends a message (string) from source object ID, to destination object ID. In case there are some doubts about
 	 * security in sending the message this way (especially by having the option to define from which user name the 
-	 * message originates), they are not much justified. The safety is inherent in the fact, that the source user name 
-	 * must have established connection on this instance of CommunicationNode first (i.e. the credentials must be known,
+	 * message originates), there is no need to worry. The safety is inherent in the fact, that the source user name 
+	 * must have established connection on this instance of CommunicationManager first (i.e. the credentials must be known,
 	 * so the connection descriptor can be created). Moreover the device is authenticated with every request.  
 	 * 
 	 * It is thus impossible to act as a device from some other gateway/owner.
 	 *  
-	 * @param sourceUsername User name of the originating device (without the XMPP domain).
-	 * @param destinationUsername User name of the destination device (without the XMPP domain).
+	 * @param sourceObjectID Object ID of the originating device.
+	 * @param destinationObjectID Object ID of the destination device.
 	 * @param message Message string.
 	 * @return True on success, false if the destination was offline or if some error occurred.
 	 */
-	public boolean sendMessage(String sourceUsername, String destinationUsername, String message){
+	public boolean sendMessage(String sourceObjectID, String destinationObjectID, String message){
 		
-		// check the validity of source user
-		ConnectionDescriptor descriptor = descriptorPoolGet(sourceUsername);
+		// check the validity object
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectID);
 		
 		if (descriptor == null){
-			logger.warning("No descriptor exist for source username '" + sourceUsername + "'. The device has not logged"
-					+ " into the Gateway API yet.");
+			logger.warning("No descriptor exist for source object ID '" + sourceObjectID + "'. The device has not logged"
+					+ " into the Gateway yet.");
 			return false;
 		}
 		
 		// if the connection disintegrated for some reason, be proactive and reconnect
 		if (descriptor.isConnected() == false) {
-			logger.info("The connection is closed for username '" + sourceUsername + "'. Attempting to reconnect.");
+			logger.info("The connection is closed for object ID '" + sourceObjectID + "'. Attempting to reconnect.");
 			
 			if (!descriptor.connect()){
-				logger.warning("The connection for username '" + sourceUsername + "' can't be established.");
+				logger.warning("The connection for object ID '" + sourceObjectID + "' can't be established.");
 				return false;
 			}
 		}
 		
-		return descriptor.sendMessage(destinationUsername, message);
+		return descriptor.sendMessage(destinationObjectID, message);
 	}
 	
 	
 	/**
 	 * Retrieves a single {@link NetworkMessage NetworkMessage} from the queue of incoming messages. It is important
-	 * to provide a user name of the recipient and correlation request ID. This method blocks the thread when there are
+	 * to provide a object ID of the recipient and correlation request ID. This method blocks the thread when there are
 	 * no messages in the queue and waits for the arrival.
 	 * 
-	 * @param forUsername Recipient user name.
+	 * @param objectID Recipient object ID.
 	 * @param requestId Correlation request ID.
-	 * @return {@link NetworkMessage NetworkMessage} received over XMPP message.
+	 * @return {@link NetworkMessage NetworkMessage} received from the network.
 	 */
-	public NetworkMessage retrieveSingleMessage(String forUsername, int requestId){
+	public NetworkMessage retrieveSingleMessage(String objectID, int requestId){
 		
-		// check the validity of source user
-		ConnectionDescriptor descriptor = descriptorPoolGet(forUsername);
+		// check the validity of source object
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			logger.warning("No descriptor exist for source username '" + forUsername + "'. The device has not logged"
-					+ " into the Gateway API yet.");
+			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
+					+ " into the Gateway yet.");
 			return null;
 		}
 		
@@ -448,78 +511,63 @@ public class CommunicationManager {
 	
 	
 	
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/* === PRIVATE METHODS === */
 	
 	/**
-	 * Thread-safe method for inserting a XMPP user name (K) and a descriptor (V) into the descriptor pool. This is a
+	 * Thread-safe method for inserting an object ID (K) and a descriptor (V) into the descriptor pool. This is a
 	 * synchronised equivalent for {@link java.util.HashMap#put(Object, Object) put()} method of HashMap table.
 	 * 
 	 *    IMPORTANT: It is imperative to use only this method to interact with the descriptor pool when adding
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#put(Object, Object) put()} method. 
 	 *    
-	 * @param xmppUsername The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @param descriptor The value part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The previous value associated with key, or null if there was no mapping for key. 
 	 * (A null return can also indicate that the map previously associated null with key, if the implementation 
 	 * supports null values.)
 	 */
-	private ConnectionDescriptor descriptorPoolPut(String xmppUsername, ConnectionDescriptor descriptor){
+	private ConnectionDescriptor descriptorPoolPut(String objectID, ConnectionDescriptor descriptor){
 		synchronized (descriptorPool){
-			return descriptorPool.put(xmppUsername, descriptor);
+			return descriptorPool.put(objectID, descriptor);
 		}
 	}
 	
 	
 	/**
-	 * Thread-safe method for retrieving a connection descriptor (V) from the descriptor pool by XMPP user name (K). 
+	 * Thread-safe method for retrieving a connection descriptor (V) from the descriptor pool by object ID (K). 
 	 * This is a synchronised equivalent for {@link java.util.HashMap#get(Object) get()} method of HashMap table.
 	 * 
 	 *    IMPORTANT: It is imperative to use only this method to interact with the descriptor pool when adding
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#get(Object) get()} method. 
 	 *    
-	 * @param xmppUsername The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The value to which the specified key is mapped, or null if this map contains no mapping for the key.
 	 */
-	private ConnectionDescriptor descriptorPoolGet(String xmppUsername){
+	private ConnectionDescriptor descriptorPoolGet(String objectID){
 		synchronized (descriptorPool){
 			
-			return descriptorPool.get(xmppUsername);
+			return descriptorPool.get(objectID);
 		}
 	}
 	
 	
 	/**
-	 * Thread-safe method for removing a connection descriptor (V) from the descriptor pool by XMPP user name (K). 
+	 * Thread-safe method for removing a connection descriptor (V) for the object ID (K) from the descriptor pool. 
 	 * This is a synchronised equivalent for {@link java.util.HashMap#remove(Object) remove()} method of HashMap table.
 	 * 
 	 *    IMPORTANT: It is imperative to use only this method to interact with the descriptor pool when adding
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#remove(Object) remove()} method.
 	 *    
-	 * @param xmppUsername The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The previous value associated with key, or null if there was no mapping for key.
 	 */
-	private ConnectionDescriptor descriptorPoolRemove(String xmppUsername){
+	private ConnectionDescriptor descriptorPoolRemove(String objectID){
 		synchronized (descriptorPool){
 			
-			return descriptorPool.remove(xmppUsername);
+			return descriptorPool.remove(objectID);
 		}
 	}
 	

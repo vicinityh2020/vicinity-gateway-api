@@ -14,7 +14,7 @@ import java.util.Set;
  */
 
 
-// TODO
+// TODO documentation
 
 // napisat ze je to thread safe a ako sa to pouziva.
 /**

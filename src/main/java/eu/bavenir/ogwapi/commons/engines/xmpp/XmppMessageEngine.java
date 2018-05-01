@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.jivesoftware.smack.AbstractXMPPConnection;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
@@ -49,6 +50,17 @@ public class XmppMessageEngine extends CommunicationEngine {
 
 	/* === CONSTANTS === */
 	
+	
+	/**
+	 * Name of the configuration parameter for XMPP .
+	 */
+	private static final String CONFIG_PARAM_XMPPDEBUG = "xmpp.debug";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_XMPPDEBUG CONFIG_PARAM_XMPPDEBUG} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
+	 */
+	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
 	
 	/**
 	 * Name of the configuration parameter for XMPP server URL.
@@ -118,6 +130,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 		roster = null;
 		
 		openedChats = new ArrayList<Chat>();
+		
+		// enable debugging if desired
+		boolean debuggingEnabled = config.getBoolean(CONFIG_PARAM_XMPPDEBUG, CONFIG_DEF_XMPPDEBUG);
+		if (debuggingEnabled) {
+			SmackConfiguration.DEBUG = debuggingEnabled;
+			logger.config("XMPP debugging enabled.");
+		}
 	}
 
 	

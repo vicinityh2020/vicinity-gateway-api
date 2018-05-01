@@ -1,6 +1,8 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -26,8 +28,9 @@ import eu.bavenir.ogwapi.xmpp.AgentCommunicator;
  * - private methods
  */
 
+// TODO documentation
 /**
- * A representation of a connection to XMPP network. In essence, it is a client connected into XMPP network, able to 
+ * A representation of a connection to network. In essence, it is a client connected into XMPP network, able to 
  * send / receive messages and process the requests that arrive in them. Basically, the flow is like this:
  * 
  * 1. construct an instance
@@ -65,12 +68,11 @@ public class ConnectionDescriptor {
 	
 	/* === FIELDS === */
 	
-	// TODO this stays here during re-factoring 
+	// a set of event channels served by this object
+	private Set<EventChannel> providedEventChannels;
 	
-	private Set<EventChannel> eventChannels;
-	
-	//////////////////////////////////////////////////////////////////////
-	
+	// a map of channels that this object is subscribed to
+	private Map<String, String> subscribedEventChannels;
 	
 	
 	// logger and configuration
@@ -97,9 +99,6 @@ public class ConnectionDescriptor {
 	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
 	 * the descriptor will not be able to connect (in the best case scenario, the other being a storm of null pointer 
 	 * exceptions).
-	 */
-	/**
-	 * 
 	 * @param objectID
 	 * @param password
 	 * @param config
@@ -117,13 +116,15 @@ public class ConnectionDescriptor {
 		
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
-		eventChannels = new HashSet<EventChannel>();
+		providedEventChannels = new HashSet<EventChannel>();
+		subscribedEventChannels = new HashMap<String, String>();
+		
 		
 		// build new connection
-		// TODO spawn a comm engine and connect
-		// this is also the place, where it should decide what engine to use
+		// TODO this is also the place, where it should decide what engine to use
 		commEngine = new XmppMessageEngine(objectID, password, config, logger, this);
 		
+		// TODO load the event channels - either from a file or server
 		
 	}
 	
@@ -177,8 +178,13 @@ public class ConnectionDescriptor {
 
 	// TODO documentation
 	public boolean sendMessage(String destinationObjectID, String message){
+		
 		return commEngine.sendMessage(destinationObjectID, message);
 	}
+	
+	
+	
+	
 	
 	
 	/**
@@ -241,6 +247,40 @@ public class ConnectionDescriptor {
 		} while (message == null && !timeoutReached);
 	
 		return message;	
+	}
+	
+	
+	
+	/**
+	 * Sets the status of the {@link EventChannel EventChannel}. The status can be either active, or inactive, depending
+	 * on the 'status' parameter. 
+	 * 
+	 * If no channel with given 'eventID' exists and the 'status' is set to true, it gets created. If the 'status' is
+	 * false, the channel is not created if it does not exists previously.
+	 * 
+	 * @param eventID Event ID.
+	 * @param status If true, the channel will be set to active status.
+	 */
+	public void setEventChannelStatus(String eventID, boolean status) {
+		
+		// search for given event channel
+		boolean eventChannelFound = false;
+		for (EventChannel eventChannel : providedEventChannels) {
+			if (eventChannel.getEventID().equals(eventID)) {
+				// found it
+				eventChannel.setActive(status);
+				eventChannelFound = true;
+				
+				logger.fine("Object '" + objectID + "' changed the activeness of existing event channel '" 
+						+ eventID + "' to " + status);
+			}
+		}
+		
+		// if no event channel was found AND the caller wanted it to be active, create it
+		if (!eventChannelFound && status) {
+			providedEventChannels.add(new EventChannel(objectID, eventID, true));
+			logger.fine("Object '" + objectID + "' created active event channel '" + eventID + "'");
+		}
 	}
 	
 	
@@ -321,6 +361,7 @@ public class ConnectionDescriptor {
 	private void processMessageResponse(String from, NetworkMessage networkMessage){
 		messageQueue.add(networkMessage);
 	}
+	
 	
 	
 
