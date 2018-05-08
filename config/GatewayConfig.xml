@@ -86,6 +86,16 @@
 		<debugging>true</debugging>
 		
 		<!--
+		Listen for changes in rosters (XMPP contact lists) of devices connected
+		to this Gateway. These changes include whether a partner device goes 
+		offline or online. It is recommended to have this feature turned on,
+		unless there are thousands of devices connected to this Gateway API. 
+		
+		Default is true.
+		-->
+		<listenForRosterChanges>true</listenForRosterChanges>
+		
+		<!--
 		Number of seconds to consider request message as no longer relevant. 
 		After a request is sent from point A to point B, point A waits for 
 		response. If the response does not arrive until this timeout expires, 
@@ -156,7 +166,7 @@
 		
 		Defaults to 9997.
 		-->
-		<agentPort>9191</agentPort>
+		<agentPort>9997</agentPort>
 		
 	</api>
 
