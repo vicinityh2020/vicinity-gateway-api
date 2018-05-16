@@ -73,6 +73,9 @@ public class MessageParser {
 		case NetworkMessageResponse.MESSAGE_TYPE:
 			return new NetworkMessageResponse(json, config);
 			
+		case NetworkMessageEvent.MESSAGE_TYPE:
+			return new NetworkMessageEvent(json, config);
+			
 			default:
 				return null;
 		}

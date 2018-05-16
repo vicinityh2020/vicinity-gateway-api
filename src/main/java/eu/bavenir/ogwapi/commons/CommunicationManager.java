@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 /*
  * STRUCTURE:
@@ -35,6 +36,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 
 
 // TODO documentation (this main one - the others are good unless stated otherwise)
+// TODO make logging more meaningful - manager (INFO), descriptor (FINE), engine (FINER) and document it in the javadoc.
 /**
  * 
  * This class serves as a connection manager for XMPP communication over P2P network. There is usually only need
@@ -119,8 +121,8 @@ public class CommunicationManager {
 	// ADMINISTRATION METHODS - not directly related to interfaces
 	
 	/**
-	 * Retrieves the object IDs that has open connections to network. Based on these strings, the respective
-	 * connections can be retrieved from the connection descriptor pool.
+	 * Retrieves the object IDs that has open connections to network via this ConnectionManager. 
+	 * Based on these strings, the respective connections can be retrieved from the connection descriptor pool.
 	 * 
 	 * @return Set of object IDs. 
 	 */
@@ -128,7 +130,7 @@ public class CommunicationManager {
 		
 		Set<String> usernames = descriptorPool.keySet();
 		
-		logger.finest("-- Object IDs connected to network: --");
+		logger.finest("-- Object IDs connected to network through this CommunicationManager: --");
 		for (String string : usernames) {
 			logger.finest(string);
 		}
@@ -138,7 +140,7 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Checks whether the object ID connection {@link ConnectionDescriptor descriptor} instance exists for given object and 
+	 * Checks whether the connection {@link ConnectionDescriptor descriptor} instance exists for given object ID and 
 	 * whether or not it is connected to the network. Returns true or false accordingly.  
 	 * 
 	 * @param objectID Object ID in question. 
@@ -161,7 +163,7 @@ public class CommunicationManager {
 	/**
 	 * Verifies the credentials of an object, when (for example) trying to reach its connection 
 	 * {@link ConnectionDescriptor descriptor} instance via RESTLET API Authenticator. This method should be called after 
-	 * {@link #isConnected(String) isConnected} is called first, otherwise will always return false. 
+	 * {@link #isConnected(String) isConnected} is used for making sure, that the object is actually connected. 
 	 * It is safe to use this method when processing authentication of every request, even in quick succession.
 	 * 
 	 * @param objectID Object ID in question.
@@ -215,18 +217,20 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Establishes a single connection for given object  with preferences from configuration file and provided credentials. 
-	 * The connection descriptor is then stored in a hash map.
+	 * Establishes a single connection for given object with preferences from configuration file and provided credentials. 
+	 * The connection descriptor is then stored in the internal descriptor pool.
 	 * 
 	 * If the connection descriptor for given object already exists, it get terminated, discarded and then recreated.
+	 * 
 	 * 
 	 * NOTE: This is the equivalent of GET /objects/login in the REST API.
 	 * 
 	 * @param objectID Object ID.
 	 * @param password Password.
-	 * @return The established connection descriptor if the attempt was successful, null otherwise.
+	 * @return StatusMessage, with the error flag set as false, if the login was successful. If not, the error flag is
+	 * set to true.
 	 */
-	public ConnectionDescriptor establishConnection(String objectID, String password){
+	public StatusMessage establishConnection(String objectID, String password){
 		
 		// if there is a previous descriptor we should close the connection first, before reopening it again
 		ConnectionDescriptor descriptor = descriptorPoolRemove(objectID);
@@ -239,19 +243,23 @@ public class CommunicationManager {
 		
 		descriptor = new ConnectionDescriptor(objectID, password, config, logger);
 		
+		StatusMessage statusMessage;
+		
 		if (descriptor.connect()){
 			logger.info("Connection for '" + objectID +"' was established.");
-		} else {
 			
+			// insert the connection descriptor into the pool
+			descriptorPoolPut(objectID, descriptor);
+			logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
+			
+			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_LOGIN, StatusMessage.TEXT_SUCCESS);
+			
+		} else {
 			logger.info("Connection for '" + objectID +"' was not established.");
-			return null;
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_LOGIN, StatusMessage.TEXT_FAILURE);
 		}
 		
-		// insert the connection descriptor into the pool
-		descriptorPoolPut(objectID, descriptor);
-		logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
-		
-		return descriptor;
+		return statusMessage;
 	}
 	
 	
@@ -292,7 +300,22 @@ public class CommunicationManager {
 	
 	// CONSUMPTION INTERFACE
 	
+	/*
+	 * this has to be solved eventually - there is too much logic in the rest service, it is therefore hard 
+	 * to make the ogwapi a single library solution.
+	 * 
+	 * 
+	public String getPropertyOfRemoteObject(String objectID, String remoteObjectID, String remotePropertyID) {
+		
+	}
 	
+	
+	
+	public String setPropertyOfRemoteObject(String objectID, String remoteObjectID, String remotePropertyID) {
+		
+		
+	}
+	*/
 	
 	
 	// DISCOVERY INTERFACE
@@ -367,35 +390,53 @@ public class CommunicationManager {
 	 * If the event channel was never activated before (or there is other reason why it was not saved previously), it 
 	 * gets created anew. In that case, the list of subscribers is empty.  
 	 * 
-	 * NOTE: This is the equivalent of POST /objects/[oid]/events/[eid] in the REST API.
+	 * NOTE: This is the equivalent of POST /events/[eid] in the REST API.
 	 * 
 	 * @param objectID Object ID of the event channel owner.
 	 * @param eventID Event ID.
-	 * @return False if the owner object is not logged into the network. Otherwise true.
+	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
+	 * successfully.
 	 */
-	public boolean activateEventChannel(String objectID, String eventID) {
+	public StatusMessage activateEventChannel(String objectID, String eventID) {
 		
 		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
-					+ " into the Gateway yet.");
-			return false;
+			String messageText = new String("No descriptor exist for source object ID '"  
+					+ objectID + "'. The device has not logged into the Gateway yet.");
+			
+			logger.warning(messageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_ACTIVATION, messageText);
 		}
 		
 		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
 		
-		return true;
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, StatusMessage.TEXT_SUCCESS);
 	}
 	
 	
 	
-	public void sendEventToSubscribedObjects(String eventID) {
+	public StatusMessage sendEventToSubscribedObjects(String objectID, String eventID, String event) {
 		
-		// TODO
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			String messageText = new String("No descriptor exist for source object ID '"  
+					+ objectID + "'. The device has not logged into the Gateway yet.");
+			
+			logger.warning(messageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, messageText);
+		}
+		
+		
+		
+		
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, StatusMessage.TEXT_SUCCESS);
 		
 	}
+	
 	
 	
 	/**
@@ -405,26 +446,29 @@ public class CommunicationManager {
 	 * The channel will still exist though along with the list of subscribers. If it gets re-activated, the list of
 	 * subscribers will be the same as in the moment of de-activation.  
 	 * 
-	 * NOTE: This is the equivalent of DELETE /objects/[oid]/events/[eid] in the REST API.
+	 * NOTE: This is the equivalent of DELETE /events/[eid] in the REST API.
 	 * 
 	 * @param objectID Object ID of the event channel owner
 	 * @param eventID Event ID.
-	 * @return False if the owner object is not logged into the network. Otherwise true.
+	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
+	 * successfully.
 	 */
-	public boolean deactivateEventChannel(String objectID, String eventID) {
+	public StatusMessage deactivateEventChannel(String objectID, String eventID) {
 		
 		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
-					+ " into the Gateway yet.");
-			return false;
+			String messageText = new String("No descriptor exist for source object ID '"  
+					+ objectID + "'. The device has not logged into the Gateway yet.");
+			
+			logger.warning(messageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_DEACTIVATION, messageText);
 		}
 		
 		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
 		
-		return true;
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, StatusMessage.TEXT_SUCCESS);
 	}
 	
 	
@@ -447,20 +491,7 @@ public class CommunicationManager {
 	
 	
 	// TODO move this to consumption interface
-	/**
-	 * Sends a message (string) from source object ID, to destination object ID. In case there are some doubts about
-	 * security in sending the message this way (especially by having the option to define from which user name the 
-	 * message originates), there is no need to worry. The safety is inherent in the fact, that the source user name 
-	 * must have established connection on this instance of CommunicationManager first (i.e. the credentials must be known,
-	 * so the connection descriptor can be created). Moreover the device is authenticated with every request.  
-	 * 
-	 * It is thus impossible to act as a device from some other gateway/owner.
-	 *  
-	 * @param sourceObjectID Object ID of the originating device.
-	 * @param destinationObjectID Object ID of the destination device.
-	 * @param message Message string.
-	 * @return True on success, false if the destination was offline or if some error occurred.
-	 */
+	
 	public boolean sendMessage(String sourceObjectID, String destinationObjectID, String message){
 		
 		// check the validity object
@@ -573,7 +604,7 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Thread-safe method for clearing the descriptor pool. This is a synchronized equivalent for 
+	 * Thread-safe method for clearing the descriptor pool. This is a synchronised equivalent for 
 	 * {@link java.util.HashMap#clear() clear()} method of HashMap table.
 	 * 
 	 *    IMPORTANT: It is imperative to use only this method to interact with the descriptor pool when adding

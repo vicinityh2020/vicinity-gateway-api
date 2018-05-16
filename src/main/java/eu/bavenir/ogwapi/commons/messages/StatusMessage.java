@@ -51,14 +51,27 @@ public class StatusMessage {
 	
 	
 	/**
-	 * Name of the error attribute.
+	 * Name of the error attribute - for JSON building.
 	 */
 	public static final String ATTR_ERROR = "error";
 	
 	/**
-	 * Name of the message attribute.
+	 * Name of the message attribute - for JSON building.
 	 */
 	public static final String ATTR_MESSAGE = "message";
+	
+	/**
+	 * Text of the success message.
+	 */
+	public static final String TEXT_SUCCESS = "success";
+	
+	/**
+	 * Text of the failure message.
+	 */
+	public static final String TEXT_FAILURE = "failure";
+	
+	
+	// this is a list of status message names, that can usually occur during operations of the OGWAPI
 	
 	/**
 	 * Attribute name for the status code, returned by HTTP server on the remote site.  
@@ -69,6 +82,31 @@ public class StatusMessage {
 	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
 	 */
 	public static final String MESSAGE_REASON = "reason";
+	
+	/**
+	 * Attribute name for login.
+	 */
+	public static final String MESSAGE_LOGIN = "login";
+	
+	/**
+	 * Attribute name for login.
+	 */
+	public static final String MESSAGE_LOGOUT = "logout";
+	
+	/**
+	 * Attribute name for Event channel activation.
+	 */
+	public static final String MESSAGE_EVENT_ACTIVATION = "eventChannelActivation";
+	
+	/**
+	 * Attribute name for Event channel deactivation.
+	 */
+	public static final String MESSAGE_EVENT_DEACTIVATION = "eventChannelDeactivation";
+	
+	/**
+	 * Attribute name for sending the Event to subscribers.
+	 */
+	public static final String MESSAGE_EVENT_SENDINGTOSUBSCRIBERS = "eventSendingToSubscribers";
 	
 	
 	/* === FIELDS === */

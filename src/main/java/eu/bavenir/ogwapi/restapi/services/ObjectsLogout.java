@@ -18,9 +18,9 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
  */
 
 /**
- * This class implements logout service for object, that needs to log out of the XMPP network. Usually, while 
- * utilizing HTTP Authentication Schemes, it is not necessary to log out, since the RESTLET provides state-less 
- * services. However, since the Gateway API works as a translator between state-less API and the state-full XMPP 
+ * This class implements logout service for object, that needs to log out of the network. Usually, while 
+ * utilising HTTP Authentication Schemes, it is not necessary to log out, since the RESTLET provides state-less 
+ * services. However, since the Gateway API works as a translator between state-less API and the state-full P2P 
  * network, it is necessary to include such a service to log out of the network. 
  * 
  *   URL: 				[server]:[port]/api/objects/logout
@@ -38,12 +38,19 @@ public class ObjectsLogout extends ServerResource{
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
+	/**
+	 * Logs the object that is calling this method out from the network.
+	 * 
+	 * @return {@link StatusMessage StatusMessage} with a success message.
+	 */
 	@Get
 	public Representation represent() {
 		
 		logoutObject();
 		
-		StatusMessage statusMessage = new StatusMessage(false, "logout", "success");
+		// the status message has to be created a new - there is no easy way how to propagate it from the REST
+		// authentication verifier.
+		StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_LOGOUT, StatusMessage.TEXT_SUCCESS);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
@@ -51,9 +58,13 @@ public class ObjectsLogout extends ServerResource{
 	
 	// === PRIVATE METHODS ===
 	
+	/**
+	 * Destroys the connection descriptor for given object ID.
+	 */
 	private void logoutObject() {
 		
-		CommunicationManager communicationManager = (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+		CommunicationManager communicationManager = 
+						(CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
 		communicationManager.terminateConnection(
 				getRequest().getChallengeResponse().getIdentifier(), 

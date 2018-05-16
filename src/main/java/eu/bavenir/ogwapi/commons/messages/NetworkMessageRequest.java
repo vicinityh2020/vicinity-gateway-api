@@ -22,6 +22,8 @@ import org.apache.commons.configuration2.XMLConfiguration;
  * - private methods
  */
 
+
+// explain why there are two constructors
 /**
  * Extended {@link NetworkMessage NetworkMessage} that represents a request. In order to transport a request across P2P
  * network, it has to be disassembled at the place of origin (HTTP method, URL attributes, parameters, etc. have to 
@@ -55,55 +57,114 @@ public class NetworkMessageRequest extends NetworkMessage {
 	/**
 	 * Name of the request method field in JSON that is to be sent. 
 	 */
-	public static final String ATTR_REQUESTOPERATION = "requestOperation";
+	private static final String ATTR_REQUESTOPERATION = "requestOperation";
 	
 	/**
 	 * Name of the attributes field in JSON that is to be sent. 
 	 */
-	public static final String ATTR_ATTRIBUTES = "attributes";
+	private static final String ATTR_ATTRIBUTES = "attributes";
 	
 	/**
 	 * Name of the parameters field in JSON that is to be sent. 
 	 */
-	public static final String ATTR_PARAMETERS = "parameters";
+	private static final String ATTR_PARAMETERS = "parameters";
 	
 	/**
 	 * Name of the request body attribute.
 	 */
-	public static final String ATTR_REQUESTBODY = "requestBody";
+	private static final String ATTR_REQUESTBODY = "requestBody";
+	
+	/**
+	 * Operation ID for getting a list of properties.
+	 */
+	public static final byte OPERATION_GETLISTOFPROPERTIES = 0x00;
+	
+	/**
+	 * Operation ID for getting property value.
+	 */
+	public static final byte OPERATION_GETPROPERTYVALUE = 0x01;
+	
+	/**
+	 * Operation ID for setting property value.
+	 */
+	public static final byte OPERATION_SETPROPERTYVALUE = 0x02;
+	
+	/**
+	 * Operation ID for getting a list of actions. 
+	 */
+	public static final byte OPERATION_GETLISTOFACTIONS = 0x03;
+	
+	/**
+	 * Operation ID for starting an action.
+	 */
+	public static final byte OPERATION_STARTACTION = 0x04;
+	
+	/**
+	 * Operation ID for getting task status.
+	 */
+	public static final byte OPERATION_GETTASKSTATUS = 0x05;
+	
+	/**
+	 * Operation ID for cancelling a task.
+	 */
+	public static final byte OPERATION_CANCELTASK = 0x06;
+	
+	/**
+	 * Operation ID for getting a list of events.
+	 */
+	public static final byte OPERATION_GETLISTOFEVENTS = 0x07;
+	
+	/**
+	 * Operation ID getting event channel status.  
+	 */
+	public static final byte OPERATION_GETEVENTCHANNELSTATUS = 0x08;
+	
+	/**
+	 * Operation ID for subscribing to event channel.
+	 */
+	public static final byte OPERATION_SUBSCRIBETOEVENTCHANNEL = 0x09;
+	
+	/**
+	 * Operation ID for cancelling subscription to an event channel.
+	 */
+	public static final byte OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL = 0x0A;
+	
+	// IMPORTANT NOTE: If adding new operation codes, add them also to the verification method at the end 
+	// of this class - in the private methods section. 
+	
+	// TODO to be removed
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP GET.
 	 */
-	public static final int REQUEST_OPERATION_GET = 0x00;
+	public static final byte REQUEST_OPERATION_GET = 0x10;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP PUT.
 	 */
-	public static final int REQUEST_OPERATION_PUT = 0x01;
+	public static final byte REQUEST_OPERATION_PUT = 0x11;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP DELETE.
 	 */
-	public static final int REQUEST_OPERATION_DEL = 0x02;
+	public static final byte REQUEST_OPERATION_DEL = 0x12;
 	
 	/**
 	 * Value that is used, when the requested operation is HTTP POST.
 	 */
-	public static final int REQUEST_OPERATION_POST = 0x03;
+	public static final byte REQUEST_OPERATION_POST = 0x13;
+	
+	// ========================
+	
 	
 	
 	/* === FIELDS === */
 	
 	/**
-	 * This variable specifies which HTTP method is to be utilised on remote object. Valid values are:
-	 * 
-	 * 	{@link #REQUEST_OPERATION_GET REQUEST_OPERATION_GET}
-	 *  {@link #REQUEST_OPERATION_PUT REQUEST_OPERATION_PUT}
-	 *  {@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
-	 *  {@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
+	 * This variable specifies which operation should be requested from the remote site. Valid values are the constants
+	 * of this class starting with OPERATION prefix.
 	 */
-	private int requestOperation;
+	private byte requestOperation;
 	
 	/**
 	 * Linked hash map with attribute names and their values.
@@ -120,31 +181,17 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 */
 	private String requestBody;
 	
-	/**
-	 * The JSON object that can be a result of two events:
-	 *  - Either a JSON arrived in a message and is saved here while it was being parsed and fields of this object
-	 *  	were filled. It is useful to keep it here, because parsing can fail, making the message invalid, in which 
-	 *  	case the validity {@link NetworkMessage#valid flag} is set to false. While the JSON is stored here, it can 
-	 *  	be logged somewhere conveniently.
-	 *  - A message to be sent is being built, and after all necessary fields, parameters and attributes are set, the 
-	 *  	JSON is assembled using {@link #buildMessageString() build} method. This would overwrite the JSON from the
-	 *  	first event, if the same message object is used (which should not happen). 
-	 */
-	private JsonObject jsonRepresentation;
-	
 	
 	/* === PUBLIC METHODS === */
 	
 	/**
-	 * Constructor of a request message that is to be sent across XMPP network. Request ID is computed during 
+	 * Constructor of a request message that is to be sent across the network. Request ID is computed during 
 	 * object's construction. The rest of attributes, codes, parameters, etc. need to be filled as needed.  
 	 * 
 	 */
 	public NetworkMessageRequest(XMLConfiguration config){
 		// always call this guy
 		super(config);
-
-		jsonRepresentation = null;
 		
 		messageType = NetworkMessageRequest.MESSAGE_TYPE;
 		
@@ -156,11 +203,14 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * This constructor attempts to build this object by parsing incoming JSON. If the parsing operation is not 
 	 * successful, the result is an object with validity {@link NetworkMessage#valid flag} set to false.
 	 * 
-	 * @param json JSON that arrived from the XMPP network. 
+	 * @param json JSON that arrived from the network. 
 	 */
 	public NetworkMessageRequest(JsonObject json, XMLConfiguration config){
 		// always call this guy
 		super(config);
+		
+		// remember the json this message was created from
+		jsonRepresentation = json;
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
@@ -188,10 +238,10 @@ public class NetworkMessageRequest extends NetworkMessage {
 
 
 	/**
-	 * Returns a JSON String that is to be sent over the XMPP network. The String is build from all the attributes that
+	 * Returns a JSON String that is to be sent over the network. The String is build from all the attributes that
 	 * were set with getters and setters. Use this when you are finished with setting the attributes, parameters etc.
 	 * 
-	 * @return JSON String that can be sent over the XMPP network.
+	 * @return JSON String that can be sent over the network.
 	 */
 	public String buildMessageString(){
 		
@@ -202,28 +252,23 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * If this NetworkMessage instance is a request, returns the HTTP request method that is to be used.
+	 * Returns the request operation that is to be executed. Valid values are the constants
+	 * of this class starting with OPERATION prefix.
 	 * 
-	 * @return 	{@link #REQUEST_OPERATION_GET REQUEST_OPERATION_GET}
-	 *  		{@link #REQUEST_OPERATION_PUT REQUEST_OPERATION_PUT}
-	 *  		{@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
-	 *  		{@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
+	 * @return 	Request operation identifier.
 	 */
-	public int getRequestOperation() {
+	public byte getRequestOperation() {
 		return requestOperation;
 	}
 
 
 	/**
-	 * If this NetworkMessage instance is a request, sets the HTTP request method that is to be used.
+	 * Sets the request operation that is to be executed. Valid values are the constants
+	 * of this class starting with OPERATION prefix.
 	 * 
-	 * @param requestOperation Valid values are:
-	 * 			{@link #REQUEST_OPERATION_GET REQUEST_OPERATION_GET}
-	 *  		{@link #REQUEST_OPERATION_PUT REQUEST_OPERATION_PUT}
-	 *  		{@link #REQUEST_OPERATION_POST REQUEST_OPERATION_POST}
-	 *  		{@link #REQUEST_OPERATION_DELETE REQUEST_OPERATION_DELETE}
+	 * @param requestOperation Request operation identifier.
 	 */
-	public void setRequestOperation(int requestOperation) {
+	public void setRequestOperation(byte requestOperation) {
 		this.requestOperation = requestOperation;
 	}
 	
@@ -368,15 +413,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
 		
 		// get and validate the request operation
-		requestOperation = json.getInt(NetworkMessageRequest.ATTR_REQUESTOPERATION);
+		requestOperation = (byte) json.getInt(NetworkMessageRequest.ATTR_REQUESTOPERATION);
 		
-		if (
-				!(requestOperation == NetworkMessageRequest.REQUEST_OPERATION_GET
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_DEL
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_POST
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_PUT)
-			){
-				
+		if (!validateRequestOperation(requestOperation)) {
 			setValid(false);
 			return false;
 		}
@@ -385,7 +424,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 			requestBody = removeQuotes(json.getString(NetworkMessageRequest.ATTR_REQUESTBODY));
 		}
 		
-		// here both the parameters and attributes will during reading
+		// here both the parameters and attributes will be stored during reading
 		Set<Entry<String,JsonValue>> entrySet;
 		String stringValue;
 
@@ -428,6 +467,50 @@ public class NetworkMessageRequest extends NetworkMessage {
 			}
 		}
 
+		return true;
+	}
+	
+	
+	
+	/**
+	 * Validates the request operation code. If the code is not among the codes that are enumerated by constants, 
+	 * the verification fails. 
+	 * 
+	 * This check is preventing malicious remote gateways to ask us to do something, that this version of gateway is
+	 * not capable of. 
+	 * 
+	 * NOTE: Every time there is a new operation implemented in the gateway, the operation code must be inserted among
+	 * the constants as well as here.  
+	 * 
+	 * @param requestOperation Operation ID of the incoming message. 
+	 * @return True if the operation ID is valid for this gateway, false otherwise.
+	 */
+	private boolean validateRequestOperation(byte requestOperation) {
+		
+		if (
+				!(requestOperation == NetworkMessageRequest.OPERATION_CANCELTASK
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETLISTOFACTIONS
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETLISTOFEVENTS
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETPROPERTYVALUE
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETTASKSTATUS
+				|| requestOperation == NetworkMessageRequest.OPERATION_SETPROPERTYVALUE
+				|| requestOperation == NetworkMessageRequest.OPERATION_STARTACTION
+				|| requestOperation == NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL
+				|| requestOperation == NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL
+				
+				// TODO remove these old ones
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_DEL
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_GET
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_POST
+				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_PUT
+				)
+			){
+			
+			return false;
+		}
+		
 		return true;
 	}
 	

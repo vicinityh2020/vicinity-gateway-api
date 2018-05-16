@@ -114,10 +114,10 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
 			logger.info("OID: " + attrOid + " PID: " + attrPid 
-					+ " Invalid property description.");
+					+ " Invalid property description - must be a valid JSON.");
 			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description.");
+					"Invalid property description - must be a valid JSON.");
 		}
 		
 		// get the json

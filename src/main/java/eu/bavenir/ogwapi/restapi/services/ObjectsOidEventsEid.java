@@ -47,7 +47,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 	private static final String ATTR_OID = "oid";
 	
 	/**
-	 * Name of the Process ID attribute.
+	 * Name of the Event ID attribute.
 	 */
 	private static final String ATTR_EID = "eid";
 	

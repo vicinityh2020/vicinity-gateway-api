@@ -45,17 +45,17 @@ public class NetworkMessageResponse extends NetworkMessage {
 	/**
 	 * Name of the response status code attribute.
 	 */
-	public static final String ATTR_RESPONSECODE = "responseCode";
+	private static final String ATTR_RESPONSECODE = "responseCode";
 	
 	/**
 	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
 	 */
-	public static final String ATTR_RESPONSECODEREASON = "responseCodeReason";
+	private static final String ATTR_RESPONSECODEREASON = "responseCodeReason";
 	
 	/**
 	 * Name of the response body attribute.
 	 */
-	public static final String ATTR_RESPONSEBODY = "responseBody";
+	private static final String ATTR_RESPONSEBODY = "responseBody";
 
 	
 	/* === FIELDS === */
@@ -76,18 +76,6 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	private String responseBody;
 	
-	/**
-	 * The JSON object that can be a result of two events:
-	 *  - Either a JSON arrived in a message and is saved here while it was being parsed and fields of this object
-	 *  	were filled. It is useful to keep it here, because parsing can fail, making the message invalid, in which 
-	 *  	case the validity {@link NetworkMessage#valid flag} is set to false. While the JSON is stored here, it can 
-	 *  	be logged somewhere conveniently.
-	 *  - A message to be sent is being built, and after all necessary fields, parameters and attributes are set, the 
-	 *  	JSON is assembled using {@link #buildMessageString() build} method. This would overwrite the JSON from the
-	 *  	first event, if the same message object is used (which should not happen). 
-	 */
-	private JsonObject jsonRepresentation;
-	
 	
 	
 	/* === PUBLIC METHODS === */
@@ -98,8 +86,6 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	public NetworkMessageResponse(XMLConfiguration config){
 		super(config);
-		
-		jsonRepresentation = null;
 		
 		messageType = NetworkMessageResponse.MESSAGE_TYPE;
 	}

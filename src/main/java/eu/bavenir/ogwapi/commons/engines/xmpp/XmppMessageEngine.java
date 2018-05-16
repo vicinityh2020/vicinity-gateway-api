@@ -256,8 +256,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 		
 		Set<String> rosterSet = new HashSet<String>();
 		
-		// TODO this needs to be tested - especially whether or not we have the domain at end.
-		
 		if (connection == null || !connection.isConnected()){
 			logger.warning("Invalid connection in descriptor for username '" + objectID + "'.");
 			return Collections.emptySet();
@@ -269,17 +267,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 		}
 		
-		
 		Collection<RosterEntry> entries = roster.getEntries();
 		for (RosterEntry entry : entries) {
-		
-			
-			//rosterSet.add(entry.getJid().asBareJid().toString());
 			rosterSet.add(entry.getJid().getLocalpartOrNull().toString());
-			
-			// TODO 
-			System.out.println("XmppMessageEngine.getRoster: " + entry.getJid().getLocalpartOrNull().toString() + " was added to set.");
-			
 		}
 		
 		return rosterSet;

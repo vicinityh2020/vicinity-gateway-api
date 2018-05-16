@@ -8,6 +8,7 @@ import org.restlet.data.ChallengeResponse;
 import org.restlet.security.Verifier;
 
 import eu.bavenir.ogwapi.commons.CommunicationManager;
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 // !!!!!!!!!!!! 
 // http://www.programcreek.com/java-api-examples/index.php?api=org.restlet.security.Verifier
@@ -18,15 +19,15 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
 // https://stackoverflow.com/questions/5199554/restful-authentication-resulting-poor-performance-on-high-load
 
 /**
- * Verifier usable in Vicinity ecosystem. The credentials are verified two ways:
+ * Verifier usable in the P2P network. The credentials are verified two ways:
  * 
  *  1. The clients logs in for the first time:
  *  	In such case, the credentials are verified by whether or not the 
  *  	{@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor} can be created, i.e.
- *  	whether it is possible to log into the XMPP network with provided credentials.
+ *  	whether it is possible to log into the network with provided credentials.
  *  
  *  2. The client is already logged and has a {@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor} created:
- *  	ConnectionDescriptor, after successful login, contains the password that was used to connect to XMPP network 
+ *  	ConnectionDescriptor, after successful login, contains the password that was used to connect to the network 
  *  	as one of its fields. Credentials are then compared when this verifier is called.
  *  
  * @author sulfo
@@ -34,7 +35,14 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
  */
 public class AuthenticationVerifier implements Verifier {
 
-	private CommunicationManager communicationNode;
+	/**
+	 * {@link CommunicationManager CommunicationManager} used for the authentication.
+	 */
+	private CommunicationManager communicationManager;
+	
+	/**
+	 * {@link Logger Logger} used for logging.
+	 */
 	private Logger logger;
 	
 	
@@ -44,7 +52,7 @@ public class AuthenticationVerifier implements Verifier {
 	 * exceptions).
 	 */
 	public AuthenticationVerifier(CommunicationManager communicationNode, Logger logger){
-		this.communicationNode = communicationNode;
+		this.communicationManager = communicationNode;
 		this.logger = logger;
 	}
 	
@@ -63,19 +71,20 @@ public class AuthenticationVerifier implements Verifier {
 			return Verifier.RESULT_MISSING;
 		}
 		
-		String username = cr.getIdentifier();
+		String objectID = cr.getIdentifier();
 		String password = new String(cr.getSecret());
 		
-		if (communicationNode.isConnected(username)){
+		if (communicationManager.isConnected(objectID)){
 			// if the client is already connected, just verify the password
-			if (!communicationNode.verifyPassword(username, password)){
+			if (!communicationManager.verifyPassword(objectID, password)){
 				logger.info("Invalid credentials in request from a client with IP " 
 						+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;
 			}
 		} else {
 			// if not, establish a connection
-			if (communicationNode.establishConnection(username, password) == null){
+			StatusMessage statusMessage = communicationManager.establishConnection(objectID, password); 
+			if (statusMessage.isError()){
 				logger.info("Invalid credentials in request from a client with IP " 
 											+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;

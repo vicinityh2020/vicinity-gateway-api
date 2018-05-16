@@ -13,6 +13,7 @@ import org.restlet.security.ChallengeAuthenticator;
 import eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjectsDelete;
+import eu.bavenir.ogwapi.restapi.services.EventsEid;
 import eu.bavenir.ogwapi.restapi.services.Objects;
 import eu.bavenir.ogwapi.restapi.services.ObjectsLogin;
 import eu.bavenir.ogwapi.restapi.services.ObjectsLogout;
@@ -174,7 +175,7 @@ public class Api extends Application {
 		// EXPOSING
 		router.attach("/objects/{oid}/events", ObjectsOidEvents.class);
 		router.attach("/objects/{oid}/events/{eid}", ObjectsOidEventsEid.class);
-		router.attach("/events/{eid}", ObjectsOidEventsEid.class);
+		router.attach("/events/{eid}", EventsEid.class);
 		
 		
 		// DISCOVERY

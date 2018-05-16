@@ -1,5 +1,7 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import javax.json.JsonObject;
+
 import org.apache.commons.configuration2.XMLConfiguration;
 
 /*
@@ -98,6 +100,18 @@ public class NetworkMessage {
 	 * Configuration - necessary to obtain a timeout value. 
 	 */
 	protected XMLConfiguration config;
+	
+	/**
+	 * The JSON object that can be a result of two events:
+	 *  - Either a JSON arrived in a message and is saved here while it was being parsed and fields of this object
+	 *  	were filled. It is useful to keep it here, because parsing can fail, making the message invalid, in which 
+	 *  	case the validity {@link NetworkMessage#valid flag} is set to false. While the JSON is stored here, it can 
+	 *  	be logged somewhere conveniently.
+	 *  - A message to be sent is being built, and after all necessary fields, parameters and attributes are set, the 
+	 *  	JSON is assembled using {@link #buildMessageString() build} method. This would overwrite the JSON from the
+	 *  	first event, if the same message object is used (which should not happen). 
+	 */
+	protected JsonObject jsonRepresentation;
 
 	
 	/* === PUBLIC METHODS === */
@@ -111,6 +125,8 @@ public class NetworkMessage {
 		stale = false;
 		messageType = NetworkMessage.MESSAGE_TYPE;
 		this.config = config;
+		
+		jsonRepresentation = null;
 	}
 	
 	
@@ -200,7 +216,7 @@ public class NetworkMessage {
 	
 	/**
 	 * Inserting a string into JSON has a side effect of the string becoming quoted when extracted back from the JSON.
-	 * This toy just removes quotes if there are any (it tests for their existence first).
+	 * This little toy just removes quotes if there are any (it tests for their existence first).
 	 *  
 	 * @param quotedString The original quoted string.
 	 * @return Unquoted string.

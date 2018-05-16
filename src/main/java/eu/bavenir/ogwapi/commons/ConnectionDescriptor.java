@@ -176,7 +176,18 @@ public class ConnectionDescriptor {
 	
 	
 
-	// TODO documentation
+	/**
+	 * Sends a message (string) from to destination object ID. In case there are some doubts about
+	 * The safety is inherent in the fact, that the source user name must have established connection on this instance 
+	 * of CommunicationManager first (i.e. the credentials must be known, so the connection descriptor can be created). 
+	 * Moreover the device is authenticated with every request.  
+	 * 
+	 * It is thus impossible to act as a device from some other gateway/owner.
+	 *  
+	 * @param destinationObjectID Object ID of the destination device.
+	 * @param message Message string.
+	 * @return True on success, false if the destination was offline or if some error occurred.
+	 */
 	public boolean sendMessage(String destinationObjectID, String message){
 		
 		return commEngine.sendMessage(destinationObjectID, message);
@@ -260,27 +271,76 @@ public class ConnectionDescriptor {
 	 * 
 	 * @param eventID Event ID.
 	 * @param status If true, the channel will be set to active status.
+	 * @return If the channel was found and its status set, returns true. It will also return true, if the channel was
+	 * not found, but was created (this is what happens when the status of the non existing channel is being set to
+	 * {@link EventChannel#STATUS_ACTIVE active}). If the channel was not found and the status was being set to 
+	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false.
 	 */
-	public void setEventChannelStatus(String eventID, boolean status) {
+	public boolean setEventChannelStatus(String eventID, boolean status) {
+		
+		boolean result = true;
 		
 		// search for given event channel
-		boolean eventChannelFound = false;
-		for (EventChannel eventChannel : providedEventChannels) {
-			if (eventChannel.getEventID().equals(eventID)) {
-				// found it
-				eventChannel.setActive(status);
-				eventChannelFound = true;
+		EventChannel eventChannel = searchForEventChannel(eventID);
+		
+		if (eventChannel != null) {
+			eventChannel.setActive(status);
+			logger.fine("Object '" + objectID + "' changed the activeness of existing event channel '" 
+					+ eventID + "' to " + status);
+		} else {
+			
+			// if no event channel was found AND the caller wanted it to be active, create it
+			if (status) {
+				providedEventChannels.add(new EventChannel(objectID, eventID, true));
+				logger.fine("Object '" + objectID + "' created active event channel '" + eventID + "'");
+			} else {
+				logger.fine("Could not deactivate the event channel '" + eventID + "' of the object '" + objectID 
+						+ "'. The event channel does not exist.");
 				
-				logger.fine("Object '" + objectID + "' changed the activeness of existing event channel '" 
-						+ eventID + "' to " + status);
+				result = false;
 			}
 		}
 		
-		// if no event channel was found AND the caller wanted it to be active, create it
-		if (!eventChannelFound && status) {
-			providedEventChannels.add(new EventChannel(objectID, eventID, true));
-			logger.fine("Object '" + objectID + "' created active event channel '" + eventID + "'");
+		return result;
+	}
+	
+	
+	// -1 if there is no such eventchannel 
+	public int sendEventToSubscribers(String eventID, String event) {
+		
+		// look up the event channel
+		EventChannel eventChannel = searchForEventChannel(eventID);
+		
+		if (eventChannel == null) {
+			return -1;
 		}
+		
+		Set<String> subscribers = eventChannel.getSubscribersSet();
+		
+		for (String string : subscribers) {
+			
+			
+			// TODO YOU ARE HERE commEngine.send
+		}
+	}
+	
+	
+	/**
+	 * Returns the number of subscribers for the {@link EventChannel EventChannel} specified by its event ID. 
+	 * 
+	 * @param eventID ID of the {@link EventChannel EventChannel}.
+	 * @return Number of subscribers, or -1 if no such {@link EventChannel EventChannel} exists. 
+	 */
+	public int getNumberOfSubscribers(String eventID) {
+		
+		// look up the event channel
+		EventChannel eventChannel = searchForEventChannel(eventID);
+		
+		if (eventChannel == null) {
+			return -1;
+		}
+		
+		return eventChannel.getSubscribersSet().size();
 	}
 	
 	
@@ -352,6 +412,8 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	
+	
 	/**
 	 * Processing method for {@link NetworkMessageResponse response} type of {@link NetworkMessage NetworkMessage}.
 	 * 
@@ -364,5 +426,23 @@ public class ConnectionDescriptor {
 	
 	
 	
+	/**
+	 * Searches for {@link EventChannel EventChannel} with provided eventID. 
+	 * 
+	 * @param eventID ID of the event.
+	 * @return {@link EventChannel EventChannel} with the ID, or null if no such channel exists. 
+	 */
+	private EventChannel searchForEventChannel(String eventID) {
+		// search for given event channel
+		
+		for (EventChannel eventChannel : providedEventChannels) {
+			if (eventChannel.getEventID().equals(eventID)) {
+				// found it
+				return eventChannel;
+			}
+		}
+
+		return null;
+	}
 
 }
