@@ -360,28 +360,6 @@ public class CommunicationManager {
 	
 	// EXPOSING INTERFACE
 	
-	public void getObjectEvents(String objectID) {
-		// TODO
-	}
-	
-	public void getEventChannelStatus(String objectID, String eventID) {
-		
-		// TODO
-	}
-	
-	public void subscribeToEventChannel(String objectID, String eventID, String subscriberObjectID) {
-		
-		//TODO
-		
-		
-	}
-	
-	public void unsubscribeFromEventChannel(String objectID, String eventID) {
-		
-		// TODO
-	}
-	
-	
 	
 	/**
 	 * Activates the event channel identified by the eventID. From the moment of activation, other devices in the 
@@ -417,23 +395,37 @@ public class CommunicationManager {
 	
 	
 	
+	// TODO documentation
+	// returns number of sent messages vs the number of subscribers
 	public StatusMessage sendEventToSubscribedObjects(String objectID, String eventID, String event) {
+		
+		String statusMessageText;
 		
 		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			String messageText = new String("No descriptor exist for source object ID '"  
+			 statusMessageText = new String("No descriptor exist for source object ID '"  
 					+ objectID + "'. The device has not logged into the Gateway yet.");
 			
-			logger.warning(messageText);
-			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, messageText);
+			logger.warning(statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, statusMessageText);
 		}
 		
+		int numberOfSentMessages = 0;
+		int numberOfSubscribers = descriptor.getNumberOfSubscribers(eventID);
 		
+		// no need to waste cycles for nothing
+		if (numberOfSubscribers > 0) {
+			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event);
+		}
 		
+		statusMessageText = new String("Event " + eventID + " was successfully sent to " 
+								+ numberOfSentMessages + " out of " 
+								+ numberOfSubscribers + " subscribers.");
+		logger.info(statusMessageText);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, StatusMessage.TEXT_SUCCESS);
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, statusMessageText);
 		
 	}
 	
@@ -473,6 +465,25 @@ public class CommunicationManager {
 	
 	
 	
+	/*
+	// TODO documentation
+	public StatusMessage getEventChannelStatus(String objectID, String EventID) {
+		
+	}
+	
+	
+	
+	// TODO documentation
+	public StatusMessage subscribeToEventChannel(String objectID, String eventID) {
+		
+	}
+	
+	
+	// TODO documentation
+	public StatusMessage unsubscribeFromEventChannel(String objectID, String eventID) {
+		
+	}
+	*/
 	
 	
 	// REGISTRY INTERFACE

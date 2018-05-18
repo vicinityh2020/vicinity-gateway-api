@@ -1,6 +1,9 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
@@ -47,7 +50,10 @@ public class NetworkMessageEvent extends NetworkMessage{
 	/**
 	 * Although the destination OID is not passed in the arriving JSON, during the execution it is wise to set 
 	 * this field to an ID of the object that is the destination for this event (by the appropriate 
-	 * {@link ConnectionDescriptor ConnectionDescriptor}). All for better control of where this should be routed.  
+	 * {@link ConnectionDescriptor ConnectionDescriptor} AFTER it arrives). 
+	 * 
+	 * This is not mandatory, but it helps keeping track and better control of where this should be routed.
+	 *   
 	 */
 	private String destinationOid;
 	
@@ -73,12 +79,13 @@ public class NetworkMessageEvent extends NetworkMessage{
 	/**
 	 * Constructor of an event message that is to be sent across the network.  
 	 */
-	public NetworkMessageEvent(XMLConfiguration config, String eventID, String eventBody) {
+	public NetworkMessageEvent(XMLConfiguration config, String sourceOid, String eventID, String eventBody) {
 		// always call this guy
 		super(config);
 		
 		destinationOid = null;
-		sourceOid = null;
+		
+		this.sourceOid = sourceOid;
 		this.eventID = eventID;
 		this.eventBody = eventBody;
 		
@@ -171,9 +178,51 @@ public class NetworkMessageEvent extends NetworkMessage{
 	}
 
 
+	/**
+	 * Returns a JSON String that is to be sent over the network. The String is build from all the attributes that
+	 * were set with getters and setters. Use this when you are finished with setting the attributes, parameters etc.
+	 * 
+	 * @return JSON String that can be sent over the network.
+	 */
+	public String buildMessageString(){
+		
+		buildMessageJson();
+		
+		return jsonRepresentation.toString();
+	}
 	
 	
 	/* === PRIVATE METHODS === */
+	
+	
+	/**
+	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over the
+	 * network. 
+	 * 
+	 */
+	// remind of certain attributes that must not be null
+	private void buildMessageJson(){
+		
+		// create the factory
+		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
+		
+		// build the thing
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
+		mainBuilder.add(ATTR_MESSAGETYPE, messageType)
+			.add(ATTR_EVENTSOURCEOBJECTID, sourceOid)
+			.add(ATTR_EVENTID, eventID);
+		
+		if (eventBody == null){
+			mainBuilder.addNull(ATTR_EVENTBODY);
+		} else {
+			mainBuilder.add(ATTR_EVENTBODY, eventBody);
+		}
+		
+		jsonRepresentation = mainBuilder.build();
+		
+	}
+	
+	
 	
 	/**
 	 * Takes the JSON object and fills necessary fields with values.

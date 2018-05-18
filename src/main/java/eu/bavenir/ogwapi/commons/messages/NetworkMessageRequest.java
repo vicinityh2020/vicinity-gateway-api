@@ -343,7 +343,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over XMPP
+	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over the
 	 * network. 
 	 * 
 	 */

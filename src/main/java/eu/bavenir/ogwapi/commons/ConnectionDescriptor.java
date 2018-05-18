@@ -15,6 +15,7 @@ import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
 import eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine;
 import eu.bavenir.ogwapi.commons.messages.MessageParser;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
+import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.xmpp.AgentCommunicator;
@@ -71,7 +72,7 @@ public class ConnectionDescriptor {
 	// a set of event channels served by this object
 	private Set<EventChannel> providedEventChannels;
 	
-	// a map of channels that this object is subscribed to
+	// a map of channels that this object is subscribed to (OID / EID)
 	private Map<String, String> subscribedEventChannels;
 	
 	
@@ -305,24 +306,36 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	// TODO documentation
 	// -1 if there is no such eventchannel 
 	public int sendEventToSubscribers(String eventID, String event) {
 		
 		// look up the event channel
 		EventChannel eventChannel = searchForEventChannel(eventID);
 		
-		if (eventChannel == null) {
+		if (eventChannel == null || !eventChannel.isActive()) {
+			// TODO log there is no such event channel or that it is deactivated
 			return -1;
 		}
 		
-		Set<String> subscribers = eventChannel.getSubscribersSet();
+		// create the message
+		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, objectID, eventID, event);
+		String message = eventMessage.buildMessageString();
 		
-		for (String string : subscribers) {
-			
-			
-			// TODO YOU ARE HERE commEngine.send
+		// keep track of number of sent messages
+		int sentMessages = 0;
+		
+		// send them
+		Set<String> subscribers = eventChannel.getSubscribersSet();
+		for (String destinationOid : subscribers) {
+			if(commEngine.sendMessage(destinationOid, message)) {
+				sentMessages++;
+			} 
 		}
+		
+		return sentMessages;
 	}
+	
 	
 	
 	/**
