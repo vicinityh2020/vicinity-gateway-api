@@ -8,9 +8,15 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.resource.ResourceException;
 
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
+import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
+import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
+import eu.bavenir.ogwapi.restapi.Api;
 
 /*
  * STRUCTURE:
@@ -66,7 +72,7 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  *  a) requests  -	An Object is requesting an access to a service of another Object (or Agent). This request needs to 
  *  				be propagated across XMPP network and at the end of the communication pipe, the message has to be
  *  				translated into valid HTTP request to an Agent service. Translating the message is as well as 
- *  				their detailed structure is described in {@link AgentCommunicator AgentCommunicator}. See
+ *  				their detailed structure is described in {@link RestAgentConnector AgentCommunicator}. See
  *  				{@link NetworkMessageRequest NetworkMessageRequest}.
  *  
  *  b) responses -	The value returned by Object / Agent services in JSON, that is propagated back to the caller. See
@@ -152,8 +158,7 @@ public class CommunicationManager {
 		if (descriptor != null){
 			return descriptor.isConnected();
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
-					+ objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 			
 			return false;
 		}
@@ -176,8 +181,7 @@ public class CommunicationManager {
 		if (descriptor != null){
 			return descriptor.verifyPassword(password);
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
-					+ objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 			
 			return false;
 		}
@@ -252,11 +256,11 @@ public class CommunicationManager {
 			descriptorPoolPut(objectID, descriptor);
 			logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
 			
-			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_LOGIN, StatusMessage.TEXT_SUCCESS);
+			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Login successfull.");
 			
 		} else {
 			logger.info("Connection for '" + objectID +"' was not established.");
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_LOGIN, StatusMessage.TEXT_FAILURE);
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, "Login unsuccessfull.");
 		}
 		
 		return statusMessage;
@@ -283,8 +287,7 @@ public class CommunicationManager {
 		if (descriptor != null){
 			descriptor.disconnect();
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" 
-					+ objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 		}
 		
 		if (destroyConnectionDescriptor){
@@ -298,24 +301,41 @@ public class CommunicationManager {
 	}
 	
 	
+	
+	
 	// CONSUMPTION INTERFACE
+
 	
-	/*
-	 * this has to be solved eventually - there is too much logic in the rest service, it is therefore hard 
-	 * to make the ogwapi a single library solution.
-	 * 
-	 * 
-	public String getPropertyOfRemoteObject(String objectID, String remoteObjectID, String remotePropertyID) {
+	// TODO documentation
+	public StatusMessage getPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID) {
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getPropertyOfRemoteObject(destinationObjectID, propertyID);
 		
 	}
 	
 	
-	
-	public String setPropertyOfRemoteObject(String objectID, String remoteObjectID, String remotePropertyID) {
+	// TODO documentation
+	public StatusMessage setPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID, String body) {
 		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.setPropertyOfRemoteObject(destinationObjectID, propertyID, body);
 	}
-	*/
+
 	
 	
 	// DISCOVERY INTERFACE
@@ -336,7 +356,7 @@ public class CommunicationManager {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 			return Collections.emptySet();
 		}
 		
@@ -381,16 +401,14 @@ public class CommunicationManager {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			String messageText = new String("No descriptor exist for source object ID '"  
-					+ objectID + "'. The device has not logged into the Gateway yet.");
 			
-			logger.warning(messageText);
-			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_ACTIVATION, messageText);
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			return null;
 		}
 		
 		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, StatusMessage.TEXT_SUCCESS);
+		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel activated.");
 	}
 	
 	
@@ -405,11 +423,9 @@ public class CommunicationManager {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			 statusMessageText = new String("No descriptor exist for source object ID '"  
-					+ objectID + "'. The device has not logged into the Gateway yet.");
 			
-			logger.warning(statusMessageText);
-			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, statusMessageText);
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			return null;
 		}
 		
 		int numberOfSentMessages = 0;
@@ -425,7 +441,7 @@ public class CommunicationManager {
 								+ numberOfSubscribers + " subscribers.");
 		logger.info(statusMessageText);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SENDINGTOSUBSCRIBERS, statusMessageText);
+		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, statusMessageText);
 		
 	}
 	
@@ -451,16 +467,13 @@ public class CommunicationManager {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
-			String messageText = new String("No descriptor exist for source object ID '"  
-					+ objectID + "'. The device has not logged into the Gateway yet.");
-			
-			logger.warning(messageText);
-			return new StatusMessage(true, StatusMessage.MESSAGE_EVENT_DEACTIVATION, messageText);
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			return null;
 		}
 		
 		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, StatusMessage.TEXT_SUCCESS);
+		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel deactivated.");
 	}
 	
 	
@@ -496,60 +509,6 @@ public class CommunicationManager {
 	
 	// QUERY INTERFACE
 	
-	
-	
-	
-	
-	
-	// TODO move this to consumption interface
-	
-	public boolean sendMessage(String sourceObjectID, String destinationObjectID, String message){
-		
-		// check the validity object
-		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectID);
-		
-		if (descriptor == null){
-			logger.warning("No descriptor exist for source object ID '" + sourceObjectID + "'. The device has not logged"
-					+ " into the Gateway yet.");
-			return false;
-		}
-		
-		// if the connection disintegrated for some reason, be proactive and reconnect
-		if (descriptor.isConnected() == false) {
-			logger.info("The connection is closed for object ID '" + sourceObjectID + "'. Attempting to reconnect.");
-			
-			if (!descriptor.connect()){
-				logger.warning("The connection for object ID '" + sourceObjectID + "' can't be established.");
-				return false;
-			}
-		}
-		
-		return descriptor.sendMessage(destinationObjectID, message);
-	}
-	
-	
-	/**
-	 * Retrieves a single {@link NetworkMessage NetworkMessage} from the queue of incoming messages. It is important
-	 * to provide a object ID of the recipient and correlation request ID. This method blocks the thread when there are
-	 * no messages in the queue and waits for the arrival.
-	 * 
-	 * @param objectID Recipient object ID.
-	 * @param requestId Correlation request ID.
-	 * @return {@link NetworkMessage NetworkMessage} received from the network.
-	 */
-	public NetworkMessage retrieveSingleMessage(String objectID, int requestId){
-		
-		// check the validity of source object
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
-		
-		if (descriptor == null){
-			logger.warning("No descriptor exist for source object ID '" + objectID + "'. The device has not logged"
-					+ " into the Gateway yet.");
-			return null;
-		}
-		
-		return descriptor.retrieveMessage(requestId);
-	}
 	
 	
 	

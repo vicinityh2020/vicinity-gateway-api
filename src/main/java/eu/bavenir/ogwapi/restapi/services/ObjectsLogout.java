@@ -50,7 +50,7 @@ public class ObjectsLogout extends ServerResource{
 		
 		// the status message has to be created a new - there is no easy way how to propagate it from the REST
 		// authentication verifier.
-		StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_LOGOUT, StatusMessage.TEXT_SUCCESS);
+		StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Logout successfull.");
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}

@@ -74,39 +74,10 @@ public class StatusMessage {
 	// this is a list of status message names, that can usually occur during operations of the OGWAPI
 	
 	/**
-	 * Attribute name for the status code, returned by HTTP server on the remote site.  
+	 * Attribute name for the status message body.  
 	 */
-	public static final String MESSAGE_CODE = "code";
+	public static final String MESSAGE_BODY = "body";
 	
-	/**
-	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
-	 */
-	public static final String MESSAGE_REASON = "reason";
-	
-	/**
-	 * Attribute name for login.
-	 */
-	public static final String MESSAGE_LOGIN = "login";
-	
-	/**
-	 * Attribute name for login.
-	 */
-	public static final String MESSAGE_LOGOUT = "logout";
-	
-	/**
-	 * Attribute name for Event channel activation.
-	 */
-	public static final String MESSAGE_EVENT_ACTIVATION = "eventChannelActivation";
-	
-	/**
-	 * Attribute name for Event channel deactivation.
-	 */
-	public static final String MESSAGE_EVENT_DEACTIVATION = "eventChannelDeactivation";
-	
-	/**
-	 * Attribute name for sending the Event to subscribers.
-	 */
-	public static final String MESSAGE_EVENT_SENDINGTOSUBSCRIBERS = "eventSendingToSubscribers";
 	
 	
 	/* === FIELDS === */

@@ -136,49 +136,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 */
 	private String getObjectActionTask(String sourceOid, String attrOid, String attrAid, String attrTid, Logger logger){
 		
-		// send message to the right object
-		CommunicationManager communicationManager 
-									= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
-		
-		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
-		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.REQUEST_OPERATION_GET);
-		request.addAttribute(ATTR_OBJECTS, attrOid);
-		request.addAttribute(ATTR_ACTIONS, attrAid);
-		request.addAttribute(ATTR_TASKS, attrTid);
-		
-		// all set
-		if (!communicationManager.sendMessage(sourceOid, attrOid, request.buildMessageString())){
-			logger.info("Destination object " + attrOid + " is not online.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
-		}
-	
-		// this will wait for response
-		NetworkMessageResponse response 
-						= (NetworkMessageResponse) communicationManager.retrieveSingleMessage(sourceOid, requestId);
-		
-		if (response == null){
-			logger.info("No response message received. Source ID: " 
-				+ sourceOid + " Destination ID: " + attrOid + " Action ID: " + attrAid + " Task ID: " + attrTid 
-				+ " Request ID: " + requestId);
-			throw new ResourceException(Status.CONNECTOR_ERROR_CONNECTION,
-					"No valid response from remote object, possible message timeout.");
-		}
-		
-		// if the return code is different than 2xx, make it visible
-		if ((response.getResponseCode() / 200) != 1){
-			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
-					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			return response.getResponseCode() + " " + response.getResponseCodeReason();
-		}
-		
-		return response.getResponseBody();
+		return null;
 		
 	}
 	

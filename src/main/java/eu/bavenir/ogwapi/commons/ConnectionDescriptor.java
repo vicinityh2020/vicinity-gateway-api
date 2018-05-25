@@ -10,7 +10,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.resource.ResourceException;
 
+import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector;
 import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
 import eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine;
 import eu.bavenir.ogwapi.commons.messages.MessageParser;
@@ -18,7 +23,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
-import eu.bavenir.ogwapi.xmpp.AgentCommunicator;
+import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 
 /*
@@ -81,7 +86,7 @@ public class ConnectionDescriptor {
 	private Logger logger;
 	
 	// the thing that communicates with agent
-	private AgentCommunicator agentCommunicator;
+	private AgentConnector agentConnector;
 	
 	// credentials
 	private String objectID;
@@ -113,7 +118,8 @@ public class ConnectionDescriptor {
 		this.config = config;
 		this.logger = logger;
 		
-		agentCommunicator = new AgentCommunicator(config, logger);
+		// TODO decide what type of connector to use
+		agentConnector = new RestAgentConnector(config, logger);
 		
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
@@ -177,89 +183,9 @@ public class ConnectionDescriptor {
 	
 	
 
-	/**
-	 * Sends a message (string) from to destination object ID. In case there are some doubts about
-	 * The safety is inherent in the fact, that the source user name must have established connection on this instance 
-	 * of CommunicationManager first (i.e. the credentials must be known, so the connection descriptor can be created). 
-	 * Moreover the device is authenticated with every request.  
-	 * 
-	 * It is thus impossible to act as a device from some other gateway/owner.
-	 *  
-	 * @param destinationObjectID Object ID of the destination device.
-	 * @param message Message string.
-	 * @return True on success, false if the destination was offline or if some error occurred.
-	 */
-	public boolean sendMessage(String destinationObjectID, String message){
-		
-		return commEngine.sendMessage(destinationObjectID, message);
-	}
+
 	
 	
-	
-	
-	
-	
-	/**
-	 * Retrieves a {@link NetworkMessage NetworkMessage} from the queue of incoming messages based on the correlation 
-	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives or until timeout
-	 * is reached. The check for timeout is scheduled every {@link #POLL_INTERRUPT_INTERVAL_MILLIS POLL_INTERRUPT_INTERVAL_MILLIS}.
-	 * 
-	 * @param requestId Correlation request ID. 
-	 * @return {@link NetworkMessage NetworkMessage} from the queue.
-	 */
-	public NetworkMessage retrieveMessage(int requestId){
-		
-		NetworkMessage message = null;
-		
-		// retrieve the timeout from configuration
-		long startTime = System.currentTimeMillis();
-		boolean timeoutReached = false;
-		
-		do {
-			NetworkMessage helperMessage = null;
-			try {
-				// take the first element or wait for one
-				helperMessage = messageQueue.poll(POLL_INTERRUPT_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException e) {
-				// bail out
-				return null;
-			}
-			
-			if (helperMessage != null){
-				// we have a message now
-				if (helperMessage.getRequestId() != requestId){
-					// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
-					if (helperMessage.isValid()){
-						messageQueue.offer(helperMessage);
-					} else {
-						logger.fine("Discarding stale message: ID = " + helperMessage.getRequestId() 
-							+ "; Timestamp = " + helperMessage.getTimeStamp());
-					}
-					
-					// in order not to iterate thousand times a second over one single message, that don't belong
-					// to us (or anybody), let's sleep a little to optimise performance
-					if (messageQueue.size() == 1){
-						try {
-							Thread.sleep(THREAD_SLEEP_MILLIS);
-						} catch (InterruptedException e) {
-							return null;
-						}
-					}
-				} else {
-					// it is our message :-3
-					message = helperMessage;
-				}
-			}
-			
-			timeoutReached = ((System.currentTimeMillis() - startTime) 
-							> (config.getInt(NetworkMessage.CONFIG_PARAM_XMPPMESSAGETIMEOUT, 
-									NetworkMessage.CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000));
-			
-		// until we get our message or the timeout expires
-		} while (message == null && !timeoutReached);
-	
-		return message;	
-	}
 	
 	
 	
@@ -314,7 +240,17 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = searchForEventChannel(eventID);
 		
 		if (eventChannel == null || !eventChannel.isActive()) {
-			// TODO log there is no such event channel or that it is deactivated
+			
+			logger.fine("Could not distribute an event to the channel '" + eventID + "' of the object '" + objectID 
+					+ "'. The event channel does not exist.");
+			return -1;
+		}
+		
+		if (!eventChannel.isActive()) {
+			
+			logger.fine("Could not distribute an event to the channel '" + eventID + "' of the object '" + objectID 
+					+ "'. The event channel is not active.");
+			
 			return -1;
 		}
 		
@@ -357,7 +293,126 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	
+	
+	// TODO documentation
+	public StatusMessage getPropertyOfRemoteObject(String destinationObjectID, String propertyID) {
 
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// message to be returned in case something goes wrong
+		String statusMessageText;
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETPROPERTYVALUE);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
+		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
+		
+		// all set
+		
+		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, 
+					statusMessageText);
+			
+			return statusMessage;
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + destinationObjectID + " Property ID: " + propertyID  
+					+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+		}
+		
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			
+			statusMessageText = new String("Source object: " + objectID + " Destination object: " + destinationObjectID 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			
+			logger.info(statusMessageText);
+			
+			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+		}
+		
+		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, response.getResponseBody());
+	}
+	
+	
+	
+	// TODO documentation
+	public StatusMessage setPropertyOfRemoteObject(String destinationObjectID, String propertyID, String body) {
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// message to be returned in case something goes wrong
+		String statusMessageText;
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_SETPROPERTYVALUE);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
+		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
+		
+		request.setRequestBody(body);
+		
+		// all set
+		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+			
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+				+ objectID + " Destination ID: " + destinationObjectID + " Property ID: " + propertyID  
+				+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+
+			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+		}
+		
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			
+			statusMessageText = new String("Source object: " + objectID + " Destination object: " + destinationObjectID 
+					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
+			
+			logger.info(statusMessageText);
+
+			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+		}
+		
+		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, response.getResponseBody());
+	}
+	
+	
+	
 	
 	/**
 	 * This is a callback method called when a message arrives. There are two main scenarios that need to be handled:
@@ -393,6 +448,10 @@ public class ConnectionDescriptor {
 						+ messageQueue.size());
 				processMessageResponse(from, networkMessage);
 				break;
+				
+			case NetworkMessageEvent.MESSAGE_TYPE:
+				logger.finest("This message is an event. Forwarding...");
+				processMessageEvent(networkMessage);
 			}
 		} else {
 			logger.warning("Invalid message received from the network.");
@@ -418,12 +477,65 @@ public class ConnectionDescriptor {
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
 		
-		NetworkMessageResponse agentResponse = agentCommunicator.processRequestMessage(requestMessage);
+		NetworkMessageResponse response;
 		
-		// send it back
-		sendMessage(from, agentResponse.buildMessageString());
+		
+		switch (requestMessage.getRequestOperation()){
+		
+		case NetworkMessageRequest.OPERATION_CANCELTASK:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
+			
+			response = agentConnector.getObjectProperty(requestMessage);
+
+			// send it back
+			commEngine.sendMessage(from, response.buildMessageString());
+			break;
+			
+		case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
+			
+			response = agentConnector.setObjectProperty(requestMessage);
+
+			// send it back
+			commEngine.sendMessage(from, response.buildMessageString());
+			break;
+			
+		case NetworkMessageRequest.OPERATION_STARTACTION:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
+			
+			break;
+			
+		case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
+			
+			break;
+		}
+		
 	}
-	
 	
 	
 	
@@ -436,6 +548,21 @@ public class ConnectionDescriptor {
 	private void processMessageResponse(String from, NetworkMessage networkMessage){
 		messageQueue.add(networkMessage);
 	}
+	
+	
+	
+	// TODO documentation
+	private void processMessageEvent(NetworkMessage networkMessage) {
+		
+		// TODO you are here
+		
+		// cast it to event message first (it is safe and also necessary)
+		NetworkMessageEvent eventMessage = (NetworkMessageEvent) networkMessage;
+		
+		
+		
+	}
+	
 	
 	
 	
@@ -458,4 +585,68 @@ public class ConnectionDescriptor {
 		return null;
 	}
 
+	
+	
+	/**
+	 * Retrieves a {@link NetworkMessage NetworkMessage} from the queue of incoming messages based on the correlation 
+	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives or until timeout
+	 * is reached. The check for timeout is scheduled every {@link #POLL_INTERRUPT_INTERVAL_MILLIS POLL_INTERRUPT_INTERVAL_MILLIS}.
+	 * 
+	 * @param requestId Correlation request ID. 
+	 * @return {@link NetworkMessage NetworkMessage} from the queue.
+	 */
+	private NetworkMessage retrieveMessage(int requestId){
+		
+		NetworkMessage message = null;
+		
+		// retrieve the timeout from configuration
+		long startTime = System.currentTimeMillis();
+		boolean timeoutReached = false;
+		
+		do {
+			NetworkMessage helperMessage = null;
+			try {
+				// take the first element or wait for one
+				helperMessage = messageQueue.poll(POLL_INTERRUPT_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// bail out
+				return null;
+			}
+			
+			if (helperMessage != null){
+				// we have a message now
+				if (helperMessage.getRequestId() != requestId){
+					// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
+					if (helperMessage.isValid()){
+						messageQueue.offer(helperMessage);
+					} else {
+						logger.fine("Discarding stale message: ID = " + helperMessage.getRequestId() 
+							+ "; Timestamp = " + helperMessage.getTimeStamp());
+					}
+					
+					// in order not to iterate thousand times a second over one single message, that don't belong
+					// to us (or anybody), let's sleep a little to optimise performance
+					if (messageQueue.size() == 1){
+						try {
+							Thread.sleep(THREAD_SLEEP_MILLIS);
+						} catch (InterruptedException e) {
+							return null;
+						}
+					}
+				} else {
+					// it is our message :-3
+					message = helperMessage;
+				}
+			}
+			
+			timeoutReached = ((System.currentTimeMillis() - startTime) 
+							> (config.getInt(NetworkMessage.CONFIG_PARAM_XMPPMESSAGETIMEOUT, 
+									NetworkMessage.CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000));
+			
+		// until we get our message or the timeout expires
+		} while (message == null && !timeoutReached);
+	
+		return message;	
+	}
+	
 }

@@ -74,6 +74,37 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 */
 	private static final String ATTR_REQUESTBODY = "requestBody";
 	
+	
+	/**
+	 * How the object ID is to be marked in the message.
+	 */
+	public static final String ATTR_OID = "oid";
+	
+	
+	/**
+	 * How the property ID is to be marked in the message.
+	 */
+	public static final String ATTR_PID = "pid";
+	
+	
+	/**
+	 * How the action ID is to be marked in the message.
+	 */
+	public static final String ATTR_AID = "aid";
+	
+	
+	/**
+	 * How the event ID is to be marked in the message.
+	 */
+	public static final String ATTR_EID = "eid";
+	
+	
+	/**
+	 * How the task ID is to be marked in the message.
+	 */
+	public static final String ATTR_TID = "tid";
+	
+	
 	/**
 	 * Operation ID for getting a list of properties.
 	 */
@@ -132,30 +163,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	// IMPORTANT NOTE: If adding new operation codes, add them also to the verification method at the end 
 	// of this class - in the private methods section. 
 	
-	// TODO to be removed
-	
-	/**
-	 * Value that is used, when the requested operation is HTTP GET.
-	 */
-	public static final byte REQUEST_OPERATION_GET = 0x10;
-	
-	/**
-	 * Value that is used, when the requested operation is HTTP PUT.
-	 */
-	public static final byte REQUEST_OPERATION_PUT = 0x11;
-	
-	/**
-	 * Value that is used, when the requested operation is HTTP DELETE.
-	 */
-	public static final byte REQUEST_OPERATION_DEL = 0x12;
-	
-	/**
-	 * Value that is used, when the requested operation is HTTP POST.
-	 */
-	public static final byte REQUEST_OPERATION_POST = 0x13;
-	
-	// ========================
-	
+
 	
 	
 	/* === FIELDS === */
@@ -499,12 +507,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 				|| requestOperation == NetworkMessageRequest.OPERATION_STARTACTION
 				|| requestOperation == NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL
 				|| requestOperation == NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL
-				
-				// TODO remove these old ones
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_DEL
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_GET
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_POST
-				|| requestOperation == NetworkMessageRequest.REQUEST_OPERATION_PUT
+
 				)
 			){
 			
