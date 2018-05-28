@@ -348,7 +348,7 @@ public class RestAgentConnector extends AgentConnector {
 					responseRepresentation = clientResource.put(new JsonRepresentation(body), 
 							MediaType.APPLICATION_JSON);
 				} else {
-					logger.warning("PUT request contains no body.");
+					logger.warning("PUT request contains no body. Aborting.");
 				}
 				
 				break;

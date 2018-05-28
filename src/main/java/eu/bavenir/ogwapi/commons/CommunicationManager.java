@@ -406,7 +406,7 @@ public class CommunicationManager {
 			return null;
 		}
 		
-		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
+		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
 		
 		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel activated.");
 	}
@@ -471,7 +471,7 @@ public class CommunicationManager {
 			return null;
 		}
 		
-		descriptor.setEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
+		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
 		
 		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel deactivated.");
 	}

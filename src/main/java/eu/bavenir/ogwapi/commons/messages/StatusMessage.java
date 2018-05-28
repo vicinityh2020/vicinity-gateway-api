@@ -79,6 +79,61 @@ public class StatusMessage {
 	public static final String MESSAGE_BODY = "body";
 	
 	
+	/**
+	 * Attribute name for the status code, returned by HTTP server on the remote site.  
+	 */
+	public static final String MESSAGE_CODE = "code";
+	
+	/**
+	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
+	 */
+	public static final String MESSAGE_REASON = "reason";
+	
+	/**
+	 * Attribute name for login.
+	 */
+	public static final String MESSAGE_LOGIN = "login";
+	
+	/**
+	 * Attribute name for login.
+	 */
+	public static final String MESSAGE_LOGOUT = "logout";
+	
+	/**
+	 * Attribute name for Event channel activation.
+	 */
+	public static final String MESSAGE_EVENT_ACTIVATION = "activateEventChannel";
+	
+	/**
+	 * Attribute name for Event channel deactivation.
+	 */
+	public static final String MESSAGE_EVENT_DEACTIVATION = "deactivateEventChannel";
+	
+	/**
+	 * Attribute name for sending the Event to subscribers.
+	 */
+	public static final String MESSAGE_EVENT_SENDTOSUBSCRIBERS = "sendEventToSubscribers";
+	
+	
+	public static final String MESSAGE_EVENT_GETLOCALEVENTCHANNELSTATUS = "localEventChannelStatus";
+	
+	public static final String MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS = "remoteEventChannelStatus";
+	
+	public static final String MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL = "subscribeToEventChannel";
+	
+	public static final String MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL = "unsubscribeFromEventChannel";
+	
+	/**
+	 * Attribute name for getting value of a property.
+	 */
+	public static final String MESSAGE_PROPERTY_GETVALUE = "getValueOfAProperty";
+	
+	/**
+	 * Attribute name for setting value of a property.
+	 */
+	public static final String MESSAGE_PROPERTY_SETVALUE = "setValueOfAProperty";
+	
+	
 	
 	/* === FIELDS === */
 	
@@ -131,7 +186,7 @@ public class StatusMessage {
 	
 	
 	/**
-	 * More useful constructor, can be used to directly fill the basic pay load of the status message. A message built
+	 * More useful constructor, can be used to directly fill the basic payload of the status message. A message built
 	 * right after it was constructed this way will look like this:
 	 * 
 	 * {

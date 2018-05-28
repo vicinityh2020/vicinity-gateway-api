@@ -2,6 +2,7 @@ package eu.bavenir.ogwapi.commons;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -203,7 +204,7 @@ public class ConnectionDescriptor {
 	 * {@link EventChannel#STATUS_ACTIVE active}). If the channel was not found and the status was being set to 
 	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false.
 	 */
-	public boolean setEventChannelStatus(String eventID, boolean status) {
+	public boolean setLocalEventChannelStatus(String eventID, boolean status) {
 		
 		boolean result = true;
 		
@@ -230,6 +231,181 @@ public class ConnectionDescriptor {
 		
 		return result;
 	}
+	
+	
+	
+	// TODO documentation
+	// TODO make it return statusmessage, not a string
+	public String getRemoteEventChannelStatus(String objectID, String eventID) {
+		
+		if (objectID == null || eventID == null) {
+			logger.info("Invalid object ID or event ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID);
+		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
+		
+		// all set
+		
+		if (!commEngine.sendMessage(objectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + objectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + objectID + " Event ID: " + eventID  
+					+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+	}
+	
+	
+	// TODO documentation
+	// TODO make it return status message
+	public String subscribeToEventChannel(String objectID, String eventID) {
+		if (objectID == null || eventID == null) {
+			logger.info("Invalid object ID or event ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID);
+		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
+		
+		// all set
+		
+		if (!commEngine.sendMessage(objectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + objectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + objectID + " Event ID: " + eventID  
+					+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+	}
+	
+	
+	
+	// TODO documentation
+	// TODO make it return status message
+	public String unsubscribeFromEventChannel(String objectID, String eventID) {
+		if (objectID == null || eventID == null) {
+			logger.info("Invalid object ID or event ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID);
+		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
+		
+		// all set
+		
+		if (!commEngine.sendMessage(objectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + objectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + objectID + " Event ID: " + eventID  
+					+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+	}
+	
 	
 	
 	// TODO documentation
@@ -271,6 +447,13 @@ public class ConnectionDescriptor {
 		
 		return sentMessages;
 	}
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -352,6 +535,8 @@ public class ConnectionDescriptor {
 		
 		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, response.getResponseBody());
 	}
+	
+	
 	
 	
 	
@@ -488,6 +673,9 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
 			
+			response = respondToEventChannelStatusQuery(from, requestMessage);
+			commEngine.sendMessage(from, response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
@@ -554,15 +742,100 @@ public class ConnectionDescriptor {
 	// TODO documentation
 	private void processMessageEvent(NetworkMessage networkMessage) {
 		
-		// TODO you are here
+		
 		
 		// cast it to event message first (it is safe and also necessary)
 		NetworkMessageEvent eventMessage = (NetworkMessageEvent) networkMessage;
 		
+		logger.info("Event " + eventMessage.getEventID() + " arrived from " + eventMessage.getEventSource() 
+							+ ". Event body: " + eventMessage.getEventBody());
 		
+		NetworkMessageResponse response = agentConnector.forwardEventToObject(
+							eventMessage.getEventSource(), 
+							eventMessage.getEventID(), 
+							eventMessage.getEventBody());
+		
+		// if the return code is different than 2xx, make it visible
+		if ((response.getResponseCode() / 200) != 1){
+			
+			logger.warning("Event was not forwarded successfully. Response code: " + response.getResponseCode() 
+										+ ". Response reason: " + response.getResponseCodeReason());
+										
+		} else {
+			logger.info("Event forwarded successfully.");
+		}
+		
+		// no need to send the response message back to sender
+	}
+	
+	
+	
+	// TODO documentation
+	private NetworkMessageResponse respondToEventChannelStatusQuery(String from, NetworkMessageRequest requestMessage) {
+		
+		String eventID = null;
+		EventChannel eventChannel = null;
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		
+		// the event ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);	
+		}
+		
+		if (eventID != null) {
+			eventChannel = searchForEventChannel(eventID);
+		}
+		
+		if (eventChannel == null) {
+			logger.info("Received a request to provide status of invalid event channel. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+					new String("Invalid event channel specified."));
+
+		} else {
+			
+			logger.fine("Received a request to provide status of event channel " + eventID + " from " + from + ".");
+			
+			if (eventChannel.isActive()) {
+				statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+						EventChannel.STATUS_STRING_ACTIVE);
+			} else {
+				statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+						EventChannel.STATUS_STRING_INACTIVE);
+			}
+			
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
+	}
+	
+	
+	
+	private NetworkMessageResponse respondToEventSubscriptionRequest(String from, NetworkMessageRequest request) {
 		
 	}
 	
+	
+	
+	private NetworkMessageResponse respondToCancelSubscriptionRequest(String from, NetworkMessageRequest request) {
+		
+	}
 	
 	
 	

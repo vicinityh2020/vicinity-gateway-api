@@ -39,6 +39,10 @@ public class EventChannel {
 	 */
 	public static final boolean STATUS_ACTIVE = true;
 	
+	public static final String STATUS_STRING_ACTIVE = "active";
+	
+	public static final String STATUS_STRING_INACTIVE = "inactive";
+	
 	
 	/* === FIELDS === */
 	
