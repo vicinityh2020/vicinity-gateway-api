@@ -125,6 +125,8 @@ public class ConnectionDescriptor {
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
 		providedEventChannels = new HashSet<EventChannel>();
+		
+		// TODO use this
 		subscribedEventChannels = new HashMap<String, String>();
 		
 		
@@ -344,6 +346,8 @@ public class ConnectionDescriptor {
 			return statusMessage.buildMessage().toString();
 		}
 		
+		
+		
 		// TODO a status message needs to be parsed here and returned
 		return response.getResponseBody();
 	}
@@ -502,7 +506,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, 
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, 
 					statusMessageText);
 			
 			return statusMessage;
@@ -519,7 +523,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText);
 		}
 		
 		// if the return code is different than 2xx, make it visible
@@ -530,10 +534,10 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText);
 		}
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, response.getResponseBody());
+		return new StatusMessage(false, StatusMessage.MESSAGE_PROPERTY_GETVALUE, response.getResponseBody());
 	}
 	
 	
@@ -565,7 +569,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
 		}
 		
 		// this will wait for response
@@ -579,7 +583,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 
-			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
 		}
 		
 		// if the return code is different than 2xx, make it visible
@@ -590,10 +594,10 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 
-			return new StatusMessage(true, StatusMessage.MESSAGE_BODY, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
 		}
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, response.getResponseBody());
+		return new StatusMessage(false, StatusMessage.MESSAGE_PROPERTY_SETVALUE, response.getResponseBody());
 	}
 	
 	
@@ -716,9 +720,19 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
 			
+			response = respondToEventSubscriptionRequest(from, requestMessage);
+			
+			// answer
+			commEngine.sendMessage(from, response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
+			
+			response = respondToCancelSubscriptionRequest(from, requestMessage);
+			
+			// answer
+			commEngine.sendMessage(from, response.buildMessageString());
 			
 			break;
 		}
@@ -827,15 +841,114 @@ public class ConnectionDescriptor {
 	
 	
 	
-	private NetworkMessageResponse respondToEventSubscriptionRequest(String from, NetworkMessageRequest request) {
+	// TODO documentation
+	private NetworkMessageResponse respondToEventSubscriptionRequest(String from, NetworkMessageRequest requestMessage) {
+		
+		String eventID = null;
+		String objectID = null;
+		EventChannel eventChannel = null;
+		
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		// the event ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);
+			objectID = attributesMap.get(NetworkMessageRequest.ATTR_OID);
+		}
+		
+		// check whether the event channel exists
+		if (eventID != null) {
+			eventChannel = searchForEventChannel(eventID);
+		}
+		
+		// check whether the object is in our roster and whether or not it is already in the list of subscribers
+		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
+		
+		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
+			logger.info("Received a request for subscription to invalid event channel. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
+					new String("Invalid event channel specified."));
+		} else {
+			logger.fine("Received a request for subscription to event channel " + eventID + " from " + from + ".");
+			
+			eventChannel.addToSubscribers(objectID);
+			
+			statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
+						StatusMessage.TEXT_SUCCESS);
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
 		
 	}
 	
 	
 	
-	private NetworkMessageResponse respondToCancelSubscriptionRequest(String from, NetworkMessageRequest request) {
+	// TODO documentation
+	private NetworkMessageResponse respondToCancelSubscriptionRequest(String from, NetworkMessageRequest requestMessage) {
+		String eventID = null;
+		String objectID = null;
+		EventChannel eventChannel = null;
 		
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		// the event ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);
+			objectID = attributesMap.get(NetworkMessageRequest.ATTR_OID);
+		}
+		
+		// check whether the event channel exists
+		if (eventID != null) {
+			eventChannel = searchForEventChannel(eventID);
+		}
+		
+		// check whether the object is in our roster and whether or not it is already in the list of subscribers
+		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
+		
+		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
+			logger.info("Received a request to cancel subscription to invalid event channel. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
+					new String("Invalid event channel specified."));
+		} else {
+			logger.fine("Received a request to cancel subscription to event channel " + eventID + " from " + from + ".");
+			
+			eventChannel.removeFromSubscribers(objectID);
+			
+			statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
+						StatusMessage.TEXT_SUCCESS);
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
 	}
+	
 	
 	
 	
