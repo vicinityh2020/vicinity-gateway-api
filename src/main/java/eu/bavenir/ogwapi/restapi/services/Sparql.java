@@ -30,6 +30,8 @@ public class Sparql extends ServerResource {
 	
 	// === CONSTANTS ===
 	
+	private int needReview;
+	
 	/**
 	 * Name of the Sparql query attribute.
 	 */

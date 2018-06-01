@@ -66,9 +66,9 @@ public class EventsEid extends ServerResource {
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrEid == null){
-			logger.info("EID: " + attrEid + " Given identifier does not exist.");
+			logger.info("EID: " + attrEid + " Invalid identifier.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+					"Invalid identifier.");
 		}
 		
 		CommunicationManager communicationManager 
@@ -97,9 +97,9 @@ public class EventsEid extends ServerResource {
 		
 		// check the mandatory attributes
 		if (attrEid == null){
-			logger.info("EID: " + attrEid + " Given identifier does not exist.");
+			logger.info("EID: " + attrEid + " Invalid identifier.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+					"Invalid identifier.");
 		}
 		
 		CommunicationManager communicationManager 
@@ -146,9 +146,9 @@ public class EventsEid extends ServerResource {
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrEid == null){
-			logger.info("EID: " + attrEid + " Given identifier does not exist.");
+			logger.info("EID: " + attrEid + " Invalid identifier.");
 			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+					"Invalid identifier.");
 		}
 		
 		CommunicationManager communicationManager 

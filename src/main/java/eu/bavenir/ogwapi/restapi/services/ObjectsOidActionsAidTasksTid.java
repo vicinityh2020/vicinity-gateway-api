@@ -3,17 +3,13 @@ package eu.bavenir.ogwapi.restapi.services;
 
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.restapi.Api;
-import eu.bavenir.ogwapi.commons.CommunicationManager;
 
 /*
  * STRUCTURE
@@ -40,20 +36,8 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	
 	// === CONSTANTS ===
 	
-	/**
-	 * Name of the 'objects' attribute.
-	 */
-	private static final String ATTR_OBJECTS = "objects";
+	private int needReview;
 	
-	/**
-	 * Name of the 'actions' attribute.
-	 */
-	private static final String ATTR_ACTIONS = "actions";
-	
-	/**
-	 * Name of the 'tasks' attribute.
-	 */
-	private static final String ATTR_TASKS = "tasks";
 	
 	/**
 	 * Name of the Object ID attribute.

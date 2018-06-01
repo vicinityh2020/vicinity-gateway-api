@@ -8,15 +8,10 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.restlet.data.Status;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.resource.ResourceException;
 
-import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
-import eu.bavenir.ogwapi.restapi.Api;
 
 /*
  * STRUCTURE:
@@ -408,7 +403,7 @@ public class CommunicationManager {
 		
 		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel activated.");
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, "Channel activated.");
 	}
 	
 	
@@ -433,15 +428,23 @@ public class CommunicationManager {
 		
 		// no need to waste cycles for nothing
 		if (numberOfSubscribers > 0) {
-			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event);
+			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event);	
 		}
 		
-		statusMessageText = new String("Event " + eventID + " was successfully sent to " 
-								+ numberOfSentMessages + " out of " 
-								+ numberOfSubscribers + " subscribers.");
+		boolean error;
+		if (numberOfSentMessages < 0) {
+			statusMessageText = new String("Event " + eventID + " was not distributed to subscribers.");
+			error = true;
+		} else {
+			statusMessageText = new String("Event " + eventID + " was successfully sent to " 
+					+ numberOfSentMessages + " out of " 
+					+ numberOfSubscribers + " subscribers.");
+			error = false;
+		}
+		
 		logger.info(statusMessageText);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, statusMessageText);
+		return new StatusMessage(error, StatusMessage.MESSAGE_EVENT_SENDTOSUBSCRIBERS, statusMessageText);
 		
 	}
 	
@@ -473,30 +476,53 @@ public class CommunicationManager {
 		
 		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Channel deactivated.");
-	}
-	
-	
-	
-	/*
-	// TODO documentation
-	public StatusMessage getEventChannelStatus(String objectID, String EventID) {
-		
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, "Channel deactivated.");
 	}
 	
 	
 	
 	// TODO documentation
-	public StatusMessage subscribeToEventChannel(String objectID, String eventID) {
+	public String getEventChannelStatus(String objectID, String destinationObjectID, String eventID) {
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getRemoteEventChannelStatus(destinationObjectID, eventID);
+	}
+	
+	
+	
+	// TODO documentation
+	public String subscribeToEventChannel(String objectID, String destinationObjectID, String eventID) {
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.subscribeToEventChannel(destinationObjectID, eventID);
 	}
 	
 	
 	// TODO documentation
-	public StatusMessage unsubscribeFromEventChannel(String objectID, String eventID) {
+	public String unsubscribeFromEventChannel(String objectID, String destinationObjectID, String eventID) {
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.unsubscribeFromEventChannel(destinationObjectID, eventID);
 	}
-	*/
+
 	
 	
 	// REGISTRY INTERFACE

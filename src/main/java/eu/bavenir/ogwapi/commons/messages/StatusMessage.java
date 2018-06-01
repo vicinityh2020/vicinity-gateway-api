@@ -167,6 +167,9 @@ public class StatusMessage {
 	 */
 	private boolean error = false;
 	
+	
+	// TODO this is so wrong - there must be some other way around this
+	private String body;
 
 	
 	/* === PUBLIC METHODS === */
@@ -257,6 +260,16 @@ public class StatusMessage {
 	}
 
 	
+	public String getBody() {
+		return body;
+	}
+
+
+	public void setBody(String body) {
+		this.body = body;
+	}
+
+
 	/**
 	 * Builds the status message JSON. This method can be called repeatedly but the returned value will always reflect
 	 * the internal state of the StatusMessage when the method was called for the first time, which means no subsequent

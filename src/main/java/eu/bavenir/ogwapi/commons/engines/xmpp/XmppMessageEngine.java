@@ -325,6 +325,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 				openedChats.add(chat);
 
 			} else {
+				
 				return false;
 			}
 

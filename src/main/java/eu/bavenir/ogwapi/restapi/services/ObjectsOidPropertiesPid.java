@@ -3,7 +3,6 @@ package eu.bavenir.ogwapi.restapi.services;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
@@ -13,8 +12,6 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.ogwapi.restapi.Api;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
@@ -52,16 +49,6 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * Name of the Process ID attribute.
 	 */
 	private static final String ATTR_PID = "pid";
-	
-	/**
-	 * Name of the 'objects' attribute.
-	 */
-	private static final String ATTR_OBJECTS = "objects";
-	
-	/**
-	 * Name of the 'properties' attribute.
-	 */
-	private static final String ATTR_PROPERTIES = "properties";
 	
 
 	// === OVERRIDEN HTTP METHODS ===
@@ -150,52 +137,18 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		CommunicationManager communicationManager 
 								= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
+		StatusMessage statusMessage 
+					= communicationManager.setPropertyOfRemoteObject(sourceOid, attrOid, attrPid, jsonString);
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.REQUEST_OPERATION_PUT);
-		request.addAttribute(ATTR_OBJECTS, attrOid);
-		request.addAttribute(ATTR_PROPERTIES, attrPid);
-		
-		request.setRequestBody(jsonString);
-		
-		// all set
-		if (!communicationManager.sendMessage(sourceOid, attrOid, request.buildMessageString())){
-			logger.info("Destination object " + attrOid + " is not online.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
+		if (statusMessage == null) {
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");
 		}
 		
-		// this will wait for response
-		NetworkMessageResponse response 
-						= (NetworkMessageResponse) communicationManager.retrieveSingleMessage(sourceOid, requestId);
-		
-		if (response == null){
-			logger.info("No response message received. Source ID: " 
-				+ sourceOid + " Destination ID: " + attrOid + " Property ID: " + attrPid  
-				+ " Request ID: " + requestId);
-			throw new ResourceException(Status.CONNECTOR_ERROR_CONNECTION,
-					"No valid response from remote object, possible message timeout.");
-		}
-		
-		// if the return code is different than 2xx, make it visible
-		if ((response.getResponseCode() / 200) != 1){
-			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
-					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			
-			StatusMessage statusMessage = new StatusMessage();
-			statusMessage.setError(true);
-			statusMessage.addMessage(StatusMessage.MESSAGE_CODE, String.valueOf(response.getResponseCode()));
-			statusMessage.addMessage(StatusMessage.MESSAGE_REASON, response.getResponseCodeReason());
-			
+		if (statusMessage.isError()) {
 			return new JsonRepresentation(statusMessage.buildMessage().toString());
 		}
 		
-		return new JsonRepresentation(response.getResponseBody());
+		return new JsonRepresentation(statusMessage.getBody());
 		
 	}
 	
@@ -211,54 +164,21 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 */
 	private Representation getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
 		
-		// send message to the right object
-		CommunicationManager communicationNode 
-								= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		StatusMessage statusMessage 
+				= communicationManager.getPropertyOfRemoteObject(sourceOid, attrOid, attrPid);
 		
-		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
-		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.REQUEST_OPERATION_GET);
-		request.addAttribute(ATTR_OBJECTS, attrOid);
-		request.addAttribute(ATTR_PROPERTIES, attrPid);
-		
-		// all set
-		if (!communicationNode.sendMessage(sourceOid, attrOid, request.buildMessageString())){
-			logger.info("Destination object " + attrOid + " is not online.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, "Destination object is not online.");
+		if (statusMessage == null) {
+			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");
 		}
 		
-		// this will wait for response
-		NetworkMessageResponse response 
-						= (NetworkMessageResponse) communicationNode.retrieveSingleMessage(sourceOid, requestId);
-		
-		if (response == null){
-			logger.info("No response message received. Source ID: " 
-				+ sourceOid + " Destination ID: " + attrOid + " Property ID: " + attrPid  
-				+ " Request ID: " + requestId);
-			throw new ResourceException(Status.CONNECTOR_ERROR_CONNECTION,
-					"No valid response from remote object, possible message timeout.");
-		}
-		
-		// if the return code is different than 2xx, make it visible
-		if ((response.getResponseCode() / 200) != 1){
-			logger.info("Source object: " + sourceOid + " Destination object: " + attrOid 
-					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			
-			StatusMessage statusMessage = new StatusMessage();
-			statusMessage.setError(true);
-			statusMessage.addMessage(StatusMessage.MESSAGE_CODE, String.valueOf(response.getResponseCode()));
-			statusMessage.addMessage(StatusMessage.MESSAGE_REASON, response.getResponseCodeReason());
-			
+		if (statusMessage.isError()) {
 			return new JsonRepresentation(statusMessage.buildMessage().toString());
 		}
 		
-		return new JsonRepresentation(response.getResponseBody());
+		return new JsonRepresentation(statusMessage.getBody());
 	}
 	
 }

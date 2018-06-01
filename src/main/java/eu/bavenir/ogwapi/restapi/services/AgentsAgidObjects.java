@@ -2,9 +2,6 @@ package eu.bavenir.ogwapi.restapi.services;
 
 import java.util.logging.Logger;
 
-import javax.json.JsonObject;
-
-import org.json.JSONObject;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;

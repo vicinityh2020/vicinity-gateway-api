@@ -44,6 +44,8 @@ public class ObjectsOid extends ServerResource{
 
 	// === CONSTANTS ===
 	
+	private int needReview;
+	
 	/**
 	 * Name of the Object ID attribute.
 	 */

@@ -51,7 +51,7 @@ public class ObjectsLogin extends ServerResource{
 		// if the login is unsuccessful, the execution will never reach this place
 		// the status message has to be created a new - there is no easy way how to propagate it from the REST
 		// authentication verifier.
-		StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Login successfull.");
+		StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_LOGIN, "Login successfull.");
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}

@@ -3,7 +3,6 @@ package eu.bavenir.ogwapi.restapi.services;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -12,10 +11,7 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.restapi.Api;
-import eu.bavenir.ogwapi.commons.CommunicationManager;
 
 /*
  * STRUCTURE
@@ -42,6 +38,8 @@ public class ObjectsOidActionsAid extends ServerResource {
 
 	// === CONSTANTS ===
 	
+	private int needReview;
+	
 	/**
 	 * Name of the Object ID attribute.
 	 */
@@ -51,16 +49,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Name of the Action ID attribute.
 	 */
 	private static final String ATTR_AID = "aid";
-	
-	/**
-	 * Name of the 'objects' attribute.
-	 */
-	private static final String ATTR_OBJECTS = "objects";
-	
-	/**
-	 * Name of the 'actions' attribute.
-	 */
-	private static final String ATTR_ACTIONS = "actions";
 	
 
 	// === OVERRIDEN HTTP METHODS ===

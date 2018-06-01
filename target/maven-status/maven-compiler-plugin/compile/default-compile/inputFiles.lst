@@ -1,5 +1,6 @@
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/AgentsAgidObjectsDelete.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/ConnectionDescriptor.java
+/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/connectors/http/RestAgentConnector.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/messages/MessageParser.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/engines/CommunicationEngine.java
@@ -7,7 +8,7 @@
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/messages/NetworkMessageRequest.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidEvents.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidProperties.java
-/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/xmpp/AgentCommunicator.java
+/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/Subscription.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidEventsEid.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidActionsAidTasksTid.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidActions.java
@@ -17,6 +18,7 @@
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/Objects.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/App.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsLogin.java
+/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/connectors/AgentConnector.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/CommunicationManager.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidPropertiesPid.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/RestletThread.java
@@ -26,5 +28,6 @@
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/security/AuthenticationVerifier.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidActionsAid.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/Sparql.java
+/home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/restapi/services/EventsEid.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/messages/NetworkMessageResponse.java
 /home/sulfo/Workspace/GatewayApi/src/main/java/eu/bavenir/ogwapi/commons/EventChannel.java

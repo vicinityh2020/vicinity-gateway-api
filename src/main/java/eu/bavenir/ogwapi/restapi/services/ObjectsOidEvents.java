@@ -4,4 +4,6 @@ import org.restlet.resource.ServerResource;
 
 public class ObjectsOidEvents extends ServerResource {
 
+	private int needReview;
+	
 }
