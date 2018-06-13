@@ -233,6 +233,7 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	// TODO make it return statusmessage, not a string
+	// also make it return whether we are subscribed or not
 	public String getRemoteEventChannelStatus(String objectID, String eventID) {
 		
 		if (objectID == null || eventID == null) {

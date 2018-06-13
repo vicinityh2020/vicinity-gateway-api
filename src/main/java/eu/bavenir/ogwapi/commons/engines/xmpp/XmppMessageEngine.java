@@ -1,9 +1,9 @@
 package eu.bavenir.ogwapi.commons.engines.xmpp;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -114,7 +114,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private Roster roster;
 	
 	// a list of opened chats
-	private ArrayList<Chat> openedChats;
+	private HashMap<EntityBareJid, Chat> openedChats;
 	
 	
 	
@@ -129,7 +129,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		chatManager = null;
 		roster = null;
 		
-		openedChats = new ArrayList<Chat>();
+		openedChats = new HashMap<EntityBareJid, Chat>();
 		
 		// enable debugging if desired
 		boolean debuggingEnabled = config.getBoolean(CONFIG_PARAM_XMPPDEBUG, CONFIG_DEF_XMPPDEBUG);
@@ -213,6 +213,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 			}
 		});
 		
+		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}
+		
+		
 		return true;
 	}
 	
@@ -276,6 +283,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	}
 
 	
+	
 	/**
 	 * Sends a string to the destination XMPP user name. The recommended approach is to get the roster first (by the 
 	 * {@link #getRoster() getRoster()} method and then send the message, if the contact is online.  
@@ -301,78 +309,47 @@ public class XmppMessageEngine extends CommunicationEngine {
 		try {
 			jid = JidCreate.entityBareFrom(destinationObjectID);
 		} catch (XmppStringprepException e) {
-			logger.warning("Message could not be sent. Exception: " + e.getMessage());
+			logger.warning("Destination can't be resolved. Exception: " + e.getMessage());
 			return false;
 		}
 
-		// TODO Try to make it working with the chat objects - related methods are process message and send message
-		
 		try {
+			roster.reloadAndWait();
+		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}
+		
+		// check whether the destination is online
+		Presence presence = roster.getPresence(jid);
+		Chat chat;
+		
+		if (presence.isAvailable()){
+			
+			// try to find older opened chat, so we don't have to open a new one
+			chat = openedChats.get(jid);
+			
+			if (chat == null){
+				chat = chatManager.chatWith(jid);
+				openedChats.put(jid, chat);
+				
+			} 
+			
 			try {
-				roster.reloadAndWait();
-			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-				logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-			}
-
-			// check whether the destination is online
-			Presence presence = roster.getPresence(jid);
-
-			if (presence.isAvailable()){
-				Chat chat = chatManager.chatWith(jid);
 				chat.send(message);
-				
-				// TODO this is where we put it there
-				openedChats.add(chat);
-
-			} else {
-				
+			} catch (NotConnectedException | InterruptedException e) {
+				logger.warning("Message could not be sent. Exception: " + e.getMessage());
 				return false;
 			}
-
-		} catch (NotConnectedException | InterruptedException e) {
-			logger.warning("Message could not be sent. Exception: " + e.getMessage());
+				
+		} else {
+			
+			// the destination is offline
+			System.out.println("KOKOT: The destination is offline.");
 			return false;
 		}
 		
-		
-		/*
-		// distinguish between this call being a new request or a response to one
-		if (chat == null){
-			try {
-				try {
-					roster.reloadAndWait();
-				} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-					logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-				}
-
-				// check whether the destination is online
-				Presence presence = roster.getPresence(jid);
-
-				if (presence.isAvailable()){
-					chat = chatManager.chatWith(jid);
-					chat.send(message);
-	
-				} else {
-					return false;
-				}
-
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-				return false;
-			}
-		} else {
-			try {
-				chat.send(message);
-			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
-			}
-		} */
-
 		return true;
 	}
-	
-	
-	
 	
 	
 	
@@ -443,25 +420,14 @@ public class XmppMessageEngine extends CommunicationEngine {
 	//TODO documentation
 	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat) {
 		
-		// TODO observe the behaviour and try to add it to the set if possible
+		// try to find an opened chat
+		Chat openedChat = openedChats.get(from);
 		
-		
-		// go through the list of chats to find out whether there is already a chat started
-		for (Chat openedChat : openedChats) {
-			// are they the same objects?
-			if (openedChat.equals(chat)) {
-				System.out.println("One of the already opened chats equals the one provided by SMACK.");
-			}
-			
-			// is there the same addressee?
-			if (openedChat.getXmppAddressOfChatPartner().toString().equals(chat.getXmppAddressOfChatPartner().toString())) {
-				System.out.println("One of the already opened chats has the same addressee.");
-			}
+		if (openedChat == null) {
+
+			openedChats.put(from, chat);
 		}
-		
-		openedChats.add(chat);
-		
-		
+	
 		connectionDescriptor.processIncommingMessage(from.getLocalpart().toString(), xmppMessage.getBody());
 	}
 	
@@ -480,12 +446,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 		*/
-		/*
+
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
+		
 	}
 	
 	
@@ -500,12 +467,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 		*/
-		/*
+		
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
+		
 	}
 	
 	
@@ -520,12 +488,12 @@ public class XmppMessageEngine extends CommunicationEngine {
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 		*/
-		/*
+		
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
+		}
 		
 	}
 	
