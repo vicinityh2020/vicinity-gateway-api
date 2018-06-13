@@ -344,7 +344,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 		} else {
 			
 			// the destination is offline
-			System.out.println("KOKOT: The destination is offline.");
 			return false;
 		}
 		
