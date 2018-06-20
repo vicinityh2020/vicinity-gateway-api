@@ -123,6 +123,13 @@ public class StatusMessage {
 	
 	public static final String MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL = "unsubscribeFromEventChannel";
 	
+	public static final String MESSAGE_ACTION_START = "startAction";
+	
+	public static final String MESSAGE_TASK_STATUS = "taskStatus";
+	
+	public static final String MESSAGE_TASK_STOP = "stopTask";
+	
+	
 	/**
 	 * Attribute name for getting value of a property.
 	 */

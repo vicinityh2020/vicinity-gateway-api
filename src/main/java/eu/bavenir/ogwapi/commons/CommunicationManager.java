@@ -333,6 +333,38 @@ public class CommunicationManager {
 
 	
 	
+	// TODO documentation
+	public String startAction(String objectID, String destinationObjectID, String actionID) {
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.startAction(destinationObjectID, actionID);
+		
+	}
+	
+	
+	public String retrieveTaskStatus(String objectID, String destinationObjectID, String actionID, String taskID) {
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.retrieveTaskStatus(destinationObjectID, actionID, taskID);
+	}
+	
+	
+	
+	
 	// DISCOVERY INTERFACE
 	
 	

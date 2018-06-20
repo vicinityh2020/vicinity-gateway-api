@@ -180,17 +180,6 @@ public class RestAgentConnector extends AgentConnector {
 				fullEndpointUrl = fullEndpointUrl + "/" + propertyID;
 			}
 			
-			// TODO delete this
-			/*
-			// in /objects/{oid}, the 'objects' part is the key, {oid} is a value - keep that example in mind
-			for (Map.Entry<String, String> entry : attributesMap.entrySet()){
-				agentServiceUrl = agentServiceUrl + "/" + entry.getKey();
-				// watch out for nulls
-				if (entry.getValue() != null){
-					agentServiceUrl = agentServiceUrl + "/" + entry.getValue();
-				} 
-			}
-			*/
 		}
 		
 		logger.finest("Assembled URL: " + fullEndpointUrl);

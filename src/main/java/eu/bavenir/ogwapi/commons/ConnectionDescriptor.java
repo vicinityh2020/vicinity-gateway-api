@@ -182,6 +182,124 @@ public class ConnectionDescriptor {
 	
 
 
+	// TODO documentation
+	public String startAction(String destinationObjectID, String actionID) {
+		
+		if (destinationObjectID == null || actionID == null) {
+			logger.info("Invalid object ID or action ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_STARTACTION);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
+		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		
+		// all set
+		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
+					+ " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+
+	}
+	
+	
+	
+	
+	public String retrieveTaskStatus(String destinationObjectID, String actionID, String taskID) {
+		
+		if (destinationObjectID == null || actionID == null || taskID == null) {
+			logger.info("Invalid object ID, action ID or task ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETTASKSTATUS);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
+		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
+		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		
+		// all set
+		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
+					+ " Task ID: " + taskID + " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+		
+	}
 	
 	
 	
