@@ -72,6 +72,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private static final String CONFIG_PARAM_XMPPPORT = "xmpp.port";
 	
+	// TODO put it back into config file
 	/**
 	 * Name of the configuration parameter for enabling security.
 	 */

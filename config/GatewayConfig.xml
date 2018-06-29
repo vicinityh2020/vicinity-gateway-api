@@ -3,7 +3,52 @@
 
 	<general>
 
+		
 	</general>
+
+
+	<actions>
+		
+		<!--
+		This parameter sets how long (in minutes) after successful or failed 
+		finish a task's return value should be retained. In other words, if a 
+		task is finished or failed, its return value will be deleted from the 
+		OGWAPI after this number of minutes. This is to prevent the return
+		values from piling up in the device's memory.
+		
+		If not set, it defaults to 1440 minutes (24 hours). 
+		-->
+		<timeToKeepReturnValues>1440</timeToKeepReturnValues>
+		
+		
+		<!--
+		If a task is pending to be run, how long (in minutes) it should remain in the 
+		queue before being tagged as failed by timing out. This is infrastructure
+		specific - if a task usually takes hours to complete, this value should 
+		be set to higher number (maybe even days). If it takes only a few seconds,
+		it usually makes no sense to wait for more than an hour. Again, it 
+		highly depends on what the action is about and common sense.  
+		
+		Default value is 120 minutes (2 hours).
+		-->
+		<pendingTaskTimeout>120</pendingTaskTimeout>
+		
+		
+		<!-- 
+		Maximum number of tasks being queued in pending status, waiting to be
+		run. This depends on number of objects that are connecting via this 
+		gateway, and the memory size of the device it runs on. Setting a 
+		limit prevents a malicious object to fill the memory with pending 
+		requests. Note that is is a limit per action, so if you have two
+		actions that can be executed on you local infrastructure, 
+		maximum number of pending tasks will be twice this number.  
+		
+		Default is 128.  
+		-->
+		<maxNumberOfPendingTasks>128</maxNumberOfPendingTasks>
+		
+		
+	</actions>
 
 	<logging>
 		<!-- 
@@ -13,7 +58,7 @@
 		stamp during start. Each start of the Gateway will produce a new log file
 		with a new time stamp.  
 		-->
-		<file>/home/sulfo/Workspace/GatewayApi/log/%s-gateway.log</file>
+		<file>log/%s-gateway.log</file>
 		
 		<!--
 		Set a log level - messages with severity level lower than this setting 

@@ -334,7 +334,7 @@ public class CommunicationManager {
 	
 	
 	// TODO documentation
-	public String startAction(String objectID, String destinationObjectID, String actionID) {
+	public String startAction(String objectID, String destinationObjectID, String actionID, String body) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -344,7 +344,7 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.startAction(destinationObjectID, actionID);
+		return descriptor.startAction(destinationObjectID, actionID, body);
 		
 	}
 	
@@ -360,6 +360,21 @@ public class CommunicationManager {
 		} 
 		
 		return descriptor.retrieveTaskStatus(destinationObjectID, actionID, taskID);
+	}
+	
+	
+	
+	public String cancelRunningTask(String objectID, String destinationObjectID, String actionID, String taskID) {
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.cancelRunningTask(destinationObjectID, actionID, taskID);
 	}
 	
 	

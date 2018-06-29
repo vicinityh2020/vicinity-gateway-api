@@ -76,6 +76,9 @@ public class ConnectionDescriptor {
 	// a map of channels that this object is subscribed to (OID / EID)
 	private Set<Subscription> subscribedEventChannels;
 	
+	// a set of actions served by this object
+	private Set<Action> providedActions;
+	
 	
 	// logger and configuration
 	private XMLConfiguration config;
@@ -121,15 +124,16 @@ public class ConnectionDescriptor {
 		
 		providedEventChannels = new HashSet<EventChannel>();
 		
-		// TODO use this
 		subscribedEventChannels = new HashSet<Subscription>();
+		
+		providedActions = new HashSet<Action>();
 		
 		
 		// build new connection
 		// TODO this is also the place, where it should decide what engine to use
 		commEngine = new XmppMessageEngine(objectID, password, config, logger, this);
 		
-		// TODO load the event channels - either from a file or server
+		// TODO load the event channels and actions - either from a file or server
 		
 	}
 	
@@ -183,7 +187,7 @@ public class ConnectionDescriptor {
 
 
 	// TODO documentation
-	public String startAction(String destinationObjectID, String actionID) {
+	public String startAction(String destinationObjectID, String actionID, String body) {
 		
 		if (destinationObjectID == null || actionID == null) {
 			logger.info("Invalid object ID or action ID.");
@@ -301,6 +305,72 @@ public class ConnectionDescriptor {
 		
 	}
 	
+	
+	
+	
+	public String cancelRunningTask(String destinationObjectID, String actionID, String taskID) {
+		
+		if (destinationObjectID == null || actionID == null || taskID == null) {
+			logger.info("Invalid object ID, action ID or task ID.");
+			return null;
+		}
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(NetworkMessageRequest.OPERATION_CANCELTASK);
+		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
+		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
+		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
+		
+		// message to be returned
+		String statusMessageText;
+		
+		
+		// all set
+		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
+			
+			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
+					statusMessageText);
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		if (response == null){
+
+			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
+					+ " Task ID: " + taskID + " Request ID: " + requestId);
+			
+			logger.info(statusMessageText);
+			
+			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
+					statusMessageText); 
+			
+			return statusMessage.buildMessage().toString();
+		}
+		
+		
+		// TODO a status message needs to be parsed here and returned
+		return response.getResponseBody();
+		
+	}
+	
+	
+	
+	public StatusMessage updateTaskStatus() {
+		
+	}
 	
 	
 	
@@ -884,6 +954,11 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_STARTACTION:
 			
+			response = respondToStartActionRequest(from, requestMessage);
+			
+			// send it back
+			commEngine.sendMessage(from, response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
@@ -1120,6 +1195,32 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	private NetworkMessageResponse respondToStartActionRequest(String from, NetworkMessageRequest requestMessage) {
+		
+		String actionID = null;
+		Action action = null;
+		
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		// the action ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+		}
+		
+		// check whether the action exists
+		if (actionID != null) {
+			action = searchForAction(actionID);
+		}
+		
+		// TODO YOU ARE HERE
+		
+	}
+	
+	
+	
 	
 	
 	/**
@@ -1135,6 +1236,20 @@ public class ConnectionDescriptor {
 			if (eventChannel.getEventID().equals(eventID)) {
 				// found it
 				return eventChannel;
+			}
+		}
+
+		return null;
+	}
+	
+	
+	private Action searchForAction(String actionID) {
+		// search for given action
+		
+		for (Action action : providedActions) {
+			if (action.getActionID().equals(actionID)) {
+				// found it
+				return action;
 			}
 		}
 
