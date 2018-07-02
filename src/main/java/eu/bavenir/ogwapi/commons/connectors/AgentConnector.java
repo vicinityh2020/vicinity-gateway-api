@@ -36,17 +36,16 @@ public abstract class AgentConnector {
 	}
 
 	
+	// TODO make them return StatusMessage
 	public abstract NetworkMessageResponse forwardEventToObject(String objectID, String eventID, String eventBody);
 	
 	public abstract NetworkMessageResponse getObjectProperty(NetworkMessageRequest requestMessage);
 	
 	public abstract NetworkMessageResponse setObjectProperty(NetworkMessageRequest requestMessage);
 	
-	public abstract NetworkMessageResponse startObjectAction();
+	public abstract NetworkMessageResponse startObjectAction(String objectID, String actionID, String requestBody);
 	
-	public abstract NetworkMessageResponse getTaskStatus();
-	
-	public abstract NetworkMessageResponse cancelTask();
+	public abstract NetworkMessageResponse cancelTask(String objectID, String actionID);
 	
 		
 	

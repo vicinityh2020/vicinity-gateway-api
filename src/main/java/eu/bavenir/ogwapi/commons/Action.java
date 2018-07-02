@@ -10,6 +10,9 @@ import java.util.TimerTask;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
+import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
+
 
 /*
  * STRUCTURE:
@@ -74,14 +77,17 @@ public class Action {
 	
 	private int maxNumberOfPendingTasks;
 	
+	private AgentConnector connector;
+	
 	
 	
 	/* === PUBLIC METHODS === */
 	
-	public Action(XMLConfiguration config, String objectID, String actionID) {
+	public Action(XMLConfiguration config, String objectID, String actionID, AgentConnector connector) {
 		
 		this.objectID = objectID;
 		this.actionID = actionID;
+		this.connector = connector;
 		
 		pendingTasks = Collections.synchronizedList(new LinkedList<Task>());
 		
@@ -179,7 +185,7 @@ public class Action {
 	
 	public byte getTaskStatus(String taskID) {
 		
-		Task task = searchForTask(taskID);
+		Task task = searchForTask(taskID, true);
 		
 		if (task == null) {
 			
@@ -200,7 +206,7 @@ public class Action {
 	
 	public String getTaskStatusString(String taskID) {
 		
-		Task task = searchForTask(taskID);
+		Task task = searchForTask(taskID, true);
 		
 		if (task == null) {
 			
@@ -221,7 +227,7 @@ public class Action {
 	
 	public String getTaskReturnValue(String taskID) {
 		
-		Task task = searchForTask(taskID);
+		Task task = searchForTask(taskID, true);
 		
 		if (task == null) {
 			
@@ -249,7 +255,7 @@ public class Action {
 		}
 		
 		// start a task in a default pending status
-		Task task = new Task(objectID, body);
+		Task task = new Task(objectID, actionID, body, connector);
 		
 		pendingTasks.add(task);
 		
@@ -261,52 +267,55 @@ public class Action {
 	
 	
 	// update 
-	public boolean updateTask(String taskID, String returnValue) {
+	public boolean updateTask(String taskStatus, String returnValue) {
 		
-		Task task = searchForTask(taskID);
-		
-		if (task == null) {
-			
+		// only running task can be updated
+		if (runningTask == null) {
 			// TODO delete after test
-			System.out.println("Task does not exist.");
+			System.out.println("There is no running task.");
 			
 			return false;
 		}
 		
-		// we can only update a status of running task
-		if (task.getTaskStatus() != Task.TASKSTATUS_RUNNING) {
+		if (!runningTask.updateRunningTask(taskStatus, returnValue)) {
 			
 			// TODO delete after test
-			System.out.println("Task is not running.");
-			
+			System.out.println("The runnning task can't be put into desired state.");
 			return false;
+		}
+		
+		// if the new desired state is failed or finished, the task is to be moved into the set of finished tasks
+		if (!taskStatus.equals(Task.TASKSTATUS_STRING_RUNNING)) {
+			if (!finishedTasks.add(runningTask)) {
+				// TODO delete after test
+				System.out.println("Unknown error here.");
+				return false;
+			} 
+			
+			// clear the place for the next task to be run
+			runningTask = null;
+			
 		}
 		
 		// TODO delete after test
-		System.out.println("Task return value set.");
-		
-		task.setReturnValue(returnValue);
+		System.out.println("Task updated.");
 		
 		return true;
 		
 	}
 	
-	// stop
-	
-	
-	
 	
 	// cancel
-	public boolean cancelTask(String taskID) {
+	public NetworkMessageResponse cancelTask(String taskID) {
 		
-		Task task = searchForTask(taskID);
+		Task task = searchForTask(taskID, false);
 		
 		if (task == null) {
 			
 			// TODO delete after test
-			System.out.println("Task does not exist.");
+			System.out.println("Canceling finished/failed task is not possible.");
 			
-			return false;
+			return null;
 		}
 		
 		// we can't cancel finished or failed job
@@ -314,17 +323,37 @@ public class Action {
 			
 			// TODO delete after test
 			System.out.println("Canceling finished/failed task is not possible.");
-			return false;
+			return null;
 		}
 		
 		
 		// TODO delete after test
 		System.out.println("Canceling task.");
 		
-		if (!task.cancel())
+		NetworkMessageResponse response = task.cancel();
 		
+		if (response == null ) { 
+			// TODO delete after test
+			System.out.println("Something went wrong during the task cancelling.");
+			
+			return null;
+		} 
 		
-		return task.cancel();
+		// now move it to finished task pool
+		finishedTasks.add(task);
+		if (runningTask.equals(task)) {
+			// TODO delete after test
+			System.out.println("Running task set to null.");
+			
+			runningTask = null;
+			
+		} else {
+			// TODO delete after test
+			System.out.println("Removed from pending tasks.");
+			pendingTasks.remove(task);
+		}
+		
+		return response;
 	}
 	
 	
@@ -383,7 +412,7 @@ public class Action {
 	}
 	
 	
-	private Task searchForTask(String taskID) {
+	private Task searchForTask(String taskID, boolean searchAlsoAmongFinishedTasks) {
 		
 		// is it the running task?
 		if (runningTask != null && runningTask.getTaskID().equals(taskID)) {
@@ -397,10 +426,12 @@ public class Action {
 			}
 		}
 		
-		// or among finished tasks?
-		for (Task task : finishedTasks) {
-			if (task.getTaskID().equals(taskID)) {
-				return task;
+		if (searchAlsoAmongFinishedTasks) {
+			// or among finished tasks?
+			for (Task task : finishedTasks) {
+				if (task.getTaskID().equals(taskID)) {
+					return task;
+				}
 			}
 		}
 		

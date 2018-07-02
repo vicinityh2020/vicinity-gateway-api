@@ -127,7 +127,11 @@ public class StatusMessage {
 	
 	public static final String MESSAGE_TASK_STATUS = "taskStatus";
 	
+	public static final String MESSAGE_TASK_RETURNVALUE = "returnValue";
+	
 	public static final String MESSAGE_TASK_STOP = "stopTask";
+	
+	public static final String MESSAGE_TASKID = "taskID";
 	
 	
 	/**

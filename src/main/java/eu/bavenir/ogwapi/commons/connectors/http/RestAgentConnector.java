@@ -98,6 +98,8 @@ public class RestAgentConnector extends AgentConnector {
 	
 	private static final String ATTR_URL_EVENTS = "/events";
 	
+	private static final String ATTR_URL_ACTIONS = "/actions";
+	
 	
 	private static final byte OPERATION_GET = 0x00;
 	
@@ -233,23 +235,28 @@ public class RestAgentConnector extends AgentConnector {
 
 
 	@Override
-	public NetworkMessageResponse startObjectAction() {
-		// TODO Auto-generated method stub
-		return null;
+	public NetworkMessageResponse startObjectAction(String objectID, String actionID, String requestBody) {
+		
+		String fullEndpointUrl = new String(agentServiceUrl);
+		
+		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
+		
+		logger.finest("Assembled URL: " + fullEndpointUrl);
+		
+		return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
 	}
 
 
-	@Override
-	public NetworkMessageResponse getTaskStatus() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
-	public NetworkMessageResponse cancelTask() {
-		// TODO Auto-generated method stub
-		return null;
+	public NetworkMessageResponse cancelTask(String objectID, String actionID) {
+		String fullEndpointUrl = new String(agentServiceUrl);
+		
+		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
+		
+		logger.finest("Assembled URL: " + fullEndpointUrl);
+		
+		return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
 	}
 	
 	

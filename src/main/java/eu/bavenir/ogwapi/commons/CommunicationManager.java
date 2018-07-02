@@ -349,6 +349,21 @@ public class CommunicationManager {
 	}
 	
 	
+	public StatusMessage updateTaskStatus(String objectID, String actionID, 
+					String newStatus, String returnValue) {
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		
+		if (descriptor == null) {
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			
+			return null;
+		}
+		
+		return descriptor.updateTaskStatus(actionID, newStatus, returnValue);
+	}
+	
+	
 	public String retrieveTaskStatus(String objectID, String destinationObjectID, String actionID, String taskID) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);

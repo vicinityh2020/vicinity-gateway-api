@@ -247,6 +247,47 @@ public class ConnectionDescriptor {
 	
 	
 	
+	
+	public StatusMessage updateTaskStatus(String actionID, String newStatus, String returnValue) {
+		
+		if (actionID == null) {
+			logger.warning("Invalid action ID or task ID.");
+			return null;
+		}
+		
+		Action action = searchForAction(actionID);
+		
+		if (action == null) {
+			logger.warning("No such action " + actionID);
+			return null;
+		}
+		
+		StatusMessage statusMessage;
+		String messageString;
+		
+		if (!action.updateTask(newStatus, returnValue)) {
+			
+			messageString = "Running task of action " + actionID + " is not in a state allowing update, "
+					+ "or the requested new state is not aplicable.";
+			
+			logger.warning(messageString);
+			
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, messageString);
+			
+		}
+		
+		messageString = "Running task of action " + actionID + " was updated.";
+		
+		logger.info(messageString);
+		statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_TASK_STATUS, messageString);
+		
+		return statusMessage;
+		
+	}
+	
+	
+	
+	
 	public String retrieveTaskStatus(String destinationObjectID, String actionID, String taskID) {
 		
 		if (destinationObjectID == null || actionID == null || taskID == null) {
@@ -366,11 +407,7 @@ public class ConnectionDescriptor {
 		
 	}
 	
-	
-	
-	public StatusMessage updateTaskStatus() {
-		
-	}
+
 	
 	
 	
@@ -911,6 +948,9 @@ public class ConnectionDescriptor {
 		
 		case NetworkMessageRequest.OPERATION_CANCELTASK:
 			
+			response = respondToCancelRunningTask(from, requestMessage);
+			commEngine.sendMessage(from, response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
@@ -941,6 +981,11 @@ public class ConnectionDescriptor {
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
+			
+			response = respondToGetTaskStatus(from, requestMessage);
+			
+			// send it back
+			commEngine.sendMessage(from, response.buildMessageString());
 			
 			break;
 			
@@ -1195,6 +1240,8 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	
+	// TODO documentation
 	private NetworkMessageResponse respondToStartActionRequest(String from, NetworkMessageRequest requestMessage) {
 		
 		String actionID = null;
@@ -1215,11 +1262,208 @@ public class ConnectionDescriptor {
 			action = searchForAction(actionID);
 		}
 		
-		// TODO YOU ARE HERE
+		// TODO delete this workaround - the actions should be loaded at the startup and no new action should 
+		// be possible
+		if (action == null) {
+			action = new Action (config, this.objectID, actionID, agentConnector);
+		}
+		
+		String statusString;
+		
+		// check whether the object is in our roster and whether or not the action already exists
+		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
+		if (action == null ) { // || security check
+			logger.info("Received a request to start non existing action. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_ACTION_START, 
+					new String("Invalid action specified."));
+		} else {
+			logger.fine("Received a request to start action " + actionID + " from " + from + ".");
+			
+			String taskID = action.createNewTask(from, requestMessage.getRequestBody());
+			
+			if (taskID == null) {
+				
+				statusString = new String("Cannot start action " + actionID + ", too many tasks in queue.");
+				
+				logger.warning(statusString);
+				
+				statusMessage = new StatusMessage(
+						true, 
+						StatusMessage.MESSAGE_ACTION_START, 
+						new String(statusString));
+			} else {
+				statusString = new String("Task " + taskID + " of action " + actionID + " was created and added to the queue.");
+				
+				logger.fine(statusString);
+				
+				statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_ACTION_START, 
+						StatusMessage.TEXT_SUCCESS);
+				
+				statusMessage.addMessage(StatusMessage.MESSAGE_TASKID, taskID);
+			}
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
+	}
+	
+	
+	
+	private NetworkMessageResponse respondToGetTaskStatus(String from, NetworkMessageRequest requestMessage) {
+		String actionID = null;
+		String taskID = null;
+		Action action = null;
+		
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		// the action ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+			taskID = attributesMap.get(NetworkMessageRequest.ATTR_TID);
+		}
+		
+		// check whether the action exists
+		if (actionID != null) {
+			action = searchForAction(actionID);
+		}
+		
+		
+		String statusString;
+		
+		// check whether the object is in our roster and whether or not the action already exists
+		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
+		if (action == null ) { // || security check
+			logger.info("Received a request for status report on non existing action/task. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_TASK_STATUS, 
+					new String("Invalid action specified."));
+		} else {
+			logger.fine("Received a request for status report on action " + actionID + " task " + taskID + " from " + from + ".");
+			
+			byte statusCode = action.getTaskStatus(taskID);
+			String status = action.getTaskStatusString(taskID);
+			String returnValue = action.getTaskReturnValue(taskID);
+			// running time?
+			
+			if (statusCode == Task.TASKSTATUS_UNKNOWN) {
+				
+				statusString = new String("Cannot find task " + taskID + ". Its status is unknown.");
+				
+				logger.warning(statusString);
+				
+				statusMessage = new StatusMessage(
+						true, 
+						StatusMessage.MESSAGE_TASK_STATUS, 
+						new String(statusString));
+			} else {
+				statusString = new String("Task " + taskID + " of action " + actionID + " status " + status + " return value " + returnValue);
+				
+				logger.fine(statusString);
+				
+				statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_TASK_STATUS, 
+						status);
+				
+				statusMessage.addMessage(StatusMessage.MESSAGE_TASK_RETURNVALUE, returnValue);
+			}
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
 		
 	}
 	
 	
+	
+	private NetworkMessageResponse respondToCancelRunningTask(String from, NetworkMessageRequest requestMessage) {
+		String actionID = null;
+		String taskID = null;
+		Action action = null;
+		
+		// this is a network message used to encapsulate the status message
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		StatusMessage statusMessage;
+		
+		// the action ID should have been sent in attributes
+		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		if (!attributesMap.isEmpty()) {
+			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+			taskID = attributesMap.get(NetworkMessageRequest.ATTR_TID);
+		}
+		
+		// check whether the action exists
+		if (actionID != null) {
+			action = searchForAction(actionID);
+		}
+		
+		
+		String statusString;
+		
+		// check whether the object is in our roster and whether or not the action already exists
+		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
+		if (action == null ) { // || security check
+			logger.info("Received a request for stopping a non existing action/task. Request came from: " + from);
+			
+			// responding with error
+			// remember! we are going to include the outcome of the operation as the status message
+			statusMessage = new StatusMessage(
+					true, 
+					StatusMessage.MESSAGE_TASK_STOP, 
+					new String("Invalid action specified."));
+		} else {
+			logger.fine("Received a request for for stopping an action " + actionID + " task " + taskID + " from " + from + ".");
+			
+			NetworkMessageResponse response2 = action.cancelTask(taskID);
+			
+			if (response2 == null) {
+				
+				statusString = new String("Cannot find task " + taskID + ". Its status is unknown.");
+				
+				logger.warning(statusString);
+				
+				statusMessage = new StatusMessage(
+						true, 
+						StatusMessage.MESSAGE_TASK_STOP, 
+						new String(statusString));
+			} else {
+				statusString = new String("Task " + taskID + " of action " + actionID 
+						+ " cancelation result: " + response2.getResponseCode() + " " + response2.getResponseCodeReason());
+				
+				logger.fine(statusString);
+				
+				statusMessage = new StatusMessage(
+						false, 
+						StatusMessage.MESSAGE_TASK_STOP, statusString);
+			}
+		}
+		
+		response.setResponseBody(statusMessage.buildMessage().toString());
+		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+		
+		return response;
+	}
 	
 	
 	

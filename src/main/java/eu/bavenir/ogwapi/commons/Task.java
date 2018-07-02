@@ -2,6 +2,9 @@ package eu.bavenir.ogwapi.commons;
 
 import java.util.UUID;
 
+import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
+
 /*
  * STRUCTURE:
  * - constants
@@ -51,11 +54,14 @@ public class Task {
 	
 	private long endTime;
 	
+	// TODO make it so that the running time will be updated every second and it will be possible to return comprehensive status
 	private long runningTime;
 	
 	private String objectID;
 	
 	private String taskID;
+	
+	private String actionID;
 	
 	private String returnValue;
 	
@@ -63,22 +69,24 @@ public class Task {
 	
 	private String body;
 	
+	private AgentConnector connector;
+	
 	
 	
 	
 	/* === PUBLIC METHODS === */
 	
-	public Task(String objectID, String body) {
-		initialize(objectID, body);
+	public Task(String objectID, String actionID, String body, AgentConnector connector) {
+		initialize(objectID, actionID, connector, body);
 		
 		// default status after creating an instance of task
-		setTaskStatus(TASKSTATUS_PENDING);
+		taskStatus = TASKSTATUS_PENDING;
 	}
 	
 	
 	
-	public Task(String objectID, String body, byte taskStatus) {
-		initialize(objectID, body);
+	public Task(String objectID, String actionID, String body, byte taskStatus, AgentConnector connector) {
+		initialize(objectID, actionID, connector, body);
 		
 		// if wrong status was given, assign the default
 		if (!setTaskStatus(taskStatus)) {
@@ -88,59 +96,98 @@ public class Task {
 	
 	
 	
-	public boolean setTaskStatus(byte taskStatus) {
+	public NetworkMessageResponse start() {
 		
-		// check whether the status is in the set of allowed states
-		if (taskStatus == TASKSTATUS_FAILED 
-				|| taskStatus == TASKSTATUS_FINISHED
-				|| taskStatus == TASKSTATUS_PENDING
-				|| taskStatus == TASKSTATUS_RUNNING) {
-			
-			this.taskStatus = taskStatus;
-			
-		} else {
-			return false;
+		// only pending task can be started
+		if (taskStatus != TASKSTATUS_PENDING) {
+			return null;
 		}
 		
-		return true;
-	}
-	
-	
-	
-	public void start() {
+		// TODO this is baaad, need to return status message
+		NetworkMessageResponse response = connector.startObjectAction(objectID, actionID, body);
+		
+		if (response == null) {
+			return null;
+		}
+		
+		if ((response.getResponseCode() / 200) != 1){
+			
+			return null;
+		}
 		
 		startTime = System.currentTimeMillis();
 		
 		taskStatus = TASKSTATUS_RUNNING;
+		
+		return response;
+	}
+	
+	
+	
+	public boolean updateRunningTask(String taskStatus, String returnValue) {
+		
+		// only running task can be updated and it is only possible to either:
+		// 		remain in the running state
+		//		switch to finished state
+		//		switch to failed state
+		
+		if (taskStatus.equals(TASKSTATUS_STRING_RUNNING)) {
+			// this is more or less just progress update
+			this.returnValue = returnValue;
+			return true;
+		}
+		
+		if (taskStatus.equals(TASKSTATUS_STRING_FINISHED) || taskStatus.equals(TASKSTATUS_STRING_FAILED)) {
+			
+			// stop the clock
+			endTime = System.currentTimeMillis();
+			runningTime = runningTime + (endTime - startTime);
+			
+			// change the status
+			this.taskStatus = translateStringStatusToByte(taskStatus);
+			this.returnValue = returnValue;	
+			
+			return true;
+		}
+		
+		// all other alternatives are banned
+		return false;
 	}
 	
 	
 
-	public void stop(String returnValue, boolean finishedWithError) {
+	public NetworkMessageResponse cancel() {
 		
-		if (finishedWithError) {
-			taskStatus = TASKSTATUS_FAILED;
-		} else {
-			taskStatus = TASKSTATUS_FINISHED;
+		NetworkMessageResponse response = null;
+		
+		if (taskStatus == TASKSTATUS_FAILED || taskStatus == TASKSTATUS_FINISHED) {
+			return null;
 		}
 		
-		endTime = System.currentTimeMillis();
 		
-		runningTime = runningTime + (endTime - startTime);
-		
-		this.returnValue = returnValue;
-	}
-	
-	
-	public boolean cancel() {
-		
-		
+		// only pending and running task can be canceled
+		if (taskStatus == TASKSTATUS_RUNNING) {
+			// TODO this is baaad, need to return status message - and control the return value
+			response = connector.cancelTask(objectID, actionID);
+			
+			if (response == null) {
+				return null;
+			}
+			
+			if ((response.getResponseCode() / 200) != 1){
+				return null;
+			}
+			
+			// stop the clock
+			endTime = System.currentTimeMillis();
+			runningTime = runningTime + (endTime - startTime);	
+		} 
 		
 		taskStatus = TASKSTATUS_FINISHED;
-		
 		returnValue = CANCELED_RETURN_VALUE;
 		
-		return true;
+		return response;
+		
 	}
 	
 	
@@ -218,14 +265,9 @@ public class Task {
 	
 	
 	/* === PRIVATE METHODS === */
-	
 
 
-
-	
-
-
-	private void initialize(String objectID, String body) {
+	private void initialize(String objectID, String actionID, AgentConnector connector, String body) {
 		startTime = 0;
 		endTime = 0;
 		runningTime = 0;
@@ -237,5 +279,47 @@ public class Task {
 		
 		this.body = body;
 		this.objectID = objectID;
+		this.actionID = actionID;
+		this.connector = connector;
+	}
+	
+	
+	
+	private boolean setTaskStatus(byte taskStatus) {
+		
+		// check whether the status is in the set of allowed states
+		if (taskStatus == TASKSTATUS_FAILED 
+				|| taskStatus == TASKSTATUS_FINISHED
+				|| taskStatus == TASKSTATUS_PENDING
+				|| taskStatus == TASKSTATUS_RUNNING) {
+			
+			this.taskStatus = taskStatus;
+			
+		} else {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	private byte translateStringStatusToByte(String statusString) {
+		switch (statusString) {
+		
+		case(TASKSTATUS_STRING_FAILED):
+			return TASKSTATUS_FAILED;
+		
+		case(TASKSTATUS_STRING_FINISHED):
+			return TASKSTATUS_FINISHED;
+		
+		case(TASKSTATUS_STRING_PENDING):
+			return TASKSTATUS_PENDING;
+		
+		case(TASKSTATUS_STRING_RUNNING):
+			return TASKSTATUS_RUNNING;
+		
+		default:
+			return TASKSTATUS_UNKNOWN;
+		}
 	}
 }

@@ -7,7 +7,6 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -50,6 +49,8 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Name of the Action ID attribute.
 	 */
 	private static final String ATTR_AID = "aid";
+	
+	private static final String PARAM_STATUS = "status";
 	
 
 	// === OVERRIDEN HTTP METHODS ===
@@ -117,6 +118,14 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"Object or property does not exist under given identifier.");
 		}
 		
+		if (!attrOid.equals(callerOid)) {
+			logger.info("OID: " + attrOid + " Caller ID: " + callerOid 
+					+ " does not match.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"OID and caller ID must match.");
+		}
+		
 		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
 			logger.info("OID: " + attrOid + " PID: " + attrAid 
 					+ " Invalid property description - must be a valid JSON.");
@@ -125,17 +134,20 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"Invalid property description - must be a valid JSON.");
 		}
 		
+		// get the new status
+		String newStatus = getQueryValue(PARAM_STATUS);
+		
 		// get the json
-		String propertyJsonString = null;
+		String returnValue = null;
 		try {
-			propertyJsonString = entity.getText();
+			returnValue = entity.getText();
 		} catch (IOException e) {
 			logger.info(e.getMessage());
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid property description");
 		}
 		
-		return updateActionStatus(callerOid, attrOid, attrAid, propertyJsonString);
+		return updateActionStatus(callerOid, attrAid, newStatus,returnValue);
 	}
 	
 	
@@ -171,9 +183,11 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation updateActionStatus(String sourceOid, String attrOid, String attrAid, String actionStatus){
-		
-		return null;
+	private Representation updateActionStatus(String sourceOid, String attrAid, String status, String returnValue){
+		CommunicationManager communicationManager 
+				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return new JsonRepresentation(communicationManager.updateTaskStatus(sourceOid, attrAid, status, returnValue));
 		
 	}
 }

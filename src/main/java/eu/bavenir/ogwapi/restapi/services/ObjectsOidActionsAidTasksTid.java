@@ -4,11 +4,14 @@ package eu.bavenir.ogwapi.restapi.services;
 import java.util.logging.Logger;
 
 import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
 /*
@@ -36,9 +39,6 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	
 	// === CONSTANTS ===
 	
-	private int needReview;
-	
-	
 	/**
 	 * Name of the Object ID attribute.
 	 */
@@ -63,7 +63,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * @return Task status.
 	 */
 	@Get
-	public String represent() {
+	public Representation represent() {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
@@ -78,7 +78,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		return getObjectActionTask(callerOid, attrOid, attrAid, attrTid, logger);
+		return getActionTaskStatus(callerOid, attrOid, attrAid, attrTid);
 	}
 	
 	
@@ -86,7 +86,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * Deletes the given task to perform an action.
 	 */
 	@Delete
-	public void remove() {
+	public Representation remove() {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
@@ -101,7 +101,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		deleteObjectActionTask(callerOid, attrOid, attrAid, attrTid, logger);
+		return deleteActionTask(callerOid, attrOid, attrAid, attrTid);
 	}
 	
 	
@@ -118,22 +118,22 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * 
 	 * @return Response from the remote station. 
 	 */
-	private String getObjectActionTask(String sourceOid, String attrOid, String attrAid, String attrTid, Logger logger){
+	private Representation getActionTaskStatus(String sourceOid, String attrOid, String attrAid, String attrTid){
 		
-		return null;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return new JsonRepresentation(communicationManager.retrieveTaskStatus(sourceOid, attrOid, attrAid, attrTid));
 		
 	}
 	
 	
 	// TODO documentation
-	private void deleteObjectActionTask(
-						String SourceOid, String attrOid, String attrAid, String attrTid, Logger logger){
-		if (attrOid.equals("0729a580-2240-11e6-9eb5-0002a5d5c51b") && attrAid.equals("switch")
-				&& attrTid.equals("ca43b079-0818-4c39-b896-699c2d31f2db")){
-			//return "Object deleted.";
-		} else {
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
-		}
+	private Representation deleteActionTask(String SourceOid, String attrOid, String attrAid, String attrTid){
+		
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return new JsonRepresentation(communicationManager.cancelRunningTask(SourceOid, attrOid, attrAid, attrTid));
 	}
 }
