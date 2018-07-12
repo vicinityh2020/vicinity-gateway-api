@@ -201,6 +201,10 @@ public class RestAgentConnector extends AgentConnector {
 		NetworkMessageResponse response;
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
+		// TODO remove
+		System.out.println("!!!DEBUGGING: A request to set object property arrived, request ID: " + requestMessage.getRequestId());
+		
+		
 		// finalise the URL
 		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
 		
@@ -315,16 +319,27 @@ public class RestAgentConnector extends AgentConnector {
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = null;
 		
+		// TODO remove
+		System.out.println("!!!DEBUGGING: Operation code: " + operationCode + "; Assembled URL: " + fullUrl + "; Request body: " + body);
+		
+		
 		try {
 			
 			switch (operationCode){
 			
 			case OPERATION_GET:
+				
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Operation is GET. Making a request, waiting for response.");
+				
 				// parameters
 				responseRepresentation = clientResource.get();
 				break;
 				
 			case OPERATION_POST:
+				
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Operation is POST. Making a request, waiting for response.");
 				
 				// this should always be json string
 				if (body != null){
@@ -337,6 +352,9 @@ public class RestAgentConnector extends AgentConnector {
 				break;
 				
 			case OPERATION_PUT:
+				
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Operation is PUT. Making a request, waiting for response.");
 				
 				// this should always be json string
 				
@@ -351,14 +369,24 @@ public class RestAgentConnector extends AgentConnector {
 				
 			case OPERATION_DELETE:
 				
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Operation is DELETE. Making a request, waiting for response.");
+				
 				responseRepresentation = clientResource.delete();
 				break;
 				
 			}
 			
 			if (responseRepresentation != null){
+				
 				responseRepresentation.write(writer);
 				response.setResponseBody(writer.toString());
+				
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Response arrived with NOT-NULL body. Response body: " + writer.toString());
+			} else {
+				// TODO remove
+				System.out.println("!!!DEBUGGING: Response arrived with NULL body!");
 			}
 			
 		} catch (ResourceException | IOException e) {
@@ -366,6 +394,13 @@ public class RestAgentConnector extends AgentConnector {
 			logger.warning(e.getMessage());
 
 		} finally {
+			
+			// TODO remove
+			System.out.println("!!!DEBUGGING: Client responded with code: " + clientResource.getStatus().getCode());
+
+			// TODO remove
+			System.out.println("!!!DEBUGGING: Reason for the code: " + clientResource.getStatus().getReasonPhrase());
+			
 			response.setResponseCode(clientResource.getStatus().getCode());
 			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
 		}

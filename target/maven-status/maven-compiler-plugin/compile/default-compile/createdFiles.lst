@@ -1,6 +1,7 @@
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine$2.class
 eu/bavenir/ogwapi/commons/messages/StatusMessage.class
 eu/bavenir/ogwapi/restapi/RestletThread.class
+eu/bavenir/ogwapi/commons/Action$2.class
 eu/bavenir/ogwapi/commons/connectors/AgentConnector.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOid.class
 eu/bavenir/ogwapi/restapi/services/AgentsAgidObjectsDelete.class
@@ -19,9 +20,12 @@ eu/bavenir/ogwapi/restapi/services/EventsEid.class
 eu/bavenir/ogwapi/commons/messages/MessageParser.class
 eu/bavenir/ogwapi/restapi/security/AuthenticationVerifier.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidEvents.class
+eu/bavenir/ogwapi/commons/Task.class
+eu/bavenir/ogwapi/commons/Action$1.class
 eu/bavenir/ogwapi/commons/messages/NetworkMessage.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidPropertiesPid.class
 eu/bavenir/ogwapi/restapi/services/AgentsAgidObjects.class
+eu/bavenir/ogwapi/commons/Action$3.class
 eu/bavenir/ogwapi/commons/connectors/http/RestAgentConnector.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidProperties.class
 eu/bavenir/ogwapi/commons/EventChannel.class
@@ -32,5 +36,6 @@ eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidEventsEid.class
 eu/bavenir/ogwapi/commons/messages/NetworkMessageRequest.class
 eu/bavenir/ogwapi/App$1.class
+eu/bavenir/ogwapi/commons/Action.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidActionsAid.class
 eu/bavenir/ogwapi/restapi/services/Objects.class
