@@ -57,6 +57,8 @@ public class Task {
 	// TODO make it so that the running time will be updated every second and it will be possible to return comprehensive status
 	private long runningTime;
 	
+	private String requestingObjectID;
+	
 	private String objectID;
 	
 	private String taskID;
@@ -76,8 +78,8 @@ public class Task {
 	
 	/* === PUBLIC METHODS === */
 	
-	public Task(String objectID, String actionID, String body, AgentConnector connector) {
-		initialize(objectID, actionID, connector, body);
+	public Task(String objectID, String requestingObjectID, String actionID, String body, AgentConnector connector) {
+		initialize(objectID, requestingObjectID, actionID, connector, body);
 		
 		// default status after creating an instance of task
 		taskStatus = TASKSTATUS_PENDING;
@@ -85,8 +87,8 @@ public class Task {
 	
 	
 	
-	public Task(String objectID, String actionID, String body, byte taskStatus, AgentConnector connector) {
-		initialize(objectID, actionID, connector, body);
+	public Task(String objectID, String requestingObjectID, String actionID, String body, byte taskStatus, AgentConnector connector) {
+		initialize(objectID, requestingObjectID, actionID, connector, body);
 		
 		// if wrong status was given, assign the default
 		if (!setTaskStatus(taskStatus)) {
@@ -213,6 +215,9 @@ public class Task {
 		return startTime;
 	}
 	
+	public String getRequestingObjectID() {
+		return requestingObjectID;
+	}
 	
 	public String getObjectID() {
 		return objectID;
@@ -267,7 +272,7 @@ public class Task {
 	/* === PRIVATE METHODS === */
 
 
-	private void initialize(String objectID, String actionID, AgentConnector connector, String body) {
+	private void initialize(String objectID, String requestingObjectID, String actionID, AgentConnector connector, String body) {
 		startTime = 0;
 		endTime = 0;
 		runningTime = 0;
@@ -277,8 +282,9 @@ public class Task {
 		taskID = UUID.randomUUID().toString();		
 		returnValue = null;
 		
-		this.body = body;
 		this.objectID = objectID;
+		this.body = body;
+		this.requestingObjectID = objectID;
 		this.actionID = actionID;
 		this.connector = connector;
 	}

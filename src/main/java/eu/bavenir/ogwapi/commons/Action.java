@@ -111,9 +111,6 @@ public class Action {
 		timerForTaskScheduling.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				
-				// TODO delete after test
-				System.out.println("Timer1: scheduling tasks.");
 				workThroughTasks();
 				
 			}
@@ -126,11 +123,7 @@ public class Action {
 		timerForReturnValues.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				
-				// TODO delete after test
-				System.out.println("Timer2: attempting to purge outdated return values.");
 				purgeOutdatedReturnValues();
-				
 			}
 		}, TIMER2_START, MINUTE);
 		
@@ -141,9 +134,6 @@ public class Action {
 		timerForPendingTasks.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				
-				// TODO delete after test
-				System.out.println("Timer3: attempting to purge timed out pending tasks.");				
 				purgeTimedOutPendingTasks();
 				
 			}
@@ -244,7 +234,7 @@ public class Action {
 	
 	
 	// start
-	public String createNewTask(String objectID, String body) {
+	public String createNewTask(String requestingObjectID, String body) {
 		
 		if (pendingTasks.size() >= maxNumberOfPendingTasks) {
 			
@@ -255,7 +245,7 @@ public class Action {
 		}
 		
 		// start a task in a default pending status
-		Task task = new Task(objectID, actionID, body, connector);
+		Task task = new Task(this.objectID, requestingObjectID, actionID, body, connector);
 		
 		pendingTasks.add(task);
 		

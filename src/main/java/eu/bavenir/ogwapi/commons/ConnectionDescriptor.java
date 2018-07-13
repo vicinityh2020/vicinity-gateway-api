@@ -1266,6 +1266,7 @@ public class ConnectionDescriptor {
 		// be possible
 		if (action == null) {
 			action = new Action (config, this.objectID, actionID, agentConnector);
+			providedActions.add(action);
 		}
 		
 		String statusString;
@@ -1488,6 +1489,12 @@ public class ConnectionDescriptor {
 	
 	
 	private Action searchForAction(String actionID) {
+		
+		// TODO remove
+		for (Action action : providedActions) {
+			System.out.println("List of actions: " + action.getActionID());
+		}
+		
 		// search for given action
 		
 		for (Action action : providedActions) {

@@ -247,7 +247,10 @@ public class RestAgentConnector extends AgentConnector {
 		
 		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
-		return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
+		// TODO remove
+		//return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
+		return performTestOperation(OPERATION_POST, fullEndpointUrl, requestBody);
+		
 	}
 
 
@@ -260,7 +263,9 @@ public class RestAgentConnector extends AgentConnector {
 		
 		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
-		return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
+		// TODO remove
+		//return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
+		return performTestOperation(OPERATION_DELETE, fullEndpointUrl, null);
 	}
 	
 	
@@ -319,28 +324,18 @@ public class RestAgentConnector extends AgentConnector {
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = null;
 		
-		// TODO remove
-		System.out.println("!!!DEBUGGING: Operation code: " + operationCode + "; Assembled URL: " + fullUrl + "; Request body: " + body);
-		
-		
 		try {
 			
 			switch (operationCode){
 			
 			case OPERATION_GET:
-				
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Operation is GET. Making a request, waiting for response.");
-				
+			
 				// parameters
 				responseRepresentation = clientResource.get();
 				break;
 				
 			case OPERATION_POST:
-				
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Operation is POST. Making a request, waiting for response.");
-				
+			
 				// this should always be json string
 				if (body != null){
 					responseRepresentation = clientResource.post(new JsonRepresentation(body), 
@@ -352,9 +347,6 @@ public class RestAgentConnector extends AgentConnector {
 				break;
 				
 			case OPERATION_PUT:
-				
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Operation is PUT. Making a request, waiting for response.");
 				
 				// this should always be json string
 				
@@ -368,10 +360,6 @@ public class RestAgentConnector extends AgentConnector {
 				break;
 				
 			case OPERATION_DELETE:
-				
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Operation is DELETE. Making a request, waiting for response.");
-				
 				responseRepresentation = clientResource.delete();
 				break;
 				
@@ -381,13 +369,8 @@ public class RestAgentConnector extends AgentConnector {
 				
 				responseRepresentation.write(writer);
 				response.setResponseBody(writer.toString());
-				
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Response arrived with NOT-NULL body. Response body: " + writer.toString());
-			} else {
-				// TODO remove
-				System.out.println("!!!DEBUGGING: Response arrived with NULL body!");
-			}
+
+			} 
 			
 		} catch (ResourceException | IOException e) {
 			
@@ -395,16 +378,22 @@ public class RestAgentConnector extends AgentConnector {
 
 		} finally {
 			
-			// TODO remove
-			System.out.println("!!!DEBUGGING: Client responded with code: " + clientResource.getStatus().getCode());
-
-			// TODO remove
-			System.out.println("!!!DEBUGGING: Reason for the code: " + clientResource.getStatus().getReasonPhrase());
-			
 			response.setResponseCode(clientResource.getStatus().getCode());
 			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
 		}
 
+		return response;
+	}
+	
+	
+	private NetworkMessageResponse performTestOperation (byte operationCode, String fullUrl, String body) {
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		
+		response.setResponseCode(200);
+		response.setResponseCodeReason("OK");
+		response.setResponseBody("Test reply. Url: " + fullUrl);
+		
 		return response;
 	}
 	
