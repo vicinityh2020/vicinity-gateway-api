@@ -137,10 +137,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 		// get the new status
 		String newStatus = getQueryValue(PARAM_STATUS);
 		
-		// TODO delete after test
-		System.out.println("!!!New status from the request: " + newStatus);
-		
-		
 		// get the json
 		String returnValue = null;
 		try {

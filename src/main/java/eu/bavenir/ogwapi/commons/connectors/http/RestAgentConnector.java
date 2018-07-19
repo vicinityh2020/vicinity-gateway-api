@@ -201,10 +201,7 @@ public class RestAgentConnector extends AgentConnector {
 		NetworkMessageResponse response;
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-		// TODO remove
-		System.out.println("!!!DEBUGGING: A request to set object property arrived, request ID: " + requestMessage.getRequestId());
-		
-		
+	
 		// finalise the URL
 		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
 		
@@ -246,10 +243,8 @@ public class RestAgentConnector extends AgentConnector {
 		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
 		
 		logger.finest("Assembled URL: " + fullEndpointUrl);
-		
-		// TODO remove
-		//return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
-		return performTestOperation(OPERATION_POST, fullEndpointUrl, requestBody);
+
+		return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
 		
 	}
 
@@ -263,9 +258,7 @@ public class RestAgentConnector extends AgentConnector {
 		
 		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
-		// TODO remove
-		//return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
-		return performTestOperation(OPERATION_DELETE, fullEndpointUrl, null);
+		return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
 	}
 	
 	
@@ -386,6 +379,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 	
 	
+	/*
+	 * Very handy testing method that can be used instead of performOperation. This one does not rely on 
+	 * functional agent and always returns positive news.
 	private NetworkMessageResponse performTestOperation (byte operationCode, String fullUrl, String body) {
 		
 		NetworkMessageResponse response = new NetworkMessageResponse(config);
@@ -396,6 +392,7 @@ public class RestAgentConnector extends AgentConnector {
 		
 		return response;
 	}
+	*/
 	
 	
 }

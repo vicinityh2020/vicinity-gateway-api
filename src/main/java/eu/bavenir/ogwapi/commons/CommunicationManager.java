@@ -122,7 +122,7 @@ public class CommunicationManager {
 	// ADMINISTRATION METHODS - not directly related to interfaces
 	
 	/**
-	 * Retrieves the object IDs that has open connections to network via this ConnectionManager. 
+	 * Retrieves the object IDs that has open connections to network via this CommunicationManager. 
 	 * Based on these strings, the respective connections can be retrieved from the connection descriptor pool.
 	 * 
 	 * @return Set of object IDs. 
@@ -148,6 +148,11 @@ public class CommunicationManager {
 	 * @return True if descriptor exists and the connection is established.
 	 */
 	public boolean isConnected(String objectID){
+		
+		if (objectID == null || objectID.isEmpty()) {
+			//logger.warning(");
+		}
+		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor != null){
@@ -312,6 +317,21 @@ public class CommunicationManager {
 			return null;
 		} 
 		
+		if (destinationObjectID == null){
+			logger.warning("Error when getting property of remote object. Destination object ID is null. "
+					+ "Source object: '" + objectID + "'.");
+			
+			return null;
+		}
+		
+		if (propertyID == null){
+			logger.warning("Error when getting property of remote object. The property name is null. "
+					+ "Source object: '" + objectID + "', destination object: '" + destinationObjectID);
+			
+			return null;
+		}
+		
+		
 		return descriptor.getPropertyOfRemoteObject(destinationObjectID, propertyID);
 		
 	}
@@ -327,6 +347,24 @@ public class CommunicationManager {
 			
 			return null;
 		} 
+		
+		if (destinationObjectID == null){
+			logger.warning("Error when setting property of remote object. Destination object ID is null. "
+					+ "Source object: '" + objectID + "'.");
+			
+			return null;
+		}
+		
+		if (propertyID == null){
+			logger.warning("Error when setting property of remote object. The property name is null. "
+					+ "Source object: '" + objectID + "', destination object: '" + destinationObjectID);
+			
+			return null;
+		}
+		
+		if (body == null) {
+			
+		}
 		
 		return descriptor.setPropertyOfRemoteObject(destinationObjectID, propertyID, body);
 	}
@@ -359,6 +397,8 @@ public class CommunicationManager {
 			
 			return null;
 		}
+		
+		
 		
 		return descriptor.updateTaskStatus(actionID, newStatus, returnValue);
 	}
@@ -596,6 +636,25 @@ public class CommunicationManager {
 	
 	
 	// QUERY INTERFACE
+	
+	public String performSparqlSearch(String sourceObjectID, String sparqlQuery) {
+		
+		if (sourceObjectID == null || sourceObjectID.isEmpty() || sparqlQuery == null || sparqlQuery.isEmpty()) {
+			logger.warning("Method parameters can't be null nor empty.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectID);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectID + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.performSparqlQuery(sparqlQuery);
+	}
 	
 	
 	

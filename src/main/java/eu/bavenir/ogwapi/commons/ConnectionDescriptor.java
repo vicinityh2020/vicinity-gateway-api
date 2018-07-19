@@ -20,6 +20,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
+import eu.bavenir.ogwapi.commons.search.SparqlQuery;
 
 
 /*
@@ -84,6 +85,10 @@ public class ConnectionDescriptor {
 	private XMLConfiguration config;
 	private Logger logger;
 	
+	// sparql query search engine
+	private SparqlQuery sparql;
+	
+	
 	// the thing that communicates with agent
 	private AgentConnector agentConnector;
 	
@@ -111,11 +116,18 @@ public class ConnectionDescriptor {
 	 */
 	public ConnectionDescriptor(String objectID, String password, XMLConfiguration config, Logger logger){
 		
+		
+		
+		// TODO this all should probably happen after successful login, so it does not use resources for nothing
+		
 		this.objectID = objectID;
 		this.password = password;
 		
 		this.config = config;
 		this.logger = logger;
+		
+		sparql = new SparqlQuery(this, logger);
+		
 		
 		// TODO decide what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);
@@ -127,6 +139,8 @@ public class ConnectionDescriptor {
 		subscribedEventChannels = new HashSet<Subscription>();
 		
 		providedActions = new HashSet<Action>();
+		
+		
 		
 		
 		// build new connection
@@ -921,6 +935,17 @@ public class ConnectionDescriptor {
 			logger.warning("Invalid message received from the network.");
 		}
 		
+	}
+	
+	
+	
+	public String performSparqlQuery(String query) {
+		
+		if (query == null) {
+			return null;
+		}
+		
+		return sparql.performQuery(query);
 	}
 	
 	

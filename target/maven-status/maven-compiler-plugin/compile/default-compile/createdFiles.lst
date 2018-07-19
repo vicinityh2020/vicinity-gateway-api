@@ -27,6 +27,7 @@ eu/bavenir/ogwapi/restapi/services/ObjectsOidPropertiesPid.class
 eu/bavenir/ogwapi/restapi/services/AgentsAgidObjects.class
 eu/bavenir/ogwapi/commons/Action$3.class
 eu/bavenir/ogwapi/commons/connectors/http/RestAgentConnector.class
+eu/bavenir/ogwapi/commons/search/SparqlQuery.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidProperties.class
 eu/bavenir/ogwapi/commons/EventChannel.class
 eu/bavenir/ogwapi/commons/messages/NetworkMessageEvent.class
