@@ -3,7 +3,7 @@
   
 	<groupId>eu.bavenir</groupId>
 	<artifactId>OpenGatewayAPI</artifactId>
-	<version>0.5</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 
 	<name>OpenGatewayAPI</name>
@@ -74,42 +74,42 @@
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-core</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-extensions</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-im</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-java7</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-resolver-javax</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-sasl-javax</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-tcp</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-debug</artifactId>
-			<version>4.2.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		
 		<!-- Apache Commons Configuration -->

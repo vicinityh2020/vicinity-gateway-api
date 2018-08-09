@@ -18,7 +18,7 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 public class SparqlQuery {
 
 	
-	private static final String GWAPI_SERVICES_URL = "vic.org";
+	private static final String GWAPI_SERVICES_URL = "http://gws.vicinity.linkeddata.es/";
 	
 
 	// this is necessary to send requests to all neighbours

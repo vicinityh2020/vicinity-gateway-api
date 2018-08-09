@@ -221,7 +221,7 @@ public class StatusMessage {
 	public StatusMessage(boolean error, String attribute, String value) {
 		initializeBuilders();
 		
-		error = this.error;
+		this.error = error;
 		
 		addMessage(attribute,value);
 	}

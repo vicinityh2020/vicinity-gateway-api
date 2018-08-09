@@ -150,7 +150,7 @@
 		
 		Default is 30 seconds. 
 		-->
-		<messageTimeout>30</messageTimeout>
+		<messageTimeout>60</messageTimeout>
 	</xmpp>
 	
 	<api>

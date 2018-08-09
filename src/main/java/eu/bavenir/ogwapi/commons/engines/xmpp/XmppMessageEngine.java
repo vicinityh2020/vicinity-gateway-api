@@ -177,8 +177,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 			return false;
 		}
 		
-		// TODO test whether this should be done only once, for effectiveness - also for the roster
-		// spawn a chat manager and associate a call for incoming messages
 		chatManager = ChatManager.getInstanceFor(connection);
 		chatManager.addIncomingListener(new IncomingChatMessageListener(){
 			
@@ -191,6 +189,23 @@ public class XmppMessageEngine extends CommunicationEngine {
 		
 		// spawn a roster and associate calls for changes in roster - if set
 		roster = Roster.getInstanceFor(connection);
+		
+		
+		// TODO delete after test
+		if (roster.isRosterLoadedAtLogin()) {
+			System.out.println("Roster is set to be loaded at login.");
+		} else {
+			System.out.println("Roster is not set to be loaded at login.");
+		}
+		
+		// TODO delete after test
+		if (roster.isLoaded()) {
+			System.out.println("Roster is loaded. 1");
+		} else {
+			System.out.println("Roster is not loaded yet. 1");
+		}
+		
+		
 		
 		roster.addRosterListener(new RosterListener() {
 			@Override
@@ -214,10 +229,31 @@ public class XmppMessageEngine extends CommunicationEngine {
 			}
 		});
 		
+		
+		// TODO delete after test
+		if (roster.isLoaded()) {
+			System.out.println("Roster is loaded. 2 ");
+		} else {
+			System.out.println("Roster is not loaded yet. 2");
+		}
+		
+		
 		try {
+			
+			// TODO delete after test
+			System.out.println("Roster is loading artificaly.");
+			
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
+		}
+		
+		
+		// TODO delete after test
+		if (roster.isLoaded()) {
+			System.out.println("Roster is loaded. 3");
+		} else {
+			System.out.println("Roster is not loaded yet. 3");
 		}
 		
 		
@@ -314,11 +350,29 @@ public class XmppMessageEngine extends CommunicationEngine {
 			return false;
 		}
 
+		
+		// TODO delete after test
+		if (roster.isLoaded()) {
+			System.out.println("Roster is loaded when sending message.");
+		} else {
+			System.out.println("Roster is not loaded yet when sending message.");
+		}
+		
+		
+		
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 		}
+		
+		// TODO delete this after test
+		System.out.println("Roster for " + connection.getUser() + ", while trying to send message to " + destinationObjectID + ":");
+		Collection<RosterEntry> entries = roster.getEntries();
+		for (RosterEntry entry : entries) {
+			System.out.println(entry.getJid().getLocalpartOrNull().toString());
+		}
+		
 		
 		// check whether the destination is online
 		Presence presence = roster.getPresence(jid);
@@ -441,17 +495,18 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
 		
-		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
-		*/
+		
+		System.out.println("Roster entries added");
 
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 		
 	}
 	
@@ -462,17 +517,19 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were deleted.
 	 */
 	private void processRosterEntriesDeleted(Collection<Jid> addresses){
-		/*
+		
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
-		*/
 		
+		System.out.println("Roster entries deleted");
+		
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 		
 	}
 	
@@ -483,17 +540,19 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were updated.
 	 */
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
-		/*
+
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
-		*/
 		
+		System.out.println("Roster entries updated");
+		
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 		
 	}
 	
@@ -504,6 +563,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * @param presence A new {@link org.jivesoftware.smack.packet.Presence presence}.
 	 */
 	private void processRosterPresenceChanged(Presence presence) {
-		//System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
+		System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
 	}
 }
