@@ -480,6 +480,46 @@ public class ConnectionDescriptor {
 			return null;
 		}
 		
+		// when the owner wants to check its own status, there is no need to send it across the network
+		if (objectID.equals(this.objectID)) {
+
+			EventChannel eventChannel = searchForEventChannel(eventID);
+			StatusMessage statusMessage;
+			
+			if (eventChannel == null) {
+				logger.info("Received a request to provide status of invalid event channel. Request came from: " + this.objectID);
+				
+				// responding with error
+				// remember! we are going to include the outcome of the operation as the status message
+				statusMessage = new StatusMessage(
+						true, 
+						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+						new String("Invalid event channel specified."));
+
+			} else {
+				
+				logger.fine("Received a request to provide status of event channel " + eventID + " from " + this.getObjectID() + ".");
+				
+				if (eventChannel.isActive()) {
+					statusMessage = new StatusMessage(
+							false, 
+							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+							EventChannel.STATUS_STRING_ACTIVE);
+				} else {
+					statusMessage = new StatusMessage(
+							false, 
+							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
+							EventChannel.STATUS_STRING_INACTIVE);
+				}
+				
+			}
+			
+			return statusMessage.buildMessage().toString();
+		} 
+		
+		
+		// otherwise continue as normal
+		
 		NetworkMessageRequest request = new NetworkMessageRequest(config);
 		
 		// message to be returned
