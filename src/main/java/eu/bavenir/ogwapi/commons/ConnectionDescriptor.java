@@ -217,6 +217,8 @@ public class ConnectionDescriptor {
 		request.setRequestOperation(NetworkMessageRequest.OPERATION_STARTACTION);
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
 		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
+		request.setRequestBody(body);
+		
 		
 		// message to be returned
 		String statusMessageText;
@@ -588,10 +590,10 @@ public class ConnectionDescriptor {
 		if (subscription != null) {
 			if (subscription.subscriptionExists(eventID)) {
 				statusMessageText = 
-						new String("Can't subscribe to " + destinationObjectID + " event channel " + eventID + ". Already subscribed.");
+						new String("Already subscribed to " + destinationObjectID + " event channel " + eventID + ".");
 				logger.info(statusMessageText);
 				
-				StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
+				StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
 						statusMessageText);
 				
 				return statusMessage.buildMessage().toString();

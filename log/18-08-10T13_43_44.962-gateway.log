@@ -1,0 +1,16 @@
+Aug 10, 2018 1:43:44 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/18-08-10T13_43_44.962-gateway.log
+Aug 10, 2018 1:43:44 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+Aug 10, 2018 1:43:44 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+Aug 10, 2018 1:43:45 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Aug 10, 2018 1:43:45 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Aug 10, 2018 1:43:45 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+Aug 10, 2018 1:43:45 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+Aug 10, 2018 1:43:45 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.

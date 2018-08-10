@@ -287,6 +287,9 @@ public class Task {
 		this.requestingObjectID = objectID;
 		this.actionID = actionID;
 		this.connector = connector;
+		
+		// TODO delete after test
+		System.out.println("BODY: " + body);
 	}
 	
 	
