@@ -29,6 +29,8 @@ public class App {
 
 	/* === CONSTANTS === */
 	
+	// TODO this needs to go to the engine...
+	
 	/**
 	 * Name of the configuration parameter for a domain served by the XMPP server.
 	 */
@@ -38,7 +40,7 @@ public class App {
 	 * Default value of {@link #CONFIG_PARAM_XMPPDOMAIN CONFIG_PARAM_XMPPDOMAIN} configuration parameter. This value is
 	 * taken into account when no suitable value is found in the configuration file. 
 	 */
-	public static final String CONFIG_DEF_XMPPDOMAIN = "vicinity.eu";
+	public static final String CONFIG_DEF_XMPPDOMAIN = "bavenir.eu";
 	
 	/**
 	 * Path to configuration file.

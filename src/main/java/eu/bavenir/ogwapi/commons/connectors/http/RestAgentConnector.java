@@ -44,37 +44,50 @@ public class RestAgentConnector extends AgentConnector {
 	/* === CONSTANTS === */
 	
 	/**
+	 * Name of the configuration parameter for whether the REST Agent Connector uses simulated calls (such configuration
+	 * is useful during debugging, when no real REST Agent is available or operational and connectivity of this
+	 * OGWAPI needs to be tested). 
+	 */
+	private static final String CONFIG_PARAM_CONNECTORRESTDUMMY = "connector.restAgentConnector.useDummyCalls";
+	
+	/**
 	 * Name of the configuration parameter for whether Agent utilises HTTPS or HTTP.
 	 */
-	private static final String CONFIG_PARAM_APIAGENTUSEHTTPS = "api.agentUseHttps";
+	private static final String CONFIG_PARAM_CONNECTORRESTUSEHTTPS = "connector.restAgentConnector.useHttps";
 	
 	/**
 	 * Name of the configuration parameter for Agent IP.
 	 */
-	private static final String CONFIG_PARAM_APIAGENTIP = "api.agentIP";
+	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIP";
 	
 	/**
 	 * Name of the configuration parameter for Agent port.
 	 */
-	private static final String CONFIG_PARAM_APIAGENTPORT = "api.agentPort";
+	private static final String CONFIG_PARAM_CONNECTORRESTPORT = "connector.restAgentConnector.agentPort";
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_APIAGENTUSEHTTPS CONFIG_PARAM_APIAGENTUSEHTTPS} configuration parameter. 
+	 * Default value of {@link #CONFIG_PARAM_CONNECTORRESTDUMMY CONFIG_PARAM_APIRESTAGENTDUMMY} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final boolean CONFIG_DEF_APIRESTAGENTDUMMY = false;
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_CONNECTORRESTUSEHTTPS CONFIG_PARAM_APIAGENTUSEHTTPS} configuration parameter. 
 	 * This value is taken into account when no suitable value is found in the configuration file.
 	 */
 	private static final boolean CONFIG_DEF_APIAGENTUSEHTTPS = false;
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_APIAGENTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
+	 * Default value of {@link #CONFIG_PARAM_CONNECTORRESTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
 	 * taken into account when no suitable value is found in the configuration file.
 	 */
-	private static final String CONFIG_DEF_APIAGENTPORT = "80";
+	private static final String CONFIG_DEF_APIRESTAGENTPORT = "9997";
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_APIAGENTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
+	 * Default value of {@link #CONFIG_PARAM_CONNECTORRESTIP CONFIG_PARAM_APIAGENTIP} configuration parameter. This value is
 	 * taken into account when no suitable value is found in the configuration file.
 	 */
-	private static final String CONFIG_DEF_APIAGENTIP = "localhost";
+	private static final String CONFIG_DEF_APIRESTAGENTIP = "localhost";
 	
 	/**
 	 * The beginning of the Agent service URL when using HTTP protocol. 
@@ -116,6 +129,9 @@ public class RestAgentConnector extends AgentConnector {
 	// for the sake of making it easier to send the info about HTTPS into the logs
 	private boolean useHttps;
 	
+	// REST agent will be using dummy calls
+	private boolean dummyCalls;
+	
 	// this is the agent service URL, without attributes (basically something like http://ip:port/apiname) 
 	private String agentServiceUrl;
 	
@@ -128,13 +144,24 @@ public class RestAgentConnector extends AgentConnector {
 	public RestAgentConnector(XMLConfiguration config, Logger logger){
 		super(config, logger);
 		
-		if (config.getBoolean(CONFIG_PARAM_APIAGENTUSEHTTPS, CONFIG_DEF_APIAGENTUSEHTTPS)){
-			logger.config("HTTPS protocol enabled for Agent communication");
+		if (config.getBoolean(CONFIG_PARAM_CONNECTORRESTDUMMY, CONFIG_DEF_APIRESTAGENTDUMMY)) {
+			logger.config("REST Agent Connector: Dummy payloads enabled, all calls to an Agent via this connector "
+					+ "will be simulated.");
+			dummyCalls = true;
+		} else {
+			logger.config("REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector "
+					+ "will be real.");
+		}
+		
+		if (config.getBoolean(CONFIG_PARAM_CONNECTORRESTUSEHTTPS, CONFIG_DEF_APIAGENTUSEHTTPS)){
+			logger.config("REST Agent Connector: HTTPS protocol enabled for Agent communication.");
 			useHttps = true;
 		} else {
-			logger.config("HTTPS protocol disabled for Agent communication");
+			logger.config("REST Agent Connector: HTTPS protocol disabled for Agent communication.");
 			useHttps = false;
 		}
+		
+		
 		
 		agentServiceUrl = assembleAgentServiceUrl();
 		
@@ -147,8 +174,6 @@ public class RestAgentConnector extends AgentConnector {
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
 		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_EVENTS + "/" + eventID;
-		
-		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
 		return performOperation(OPERATION_PUT, fullEndpointUrl, eventBody);
 	}
@@ -183,8 +208,6 @@ public class RestAgentConnector extends AgentConnector {
 			}
 			
 		}
-		
-		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
 		response = performOperation(OPERATION_GET, fullEndpointUrl, null);
 		
@@ -224,8 +247,6 @@ public class RestAgentConnector extends AgentConnector {
 			}
 		}
 		
-		logger.finest("Assembled URL: " + fullEndpointUrl);
-		
 		response = performOperation(OPERATION_PUT, fullEndpointUrl, requestMessage.getRequestBody());
 		
 		// set the correlation ID 
@@ -241,11 +262,8 @@ public class RestAgentConnector extends AgentConnector {
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
 		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
-		
-		logger.finest("Assembled URL: " + fullEndpointUrl);
 
 		return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
-		
 	}
 
 
@@ -255,8 +273,6 @@ public class RestAgentConnector extends AgentConnector {
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
 		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
-		
-		logger.finest("Assembled URL: " + fullEndpointUrl);
 		
 		return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
 	}
@@ -289,9 +305,9 @@ public class RestAgentConnector extends AgentConnector {
 		
 		String agentServiceUrl = new String(
 				protocol
-				+ config.getString(CONFIG_PARAM_APIAGENTIP, CONFIG_DEF_APIAGENTIP)
+				+ config.getString(CONFIG_PARAM_CONNECTORRESTIP, CONFIG_DEF_APIRESTAGENTIP)
 				+ ":"
-				+ config.getString(CONFIG_PARAM_APIAGENTPORT, CONFIG_DEF_APIAGENTPORT)
+				+ config.getString(CONFIG_PARAM_CONNECTORRESTPORT, CONFIG_DEF_APIRESTAGENTPORT)
 				+ AGENT_API_STRING
 		);
 		
@@ -309,6 +325,13 @@ public class RestAgentConnector extends AgentConnector {
 	 * @return {@link NetworkMessageResponse Response} from the Agent. 
 	 */
 	private NetworkMessageResponse performOperation(byte operationCode, String fullUrl, String body){
+		
+		if (dummyCalls) {
+			return performDummyOperation(operationCode, fullUrl, body);
+		}
+		
+		logger.finest("REST Agent Connector: Operation code: " + operationCode);
+		logger.finest("REST Agent Connector: Assembled URL: " + fullUrl);
 		
 		NetworkMessageResponse response = new NetworkMessageResponse(config);
 		
@@ -329,25 +352,30 @@ public class RestAgentConnector extends AgentConnector {
 				
 			case OPERATION_POST:
 			
-				// this should always be json string
 				if (body != null){
+					logger.finest("REST Agent Connector: POST request contains following body: " + body);
+					
+					// this should always be json string
 					responseRepresentation = clientResource.post(new JsonRepresentation(body), 
 							MediaType.APPLICATION_JSON);
 				} else {
-					logger.warning("POST request contains no body.");
+					logger.finest("REST Agent Connector: POST request contains no body.");
+					responseRepresentation = clientResource.post(null);
 				}
 				
 				break;
 				
 			case OPERATION_PUT:
-				
-				// this should always be json string
-				
+
 				if (body != null){
+					logger.finest("REST Agent Connector: PUT request contains following body: " + body);
+					
+					// this should always be json string
 					responseRepresentation = clientResource.put(new JsonRepresentation(body), 
 							MediaType.APPLICATION_JSON);
 				} else {
-					logger.warning("PUT request contains no body. Aborting.");
+					logger.warning("REST Agent Connector: PUT request contains no body.");
+					responseRepresentation = clientResource.put(null);
 				}
 				
 				break;
@@ -381,18 +409,19 @@ public class RestAgentConnector extends AgentConnector {
 	
 	/*
 	 * Very handy testing method that can be used instead of performOperation. This one does not rely on 
-	 * functional agent and always returns positive news.
-	private NetworkMessageResponse performTestOperation (byte operationCode, String fullUrl, String body) {
+	 * functional agent and always returns positive results.
+	*/
+	private NetworkMessageResponse performDummyOperation (byte operationCode, String fullUrl, String body) {
 		
 		NetworkMessageResponse response = new NetworkMessageResponse(config);
 		
 		response.setResponseCode(200);
 		response.setResponseCodeReason("OK");
-		response.setResponseBody("Test reply. Url: " + fullUrl);
+		response.setResponseBody("REST Agent Connector: Dummy reply from REST Agent Connector. URL: " + fullUrl);
 		
 		return response;
 	}
-	*/
+	
 	
 	
 }

@@ -7,6 +7,7 @@ import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
+import org.restlet.resource.Patch;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -79,6 +80,11 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private static final String UPDATE_SERVICE = "items/update";
 	
+	/**
+	 * Modify service string.
+	 */
+	private static final String MODIFY_SERVICE = "items/modify";
+	
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -107,7 +113,7 @@ public class AgentsAgidObjects extends ServerResource {
 	
 	
 	/**
-	 * Register the IoT object(s) of the underlying eco system e.g. devices, VA service.
+	 * Register the IoT object(s) of the underlying eco-system e.g. devices, VA service.
 	 * 
 	 * @param entity Representation of the incoming JSON. List of IoT thing descriptions that are to be registered 
 	 * (from request).
@@ -170,6 +176,30 @@ public class AgentsAgidObjects extends ServerResource {
 	}
 	
 	
+	@Patch("json")
+	public Representation modify(Representation entity) {
+		
+		String attrAgid = getAttribute(ATTR_AGID);
+		
+		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		
+		if (attrAgid == null){
+			logger.info("AGID: " + attrAgid + " Invalid Agent ID.");
+			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+					"Invalid Agent ID.");
+		}
+		
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.info("AGID: " + attrAgid + " Invalid object descriptions.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid object descriptions");
+		}
+		
+		return modifyObjects(entity, logger);
+	}
+	
+	
 	// === PRIVATE METHODS ===
 	
 	
@@ -192,6 +222,20 @@ public class AgentsAgidObjects extends ServerResource {
 		
 		return responseRepresentation;
 	}
+	
+	
+	private Representation modifyObjects(Representation json, Logger logger){
+		
+		String enpointUrl = SERVER_URL + MODIFY_SERVICE;
+		
+		ClientResource clientResource = new ClientResource(enpointUrl);
+
+		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
+		
+		return responseRepresentation;
+	}
+	
+	
 	
 	
 	/**

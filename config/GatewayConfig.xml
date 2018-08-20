@@ -2,7 +2,26 @@
 <configuration>
 
 	<general>
-
+		<!--
+		URL/IP address of the communication server. If not set, the application exits.
+		-->
+		<server>vicinity.bavenir.eu</server>
+		
+		<!--
+		Port of the communication server.
+		
+		Defaults to 5222.
+		-->
+		<port>5222</port>
+		
+		<!-- 
+		Setting this parameter to true will enable encryption of communication. The policy is to
+		try the strongest mechanisms first.
+		
+		Setting it to false will disable the encryption (not 
+		recommended, only for debug purposes). Default is true.  
+		-->
+		<security>false</security>
 		
 	</general>
 
@@ -74,7 +93,7 @@
 		FINEST
 		
 		It corresponds with the levels used by class java.util.logging.Logger,
-		which the Vicinity Gateway utilizes for event logging. This value can also
+		which the Vicinity Gateway utilises for event logging. This value can also
 		be set to OFF, which will disable the logging mechanism completely. 
 		-->
 		<level>FINEST</level>
@@ -92,33 +111,11 @@
 
 
 	<xmpp>
-	
-		<!--
-		URL/IP address of XMPP server. If not set, the application exits.
-		-->
-		<server>commserver.bavenir.eu</server>
-		<!-- <server>localhost</server> -->
 		
 		<!--
-		Defaults to 5222 if not set. Server port uses STARTTLS.
+		XMPP domain that is served by the server. Defaults to bavenir.eu.
 		-->
-		<port>5222</port>
-		
-		<!-- 
-		Setting this parameter to true will enable encryption of communication. The policy is to
-		try the strongest mechanisms first. Not having a valid certificate 
-		on server will always fail the connection.
-		
-		Setting it to false will disable the security all together (not 
-		recommended, only for debug purposes). Connecting to a server that 
-		accepts only TLS will fail the connection. Default is true.  
-		-->
-		<security>false</security>
-		
-		<!--
-		XMPP domain that is served by the server. Defaults to vicinity.eu.
-		-->
-		<domain>vicinity.eu</domain>
+		<domain>bavenir.eu</domain>
 		
 		<!--
 		Enables debugging of the XMPP communication between the Gateway and the
@@ -172,9 +169,9 @@
 		Authentication realm for the RESTLET BEARER authentication schema. It 
 		is only taken into account if the authMethod is set to bearer.
 		
-		Defaults to vicinity.eu.
+		Defaults to bavenir.eu.
 		-->
-		<authRealm>vicinity.eu</authRealm>
+		<authRealm>bavenir.eu</authRealm>
 		
 		<!--
 		Authentication method for objects logging into the Gateway API. Following
@@ -195,24 +192,48 @@
 		
 		-->
 		<authMethod>basic</authMethod>
-		
-		
-		<!--
-		If the agent listens on a different interface (or a different machine),
-		it is necessary to set its IP address with this parameter.
-		
-		Defaults to localhost.
-		-->
-		<!-- <agentIP>160.40.206.250</agentIP>  -->
-		<agentIP>localhost</agentIP>
-		
-		<!-- 
-		Port on which the adapter listens.
-		
-		Defaults to 9997.
-		-->
-		<agentPort>9997</agentPort>
-		
+
 	</api>
+	
+	
+	<connector>
+		<restAgentConnector>
+		
+			<!--
+			If there is a need to test the OGWAPI responsiveness to external requests
+			without making real calls to local REST Agent, setting this parameter 
+			to 'true' will make OGWAPI perform only simulated calls.
+			
+			Defaults to false. 
+			-->
+			<useDummyCalls>false</useDummyCalls>
+			
+			<!-- 
+			Whether or not the OGWAPI should attempt to use HTTPS to connect to the REST
+			Agent.
+			
+			Defaults to false.
+			-->
+			<useHttps>false</useHttps>
+			
+			<!--
+			If the REST Agent listens on a different interface (or a different machine),
+			it is necessary to set its IP address with this parameter.
+			
+			Defaults to localhost.
+			-->
+			<agentIP>localhost</agentIP>
+			
+			<!-- 
+			Port on which the REST Agent listens.
+		
+			Defaults to 9997.
+			-->
+			<agentPort>9997</agentPort>
+			
+		</restAgentConnector>
+	
+	</connector>
+	
 
 </configuration>

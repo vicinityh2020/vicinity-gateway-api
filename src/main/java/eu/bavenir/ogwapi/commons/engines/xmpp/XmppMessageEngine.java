@@ -63,38 +63,37 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
 	
 	/**
-	 * Name of the configuration parameter for XMPP server URL.
+	 * Name of the configuration parameter for server URL.
 	 */
-	private static final String CONFIG_PARAM_XMPPSERVER = "xmpp.server";
+	private static final String CONFIG_PARAM_SERVER = "general.server";
 	
 	/**
-	 * Name of the configuration parameter for XMPP server port.
+	 * Name of the configuration parameter for server port.
 	 */
-	private static final String CONFIG_PARAM_XMPPPORT = "xmpp.port";
+	private static final String CONFIG_PARAM_PORT = "general.port";
 	
-	// TODO put it back into config file
 	/**
 	 * Name of the configuration parameter for enabling security.
 	 */
-	private static final String CONFIG_PARAM_XMPPSECURITY = "xmpp.security";
+	private static final String CONFIG_PARAM_SECURITY = "general.security";
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPSERVER CONFIG_PARAM_XMPPSERVER} configuration parameter. This value is
+	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
 	 * taken into account when no suitable value is found in the configuration file. 
 	 */
-	private static final String CONFIG_DEF_XMPPSERVER = "";
+	private static final String CONFIG_DEF_SERVER = "";
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPPORT CONFIG_PARAM_XMPPPORT} configuration parameter. This value is 
+	 * Default value of {@link #CONFIG_PARAM_PORT CONFIG_PARAM_PORT} configuration parameter. This value is 
 	 * taken into account when no suitable value is found in the configuration file. 
 	 */
-	private static final int CONFIG_DEF_XMPPPORT = 5222;
+	private static final int CONFIG_DEF_PORT = 5222;
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPSECURITY CONFIG_PARAM_XMPPSECURITY} configuration parameter. This value
+	 * Default value of {@link #CONFIG_PARAM_SECURITY CONFIG_PARAM_SECURITY} configuration parameter. This value
 	 * is taken into account when no suitable value is found in the configuration file.
 	 */
-	private static final boolean CONFIG_DEF_XMPPSECURITY = true;
+	private static final boolean CONFIG_DEF_SECURITY = true;
 	
 	/**
 	 * This is the resource part of the full JID used in the communication. It is necessary to set it and not leave it
@@ -421,10 +420,10 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private AbstractXMPPConnection buildNewConnection(String xmppUsername, String xmppPassword){
 		// we build a new connection here
 		
-		String xmppServer = config.getString(CONFIG_PARAM_XMPPSERVER, CONFIG_DEF_XMPPSERVER);
-		int xmppPort = config.getInt(CONFIG_PARAM_XMPPPORT, CONFIG_DEF_XMPPPORT);
+		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
+		int xmppPort = config.getInt(CONFIG_PARAM_PORT, CONFIG_DEF_PORT);
 		String xmppDomain = config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
-		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_XMPPSECURITY, CONFIG_DEF_XMPPSECURITY);
+		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_SECURITY, CONFIG_DEF_SECURITY);
 		
 		logger.config("Creating a new connection to XMPP server '" + xmppServer + ":" + xmppPort + "' as '" 
 						+ xmppUsername + "@" + xmppDomain + "'");
