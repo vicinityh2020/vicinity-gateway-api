@@ -2,6 +2,7 @@ package eu.bavenir.ogwapi.restapi.services;
 
 import java.util.logging.Logger;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
@@ -44,14 +45,28 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 	
 
 	/**
+	 * Name of the configuration parameter for server URL.
+	 */
+	private static final String CONFIG_PARAM_SERVER = "general.server";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
+	 */
+	private static final String CONFIG_DEF_SERVER = "";
+
+	/**
 	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
 	 * SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 + someOtherAttribute + etc...
 	 * 
 	 *  Example for discovery service:
-	 *  SERVER_URL + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
+	 *  SERVER_PROTOCOL + SERVER + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
 	 *  
 	 */
-	private static final String SERVER_URL = "https://vicinity.bavenir.eu:3000/commServer/";
+	private static final String SERVER_PROTOCOL = "https://"; 
+	
+	
+	private static final String SERVER_PART2 = ":3000/commServer/";
 	
 	
 	/**
@@ -76,6 +91,7 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 		String attrAgid = getAttribute(ATTR_AGID);
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
+		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
 		
 		if (attrAgid == null){
 			logger.info("AGID: " + attrAgid + " Invalid Agent ID.");
@@ -90,7 +106,7 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 					"Invalid object descriptions");
 		}
 		
-		return deleteObjects(entity, logger);
+		return deleteObjects(entity, logger, config);
 	}
 	
 	
@@ -104,9 +120,11 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 	 * @param logger Logger to be used. 
 	 * @return Notification of success or failure.
 	 */
-	private Representation deleteObjects(Representation json, Logger logger){
+	private Representation deleteObjects(Representation json, Logger logger, XMLConfiguration config){
 		
-		String endpointUrl = SERVER_URL + DELETE_SERVICE;
+		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
+		
+		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + DELETE_SERVICE;
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
 		

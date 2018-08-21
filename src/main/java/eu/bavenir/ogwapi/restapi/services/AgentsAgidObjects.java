@@ -234,9 +234,9 @@ public class AgentsAgidObjects extends ServerResource {
 		
 		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
 		
-		String enpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + HEAVYWEIGHTUPDATE_SERVICE;
+		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + HEAVYWEIGHTUPDATE_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(enpointUrl);
+		ClientResource clientResource = new ClientResource(endpointUrl);
 
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
@@ -248,9 +248,9 @@ public class AgentsAgidObjects extends ServerResource {
 		
 		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
 		
-		String enpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + LIGHTWEIGHTUPDATE_SERVICE;
+		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + LIGHTWEIGHTUPDATE_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(enpointUrl);
+		ClientResource clientResource = new ClientResource(endpointUrl);
 
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
@@ -272,9 +272,9 @@ public class AgentsAgidObjects extends ServerResource {
 		
 		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
 		
-		String enpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + REGISTRATION_SERVICE;
+		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + REGISTRATION_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(enpointUrl);
+		ClientResource clientResource = new ClientResource(endpointUrl);
 
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
