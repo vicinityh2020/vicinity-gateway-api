@@ -78,12 +78,12 @@ public class AgentsAgidObjects extends ServerResource {
 	/**
 	 * Update service string.
 	 */
-	private static final String UPDATE_SERVICE = "items/update";
+	private static final String LIGHTWEIGHTUPDATE_SERVICE = "items/update";
 	
 	/**
 	 * Modify service string.
 	 */
-	private static final String MODIFY_SERVICE = "items/modify";
+	private static final String HEAVYWEIGHTUPDATE_SERVICE = "items/modify";
 	
 	
 	
@@ -172,7 +172,7 @@ public class AgentsAgidObjects extends ServerResource {
 					"Invalid object descriptions");
 		}
 		
-		return updateObjects(entity, logger);
+		return heavyweightUpdate(entity, logger);
 	}
 	
 	
@@ -196,7 +196,7 @@ public class AgentsAgidObjects extends ServerResource {
 					"Invalid object descriptions");
 		}
 		
-		return modifyObjects(entity, logger);
+		return lightweightUpdate(entity, logger);
 	}
 	
 	
@@ -212,9 +212,9 @@ public class AgentsAgidObjects extends ServerResource {
 	 * @return The list of approved devices to be registered in agent configuration. Approved devices means only 
 	 * devices, that passed the validation in semantic repository and their instances were created. 
 	 */
-	private Representation updateObjects(Representation json, Logger logger){
+	private Representation heavyweightUpdate(Representation json, Logger logger){
 		
-		String enpointUrl = SERVER_URL + UPDATE_SERVICE;
+		String enpointUrl = SERVER_URL + HEAVYWEIGHTUPDATE_SERVICE;
 		
 		ClientResource clientResource = new ClientResource(enpointUrl);
 
@@ -224,9 +224,9 @@ public class AgentsAgidObjects extends ServerResource {
 	}
 	
 	
-	private Representation modifyObjects(Representation json, Logger logger){
+	private Representation lightweightUpdate(Representation json, Logger logger){
 		
-		String enpointUrl = SERVER_URL + MODIFY_SERVICE;
+		String enpointUrl = SERVER_URL + LIGHTWEIGHTUPDATE_SERVICE;
 		
 		ClientResource clientResource = new ClientResource(enpointUrl);
 
