@@ -190,22 +190,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 		roster = Roster.getInstanceFor(connection);
 		
 		
-		// TODO delete after test
-		if (roster.isRosterLoadedAtLogin()) {
-			System.out.println("Roster is set to be loaded at login.");
-		} else {
-			System.out.println("Roster is not set to be loaded at login.");
-		}
-		
-		// TODO delete after test
-		if (roster.isLoaded()) {
-			System.out.println("Roster is loaded. 1");
-		} else {
-			System.out.println("Roster is not loaded yet. 1");
-		}
-		
-		
-		
 		roster.addRosterListener(new RosterListener() {
 			@Override
 			public void entriesAdded(Collection<Jid> addresses) {
@@ -228,33 +212,11 @@ public class XmppMessageEngine extends CommunicationEngine {
 			}
 		});
 		
-		
-		// TODO delete after test
-		if (roster.isLoaded()) {
-			System.out.println("Roster is loaded. 2 ");
-		} else {
-			System.out.println("Roster is not loaded yet. 2");
-		}
-		
-		
 		try {
-			
-			// TODO delete after test
-			System.out.println("Roster is loading artificaly.");
-			
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 		}
-		
-		
-		// TODO delete after test
-		if (roster.isLoaded()) {
-			System.out.println("Roster is loaded. 3");
-		} else {
-			System.out.println("Roster is not loaded yet. 3");
-		}
-		
 		
 		return true;
 	}
@@ -358,12 +320,12 @@ public class XmppMessageEngine extends CommunicationEngine {
 		}
 		
 		
-		
+		/*
 		try {
 			roster.reloadAndWait();
 		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		}*/
 		
 		// TODO delete this after test
 		System.out.println("Roster for " + connection.getUser() + ", while trying to send message to " + destinationObjectID + ":");
@@ -445,7 +407,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		
 		if (!xmppSecurity) {
 			xmppConfigBuilder.setSecurityMode(SecurityMode.disabled);
-			logger.config("XMPP SECURE CONNECTION IS DISABLED.");
+			logger.config("XMPP secure connection is disabled.");
 		} else {
 			// default is enabled
 			logger.config("XMPP secure connection is enabled.");
@@ -484,9 +446,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		connectionDescriptor.processIncommingMessage(from.getLocalpart().toString(), xmppMessage.getBody());
 	}
 	
-	
-	
-	// TODO make reloading the roster more efficient
+
 	/**
 	 * A callback method called when entries are added into the {@link org.jivesoftware.smack.roster.Roster roster}.
 	 * 
@@ -494,12 +454,14 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
 		
+		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesAdded: " + address.toString());
 		}
 		
 		System.out.println("Roster entries added");
-
+		*/
+		
 		/*
 		try {
 			roster.reloadAndWait();
@@ -517,11 +479,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private void processRosterEntriesDeleted(Collection<Jid> addresses){
 		
+		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesDeleted: " + address.toString());
 		}
 		
 		System.out.println("Roster entries deleted");
+		*/
 		
 		/*
 		try {
@@ -540,11 +504,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
 
+		/*
 		for(Jid address : addresses){
 			System.out.println("processRosterEntriesUpdated: " + address.toString());
 		}
 		
 		System.out.println("Roster entries updated");
+		*/
 		
 		/*
 		try {
@@ -562,6 +528,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * @param presence A new {@link org.jivesoftware.smack.packet.Presence presence}.
 	 */
 	private void processRosterPresenceChanged(Presence presence) {
-		System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
+		//System.out.println("processRosterPresenceChanged - Presence changed: " + presence.getFrom() + " " + presence);
 	}
 }

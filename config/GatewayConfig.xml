@@ -5,7 +5,7 @@
 		<!--
 		URL/IP address of the communication server. If not set, the application exits.
 		-->
-		<server>vicinity.bavenir.eu</server>
+		<server>development.bavenir.eu</server>
 		
 		<!--
 		Port of the communication server.
