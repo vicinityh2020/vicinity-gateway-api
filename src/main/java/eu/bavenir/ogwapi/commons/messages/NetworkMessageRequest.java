@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.Map.Entry;
 
 import javax.json.Json;
@@ -180,9 +181,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	private LinkedHashMap<String, String> attributes = new LinkedHashMap<String, String>();
 	
 	/**
-	 * Linked hash map with parameter names and their values.
+	 * Map with parameter names and their values.
 	 */
-	private LinkedHashMap<String, String> parameters = new LinkedHashMap<String, String>();
+	private Map<String, String> parameters;
 	
 	/**
 	 * Request body. 
@@ -197,9 +198,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * object's construction. The rest of attributes, codes, parameters, etc. need to be filled as needed.  
 	 * 
 	 */
-	public NetworkMessageRequest(XMLConfiguration config){
+	public NetworkMessageRequest(XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
 		
 		messageType = NetworkMessageRequest.MESSAGE_TYPE;
 		
@@ -213,12 +214,15 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * 
 	 * @param json JSON that arrived from the network. 
 	 */
-	public NetworkMessageRequest(JsonObject json, XMLConfiguration config){
+	public NetworkMessageRequest(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
 		
 		// remember the json this message was created from
 		jsonRepresentation = json;
+		
+		// initialise the map for parameters
+		parameters = new LinkedHashMap<String, String>();
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
@@ -329,8 +333,13 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * 
 	 * @return Hash map with parameters.
 	 */
-	public LinkedHashMap<String, String> getParameters() {
+	public Map<String, String> getParameters() {
 		return parameters;
+	}
+	
+	
+	public void setParameters(Map<String, String> parameters) {
+		this.parameters = parameters;
 	}
 	
 	

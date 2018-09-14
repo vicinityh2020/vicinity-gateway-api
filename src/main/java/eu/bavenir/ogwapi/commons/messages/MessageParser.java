@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.commons.messages;
 
 import java.io.StringReader;
+import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -33,10 +34,14 @@ public class MessageParser {
 	/* === FIELDS === */
 	private XMLConfiguration config;
 	
+	private Logger logger;
+	
+	
 	/* === PUBLIC METHODS === */
 	
-	public MessageParser(XMLConfiguration config){
+	public MessageParser(XMLConfiguration config, Logger logger){
 		this.config = config;
+		this.logger = logger;
 	}
 	
 	
@@ -68,13 +73,13 @@ public class MessageParser {
 		switch (json.getInt(NetworkMessage.ATTR_MESSAGETYPE)){
 		
 		case NetworkMessageRequest.MESSAGE_TYPE:
-			return new NetworkMessageRequest(json, config);
+			return new NetworkMessageRequest(json, config, logger);
 			
 		case NetworkMessageResponse.MESSAGE_TYPE:
-			return new NetworkMessageResponse(json, config);
+			return new NetworkMessageResponse(json, config, logger);
 			
 		case NetworkMessageEvent.MESSAGE_TYPE:
-			return new NetworkMessageEvent(json, config);
+			return new NetworkMessageEvent(json, config, logger);
 			
 			default:
 				return null;

@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -67,6 +68,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -92,7 +94,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"Invalid action description");
 		}
 	
-		return startAction(callerOid, attrOid, attrAid, actionRequestBody);
+		return startAction(callerOid, attrOid, attrAid, actionRequestBody, queryParams);
 	}
 	
 	
@@ -107,6 +109,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -147,7 +150,7 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"Invalid property description");
 		}
 		
-		return updateActionStatus(callerOid, attrAid, newStatus,returnValue);
+		return updateActionStatus(callerOid, attrAid, newStatus, returnValue, queryParams);
 	}
 	
 	
@@ -164,12 +167,14 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation startAction(String sourceOid, String attrOid, String attrAid, String actionRequestBody){
+	private Representation startAction(String sourceOid, String attrOid, String attrAid, String actionRequestBody, 
+			Map<String, String> queryParams){
 
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.startAction(sourceOid, attrOid, attrAid, actionRequestBody));
+		return new JsonRepresentation(communicationManager.startAction(sourceOid, attrOid, attrAid, actionRequestBody, 
+				queryParams));
 	
 	}
 	
@@ -183,11 +188,14 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation updateActionStatus(String sourceOid, String attrAid, String status, String returnValue){
+	private Representation updateActionStatus(String sourceOid, String attrAid, String status, String returnValue, 
+			Map<String, String> queryParams){
+		
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.updateTaskStatus(sourceOid, attrAid, status, returnValue));
+		return new JsonRepresentation(communicationManager.updateTaskStatus(sourceOid, attrAid, status, returnValue, 
+				queryParams));
 		
 	}
 }

@@ -1,5 +1,7 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import java.util.logging.Logger;
+
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
@@ -17,7 +19,7 @@ import org.apache.commons.configuration2.XMLConfiguration;
 
 
 /**
- * Extended {@link NetworkMessage NetworkMessage} that represents a request. Same as {@link NetworkMessageRequest request}
+ * Extended {@link NetworkMessage NetworkMessage} that represents a response. Same as {@link NetworkMessageRequest request}
  * but with HTTP response.
  * 
  * Use it like this:
@@ -43,6 +45,11 @@ public class NetworkMessageResponse extends NetworkMessage {
 	public static final int MESSAGE_TYPE = 0x02;
 	
 	/**
+	 * Name of the error indicator attribute.
+	 */
+	private static final String ATTR_ERROR = "error";
+	
+	/**
 	 * Name of the response status code attribute.
 	 */
 	private static final String ATTR_RESPONSECODE = "responseCode";
@@ -59,6 +66,11 @@ public class NetworkMessageResponse extends NetworkMessage {
 
 	
 	/* === FIELDS === */
+	
+	/**
+	 * Indicates whether or not an error occurred on the other side. 
+	 */
+	private boolean error;
 	
 	/**
 	 * HTTP response code from the remote object.
@@ -84,8 +96,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 *  
 	 * @param xmppMessage A 'raw' XMPP message. 
 	 */
-	public NetworkMessageResponse(XMLConfiguration config){
-		super(config);
+	public NetworkMessageResponse(XMLConfiguration config, Logger logger){
+		super(config, logger);
 		
 		messageType = NetworkMessageResponse.MESSAGE_TYPE;
 	}
@@ -95,16 +107,38 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * This constructor attempts to build this object by parsing incoming JSON. If the parsing operation is not 
 	 * successful, the result is an object with validity {@link NetworkMessage#valid flag} set to false.
 	 * 
-	 * @param json JSON that arrived from the XMPP network. 
+	 * @param json JSON that arrived from the P2P network. 
 	 */
-	public NetworkMessageResponse(JsonObject json, XMLConfiguration config){
+	public NetworkMessageResponse(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
 			setValid(false);
 		}
+	}
+	
+	
+	public NetworkMessageResponse(XMLConfiguration config, Logger logger, boolean error, int responseCode, 
+					String responseCodeReason, String responseBody) {
+		super(config, logger);
+		
+		messageType = NetworkMessageResponse.MESSAGE_TYPE;
+		
+		this.error = error;
+		this.responseCode = responseCode;
+		this.responseCodeReason = responseCodeReason;
+		this.responseBody = responseBody;
+	}
+	
+	
+	public boolean isError() {
+		return error;
+	}
+	
+	public void setError(boolean error) {
+		this.error = error;
 	}
 	
 
@@ -193,19 +227,43 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * @return True if parsing was successful, false otherwise.
 	 */
 	private boolean parseJson(JsonObject json){
-		// figure out the message type
-		messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
+		
+		try {
+			
+			// figure out the message type
+			messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
+			
+		} catch (Exception e) {
+			logger.warning("Exception while parsing NetworkMessageResponse: " + e.getMessage());
+			
+			return false;
+		}
 		
 		if (messageType != MESSAGE_TYPE){
+			logger.warning("Error while parsing NetworkMessageResponse: The messageType does not match. Should be " 
+								+ MESSAGE_TYPE + " but is " + messageType);
+			
 			// just a formality
 			return false;
 		}
 		
-		// the correlation ID of the request
-		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
+		try {
+			
+			// the correlation ID of the request (in superclass)
+			requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
+			
+			// error indicator
+			error = json.getBoolean(ATTR_ERROR);
+			
+			// response code
+			responseCode = json.getInt(ATTR_RESPONSECODE);
+			
+		} catch (Exception e) {
+			logger.severe("Exception while parsing NetworkMessageResponse: " + e.getMessage());
+			
+			return false;
+		}
 		
-		// response code
-		responseCode = json.getInt(ATTR_RESPONSECODE);
 		
 		String stringValue = new String();
 		
@@ -252,6 +310,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		mainBuilder.add(ATTR_MESSAGETYPE, messageType);
 		mainBuilder.add(ATTR_REQUESTID, requestId);
+		mainBuilder.add(ATTR_ERROR, error);
 		mainBuilder.add(ATTR_RESPONSECODE, responseCode);
 		
 		if (responseCodeReason == null){

@@ -1,5 +1,7 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import java.util.logging.Logger;
+
 import javax.json.JsonObject;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -102,6 +104,11 @@ public class NetworkMessage {
 	protected XMLConfiguration config;
 	
 	/**
+	 * Logger - useful when exception during parsing is thrown. 
+	 */
+	protected Logger logger;
+	
+	/**
 	 * The JSON object that can be a result of two events:
 	 *  - Either a JSON arrived in a message and is saved here while it was being parsed and fields of this object
 	 *  	were filled. It is useful to keep it here, because parsing can fail, making the message invalid, in which 
@@ -119,12 +126,13 @@ public class NetworkMessage {
 	/**
 	 * Basic constructor for the message. Only time stamp is computed.
 	 */
-	public NetworkMessage(XMLConfiguration config){
+	public NetworkMessage(XMLConfiguration config, Logger logger){
 		timeStamp = System.currentTimeMillis();
 		valid = true;
 		stale = false;
 		messageType = NetworkMessage.MESSAGE_TYPE;
 		this.config = config;
+		this.logger = logger;
 		
 		jsonRepresentation = null;
 	}

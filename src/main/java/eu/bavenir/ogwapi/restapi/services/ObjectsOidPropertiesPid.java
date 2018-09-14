@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -63,6 +64,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -72,7 +74,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		return getObjectProperty(callerOid, attrOid, attrPid, logger);
+		return getObjectProperty(callerOid, attrOid, attrPid, queryParams, logger);
 		
 	}
 	
@@ -88,6 +90,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -117,7 +120,7 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 					"Invalid property description");
 		}
 		
-		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, logger);
+		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, queryParams, logger);
 	}
 	
 	
@@ -133,12 +136,14 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, Logger logger){
+	private Representation updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, 
+			Map<String, String> queryParams, Logger logger){
+		
 		CommunicationManager communicationManager 
 								= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
 		StatusMessage statusMessage 
-					= communicationManager.setPropertyOfRemoteObject(sourceOid, attrOid, attrPid, jsonString);
+					= communicationManager.setPropertyOfRemoteObject(sourceOid, attrOid, attrPid, jsonString, queryParams);
 		
 		if (statusMessage == null) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");
@@ -162,13 +167,14 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
+	private Representation getObjectProperty(String sourceOid, String attrOid, String attrPid, 
+			Map<String, String> queryParams, Logger logger){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
 		StatusMessage statusMessage 
-				= communicationManager.getPropertyOfRemoteObject(sourceOid, attrOid, attrPid);
+				= communicationManager.getPropertyOfRemoteObject(sourceOid, attrOid, attrPid, queryParams);
 		
 		if (statusMessage == null) {
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");

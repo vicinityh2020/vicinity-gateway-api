@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.Status;
@@ -68,6 +69,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -78,7 +80,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		return getActionTaskStatus(callerOid, attrOid, attrAid, attrTid);
+		return getActionTaskStatus(callerOid, attrOid, attrAid, attrTid, queryParams);
 	}
 	
 	
@@ -91,6 +93,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -101,7 +104,7 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 					"Given identifier does not exist.");
 		}
 		
-		return deleteActionTask(callerOid, attrOid, attrAid, attrTid);
+		return deleteActionTask(callerOid, attrOid, attrAid, attrTid, queryParams);
 	}
 	
 	
@@ -118,22 +121,24 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * 
 	 * @return Response from the remote station. 
 	 */
-	private Representation getActionTaskStatus(String sourceOid, String attrOid, String attrAid, String attrTid){
+	private Representation getActionTaskStatus(String sourceOid, String attrOid, String attrAid, String attrTid, 
+			Map<String, String> queryParams){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.retrieveTaskStatus(sourceOid, attrOid, attrAid, attrTid));
+		return new JsonRepresentation(communicationManager.retrieveTaskStatus(sourceOid, attrOid, attrAid, attrTid, queryParams));
 		
 	}
 	
 	
 	// TODO documentation
-	private Representation deleteActionTask(String SourceOid, String attrOid, String attrAid, String attrTid){
+	private Representation deleteActionTask(String SourceOid, String attrOid, String attrAid, String attrTid, 
+			Map<String, String> queryParams){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.cancelRunningTask(SourceOid, attrOid, attrAid, attrTid));
+		return new JsonRepresentation(communicationManager.cancelRunningTask(SourceOid, attrOid, attrAid, attrTid, queryParams));
 	}
 }

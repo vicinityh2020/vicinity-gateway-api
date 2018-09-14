@@ -169,6 +169,7 @@ public class Task {
 		
 		// only pending and running task can be canceled
 		if (taskStatus == TASKSTATUS_RUNNING) {
+			
 			// TODO this is baaad, need to return status message - and control the return value
 			response = connector.cancelTask(objectID, actionID);
 			

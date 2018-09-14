@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.restapi.services;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.Status;
@@ -65,6 +66,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -78,7 +80,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
 		
-		return new JsonRepresentation(communicationManager.getEventChannelStatus(callerOid, attrOid, attrEid)); 
+		return new JsonRepresentation(communicationManager.getEventChannelStatus(callerOid, attrOid, attrEid, queryParams)); 
 		
 	}
 	
@@ -95,6 +97,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -108,7 +111,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 					= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
 	
-		return new JsonRepresentation(communicationManager.subscribeToEventChannel(callerOid, attrOid, attrEid));
+		return new JsonRepresentation(communicationManager.subscribeToEventChannel(callerOid, attrOid, attrEid, queryParams));
 	}
 	
 	
@@ -123,6 +126,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -135,7 +139,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		return new JsonRepresentation(communicationManager.unsubscribeFromEventChannel(callerOid, attrOid, attrEid));
+		return new JsonRepresentation(communicationManager.unsubscribeFromEventChannel(callerOid, attrOid, attrEid, queryParams));
 	}
 	
 	

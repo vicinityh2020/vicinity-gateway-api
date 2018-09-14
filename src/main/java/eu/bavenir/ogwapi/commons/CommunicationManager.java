@@ -256,11 +256,11 @@ public class CommunicationManager {
 			descriptorPoolPut(objectID, descriptor);
 			logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
 			
-			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, "Login successfull.");
+			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, new String("Login successfull."), logger);
 			
 		} else {
 			logger.info("Connection for '" + objectID +"' was not established.");
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, "Login unsuccessfull.");
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, new String("Login unsuccessfull."), logger);
 		}
 		
 		return statusMessage;
@@ -307,7 +307,8 @@ public class CommunicationManager {
 
 	
 	// TODO documentation
-	public StatusMessage getPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID) {
+	public StatusMessage getPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID,
+			Map<String, String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -332,13 +333,14 @@ public class CommunicationManager {
 		}
 		
 		
-		return descriptor.getPropertyOfRemoteObject(destinationObjectID, propertyID);
+		return descriptor.getPropertyOfRemoteObject(destinationObjectID, propertyID, params);
 		
 	}
 	
 	
 	// TODO documentation
-	public StatusMessage setPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID, String body) {
+	public StatusMessage setPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID, 
+			String body, Map<String,String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -366,13 +368,14 @@ public class CommunicationManager {
 			
 		}
 		
-		return descriptor.setPropertyOfRemoteObject(destinationObjectID, propertyID, body);
+		return descriptor.setPropertyOfRemoteObject(destinationObjectID, propertyID, body, params);
 	}
 
 	
 	
 	// TODO documentation
-	public String startAction(String objectID, String destinationObjectID, String actionID, String body) {
+	public String startAction(String objectID, String destinationObjectID, String actionID, String body, 
+			Map<String, String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -382,13 +385,13 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.startAction(destinationObjectID, actionID, body);
+		return descriptor.startAction(destinationObjectID, actionID, body, params);
 		
 	}
 	
 	
 	public StatusMessage updateTaskStatus(String objectID, String actionID, 
-					String newStatus, String returnValue) {
+					String newStatus, String returnValue, Map<String, String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -400,11 +403,12 @@ public class CommunicationManager {
 		
 		
 		
-		return descriptor.updateTaskStatus(actionID, newStatus, returnValue);
+		return descriptor.updateTaskStatus(actionID, newStatus, returnValue, params);
 	}
 	
 	
-	public String retrieveTaskStatus(String objectID, String destinationObjectID, String actionID, String taskID) {
+	public String retrieveTaskStatus(String objectID, String destinationObjectID, String actionID, String taskID, 
+			Map<String, String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -414,12 +418,13 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.retrieveTaskStatus(destinationObjectID, actionID, taskID);
+		return descriptor.retrieveTaskStatus(destinationObjectID, actionID, taskID, params);
 	}
 	
 	
 	
-	public String cancelRunningTask(String objectID, String destinationObjectID, String actionID, String taskID) {
+	public String cancelRunningTask(String objectID, String destinationObjectID, String actionID, String taskID, 
+			Map<String,String> params) {
 		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
@@ -429,7 +434,7 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.cancelRunningTask(destinationObjectID, actionID, taskID);
+		return descriptor.cancelRunningTask(destinationObjectID, actionID, taskID, params);
 	}
 	
 	
@@ -492,7 +497,7 @@ public class CommunicationManager {
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
 	 * successfully.
 	 */
-	public StatusMessage activateEventChannel(String objectID, String eventID) {
+	public StatusMessage activateEventChannel(String objectID, String eventID, Map<String, String> params) {
 		
 		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
@@ -503,16 +508,17 @@ public class CommunicationManager {
 			return null;
 		}
 		
-		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE);
+		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE, params);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, "Channel activated.");
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, new String("Channel activated."), logger);
 	}
 	
 	
 	
 	// TODO documentation
 	// returns number of sent messages vs the number of subscribers
-	public StatusMessage sendEventToSubscribedObjects(String objectID, String eventID, String event) {
+	public StatusMessage sendEventToSubscribedObjects(String objectID, String eventID, String event, 
+			Map<String, String> params) {
 		
 		String statusMessageText;
 		
@@ -530,7 +536,7 @@ public class CommunicationManager {
 		
 		// no need to waste cycles for nothing
 		if (numberOfSubscribers > 0) {
-			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event);	
+			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event, params);	
 		}
 		
 		boolean error;
@@ -546,7 +552,7 @@ public class CommunicationManager {
 		
 		logger.info(statusMessageText);
 		
-		return new StatusMessage(error, StatusMessage.MESSAGE_EVENT_SENDTOSUBSCRIBERS, statusMessageText);
+		return new StatusMessage(error, StatusMessage.MESSAGE_EVENT_SENDTOSUBSCRIBERS, statusMessageText, logger);
 		
 	}
 	
@@ -566,7 +572,7 @@ public class CommunicationManager {
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
 	 * successfully.
 	 */
-	public StatusMessage deactivateEventChannel(String objectID, String eventID) {
+	public StatusMessage deactivateEventChannel(String objectID, String eventID, Map<String, String> params) {
 		
 		// check the validity of the calling object
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
@@ -576,15 +582,17 @@ public class CommunicationManager {
 			return null;
 		}
 		
-		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE);
+		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE, params);
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, "Channel deactivated.");
+		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, new String("Channel deactivated."), logger);
 	}
 	
 	
 	
 	// TODO documentation
-	public String getEventChannelStatus(String objectID, String destinationObjectID, String eventID) {
+	public String getEventChannelStatus(String objectID, String destinationObjectID, String eventID, 
+			Map<String, String> params) {
+		
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
@@ -593,13 +601,14 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.getRemoteEventChannelStatus(destinationObjectID, eventID);
+		return descriptor.getRemoteEventChannelStatus(destinationObjectID, eventID, params);
 	}
 	
 	
 	
 	// TODO documentation
-	public String subscribeToEventChannel(String objectID, String destinationObjectID, String eventID) {
+	public String subscribeToEventChannel(String objectID, String destinationObjectID, String eventID, 
+			Map<String, String> params) {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
@@ -608,12 +617,13 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.subscribeToEventChannel(destinationObjectID, eventID);
+		return descriptor.subscribeToEventChannel(destinationObjectID, eventID, params);
 	}
 	
 	
 	// TODO documentation
-	public String unsubscribeFromEventChannel(String objectID, String destinationObjectID, String eventID) {
+	public String unsubscribeFromEventChannel(String objectID, String destinationObjectID, String eventID, 
+			Map<String, String> params) {
 		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
 		
 		if (descriptor == null){
@@ -622,7 +632,7 @@ public class CommunicationManager {
 			return null;
 		} 
 		
-		return descriptor.unsubscribeFromEventChannel(destinationObjectID, eventID);
+		return descriptor.unsubscribeFromEventChannel(destinationObjectID, eventID, params);
 	}
 
 	

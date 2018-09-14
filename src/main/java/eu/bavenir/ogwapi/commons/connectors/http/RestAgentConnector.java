@@ -333,7 +333,7 @@ public class RestAgentConnector extends AgentConnector {
 		logger.finest("REST Agent Connector: Operation code: " + operationCode);
 		logger.finest("REST Agent Connector: Assembled URL: " + fullUrl);
 		
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		
 		ClientResource clientResource = new ClientResource(fullUrl);
 		
@@ -413,7 +413,7 @@ public class RestAgentConnector extends AgentConnector {
 	*/
 	private NetworkMessageResponse performDummyOperation (byte operationCode, String fullUrl, String body) {
 		
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		
 		response.setResponseCode(200);
 		response.setResponseCodeReason("OK");

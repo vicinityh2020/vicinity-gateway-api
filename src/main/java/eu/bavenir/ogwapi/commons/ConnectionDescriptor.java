@@ -2,6 +2,7 @@ package eu.bavenir.ogwapi.commons;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedTransferQueue;
@@ -201,14 +202,15 @@ public class ConnectionDescriptor {
 
 
 	// TODO documentation
-	public String startAction(String destinationObjectID, String actionID, String body) {
+	public StatusMessage startAction(String destinationObjectID, String actionID, String body, 
+			Map<String, String> parameters) {
 		
 		if (destinationObjectID == null || actionID == null) {
 			logger.info("Invalid object ID or action ID.");
 			return null;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// we will need this newly generated ID, so we keep it
 		int requestId = request.getRequestId();
@@ -217,12 +219,15 @@ public class ConnectionDescriptor {
 		request.setRequestOperation(NetworkMessageRequest.OPERATION_STARTACTION);
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
 		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
+		
+		request.setParameters(parameters);
+		
 		request.setRequestBody(body);
 		
 		
 		// message to be returned
 		String statusMessageText;
-		
+		StatusMessage statusMessage;
 		
 		// all set
 		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
@@ -231,10 +236,10 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
-					statusMessageText);
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
+					statusMessageText, logger);
 			
-			return statusMessage.buildMessage().toString();
+			return statusMessage;
 		}
 		
 		// this will wait for response
@@ -248,14 +253,20 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
-					statusMessageText); 
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
+					statusMessageText, logger); 
 			
-			return statusMessage.buildMessage().toString();
+			return statusMessage;
 		}
 		
 		
-		// TODO a status message needs to be parsed here and returned
+		if (response.isError()) {
+			
+		}
+		
+		// okay, something is received, let's try to parse it into a StatusMessage
+		statusMessage = new StatusMessage();
+		
 		return response.getResponseBody();
 
 	}
@@ -264,7 +275,8 @@ public class ConnectionDescriptor {
 	
 	
 	
-	public StatusMessage updateTaskStatus(String actionID, String newStatus, String returnValue) {
+	public StatusMessage updateTaskStatus(String actionID, String newStatus, String returnValue, 
+			Map<String, String> parameters) {
 		
 		if (actionID == null) {
 			logger.warning("Invalid action ID or task ID.");
@@ -281,21 +293,21 @@ public class ConnectionDescriptor {
 		StatusMessage statusMessage;
 		String messageString;
 		
-		if (!action.updateTask(newStatus, returnValue)) {
+		if (!action.updateTask(newStatus, returnValue, parameters)) {
 			
 			messageString = "Running task of action " + actionID + " is not in a state allowing update, "
 					+ "or the requested new state is not aplicable.";
 			
 			logger.warning(messageString);
 			
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, messageString);
+			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, messageString, logger);
 			
 		}
 		
 		messageString = "Running task of action " + actionID + " was updated.";
 		
 		logger.info(messageString);
-		statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_TASK_STATUS, messageString);
+		statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_TASK_STATUS, messageString, logger);
 		
 		return statusMessage;
 		
@@ -304,14 +316,15 @@ public class ConnectionDescriptor {
 	
 	
 	
-	public String retrieveTaskStatus(String destinationObjectID, String actionID, String taskID) {
+	public String retrieveTaskStatus(String destinationObjectID, String actionID, String taskID, 
+			Map<String, String> parameters) {
 		
 		if (destinationObjectID == null || actionID == null || taskID == null) {
 			logger.info("Invalid object ID, action ID or task ID.");
 			return null;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// we will need this newly generated ID, so we keep it
 		int requestId = request.getRequestId();
@@ -321,6 +334,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
 		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
 		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
+		
+		request.setParameters(parameters);
 		
 		// message to be returned
 		String statusMessageText;
@@ -334,7 +349,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -351,7 +366,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
-					statusMessageText); 
+					statusMessageText, logger); 
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -365,14 +380,15 @@ public class ConnectionDescriptor {
 	
 	
 	
-	public String cancelRunningTask(String destinationObjectID, String actionID, String taskID) {
+	public String cancelRunningTask(String destinationObjectID, String actionID, String taskID, 
+			Map<String, String> parameters) {
 		
 		if (destinationObjectID == null || actionID == null || taskID == null) {
 			logger.info("Invalid object ID, action ID or task ID.");
 			return null;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// we will need this newly generated ID, so we keep it
 		int requestId = request.getRequestId();
@@ -382,6 +398,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
 		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
 		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
+		
+		request.setParameters(parameters);
 		
 		// message to be returned
 		String statusMessageText;
@@ -395,7 +413,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -412,7 +430,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
-					statusMessageText); 
+					statusMessageText, logger); 
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -442,7 +460,7 @@ public class ConnectionDescriptor {
 	 * {@link EventChannel#STATUS_ACTIVE active}). If the channel was not found and the status was being set to 
 	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false.
 	 */
-	public boolean setLocalEventChannelStatus(String eventID, boolean status) {
+	public boolean setLocalEventChannelStatus(String eventID, boolean status, Map<String, String> parameters) {
 		
 		boolean result = true;
 		
@@ -450,7 +468,7 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = searchForEventChannel(eventID);
 		
 		if (eventChannel != null) {
-			eventChannel.setActive(status);
+			eventChannel.setActive(status, parameters);
 			logger.fine("Object '" + objectID + "' changed the activeness of existing event channel '" 
 					+ eventID + "' to " + status);
 		} else {
@@ -475,7 +493,7 @@ public class ConnectionDescriptor {
 	// TODO documentation
 	// TODO make it return statusmessage, not a string
 	// also make it return whether we are subscribed or not
-	public String getRemoteEventChannelStatus(String objectID, String eventID) {
+	public String getRemoteEventChannelStatus(String objectID, String eventID, Map<String, String> parameters) {
 		
 		if (objectID == null || eventID == null) {
 			logger.info("Invalid object ID or event ID.");
@@ -496,7 +514,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						new String("Invalid event channel specified."));
+						new String("Invalid event channel specified."), logger);
 
 			} else {
 				
@@ -506,12 +524,12 @@ public class ConnectionDescriptor {
 					statusMessage = new StatusMessage(
 							false, 
 							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-							EventChannel.STATUS_STRING_ACTIVE);
+							EventChannel.STATUS_STRING_ACTIVE, logger);
 				} else {
 					statusMessage = new StatusMessage(
 							false, 
 							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-							EventChannel.STATUS_STRING_INACTIVE);
+							EventChannel.STATUS_STRING_INACTIVE, logger);
 				}
 				
 			}
@@ -522,7 +540,7 @@ public class ConnectionDescriptor {
 		
 		// otherwise continue as normal
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// message to be returned
 		String statusMessageText;
@@ -535,6 +553,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID);
 		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
 		
+		request.setParameters(parameters);
+		
 		// all set
 		
 		if (!commEngine.sendMessage(objectID, request.buildMessageString())){
@@ -544,7 +564,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -561,7 +581,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					statusMessageText); 
+					statusMessageText, logger); 
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -573,13 +593,13 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	// TODO make it return status message
-	public String subscribeToEventChannel(String destinationObjectID, String eventID) {
+	public String subscribeToEventChannel(String destinationObjectID, String eventID, Map<String, String> parameters) {
 		if (destinationObjectID == null || eventID == null) {
 			logger.info("Invalid object ID or event ID.");
 			return null;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// message to be returned
 		String statusMessageText;
@@ -594,7 +614,7 @@ public class ConnectionDescriptor {
 				logger.info(statusMessageText);
 				
 				StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-						statusMessageText);
+						statusMessageText, logger);
 				
 				return statusMessage.buildMessage().toString();
 			}
@@ -613,6 +633,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID); // we are sending the ID of this object
 		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
 		
+		request.setParameters(parameters);
+		
 		// all set
 		
 		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
@@ -622,7 +644,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -639,7 +661,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText); 
+					statusMessageText, logger); 
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -656,13 +678,13 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	// TODO make it return status message
-	public String unsubscribeFromEventChannel(String destinationObjectID, String eventID) {
+	public String unsubscribeFromEventChannel(String destinationObjectID, String eventID, Map<String, String> parameters) {
 		if (destinationObjectID == null || eventID == null) {
 			logger.info("Invalid object ID or event ID.");
 			return null;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// message to be returned
 		String statusMessageText;
@@ -676,7 +698,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -689,6 +711,8 @@ public class ConnectionDescriptor {
 		request.setRequestOperation(NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL);
 		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
 		
+		request.setParameters(parameters);
+		
 		// all set
 		
 		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
@@ -698,7 +722,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -715,7 +739,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					statusMessageText); 
+					statusMessageText, logger); 
 			
 			return statusMessage.buildMessage().toString();
 		}
@@ -737,7 +761,7 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	// -1 if there is no such event channel 
-	public int sendEventToSubscribers(String eventID, String event) {
+	public int sendEventToSubscribers(String eventID, String event, Map<String, String> parameters) {
 		
 		// look up the event channel
 		EventChannel eventChannel = searchForEventChannel(eventID);
@@ -758,7 +782,7 @@ public class ConnectionDescriptor {
 		}
 		
 		// create the message
-		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, objectID, eventID, event);
+		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, objectID, eventID, event, parameters, logger);
 		String message = eventMessage.buildMessageString();
 		
 		// keep track of number of sent messages
@@ -806,9 +830,10 @@ public class ConnectionDescriptor {
 	
 	
 	// TODO documentation
-	public StatusMessage getPropertyOfRemoteObject(String destinationObjectID, String propertyID) {
+	public StatusMessage getPropertyOfRemoteObject(String destinationObjectID, String propertyID, 
+			Map<String, String> parameters) {
 
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// message to be returned in case something goes wrong
 		String statusMessageText;
@@ -821,6 +846,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
 		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
 		
+		request.setParameters(parameters);
+		
 		// all set
 		
 		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
@@ -830,7 +857,7 @@ public class ConnectionDescriptor {
 			logger.info(statusMessageText);
 			
 			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, 
-					statusMessageText);
+					statusMessageText, logger);
 			
 			return statusMessage;
 		}
@@ -846,7 +873,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText, logger);
 		}
 		
 		// if the return code is different than 2xx, make it visible
@@ -857,10 +884,10 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText, logger);
 		}
 		
-		StatusMessage okStatus = new StatusMessage();
+		StatusMessage okStatus = new StatusMessage(logger);
 		okStatus.setError(false);
 		okStatus.setBody(response.getResponseBody());
 		
@@ -872,9 +899,10 @@ public class ConnectionDescriptor {
 	
 	
 	// TODO documentation
-	public StatusMessage setPropertyOfRemoteObject(String destinationObjectID, String propertyID, String body) {
+	public StatusMessage setPropertyOfRemoteObject(String destinationObjectID, String propertyID, String body,
+			Map<String, String> parameters) {
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config);
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
 		
 		// message to be returned in case something goes wrong
 		String statusMessageText;
@@ -887,6 +915,8 @@ public class ConnectionDescriptor {
 		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
 		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
 		
+		request.setParameters(parameters);
+		
 		request.setRequestBody(body);
 		
 		// all set
@@ -896,7 +926,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
 		}
 		
 		// this will wait for response
@@ -910,7 +940,7 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
 		}
 		
 		// if the return code is different than 2xx, make it visible
@@ -921,10 +951,10 @@ public class ConnectionDescriptor {
 			
 			logger.info(statusMessageText);
 
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText);
+			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
 		}
 		
-		StatusMessage okStatus = new StatusMessage();
+		StatusMessage okStatus = new StatusMessage(logger);
 		okStatus.setError(false);
 		okStatus.setBody(response.getResponseBody());
 		
@@ -952,7 +982,7 @@ public class ConnectionDescriptor {
 		logger.finest("New message from " + from + ": " + message);
 		
 		// let's parse the message 
-		MessageParser messageParser = new MessageParser(config);
+		MessageParser messageParser = new MessageParser(config, logger);
 		NetworkMessage networkMessage = messageParser.parseNetworkMessage(message);
 		
 		if (networkMessage != null){
@@ -1151,7 +1181,7 @@ public class ConnectionDescriptor {
 		String eventID = null;
 		EventChannel eventChannel = null;
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		
@@ -1173,7 +1203,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					new String("Invalid event channel specified."));
+					new String("Invalid event channel specified."), logger);
 
 		} else {
 			
@@ -1183,12 +1213,12 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						EventChannel.STATUS_STRING_ACTIVE);
+						EventChannel.STATUS_STRING_ACTIVE, logger);
 			} else {
 				statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						EventChannel.STATUS_STRING_INACTIVE);
+						EventChannel.STATUS_STRING_INACTIVE, logger);
 			}
 			
 		}
@@ -1209,7 +1239,7 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = null;
 		
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		// the event ID should have been sent in attributes
@@ -1234,7 +1264,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					new String("Invalid event channel specified."));
+					new String("Invalid event channel specified."), logger);
 		} else {
 			logger.fine("Received a request for subscription to event channel " + eventID + " from " + from + ".");
 			
@@ -1243,7 +1273,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-						StatusMessage.TEXT_SUCCESS);
+						StatusMessage.TEXT_SUCCESS, logger);
 		}
 		
 		response.setResponseBody(statusMessage.buildMessage().toString());
@@ -1262,7 +1292,7 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = null;
 		
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		// the event ID should have been sent in attributes
@@ -1287,7 +1317,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					new String("Invalid event channel specified."));
+					new String("Invalid event channel specified."), logger);
 		} else {
 			logger.fine("Received a request to cancel subscription to event channel " + eventID + " from " + from + ".");
 			
@@ -1296,7 +1326,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-						StatusMessage.TEXT_SUCCESS);
+						StatusMessage.TEXT_SUCCESS, logger);
 		}
 		
 		response.setResponseBody(statusMessage.buildMessage().toString());
@@ -1315,7 +1345,7 @@ public class ConnectionDescriptor {
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
@@ -1348,7 +1378,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_ACTION_START, 
-					new String("Invalid action specified."));
+					new String("Invalid action specified."), logger);
 		} else {
 			logger.fine("Received a request to start action " + actionID + " from " + from + ".");
 			
@@ -1363,7 +1393,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						StatusMessage.MESSAGE_ACTION_START, 
-						new String(statusString));
+						new String(statusString), logger);
 			} else {
 				statusString = new String("Task " + taskID + " of action " + actionID + " was created and added to the queue.");
 				
@@ -1372,7 +1402,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_ACTION_START, 
-						StatusMessage.TEXT_SUCCESS);
+						StatusMessage.TEXT_SUCCESS, logger);
 				
 				statusMessage.addMessage(StatusMessage.MESSAGE_TASKID, taskID);
 			}
@@ -1393,7 +1423,7 @@ public class ConnectionDescriptor {
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
@@ -1421,7 +1451,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_TASK_STATUS, 
-					new String("Invalid action specified."));
+					new String("Invalid action specified."), logger);
 		} else {
 			logger.fine("Received a request for status report on action " + actionID + " task " + taskID + " from " + from + ".");
 			
@@ -1439,7 +1469,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						StatusMessage.MESSAGE_TASK_STATUS, 
-						new String(statusString));
+						new String(statusString), logger);
 			} else {
 				statusString = new String("Task " + taskID + " of action " + actionID + " status " + status + " return value " + returnValue);
 				
@@ -1448,7 +1478,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						false, 
 						StatusMessage.MESSAGE_TASK_STATUS, 
-						status);
+						status, logger);
 				
 				statusMessage.addMessage(StatusMessage.MESSAGE_TASK_RETURNVALUE, returnValue);
 			}
@@ -1470,7 +1500,7 @@ public class ConnectionDescriptor {
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
@@ -1498,7 +1528,7 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					StatusMessage.MESSAGE_TASK_STOP, 
-					new String("Invalid action specified."));
+					new String("Invalid action specified."), logger);
 		} else {
 			logger.fine("Received a request for for stopping an action " + actionID + " task " + taskID + " from " + from + ".");
 			
@@ -1513,7 +1543,7 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						StatusMessage.MESSAGE_TASK_STOP, 
-						new String(statusString));
+						new String(statusString), logger);
 			} else {
 				statusString = new String("Task " + taskID + " of action " + actionID 
 						+ " cancelation result: " + response2.getResponseCode() + " " + response2.getResponseCodeReason());
@@ -1522,7 +1552,7 @@ public class ConnectionDescriptor {
 				
 				statusMessage = new StatusMessage(
 						false, 
-						StatusMessage.MESSAGE_TASK_STOP, statusString);
+						StatusMessage.MESSAGE_TASK_STOP, statusString, logger);
 			}
 		}
 		

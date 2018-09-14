@@ -1,5 +1,7 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import java.util.logging.Logger;
+
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
@@ -79,9 +81,9 @@ public class NetworkMessageEvent extends NetworkMessage{
 	/**
 	 * Constructor of an event message that is to be sent across the network.  
 	 */
-	public NetworkMessageEvent(XMLConfiguration config, String sourceOid, String eventID, String eventBody) {
+	public NetworkMessageEvent(XMLConfiguration config, String sourceOid, String eventID, String eventBody, Logger logger) {
 		// always call this guy
-		super(config);
+		super(config, logger);
 		
 		destinationOid = null;
 		
@@ -101,9 +103,9 @@ public class NetworkMessageEvent extends NetworkMessage{
 	 * 
 	 * @param json JSON that arrived from the network. 
 	 */
-	public NetworkMessageEvent(JsonObject json, XMLConfiguration config){
+	public NetworkMessageEvent(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
 		
 		// remember the json this message was created from
 		jsonRepresentation = json;

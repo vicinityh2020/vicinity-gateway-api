@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -62,6 +63,7 @@ public class EventsEid extends ServerResource {
 	public Representation accept(Representation entity) {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -74,7 +76,7 @@ public class EventsEid extends ServerResource {
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		StatusMessage statusMessage = communicationManager.activateEventChannel(callerOid, attrEid);
+		StatusMessage statusMessage = communicationManager.activateEventChannel(callerOid, attrEid, queryParams);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
@@ -92,6 +94,7 @@ public class EventsEid extends ServerResource {
 	public Representation store(Representation entity) {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -125,7 +128,8 @@ public class EventsEid extends ServerResource {
 		}
 		
 		StatusMessage statusMessage 
-						= communicationManager.sendEventToSubscribedObjects(callerOid, attrEid, eventJsonString);
+						= communicationManager.sendEventToSubscribedObjects(callerOid, attrEid, eventJsonString, 
+								queryParams);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
@@ -142,6 +146,7 @@ public class EventsEid extends ServerResource {
 	public Representation remove() {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -154,7 +159,7 @@ public class EventsEid extends ServerResource {
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		StatusMessage statusMessage = communicationManager.deactivateEventChannel(callerOid, attrEid);
+		StatusMessage statusMessage = communicationManager.deactivateEventChannel(callerOid, attrEid, queryParams);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
