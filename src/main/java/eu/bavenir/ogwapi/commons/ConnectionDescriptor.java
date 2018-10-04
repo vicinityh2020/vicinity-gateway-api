@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,13 +10,22 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonStructure;
+
 import org.apache.commons.configuration2.XMLConfiguration;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
 import eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector;
 import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
 import eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine;
-import eu.bavenir.ogwapi.commons.messages.MessageParser;
+import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
+import eu.bavenir.ogwapi.commons.messages.MessageResolver;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessage;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
@@ -89,12 +99,13 @@ public class ConnectionDescriptor {
 	// sparql query search engine
 	private SparqlQuery sparql;
 	
+	private MessageResolver messageResolver;
 	
 	// the thing that communicates with agent
 	private AgentConnector agentConnector;
 	
 	// credentials
-	private String objectID;
+	private String objectId;
 	private String password;
 	
 	// message queue, FIFO structure for holding incoming messages 
@@ -103,6 +114,11 @@ public class ConnectionDescriptor {
 	// the engine to use
 	private CommunicationEngine commEngine;
 	
+	/**
+	 * Factory for JSON builders.
+	 */
+	private JsonBuilderFactory jsonBuilderFactory;
+	
 	
 	/* === PUBLIC METHODS === */
 	
@@ -110,18 +126,18 @@ public class ConnectionDescriptor {
 	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
 	 * the descriptor will not be able to connect (in the best case scenario, the other being a storm of null pointer 
 	 * exceptions).
-	 * @param objectID
+	 * @param objectId
 	 * @param password
 	 * @param config
 	 * @param logger
 	 */
-	public ConnectionDescriptor(String objectID, String password, XMLConfiguration config, Logger logger){
+	public ConnectionDescriptor(String objectId, String password, XMLConfiguration config, Logger logger){
 		
 		
 		
 		// TODO this all should probably happen after successful login, so it does not use resources for nothing
 		
-		this.objectID = objectID;
+		this.objectId = objectId;
 		this.password = password;
 		
 		this.config = config;
@@ -141,12 +157,15 @@ public class ConnectionDescriptor {
 		
 		providedActions = new HashSet<Action>();
 		
+		messageResolver = new MessageResolver(config, logger);
+		
+		jsonBuilderFactory = Json.createBuilderFactory(null);
 		
 		
 		
 		// build new connection
 		// TODO this is also the place, where it should decide what engine to use
-		commEngine = new XmppMessageEngine(objectID, password, config, logger, this);
+		commEngine = new XmppMessageEngine(objectId, password, config, logger, this);
 		
 		// TODO load the event channels and actions - either from a file or server
 		
@@ -159,7 +178,7 @@ public class ConnectionDescriptor {
 	 * @return Object ID.
 	 */
 	public String getObjectID() {
-		return objectID;
+		return objectId;
 	}
 
 	
@@ -176,7 +195,7 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	public boolean connect(){
-		return commEngine.connect(objectID, password);
+		return commEngine.connect(objectId, password);
 	}
 	
 	
@@ -202,112 +221,69 @@ public class ConnectionDescriptor {
 
 
 	// TODO documentation
-	public StatusMessage startAction(String destinationObjectID, String actionID, String body, 
+	public StatusMessage startAction(String destinationOid, String actionId, String body, 
 			Map<String, String> parameters) {
 		
-		if (destinationObjectID == null || actionID == null) {
-			logger.info("Invalid object ID or action ID.");
-			return null;
-		}
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_STARTACTION);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
-		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
-		
-		request.setParameters(parameters);
-		
-		request.setRequestBody(body);
-		
-		
-		// message to be returned
-		String statusMessageText;
-		StatusMessage statusMessage;
-		
-		// all set
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
-					statusMessageText, logger);
-			
-			return statusMessage;
-		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
-					+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_ACTION_START, 
-					statusMessageText, logger); 
-			
-			return statusMessage;
-		}
-		
-		
-		if (response.isError()) {
-			
-		}
-		
-		// okay, something is received, let's try to parse it into a StatusMessage
-		statusMessage = new StatusMessage();
-		
-		return response.getResponseBody();
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_STARTACTION, 
+				destinationOid, 
+				attributes, 
+				parameters,
+				body);
 
 	}
 	
 	
-	
-	
-	
-	public StatusMessage updateTaskStatus(String actionID, String newStatus, String returnValue, 
+	public StatusMessage updateTaskStatus(String actionId, String newStatus, String returnValue, 
 			Map<String, String> parameters) {
 		
-		if (actionID == null) {
-			logger.warning("Invalid action ID or task ID.");
-			return null;
-		}
+		// message to be returned
+		String statusCodeReason;
+		StatusMessage statusMessage;
 		
-		Action action = searchForAction(actionID);
+		Action action = searchForAction(actionId);
 		
 		if (action == null) {
-			logger.warning("No such action " + actionID);
-			return null;
+			
+			statusCodeReason = new String("No such action " + actionId + ".");
+			
+			logger.warning(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_404_NOTFOUND, 
+					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+			
+			return statusMessage;
 		}
-		
-		StatusMessage statusMessage;
-		String messageString;
 		
 		if (!action.updateTask(newStatus, returnValue, parameters)) {
 			
-			messageString = "Running task of action " + actionID + " is not in a state allowing update, "
-					+ "or the requested new state is not aplicable.";
+			statusCodeReason = "Running task of action " + actionId + " is not in a state allowing update, "
+					+ "or the requested new state is not applicable.";
 			
-			logger.warning(messageString);
+			logger.warning(statusCodeReason);
 			
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, messageString, logger);
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_400_BADREQUEST, 
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+			
+			return statusMessage;
 			
 		}
 		
-		messageString = "Running task of action " + actionID + " was updated.";
+		statusCodeReason = "Running task of action " + actionId + " was updated to " + newStatus + ".";
 		
-		logger.info(messageString);
-		statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_TASK_STATUS, messageString, logger);
+		logger.info(statusCodeReason);
+		
+		statusMessage = new StatusMessage(
+				false, 
+				CodesAndReasons.CODE_200_OK, 
+				CodesAndReasons.REASON_200_OK + statusCodeReason);
 		
 		return statusMessage;
 		
@@ -316,134 +292,41 @@ public class ConnectionDescriptor {
 	
 	
 	
-	public String retrieveTaskStatus(String destinationObjectID, String actionID, String taskID, 
-			Map<String, String> parameters) {
+	public StatusMessage retrieveTaskStatus(String destinationOid, String actionId, String taskId, 
+			Map<String, String> parameters, String body) {
+	
 		
-		if (destinationObjectID == null || actionID == null || taskID == null) {
-			logger.info("Invalid object ID, action ID or task ID.");
-			return null;
-		}
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
+		attributes.put(NetworkMessageRequest.ATTR_TID, taskId);
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETTASKSTATUS);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
-		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
-		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
-		
-		request.setParameters(parameters);
-		
-		// message to be returned
-		String statusMessageText;
-		
-		
-		// all set
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
-					statusMessageText, logger);
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
-					+ " Task ID: " + taskID + " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STATUS, 
-					statusMessageText, logger); 
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		
-		// TODO a status message needs to be parsed here and returned
-		return response.getResponseBody();
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETTASKSTATUS, 
+				destinationOid, 
+				attributes, 
+				parameters,
+				body);
 		
 	}
 	
 	
 	
 	
-	public String cancelRunningTask(String destinationObjectID, String actionID, String taskID, 
-			Map<String, String> parameters) {
-		
-		if (destinationObjectID == null || actionID == null || taskID == null) {
-			logger.info("Invalid object ID, action ID or task ID.");
-			return null;
-		}
-		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_CANCELTASK);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, this.objectID); // we are sending the ID of this object
-		request.addAttribute(NetworkMessageRequest.ATTR_AID, actionID);
-		request.addAttribute(NetworkMessageRequest.ATTR_TID, taskID);
-		
-		request.setParameters(parameters);
-		
-		// message to be returned
-		String statusMessageText;
+	public StatusMessage cancelRunningTask(String destinationOid, String actionId, String taskId, 
+			Map<String, String> parameters, String body) {
 		
 		
-		// all set
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
-					statusMessageText, logger);
-			
-			return statusMessage.buildMessage().toString();
-		}
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
+		attributes.put(NetworkMessageRequest.ATTR_TID, taskId);
 		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ objectID + " Destination ID: " + destinationObjectID + " Action ID: " + actionID  
-					+ " Task ID: " + taskID + " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_TASK_STOP, 
-					statusMessageText, logger); 
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		
-		// TODO a status message needs to be parsed here and returned
-		return response.getResponseBody();
-		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_CANCELTASK, 
+				destinationOid, 
+				attributes, 
+				parameters,
+				body);	
 	}
-	
-
-	
-	
 	
 	
 	/**
@@ -453,336 +336,296 @@ public class ConnectionDescriptor {
 	 * If no channel with given 'eventID' exists and the 'status' is set to true, it gets created. If the 'status' is
 	 * false, the channel is not created if it does not exists previously.
 	 * 
-	 * @param eventID Event ID.
-	 * @param status If true, the channel will be set to active status.
+	 * @param eventId Event ID.
+	 * @param active If true, the channel will be set to active status.
 	 * @return If the channel was found and its status set, returns true. It will also return true, if the channel was
 	 * not found, but was created (this is what happens when the status of the non existing channel is being set to
 	 * {@link EventChannel#STATUS_ACTIVE active}). If the channel was not found and the status was being set to 
 	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false.
 	 */
-	public boolean setLocalEventChannelStatus(String eventID, boolean status, Map<String, String> parameters) {
+	public StatusMessage setLocalEventChannelStatus(String eventId, boolean active, Map<String, String> parameters, 
+			String body) {
 		
-		boolean result = true;
+		// message to be returned
+		String statusCodeReason;
+		StatusMessage statusMessage;
 		
 		// search for given event channel
-		EventChannel eventChannel = searchForEventChannel(eventID);
+		EventChannel eventChannel = searchForEventChannel(eventId);
 		
-		if (eventChannel != null) {
-			eventChannel.setActive(status, parameters);
-			logger.fine("Object '" + objectID + "' changed the activeness of existing event channel '" 
-					+ eventID + "' to " + status);
-		} else {
+		if (eventChannel == null) {
+			// TODO don't allow this behaviour - if there is no such event channel, stop the processing
 			
 			// if no event channel was found AND the caller wanted it to be active, create it
-			if (status) {
-				providedEventChannels.add(new EventChannel(objectID, eventID, true));
-				logger.fine("Object '" + objectID + "' created active event channel '" + eventID + "'");
+			if (active) {
+				providedEventChannels.add(new EventChannel(objectId, eventId, true));
+				
+				statusCodeReason = new String("Object '" + objectId + "' created active event channel '" + eventId + "'");
+				logger.info(statusCodeReason);
+				
+				statusMessage = new StatusMessage(
+						false, 
+						CodesAndReasons.CODE_200_OK, 
+						CodesAndReasons.REASON_200_OK + statusCodeReason);
+				
+				return statusMessage;
+				
+				
 			} else {
-				logger.fine("Could not deactivate the event channel '" + eventID + "' of the object '" + objectID 
+				statusCodeReason = new String("Could not deactivate the event channel '" + eventId + "' of the object '" + objectId 
 						+ "'. The event channel does not exist.");
 				
-				result = false;
+				logger.info(statusCodeReason);
+				
+				statusMessage = new StatusMessage(
+						true, 
+						CodesAndReasons.CODE_404_NOTFOUND, 
+						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+				
+				return statusMessage;
 			}
+			
 		}
 		
-		return result;
+		eventChannel.setActive(active);
+		
+		statusCodeReason = new String("Object '" + objectId + "' changed the activity of event channel '" 
+					+ eventId + "' to " + active);
+		
+		logger.info(statusCodeReason);
+		statusMessage = new StatusMessage(
+				false, 
+				CodesAndReasons.CODE_200_OK, 
+				CodesAndReasons.REASON_200_OK + statusCodeReason);
+		
+		return statusMessage;
 	}
 	
 	
 	
 	// TODO documentation
-	// TODO make it return statusmessage, not a string
-	// also make it return whether we are subscribed or not
-	public String getRemoteEventChannelStatus(String objectID, String eventID, Map<String, String> parameters) {
+	public StatusMessage getEventChannelStatus(String destinationOid, String eventId, Map<String, String> parameters, 
+			String body) {
 		
-		if (objectID == null || eventID == null) {
-			logger.info("Invalid object ID or event ID.");
-			return null;
-		}
+		String statusCodeReason;
+		StatusMessage statusMessage;
 		
 		// when the owner wants to check its own status, there is no need to send it across the network
-		if (objectID.equals(this.objectID)) {
+		if (destinationOid.equals(this.objectId)) {
 
-			EventChannel eventChannel = searchForEventChannel(eventID);
-			StatusMessage statusMessage;
+			EventChannel eventChannel = searchForEventChannel(eventId);
 			
 			if (eventChannel == null) {
-				logger.info("Received a request to provide status of invalid event channel. Request came from: " + this.objectID);
+				statusCodeReason = new String("Received a request to provide status of invalid event channel. Request came locally from: "
+						+ this.objectId);
 				
-				// responding with error
-				// remember! we are going to include the outcome of the operation as the status message
+				logger.info(statusCodeReason);
+				
 				statusMessage = new StatusMessage(
 						true, 
-						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						new String("Invalid event channel specified."), logger);
+						CodesAndReasons.CODE_404_NOTFOUND, 
+						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+				
+				return statusMessage;
 
 			} else {
 				
-				logger.fine("Received a request to provide status of event channel " + eventID + " from " + this.getObjectID() + ".");
+				statusCodeReason = new String("Received a request to provide status of event channel " 
+						 + eventId + " from " + this.getObjectID() + "(owner).");
 				
-				if (eventChannel.isActive()) {
-					statusMessage = new StatusMessage(
-							false, 
-							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-							EventChannel.STATUS_STRING_ACTIVE, logger);
-				} else {
-					statusMessage = new StatusMessage(
-							false, 
-							StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-							EventChannel.STATUS_STRING_INACTIVE, logger);
-				}
+				statusMessage = new StatusMessage(
+						false, 
+						CodesAndReasons.CODE_200_OK, 
+						CodesAndReasons.REASON_200_OK + statusCodeReason);
+				
+				// also include that we are not subscribed to our channel
+				JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
+				JsonObjectBuilder jsonBuilder = jsonBuilderFactory.createObjectBuilder();
+				
+				jsonBuilder.add(EventChannel.ATTR_ACTIVE, eventChannel.isActive());
+				jsonBuilder.add(EventChannel.ATTR_SUBSCRIBED, false);
+				
+				statusMessage.addMessageJson(jsonBuilder);
 				
 			}
 			
-			return statusMessage.buildMessage().toString();
+			return statusMessage;
 		} 
 		
+		// otherwise if it is not local continue as normal
 		
-		// otherwise continue as normal
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
-		
-		// message to be returned
-		String statusMessageText;
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID);
-		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
-		
-		request.setParameters(parameters);
-		
-		// all set
-		
-		if (!commEngine.sendMessage(objectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + objectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					statusMessageText, logger);
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ objectID + " Destination ID: " + objectID + " Event ID: " + eventID  
-					+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					statusMessageText, logger); 
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		// TODO a status message needs to be parsed here and returned
-		return response.getResponseBody();
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS, 
+				destinationOid, 
+				attributes, 
+				parameters,
+				body);	
 	}
 	
 	
 	// TODO documentation
-	// TODO make it return status message
-	public String subscribeToEventChannel(String destinationObjectID, String eventID, Map<String, String> parameters) {
-		if (destinationObjectID == null || eventID == null) {
-			logger.info("Invalid object ID or event ID.");
-			return null;
-		}
-		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
+	public StatusMessage subscribeToEventChannel(String destinationOid, String eventId, Map<String, String> parameters,
+			String body) {
 		
 		// message to be returned
-		String statusMessageText;
+		String statusCodeReason;
+		StatusMessage statusMessage;
 		
-		// first check whether or not we are already subscribed
-		Subscription subscription = searchForSubscription(destinationObjectID);
+		// first check whether or not this is an attempt to subscribe to our own channel and stop if yes
+		if (destinationOid.equals(this.objectId)) {
+			statusCodeReason = new String("Can't subscribe to one's own event channel. Object ID " 
+					+ destinationOid + ", event ID " + eventId);
+			
+			logger.info(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_400_BADREQUEST, 
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+			
+			return statusMessage;
+		}
+		
+		// check whether or not we are already subscribed
+		Subscription subscription = searchForSubscription(destinationOid);
 		
 		if (subscription != null) {
-			if (subscription.subscriptionExists(eventID)) {
-				statusMessageText = 
-						new String("Already subscribed to " + destinationObjectID + " event channel " + eventID + ".");
-				logger.info(statusMessageText);
+			if (subscription.subscriptionExists(eventId)) {
 				
-				StatusMessage statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-						statusMessageText, logger);
+				statusCodeReason = 
+						new String("Already subscribed to " + destinationOid + " event channel " + eventId + ".");
 				
-				return statusMessage.buildMessage().toString();
+				logger.info(statusCodeReason);
+				
+				statusMessage = new StatusMessage(
+						false, 
+						CodesAndReasons.CODE_200_OK, 
+						CodesAndReasons.REASON_200_OK + statusCodeReason);
+				
+				return statusMessage;
 			}
 		} else {
 			// create a new subscription object (but don't actually add the subscription to a concrete event yet)
-			subscription = new Subscription(destinationObjectID);
+			subscription = new Subscription(destinationOid);
 		}
 		
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
 		
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, objectID); // we are sending the ID of this object
-		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
-		
-		request.setParameters(parameters);
-		
-		// all set
-		
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText, logger);
-			
-			return statusMessage.buildMessage().toString();
+		statusMessage = sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
+	
+		if (!statusMessage.isError()) {
+			// keep the track
+			subscription.addToSubscriptions(eventId);
+			subscribedEventChannels.add(subscription);
 		}
 		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ destinationObjectID + " Destination ID: " + destinationObjectID + " Event ID: " + eventID  
-					+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText, logger); 
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		// keep the track
-		subscription.addToSubscriptions(eventID);
-		subscribedEventChannels.add(subscription);
-		
-		// TODO a status message needs to be parsed here and returned
-		return response.getResponseBody();
+		return statusMessage;
 	}
 	
 	
 	
 	// TODO documentation
-	// TODO make it return status message
-	public String unsubscribeFromEventChannel(String destinationObjectID, String eventID, Map<String, String> parameters) {
-		if (destinationObjectID == null || eventID == null) {
-			logger.info("Invalid object ID or event ID.");
-			return null;
+	public StatusMessage unsubscribeFromEventChannel(String destinationOid, String eventId, 
+			Map<String, String> parameters, String body) {
+		
+		String statusCodeReason;
+		StatusMessage statusMessage;
+		
+		// first check whether or not this is an attempt to subscribe to our own channel and stop if yes
+		if (destinationOid.equals(this.objectId)) {
+			statusCodeReason = new String("Can't unsubscribe from one's own event channel. Object ID " 
+					+ destinationOid + ", event ID " + eventId);
+			
+			logger.info(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_400_BADREQUEST, 
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+			
+			return statusMessage;
 		}
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
+		// check whether or not we are already subscribed
+		Subscription subscription = searchForSubscription(destinationOid);
 		
-		// message to be returned
-		String statusMessageText;
-		
-		// first check whether or not we are already subscribed
-		Subscription subscription = searchForSubscription(destinationObjectID);
-		
-		if (subscription == null || !subscription.subscriptionExists(eventID)) {
-			statusMessageText = 
-					new String("Can't unsubscribe from " + destinationObjectID + " event channel " + eventID + ". We are not subscribed.");
-			logger.info(statusMessageText);
+		if (subscription == null || !subscription.subscriptionExists(eventId)) {
 			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					statusMessageText, logger);
+			statusCodeReason = 
+					new String("No subscription to " + destinationOid + " event channel " + eventId + " exists.");
 			
-			return statusMessage.buildMessage().toString();
+			logger.info(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					false, 
+					CodesAndReasons.CODE_200_OK, 
+					CodesAndReasons.REASON_200_OK + statusCodeReason);
+			
+			return statusMessage;
 		}
 		
 		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
 		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL);
-		request.addAttribute(NetworkMessageRequest.ATTR_EID, eventID);
+		statusMessage = sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
 		
-		request.setParameters(parameters);
-		
-		// all set
-		
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					statusMessageText, logger);
-			
-			return statusMessage.buildMessage().toString();
+		if (!statusMessage.isError()) {
+			// keep the track
+			subscription.removeFromSubscriptions(eventId);
 		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ destinationObjectID + " Destination ID: " + destinationObjectID + " Event ID: " + eventID  
-					+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					statusMessageText, logger); 
-			
-			return statusMessage.buildMessage().toString();
-		}
-		
-		// keep the track
-		subscription.removeFromSubscriptions(eventID);
 		
 		// clean up
 		if (subscription.getNumberOfSubscriptions() == 0) {
 			subscribedEventChannels.remove(subscription);
 		}
 		
-		
-		// TODO a status message needs to be parsed here and returned
-		return response.getResponseBody();
+		return statusMessage;
 	}
 	
 	
 	
 	// TODO documentation
-	// -1 if there is no such event channel 
-	public int sendEventToSubscribers(String eventID, String event, Map<String, String> parameters) {
+	public StatusMessage sendEventToSubscribers(String eventId, String body, Map<String, String> parameters) {
+		
+		String statusCodeReason;
+		StatusMessage statusMessage;
 		
 		// look up the event channel
-		EventChannel eventChannel = searchForEventChannel(eventID);
+		EventChannel eventChannel = searchForEventChannel(eventId);
 		
 		if (eventChannel == null || !eventChannel.isActive()) {
 			
-			logger.fine("Could not distribute an event to the channel '" + eventID + "' of the object '" + objectID 
-					+ "'. The event channel does not exist.");
-			return -1;
-		}
-		
-		if (!eventChannel.isActive()) {
+			statusCodeReason = new String("Could not distribute an event to the channel '" + eventId 
+					+ "' of the object '" + objectId + "'. The event channel does not exist or is not active.");
 			
-			logger.fine("Could not distribute an event to the channel '" + eventID + "' of the object '" + objectID 
-					+ "'. The event channel is not active.");
+			logger.info(statusCodeReason);
 			
-			return -1;
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_400_BADREQUEST, 
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+			
+			return statusMessage;
 		}
 		
 		// create the message
-		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, objectID, eventID, event, parameters, logger);
+		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, this.objectId, eventId, body, 
+				parameters, logger);
 		String message = eventMessage.buildMessageString();
 		
 		// keep track of number of sent messages
@@ -793,31 +636,38 @@ public class ConnectionDescriptor {
 		for (String destinationOid : subscribers) {
 			if(commEngine.sendMessage(destinationOid, message)) {
 				sentMessages++;
-			} 
+			} else {
+				logger.warning("ConnectionDescriptor#sendEventToSubscribers: Destination object ID " + destinationOid 
+						+ " is not in the contact list of the sender " + this.objectId + ".");
+			}
 		}
 		
-		return sentMessages;
+		statusCodeReason = new String("Event " + eventId + " was successfully distributed to " 
+				+ sentMessages + " out of " 
+				+ subscribers.size() + " subscribers.");
+		
+		logger.info(statusCodeReason);
+		
+		statusMessage = new StatusMessage(
+				false, 
+				CodesAndReasons.CODE_200_OK, 
+				CodesAndReasons.REASON_200_OK + statusCodeReason);
+		
+		return statusMessage;
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
 	/**
 	 * Returns the number of subscribers for the {@link EventChannel EventChannel} specified by its event ID. 
 	 * 
-	 * @param eventID ID of the {@link EventChannel EventChannel}.
+	 * @param eventId ID of the {@link EventChannel EventChannel}.
 	 * @return Number of subscribers, or -1 if no such {@link EventChannel EventChannel} exists. 
 	 */
-	public int getNumberOfSubscribers(String eventID) {
+	public int getNumberOfSubscribers(String eventId) {
 		
 		// look up the event channel
-		EventChannel eventChannel = searchForEventChannel(eventID);
+		EventChannel eventChannel = searchForEventChannel(eventId);
 		
 		if (eventChannel == null) {
 			return -1;
@@ -827,71 +677,21 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	
 	// TODO documentation
-	public StatusMessage getPropertyOfRemoteObject(String destinationObjectID, String propertyID, 
-			Map<String, String> parameters) {
+	public StatusMessage getPropertyOfRemoteObject(String destinationOid, String propertyId, 
+			Map<String, String> parameters, String body) {
+				
+		
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_PID, propertyId);
+		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETPROPERTYVALUE, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
 
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
-		
-		// message to be returned in case something goes wrong
-		String statusMessageText;
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_GETPROPERTYVALUE);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
-		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
-		
-		request.setParameters(parameters);
-		
-		// all set
-		
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			StatusMessage statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, 
-					statusMessageText, logger);
-			
-			return statusMessage;
-		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-					+ objectID + " Destination ID: " + destinationObjectID + " Property ID: " + propertyID  
-					+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText, logger);
-		}
-		
-		// if the return code is different than 2xx, make it visible
-		if ((response.getResponseCode() / 200) != 1){
-			
-			statusMessageText = new String("Source object: " + objectID + " Destination object: " + destinationObjectID 
-					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			
-			logger.info(statusMessageText);
-			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_GETVALUE, statusMessageText, logger);
-		}
-		
-		StatusMessage okStatus = new StatusMessage(logger);
-		okStatus.setError(false);
-		okStatus.setBody(response.getResponseBody());
-		
-		return okStatus;
 	}
 	
 	
@@ -899,66 +699,19 @@ public class ConnectionDescriptor {
 	
 	
 	// TODO documentation
-	public StatusMessage setPropertyOfRemoteObject(String destinationObjectID, String propertyID, String body,
+	public StatusMessage setPropertyOfRemoteObject(String destinationOid, String propertyId, String body,
 			Map<String, String> parameters) {
+				
 		
-		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
+		Map<String, String> attributes = new HashMap<String,String>();
+		attributes.put(NetworkMessageRequest.ATTR_PID, propertyId);
 		
-		// message to be returned in case something goes wrong
-		String statusMessageText;
-		
-		// we will need this newly generated ID, so we keep it
-		int requestId = request.getRequestId();
-		
-		// now fill the thing
-		request.setRequestOperation(NetworkMessageRequest.OPERATION_SETPROPERTYVALUE);
-		request.addAttribute(NetworkMessageRequest.ATTR_OID, destinationObjectID);
-		request.addAttribute(NetworkMessageRequest.ATTR_PID, propertyID);
-		
-		request.setParameters(parameters);
-		
-		request.setRequestBody(body);
-		
-		// all set
-		if (!commEngine.sendMessage(destinationObjectID, request.buildMessageString())){
-			
-			statusMessageText = new String("Destination object " + destinationObjectID + " is not online.");
-			
-			logger.info(statusMessageText);
-			
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
-		}
-		
-		// this will wait for response
-		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
-		
-		if (response == null){
-			
-			statusMessageText = new String("No response message received. The message might have got lost. Source ID: " 
-				+ objectID + " Destination ID: " + destinationObjectID + " Property ID: " + propertyID  
-				+ " Request ID: " + requestId);
-			
-			logger.info(statusMessageText);
-
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
-		}
-		
-		// if the return code is different than 2xx, make it visible
-		if ((response.getResponseCode() / 200) != 1){
-			
-			statusMessageText = new String("Source object: " + objectID + " Destination object: " + destinationObjectID 
-					+ " Response code: " + response.getResponseCode() + " Reason: " + response.getResponseCodeReason());
-			
-			logger.info(statusMessageText);
-
-			return new StatusMessage(true, StatusMessage.MESSAGE_PROPERTY_SETVALUE, statusMessageText, logger);
-		}
-		
-		StatusMessage okStatus = new StatusMessage(logger);
-		okStatus.setError(false);
-		okStatus.setBody(response.getResponseBody());
-		
-		return okStatus;
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_SETPROPERTYVALUE, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
 	}
 	
 	
@@ -974,34 +727,45 @@ public class ConnectionDescriptor {
 	 * 
 	 * NOTE: This method is to be called by the {@link CommunicationEngine engine } subclass instance.
 	 * 
-	 * @param from Object ID of the sender.
-	 * @param message Received message.
+	 * @param sourceOid Object ID of the sender.
+	 * @param messageString Received message.
 	 */
-	public void processIncommingMessage(String from, String message){
+	public void processIncommingMessage(String sourceOid, String messageString){
 		
-		logger.finest("New message from " + from + ": " + message);
+		logger.finest("New message from " + sourceOid + ": " + messageString);
 		
-		// let's parse the message 
-		MessageParser messageParser = new MessageParser(config, logger);
-		NetworkMessage networkMessage = messageParser.parseNetworkMessage(message);
+		// let's resolve the message 
+		NetworkMessage networkMessage = messageResolver.resolveNetworkMessage(messageString);
 		
 		if (networkMessage != null){
+			
+			/* next time dont forget to put everywhere the source oids into the response messages omfg
+			// just a check whether or not somebody was tampering the message (and forgot to do it properly)
+			if (!sourceOid.equals(networkMessage.getSourceOid())) {
+				logger.severe("ConnectionDescriptor#processIncommingMessage: The source OID "
+						+ sourceOid + " returned by communication engine "
+						+ "does not match the internal source OID in the message " + networkMessage.getSourceOid() 
+						+ ". Possible message tampering! Discarding the message and aborting.");
+				
+				return;
+			}*/
+
 			switch (networkMessage.getMessageType()){
 			
 			case NetworkMessageRequest.MESSAGE_TYPE:
 				logger.finest("The message is a request. Processing...");
-				processMessageRequest(from, networkMessage);
+				processMessageRequest(networkMessage);
 				break;
 				
 			case NetworkMessageResponse.MESSAGE_TYPE:
 				logger.finest("This message is a response. Adding to incoming queue - message count: " 
 						+ messageQueue.size());
-				processMessageResponse(from, networkMessage);
+				processMessageResponse(networkMessage);
 				break;
 				
 			case NetworkMessageEvent.MESSAGE_TYPE:
 				logger.finest("This message is an event. Forwarding...");
-				processMessageEvent(from, networkMessage);
+				processMessageEvent(networkMessage);
 			}
 		} else {
 			logger.warning("Invalid message received from the network.");
@@ -1030,30 +794,31 @@ public class ConnectionDescriptor {
 	/**
 	 * Processing method for {@link NetworkMessageRequest request} type of {@link NetworkMessage NetworkMessage}.
 	 * 
-	 * @param from ID of the object that sent the message.
+	 * @param sourceOid ID of the object that sent the message.
 	 * @param networkMessage Message parsed from the incoming message. 
 	 */
-	private void processMessageRequest(String from, NetworkMessage networkMessage){
+	private void processMessageRequest(NetworkMessage networkMessage){
 		
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
 		
 		NetworkMessageResponse response;
 		
-		
+		// create response and send it back
 		switch (requestMessage.getRequestOperation()){
 		
+		// TODO move the send back lines to one single line after the persistence is finished
 		case NetworkMessageRequest.OPERATION_CANCELTASK:
 			
-			response = respondToCancelRunningTask(from, requestMessage);
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToCancelRunningTask(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
 			
-			response = respondToEventChannelStatusQuery(from, requestMessage);
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToEventChannelStatusQuery(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 			
@@ -1071,53 +836,43 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
 			
-			response = agentConnector.getObjectProperty(requestMessage);
-
-			// send it back
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToGetObjectProperty(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
 			
-			response = respondToGetTaskStatus(from, requestMessage);
-			
-			// send it back
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToGetTaskStatus(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
 			
-			response = agentConnector.setObjectProperty(requestMessage);
-
-			// send it back
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToSetObjectProperty(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_STARTACTION:
 			
-			response = respondToStartActionRequest(from, requestMessage);
-			
-			// send it back
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToStartActionRequest(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
 			
-			response = respondToEventSubscriptionRequest(from, requestMessage);
-			
-			// answer
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToEventSubscriptionRequest(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
 			
-			response = respondToCancelSubscriptionRequest(from, requestMessage);
-			
-			// answer
-			commEngine.sendMessage(from, response.buildMessageString());
+			response = respondToCancelSubscriptionRequest(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 			
 			break;
 		}
@@ -1132,33 +887,35 @@ public class ConnectionDescriptor {
 	 * @param from ID of the object that sent the message.
 	 * @param networkMessage Message parsed from the incoming message.
 	 */
-	private void processMessageResponse(String from, NetworkMessage networkMessage){
+	private void processMessageResponse(NetworkMessage networkMessage){
 		messageQueue.add(networkMessage);
 	}
 	
 	
 	
 	// TODO documentation
-	private void processMessageEvent(String from, NetworkMessage networkMessage) {
-		
-		
+	private void processMessageEvent(NetworkMessage networkMessage) {
 		
 		// cast it to event message first (it is safe and also necessary)
 		NetworkMessageEvent eventMessage = (NetworkMessageEvent) networkMessage;
 		
-		logger.info("Event " + eventMessage.getEventID() + " arrived from " + eventMessage.getEventSource() 
+		logger.info("Event " + eventMessage.getEventId() + " arrived from " + eventMessage.getSourceOid() 
 							+ ". Event body: " + eventMessage.getEventBody());
 		
 		
 		// don't process the event if we are not subscribed to it
-		Subscription subscription = searchForSubscription(from);
+		Subscription subscription = searchForSubscription(eventMessage.getSourceOid());
 		
-		if (subscription != null && subscription.subscriptionExists(eventMessage.getEventID())) {
+		if (subscription != null && subscription.subscriptionExists(eventMessage.getEventId())) {
+			
 			NetworkMessageResponse response = agentConnector.forwardEventToObject(
-					this.objectID, 
-					eventMessage.getEventID(), 
-					eventMessage.getEventBody());
-
+					eventMessage.getSourceOid(),
+					this.objectId,
+					eventMessage.getEventId(), 
+					eventMessage.getEventBody(),
+					eventMessage.getParameters()
+					);
+			
 			// if the return code is different than 2xx, make it visible
 			if ((response.getResponseCode() / 200) != 1){
 				
@@ -1174,56 +931,79 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
-	private NetworkMessageResponse respondToEventChannelStatusQuery(String from, NetworkMessageRequest requestMessage) {
+	private NetworkMessageResponse respondToGetObjectProperty(NetworkMessageRequest requestMessage) {
 		
-		String eventID = null;
+		// call the agent connector
+		NetworkMessageResponse response = agentConnector.getObjectProperty(
+				requestMessage.getSourceOid(), 
+				requestMessage.getDestinationOid(), 
+				requestMessage.getAttributes().get(NetworkMessageRequest.ATTR_PID), 
+				requestMessage.getRequestBody(), requestMessage.getParameters());
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
+	
+	
+	private NetworkMessageResponse respondToSetObjectProperty(NetworkMessageRequest requestMessage) {
+		// call the agent connector
+		NetworkMessageResponse response = agentConnector.setObjectProperty(
+				requestMessage.getSourceOid(), 
+				requestMessage.getDestinationOid(), 
+				requestMessage.getAttributes().get(NetworkMessageRequest.ATTR_PID), 
+				requestMessage.getRequestBody(), requestMessage.getParameters());
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
+	
+	
+	private NetworkMessageResponse respondToEventChannelStatusQuery(NetworkMessageRequest requestMessage) {
+		
+		String eventId = null;
 		EventChannel eventChannel = null;
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
-		
 		
 		// the event ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);	
+			eventId = attributesMap.get(NetworkMessageRequest.ATTR_EID);	
 		}
 		
-		if (eventID != null) {
-			eventChannel = searchForEventChannel(eventID);
+		if (eventId != null) {
+			eventChannel = searchForEventChannel(eventId);
 		}
 		
 		if (eventChannel == null) {
-			logger.info("Received a request to provide status of invalid event channel. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request to provide status of invalid event channel "
+					+ eventId + ". Request came from: " + requestMessage.getSourceOid());
 			
-			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-					new String("Invalid event channel specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+					+ "Invalid event channel specified.");
 
 		} else {
 			
-			logger.fine("Received a request to provide status of event channel " + eventID + " from " + from + ".");
+			logger.fine("Object ID " + this.objectId + " received a request to provide status of event channel " 
+					+ eventId + " from " + requestMessage.getSourceOid() + ".");
 			
-			if (eventChannel.isActive()) {
-				statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						EventChannel.STATUS_STRING_ACTIVE, logger);
-			} else {
-				statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS, 
-						EventChannel.STATUS_STRING_INACTIVE, logger);
-			}
+			response.setError(false);
+			response.setResponseCode(CodesAndReasons.CODE_200_OK);
+			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Event channel status retrieved.");
+			response.setResponseBody(createSimpleJsonString(EventChannel.ATTR_ACTIVE, eventChannel.isActive()));
 			
 		}
-		
-		response.setResponseBody(statusMessage.buildMessage().toString());
+
 		// don't forget to set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
@@ -1232,52 +1012,50 @@ public class ConnectionDescriptor {
 	
 	
 	
-	// TODO documentation
-	private NetworkMessageResponse respondToEventSubscriptionRequest(String from, NetworkMessageRequest requestMessage) {
+	private NetworkMessageResponse respondToEventSubscriptionRequest(NetworkMessageRequest requestMessage) {
 		
-		String eventID = null;
+		String eventId = null;
 		EventChannel eventChannel = null;
 		
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
 		
 		// the event ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);
+			eventId = attributesMap.get(NetworkMessageRequest.ATTR_EID);
 		}
 		
 		// check whether the event channel exists
-		if (eventID != null) {
-			eventChannel = searchForEventChannel(eventID);
+		if (eventId != null) {
+			eventChannel = searchForEventChannel(eventId);
 		}
 		
 		// check whether the object is in our roster and whether or not it is already in the list of subscribers
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		
 		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
-			logger.info("Received a request for subscription to invalid event channel. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request for subscription to invalid event channel " + eventId 
+					+ ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-					new String("Invalid event channel specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+					+ "Invalid event channel specified.");
+			
 		} else {
-			logger.fine("Received a request for subscription to event channel " + eventID + " from " + from + ".");
+			logger.fine("Object ID " + this.objectId + " received a request for subscription to event channel " 
+					+ eventId + " from " + requestMessage.getSourceOid() + ".");
 			
-			eventChannel.addToSubscribers(from);
+			eventChannel.addToSubscribers(requestMessage.getSourceOid());
 			
-			statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL, 
-						StatusMessage.TEXT_SUCCESS, logger);
+			response.setError(false);
+			response.setResponseCode(CodesAndReasons.CODE_200_OK);
+			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Subscribed.");
 		}
 		
-		response.setResponseBody(statusMessage.buildMessage().toString());
-		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		// set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
 		return response;
@@ -1287,49 +1065,49 @@ public class ConnectionDescriptor {
 	
 	
 	// TODO documentation
-	private NetworkMessageResponse respondToCancelSubscriptionRequest(String from, NetworkMessageRequest requestMessage) {
-		String eventID = null;
+	private NetworkMessageResponse respondToCancelSubscriptionRequest(NetworkMessageRequest requestMessage) {
+		String eventId = null;
 		EventChannel eventChannel = null;
 		
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
 		
 		// the event ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			eventID = attributesMap.get(NetworkMessageRequest.ATTR_EID);
+			eventId = attributesMap.get(NetworkMessageRequest.ATTR_EID);
 		}
 		
 		// check whether the event channel exists
-		if (eventID != null) {
-			eventChannel = searchForEventChannel(eventID);
+		if (eventId != null) {
+			eventChannel = searchForEventChannel(eventId);
 		}
 		
 		// check whether the object is in our roster and whether or not it is already in the list of subscribers
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		
 		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
-			logger.info("Received a request to cancel subscription to invalid event channel. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request to cancel subscription to invalid event "
+					+ "channel " + eventId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-					new String("Invalid event channel specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+					+ "Invalid event channel specified.");
 		} else {
-			logger.fine("Received a request to cancel subscription to event channel " + eventID + " from " + from + ".");
 			
-			eventChannel.removeFromSubscribers(from);
+			logger.fine("Object ID " + this.objectId + " received a request to cancel subscription to event channel " 
+					+ eventId + " from " + requestMessage.getSourceOid() + ".");
 			
-			statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL, 
-						StatusMessage.TEXT_SUCCESS, logger);
+			eventChannel.removeFromSubscribers(requestMessage.getSourceOid());
+			
+			response.setError(false);
+			response.setResponseCode(CodesAndReasons.CODE_200_OK);
+			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Unsubscribed.");
 		}
 		
-		response.setResponseBody(statusMessage.buildMessage().toString());
+
 		// don't forget to set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
@@ -1339,30 +1117,29 @@ public class ConnectionDescriptor {
 	
 	
 	// TODO documentation
-	private NetworkMessageResponse respondToStartActionRequest(String from, NetworkMessageRequest requestMessage) {
+	private NetworkMessageResponse respondToStartActionRequest(NetworkMessageRequest requestMessage) {
 		
-		String actionID = null;
+		String actionId = null;
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+			actionId = attributesMap.get(NetworkMessageRequest.ATTR_AID);
 		}
 		
 		// check whether the action exists
-		if (actionID != null) {
-			action = searchForAction(actionID);
+		if (actionId != null) {
+			action = searchForAction(actionId);
 		}
 		
 		// TODO delete this workaround - the actions should be loaded at the startup and no new action should 
 		// be possible
 		if (action == null) {
-			action = new Action (config, this.objectID, actionID, agentConnector);
+			action = new Action (config, this.objectId, actionId, agentConnector, logger);
 			providedActions.add(action);
 		}
 		
@@ -1371,45 +1148,44 @@ public class ConnectionDescriptor {
 		// check whether the object is in our roster and whether or not the action already exists
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		if (action == null ) { // || security check
-			logger.info("Received a request to start non existing action. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request to start non existing action " + actionId 
+					+ ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_ACTION_START, 
-					new String("Invalid action specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+								+ "Invalid action specified.");
 		} else {
-			logger.fine("Received a request to start action " + actionID + " from " + from + ".");
+			logger.fine("Object ID " + this.objectId + " received a request to start action " + actionId + " from " 
+						+ requestMessage.getSourceOid() + ".");
 			
-			String taskID = action.createNewTask(from, requestMessage.getRequestBody());
+			String taskId = action.createNewTask(requestMessage.getSourceOid(), 
+					requestMessage.getRequestBody(), requestMessage.getParameters());
 			
-			if (taskID == null) {
+			if (taskId == null) {
 				
-				statusString = new String("Cannot start action " + actionID + ", too many tasks in queue.");
+				logger.warning("Cannot start action " + actionId + ", too many tasks in queue.");
 				
-				logger.warning(statusString);
-				
-				statusMessage = new StatusMessage(
-						true, 
-						StatusMessage.MESSAGE_ACTION_START, 
-						new String(statusString), logger);
+				// responding with error
+				response.setError(true);
+				response.setResponseCode(CodesAndReasons.CODE_503_SERVICEUNAVAILABLE);
+				response.setResponseCodeReason(CodesAndReasons.REASON_503_SERVICENAVAILABLE 
+						+ "Too many tasks waiting in queue.");
+
 			} else {
-				statusString = new String("Task " + taskID + " of action " + actionID + " was created and added to the queue.");
 				
-				logger.fine(statusString);
+				logger.fine("Object " + this.objectId + " created task " + taskId + " of action " 
+						+ actionId + " and added it to the queue.");
 				
-				statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_ACTION_START, 
-						StatusMessage.TEXT_SUCCESS, logger);
-				
-				statusMessage.addMessage(StatusMessage.MESSAGE_TASKID, taskID);
+				response.setError(false);
+				response.setResponseCode(CodesAndReasons.CODE_201_CREATED);
+				response.setResponseCodeReason(CodesAndReasons.REASON_201_CREATED + "New task added to the queue.");
+				response.setResponseBody(createSimpleJsonString(Action.ATTR_TASKID, taskId));
 			}
 		}
 		
-		response.setResponseBody(statusMessage.buildMessage().toString());
-		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		// set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
 		return response;
@@ -1417,25 +1193,24 @@ public class ConnectionDescriptor {
 	
 	
 	
-	private NetworkMessageResponse respondToGetTaskStatus(String from, NetworkMessageRequest requestMessage) {
-		String actionID = null;
-		String taskID = null;
+	private NetworkMessageResponse respondToGetTaskStatus(NetworkMessageRequest requestMessage) {
+		String actionId = null;
+		String taskId = null;
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
-			taskID = attributesMap.get(NetworkMessageRequest.ATTR_TID);
+			actionId = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+			taskId = attributesMap.get(NetworkMessageRequest.ATTR_TID);
 		}
 		
 		// check whether the action exists
-		if (actionID != null) {
-			action = searchForAction(actionID);
+		if (actionId != null) {
+			action = searchForAction(actionId);
 		}
 		
 		
@@ -1444,48 +1219,47 @@ public class ConnectionDescriptor {
 		// check whether the object is in our roster and whether or not the action already exists
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		if (action == null ) { // || security check
-			logger.info("Received a request for status report on non existing action/task. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request for status report on non existing action " 
+					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_TASK_STATUS, 
-					new String("Invalid action specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+								+ "Invalid action specified.");
 		} else {
-			logger.fine("Received a request for status report on action " + actionID + " task " + taskID + " from " + from + ".");
+			logger.fine("Object ID " + this.objectId + " received a request for status report on action " + actionId 
+					+ " task " + taskId + " from " + requestMessage.getSourceOid() + ".");
 			
-			byte statusCode = action.getTaskStatus(taskID);
-			String status = action.getTaskStatusString(taskID);
-			String returnValue = action.getTaskReturnValue(taskID);
-			// running time?
-			
+			byte statusCode = action.getTaskStatus(taskId);
+
 			if (statusCode == Task.TASKSTATUS_UNKNOWN) {
 				
-				statusString = new String("Cannot find task " + taskID + ". Its status is unknown.");
+				statusString = new String("Object ID " + this.objectId + " can't find task " + taskId 
+						+ ". Its status is unknown.");
 				
 				logger.warning(statusString);
 				
-				statusMessage = new StatusMessage(
-						true, 
-						StatusMessage.MESSAGE_TASK_STATUS, 
-						new String(statusString), logger);
+				// responding with error
+				response.setError(true);
+				response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+				response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+									+ "Invalid task specified.");
 			} else {
-				statusString = new String("Task " + taskID + " of action " + actionID + " status " + status + " return value " + returnValue);
 				
-				logger.fine(statusString);
+				logger.fine("Object ID " + this.objectId + " task " + taskId + " of action " + actionId 
+						+ " status " + action.getTaskStatusString(taskId) + ".");
 				
-				statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_TASK_STATUS, 
-						status, logger);
+				response.setError(false);
+				response.setResponseCode(CodesAndReasons.CODE_200_OK);
+				response.setResponseCodeReason(CodesAndReasons.REASON_200_OK 
+									+ "Task status retrieved.");
 				
-				statusMessage.addMessage(StatusMessage.MESSAGE_TASK_RETURNVALUE, returnValue);
+				response.setResponseBody(action.createTaskStatusJson(taskId).toString());
 			}
 		}
 		
-		response.setResponseBody(statusMessage.buildMessage().toString());
-		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		// set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
 		return response;
@@ -1494,70 +1268,68 @@ public class ConnectionDescriptor {
 	
 	
 	
-	private NetworkMessageResponse respondToCancelRunningTask(String from, NetworkMessageRequest requestMessage) {
-		String actionID = null;
-		String taskID = null;
+	private NetworkMessageResponse respondToCancelRunningTask(NetworkMessageRequest requestMessage) {
+		String actionId = null;
+		String taskId = null;
 		Action action = null;
 		
 		// this is a network message used to encapsulate the status message
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		StatusMessage statusMessage;
 		
 		// the action ID should have been sent in attributes
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		Map<String, String> attributesMap = requestMessage.getAttributes();
 		if (!attributesMap.isEmpty()) {
-			actionID = attributesMap.get(NetworkMessageRequest.ATTR_AID);
-			taskID = attributesMap.get(NetworkMessageRequest.ATTR_TID);
+			actionId = attributesMap.get(NetworkMessageRequest.ATTR_AID);
+			taskId = attributesMap.get(NetworkMessageRequest.ATTR_TID);
 		}
 		
 		// check whether the action exists
-		if (actionID != null) {
-			action = searchForAction(actionID);
+		if (actionId != null) {
+			action = searchForAction(actionId);
 		}
 		
-		
-		String statusString;
 		
 		// check whether the object is in our roster and whether or not the action already exists
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		if (action == null ) { // || security check
-			logger.info("Received a request for stopping a non existing action/task. Request came from: " + from);
+			logger.info("Object ID " + this.objectId + " received a request for stopping a task of non existing action " 
+					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
-			// remember! we are going to include the outcome of the operation as the status message
-			statusMessage = new StatusMessage(
-					true, 
-					StatusMessage.MESSAGE_TASK_STOP, 
-					new String("Invalid action specified."), logger);
+			response.setError(true);
+			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
+			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
+								+ "Invalid action specified.");
 		} else {
-			logger.fine("Received a request for for stopping an action " + actionID + " task " + taskID + " from " + from + ".");
+			logger.fine("Object ID " + this.objectId + " received a request for stopping an action ID " 
+					+ actionId + " task ID " + taskId + " from object ID " + requestMessage.getSourceOid() + ".");
 			
-			NetworkMessageResponse response2 = action.cancelTask(taskID);
+			response = action.cancelTask(taskId, requestMessage.getRequestBody(), requestMessage.getParameters());
 			
-			if (response2 == null) {
+			if (response == null) {
 				
-				statusString = new String("Cannot find task " + taskID + ". Its status is unknown.");
+				logger.warning("Task ID " + taskId + " is in a state that does not allow it to be cancelled. It either does not exist, is already finished, or failed.");
 				
-				logger.warning(statusString);
+				response = new NetworkMessageResponse(config, logger);
 				
-				statusMessage = new StatusMessage(
-						true, 
-						StatusMessage.MESSAGE_TASK_STOP, 
-						new String(statusString), logger);
+				// responding with error
+				response.setError(false);
+				response.setResponseCode(CodesAndReasons.CODE_200_OK);
+				response.setResponseCodeReason(CodesAndReasons.REASON_200_OK 
+									+ "Invalid task specified.");
 			} else {
-				statusString = new String("Task " + taskID + " of action " + actionID 
-						+ " cancelation result: " + response2.getResponseCode() + " " + response2.getResponseCodeReason());
+				if (response.isError()) {
+					logger.warning("Object ID " + this.objectId + " received an error from agent connector while "
+							+ "attempting to stop task ID " + taskId + ". Code " + response.getResponseCode() 
+							+ " reason " + response.getResponseCodeReason());
+				} else {
+					logger.info("Object ID " + this.objectId + " task " + taskId + "stopped.");
+				}
 				
-				logger.fine(statusString);
-				
-				statusMessage = new StatusMessage(
-						false, 
-						StatusMessage.MESSAGE_TASK_STOP, statusString, logger);
 			}
 		}
 		
-		response.setResponseBody(statusMessage.buildMessage().toString());
-		// don't forget to set the correlation id so the other side can identify what request does this response belong to
+		// set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
 		
 		return response;
@@ -1585,17 +1357,16 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	private Action searchForAction(String actionID) {
+	private Action searchForAction(String actionId) {
 		
-		// TODO remove
-		for (Action action : providedActions) {
-			System.out.println("List of actions: " + action.getActionID());
+		if (actionId == null) {
+			return null;
 		}
 		
 		// search for given action
 		
 		for (Action action : providedActions) {
-			if (action.getActionID().equals(actionID)) {
+			if (action.getActionId().equals(actionId)) {
 				// found it
 				return action;
 			}
@@ -1673,13 +1444,131 @@ public class ConnectionDescriptor {
 			}
 			
 			timeoutReached = ((System.currentTimeMillis() - startTime) 
-							> (config.getInt(NetworkMessage.CONFIG_PARAM_XMPPMESSAGETIMEOUT, 
-									NetworkMessage.CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000));
+							> (config.getInt(NetworkMessage.CONFIG_PARAM_REQUESTMESSAGETIMEOUT, 
+									NetworkMessage.CONFIG_DEF_REQUESTMESSAGETIMEOUT)*1000));
 			
 		// until we get our message or the timeout expires
 		} while (message == null && !timeoutReached);
 	
 		return message;	
+	}
+	
+	
+	private StatusMessage sendRequestForRemoteOperation(byte operationId, String destinationOid, 
+			Map<String, String> attributes, Map<String, String> parameters, String body) {
+		
+		if (destinationOid == null) {
+			return null;
+		}
+
+		// message to be returned
+		String statusCodeReason;
+		StatusMessage statusMessage;
+		
+		NetworkMessageRequest request = new NetworkMessageRequest(config, logger);
+		
+		// we will need this newly generated ID, so we keep it
+		int requestId = request.getRequestId();
+		
+		// now fill the thing
+		request.setRequestOperation(operationId);
+		
+		request.setSourceOid(this.objectId);
+		request.setDestinationOid(destinationOid);
+		
+		request.setAttributes(attributes);
+		
+		request.setParameters(parameters);
+		
+		request.setRequestBody(body);
+		
+		
+		// all set
+		if (!commEngine.sendMessage(destinationOid, request.buildMessageString())){
+			
+			// TODO or something else wrong happened make a security check for outgoing messages
+			statusCodeReason = new String("Destination object " + destinationOid 
+					+ " is not in the list of available objects or it was not possible to send the message.");
+			
+			logger.warning(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_404_NOTFOUND, 
+					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+			
+			return statusMessage;
+		}
+		
+		// this will wait for response
+		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
+		
+		// nothing came through
+		if (response == null){
+
+			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
+					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
+			
+			logger.warning(statusCodeReason);
+			
+			statusMessage = new StatusMessage(
+					true, 
+					CodesAndReasons.CODE_408_REQUESTTIMEOUT, 
+					CodesAndReasons.REASON_408_REQUESTTIMEOUT + statusCodeReason); 
+			
+			return statusMessage;
+		}
+		
+		// response arrived
+		statusMessage = new StatusMessage(
+				response.isError(),
+				response.getResponseCode(),
+				response.getResponseCodeReason()
+				);
+		
+		JsonObject json = messageResolver.readJsonObject(response.getResponseBody());
+		if (json != null) {
+			statusMessage.addMessageJson(json);
+		} else {
+			logger.info("It was not possible to turn response body into a valid JSON. Original string: " 
+							+ response.getResponseBody());
+		}
+		
+		
+		return statusMessage;
+		
+	}
+	
+	
+	private String createSimpleJsonString(String key, String value) {
+		// if key is null, there is no need to bother... 
+		if (key == null) {
+			return null;
+		}
+			
+		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
+		
+		if (value == null) {
+			builder.addNull(key);
+		} else {
+			builder.add(key, value);
+		}
+		
+		return builder.build().toString();
+	}
+	
+	
+	private String createSimpleJsonString(String key, boolean value) {
+		// if key is null, there is no need to bother... 
+		if (key == null) {
+			return null;
+		}
+			
+		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
+		
+		builder.add(key, value);
+		
+		return builder.build().toString();
 	}
 	
 }

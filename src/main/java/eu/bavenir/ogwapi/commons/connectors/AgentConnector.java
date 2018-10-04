@@ -1,10 +1,10 @@
 package eu.bavenir.ogwapi.commons.connectors;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
 /*
@@ -19,6 +19,10 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 public abstract class AgentConnector {
 	
 	/* === CONSTANTS === */
+	/**
+	 * Reserved word for source OID parameter. explain more...
+	 */
+	public static final String PARAM_SOURCEOID = "sourceOid";
 	
 	/* === FIELDS === */
 	
@@ -35,17 +39,20 @@ public abstract class AgentConnector {
 		this.logger = logger;
 	}
 
+	public abstract NetworkMessageResponse forwardEventToObject(String sourceOid, String destinationOid, String eventId, 
+			String body, Map<String, String> parameters);
 	
-	// TODO make them return StatusMessage
-	public abstract NetworkMessageResponse forwardEventToObject(String objectID, String eventID, String eventBody);
+	public abstract NetworkMessageResponse getObjectProperty(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String, String> parameters);
 	
-	public abstract NetworkMessageResponse getObjectProperty(NetworkMessageRequest requestMessage);
+	public abstract NetworkMessageResponse setObjectProperty(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String, String> parameters);
 	
-	public abstract NetworkMessageResponse setObjectProperty(NetworkMessageRequest requestMessage);
+	public abstract NetworkMessageResponse startObjectAction(String sourceOid, String destinationOid, String actionId, 
+			String body, Map<String, String> parameters);
 	
-	public abstract NetworkMessageResponse startObjectAction(String objectID, String actionID, String requestBody);
-	
-	public abstract NetworkMessageResponse cancelTask(String objectID, String actionID);
+	public abstract NetworkMessageResponse stopObjectAction(String sourceOid, String destinationOid, String actionId, 
+			String body, Map<String, String> parameters);
 	
 		
 	

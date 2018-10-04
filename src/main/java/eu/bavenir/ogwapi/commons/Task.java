@@ -1,8 +1,13 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
+
+import org.apache.commons.configuration2.XMLConfiguration;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
 /*
@@ -41,8 +46,8 @@ public class Task {
 	// it indicates an error.
 	public static final String TASKSTATUS_STRING_UNKNOWN = "unknown";
 	
+	public static final String CANCELED_RETURN_VALUE = "canceled";
 	
-	private static final String CANCELED_RETURN_VALUE = "canceled";
 	
 	
 	
@@ -54,16 +59,15 @@ public class Task {
 	
 	private long endTime;
 	
-	// TODO make it so that the running time will be updated every second and it will be possible to return comprehensive status
 	private long runningTime;
 	
-	private String requestingObjectID;
+	private String sourceOid;
 	
-	private String objectID;
+	private String destinationOid;
 	
-	private String taskID;
+	private String taskId;
 	
-	private String actionID;
+	private String actionId;
 	
 	private String returnValue;
 	
@@ -73,29 +77,25 @@ public class Task {
 	
 	private AgentConnector connector;
 	
+	private Map<String, String> parameters;
+	
+	private XMLConfiguration config;
+	
+	private Logger logger;
+	
 	
 	
 	
 	/* === PUBLIC METHODS === */
 	
-	public Task(String objectID, String requestingObjectID, String actionID, String body, AgentConnector connector) {
-		initialize(objectID, requestingObjectID, actionID, connector, body);
+	public Task(XMLConfiguration config, Logger logger, AgentConnector connector, String sourceOid, String destinationOid, 
+			String actionId, String body, Map<String, String> parameters) {
+		
+		initialize(config, logger, connector, sourceOid, destinationOid, actionId, body, parameters);
 		
 		// default status after creating an instance of task
 		taskStatus = TASKSTATUS_PENDING;
-	}
-	
-	
-	
-	public Task(String objectID, String requestingObjectID, String actionID, String body, byte taskStatus, AgentConnector connector) {
-		initialize(objectID, requestingObjectID, actionID, connector, body);
-		
-		// if wrong status was given, assign the default
-		if (!setTaskStatus(taskStatus)) {
-			setTaskStatus(TASKSTATUS_PENDING);
-		}
-	}
-	
+	}	
 	
 	
 	public NetworkMessageResponse start() {
@@ -105,21 +105,22 @@ public class Task {
 			return null;
 		}
 		
-		// TODO this is baaad, need to return status message
-		NetworkMessageResponse response = connector.startObjectAction(objectID, actionID, body);
+		NetworkMessageResponse response = connector.startObjectAction(sourceOid, destinationOid, actionId, body, 
+							parameters);
+		
 		
 		if (response == null) {
-			return null;
-		}
-		
-		if ((response.getResponseCode() / 200) != 1){
 			
 			return null;
 		}
 		
-		startTime = System.currentTimeMillis();
-		
-		taskStatus = TASKSTATUS_RUNNING;
+		if ((response.getResponseCode() / 200) == 1){
+			
+			startTime = System.currentTimeMillis();
+			
+			taskStatus = TASKSTATUS_RUNNING;
+			
+		}
 		
 		return response;
 	}
@@ -133,20 +134,26 @@ public class Task {
 		//		switch to finished state
 		//		switch to failed state
 		
-		if (taskStatus.equals(TASKSTATUS_STRING_RUNNING)) {
+		byte taskStatusByte = translateStringStatusToByte(taskStatus);
+		
+		if (!validateTaskStatus(taskStatusByte)) {
+			return false;
+		}
+		
+		if (taskStatusByte == TASKSTATUS_RUNNING) {
 			// this is more or less just progress update
 			this.returnValue = returnValue;
 			return true;
 		}
 		
-		if (taskStatus.equals(TASKSTATUS_STRING_FINISHED) || taskStatus.equals(TASKSTATUS_STRING_FAILED)) {
+		if (taskStatusByte == TASKSTATUS_FINISHED || taskStatusByte == TASKSTATUS_FAILED) {
 			
 			// stop the clock
 			endTime = System.currentTimeMillis();
 			runningTime = runningTime + (endTime - startTime);
 			
 			// change the status
-			this.taskStatus = translateStringStatusToByte(taskStatus);
+			this.taskStatus = taskStatusByte;
 			this.returnValue = returnValue;	
 			
 			return true;
@@ -157,45 +164,89 @@ public class Task {
 	}
 	
 	
-
-	public NetworkMessageResponse cancel() {
+	public boolean updateRunningTask(byte taskStatus, String returnValue) {
 		
-		NetworkMessageResponse response = null;
+		// only running task can be updated and it is only possible to either:
+		// 		remain in the running state
+		//		switch to finished state
+		//		switch to failed state
 		
-		if (taskStatus == TASKSTATUS_FAILED || taskStatus == TASKSTATUS_FINISHED) {
-			return null;
+		if (!validateTaskStatus(taskStatus)) {
+			return false;
 		}
 		
-		
-		// only pending and running task can be canceled
 		if (taskStatus == TASKSTATUS_RUNNING) {
-			
-			// TODO this is baaad, need to return status message - and control the return value
-			response = connector.cancelTask(objectID, actionID);
-			
-			if (response == null) {
-				return null;
-			}
-			
-			if ((response.getResponseCode() / 200) != 1){
-				return null;
-			}
+			// this is more or less just progress update
+			this.returnValue = returnValue;
+			return true;
+		}
+		
+		if (taskStatus == TASKSTATUS_FINISHED || taskStatus == TASKSTATUS_FAILED) {
 			
 			// stop the clock
 			endTime = System.currentTimeMillis();
-			runningTime = runningTime + (endTime - startTime);	
+			runningTime = runningTime + (endTime - startTime);
+			
+			// change the status
+			this.taskStatus = taskStatus;
+			this.returnValue = returnValue;	
+			
+			return true;
+		}
+		
+		// all other alternatives are banned
+		return false;
+	}
+	
+
+	public NetworkMessageResponse cancel(String body, Map<String, String> parameters) {
+		
+		NetworkMessageResponse response = null;
+		
+		// only pending and running task can be aborted
+		if (taskStatus == TASKSTATUS_RUNNING) {
+			
+			response = connector.stopObjectAction(sourceOid, destinationOid, actionId, body, parameters);
+			
+			if ((response.getResponseCode() / 200) == 1){
+				
+				// stop the clock
+				endTime = System.currentTimeMillis();
+				runningTime = runningTime + (endTime - startTime);
+				
+				taskStatus = TASKSTATUS_FINISHED;
+				
+				if (response.getResponseBody() != null) {
+					returnValue = response.getResponseBody();
+				} else {
+					returnValue = CANCELED_RETURN_VALUE;
+				}
+			}
+			
+			return response;
 		} 
 		
-		taskStatus = TASKSTATUS_FINISHED;
-		returnValue = CANCELED_RETURN_VALUE;
+		if (taskStatus == TASKSTATUS_PENDING) {
+			
+			taskStatus = TASKSTATUS_FINISHED;
+			returnValue = CANCELED_RETURN_VALUE;
+			
+			response = new NetworkMessageResponse(config, logger, 
+					false, 
+					CodesAndReasons.CODE_200_OK, 
+					CodesAndReasons.REASON_200_OK + "Canceled pending task", 
+					null);
+		}
+		
+		// tasks that are in failed, finished or unknown state will always return null
 		
 		return response;
-		
 	}
 	
 	
 	public long getRunningTime() {
 		
+		// TODO this is inaccurate
 		if (taskStatus == TASKSTATUS_RUNNING) {
 			return runningTime + (System.currentTimeMillis() - startTime);
 		} else {
@@ -216,18 +267,18 @@ public class Task {
 		return startTime;
 	}
 	
-	public String getRequestingObjectID() {
-		return requestingObjectID;
+	public String getRequestingObjectId() {
+		return sourceOid;
 	}
 	
 	public String getObjectID() {
-		return objectID;
+		return destinationOid;
 	}
 
 
 	
-	public String getTaskID() {
-		return taskID;
+	public String getTaskId() {
+		return taskId;
 	}
 
 
@@ -273,43 +324,41 @@ public class Task {
 	/* === PRIVATE METHODS === */
 
 
-	private void initialize(String objectID, String requestingObjectID, String actionID, AgentConnector connector, String body) {
+	private void initialize(XMLConfiguration config, Logger logger, AgentConnector connector, String sourceOid, 
+			String destinationOid, String actionId, String body, Map<String, String> parameters) {
 		startTime = 0;
 		endTime = 0;
 		runningTime = 0;
 		
 		creationTime = System.currentTimeMillis();
 		
-		taskID = UUID.randomUUID().toString();		
+		taskId = UUID.randomUUID().toString();		
 		returnValue = null;
 		
-		this.objectID = objectID;
+		this.config = config;
+		this.logger = logger;
+		this.destinationOid = destinationOid;
 		this.body = body;
-		this.requestingObjectID = objectID;
-		this.actionID = actionID;
+		this.sourceOid = sourceOid;
+		this.actionId = actionId;
 		this.connector = connector;
+		this.parameters = parameters;
 		
-		// TODO delete after test
-		System.out.println("BODY: " + body);
 	}
 	
 	
 	
-	private boolean setTaskStatus(byte taskStatus) {
+	private boolean validateTaskStatus(byte taskStatus) {
 		
 		// check whether the status is in the set of allowed states
 		if (taskStatus == TASKSTATUS_FAILED 
 				|| taskStatus == TASKSTATUS_FINISHED
 				|| taskStatus == TASKSTATUS_PENDING
 				|| taskStatus == TASKSTATUS_RUNNING) {
-			
-			this.taskStatus = taskStatus;
-			
-		} else {
-			return false;
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 	
 	

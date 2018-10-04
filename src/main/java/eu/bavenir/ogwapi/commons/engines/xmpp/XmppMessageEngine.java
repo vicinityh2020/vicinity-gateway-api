@@ -73,9 +73,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private static final String CONFIG_PARAM_PORT = "general.port";
 	
 	/**
-	 * Name of the configuration parameter for enabling security.
+	 * Name of the configuration parameter for enabling encryption.
 	 */
-	private static final String CONFIG_PARAM_SECURITY = "general.security";
+	private static final String CONFIG_PARAM_ENCRYPTION = "general.encryption";
 	
 	/**
 	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
@@ -90,10 +90,10 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private static final int CONFIG_DEF_PORT = 5222;
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_SECURITY CONFIG_PARAM_SECURITY} configuration parameter. This value
+	 * Default value of {@link #CONFIG_PARAM_ENCRYPTION CONFIG_PARAM_ENCRYPTION} configuration parameter. This value
 	 * is taken into account when no suitable value is found in the configuration file.
 	 */
-	private static final boolean CONFIG_DEF_SECURITY = true;
+	private static final boolean CONFIG_DEF_ENCRYPTION = true;
 	
 	/**
 	 * This is the resource part of the full JID used in the communication. It is necessary to set it and not leave it
@@ -307,39 +307,38 @@ public class XmppMessageEngine extends CommunicationEngine {
 		try {
 			jid = JidCreate.entityBareFrom(destinationObjectID);
 		} catch (XmppStringprepException e) {
-			logger.warning("Destination can't be resolved. Exception: " + e.getMessage());
+			logger.warning("XMPPMessageEngine: Destination can't be resolved. Exception: " + e.getMessage());
 			return false;
 		}
 
 		
-		// TODO delete after test
+		// better do this
 		if (roster.isLoaded()) {
-			System.out.println("Roster is loaded when sending message.");
+			logger.finest("XMPPMessageEngine: Status of the roster before message is sent: ready");
 		} else {
-			System.out.println("Roster is not loaded yet when sending message.");
+			logger.finest("XMPPMessageEngine: Roster is not loaded yet when sending message. Attempting a reload...");
+			try {
+				roster.reloadAndWait();
+				logger.finest("XMPPMessageEngine: Roster reloaded.");
+			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+				logger.warning("XMPPMessageEngine: Roster could not be reloaded. Exception: " + e.getMessage());
+			}
 		}
 		
 		
+		// uncomment this to see all items in the contact list when debugging
 		/*
-		try {
-			roster.reloadAndWait();
-		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}*/
-		
-		// TODO delete this after test
 		System.out.println("Roster for " + connection.getUser() + ", while trying to send message to " + destinationObjectID + ":");
 		Collection<RosterEntry> entries = roster.getEntries();
 		for (RosterEntry entry : entries) {
 			System.out.println(entry.getJid().getLocalpartOrNull().toString());
-		}
+		}*/
 		
 		
-		// check whether the destination is online
-		Presence presence = roster.getPresence(jid);
+		// check whether the destination is in our contact list
 		Chat chat;
 		
-		if (presence.isAvailable()){
+		if (roster.contains(jid)) {
 			
 			// try to find older opened chat, so we don't have to open a new one
 			chat = openedChats.get(jid);
@@ -347,22 +346,25 @@ public class XmppMessageEngine extends CommunicationEngine {
 			if (chat == null){
 				chat = chatManager.chatWith(jid);
 				openedChats.put(jid, chat);
-				
 			} 
 			
+			// fire the thing
 			try {
+				
 				chat.send(message);
 			} catch (NotConnectedException | InterruptedException e) {
-				logger.warning("Message could not be sent. Exception: " + e.getMessage());
+				logger.warning("XMPPMessageEngine: Message could not be sent. Exception: " + e.getMessage());
 				return false;
 			}
 				
 		} else {
 			
-			// the destination is offline
+			// the destination is not in the contact list or the sending of the message failed 
+			logger.warning("XMPPMessageEngine: Message not sent. The OID " + destinationObjectID + " is not in the roster.");
 			return false;
 		}
 		
+		logger.finest("XMPPMessageEngine: Message sent. Content: " + message);
 		return true;
 	}
 	
@@ -385,7 +387,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
 		int xmppPort = config.getInt(CONFIG_PARAM_PORT, CONFIG_DEF_PORT);
 		String xmppDomain = config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
-		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_SECURITY, CONFIG_DEF_SECURITY);
+		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_ENCRYPTION, CONFIG_DEF_ENCRYPTION);
 		
 		logger.config("Creating a new connection to XMPP server '" + xmppServer + ":" + xmppPort + "' as '" 
 						+ xmppUsername + "@" + xmppDomain + "'");

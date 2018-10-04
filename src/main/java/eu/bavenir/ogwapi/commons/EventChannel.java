@@ -43,6 +43,9 @@ public class EventChannel {
 	
 	public static final String STATUS_STRING_INACTIVE = "inactive";
 	
+	public static final String ATTR_ACTIVE = "active";
+	
+	public static final String ATTR_SUBSCRIBED = "subscribed";
 	
 	/* === FIELDS === */
 	

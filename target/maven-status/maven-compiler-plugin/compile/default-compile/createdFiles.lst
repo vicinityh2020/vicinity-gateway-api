@@ -1,3 +1,4 @@
+eu/bavenir/ogwapi/commons/messages/CodesAndReasons.class
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine$2.class
 eu/bavenir/ogwapi/commons/messages/StatusMessage.class
 eu/bavenir/ogwapi/restapi/RestletThread.class
@@ -17,7 +18,6 @@ eu/bavenir/ogwapi/commons/CommunicationManager.class
 eu/bavenir/ogwapi/commons/Subscription.class
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine$1.class
 eu/bavenir/ogwapi/restapi/services/EventsEid.class
-eu/bavenir/ogwapi/commons/messages/MessageParser.class
 eu/bavenir/ogwapi/restapi/security/AuthenticationVerifier.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidEvents.class
 eu/bavenir/ogwapi/commons/Task.class
@@ -32,6 +32,7 @@ eu/bavenir/ogwapi/restapi/services/ObjectsOidProperties.class
 eu/bavenir/ogwapi/commons/EventChannel.class
 eu/bavenir/ogwapi/commons/messages/NetworkMessageEvent.class
 eu/bavenir/ogwapi/commons/engines/CommunicationEngine.class
+eu/bavenir/ogwapi/commons/messages/MessageResolver.class
 eu/bavenir/ogwapi/restapi/services/Sparql.class
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOidEventsEid.class

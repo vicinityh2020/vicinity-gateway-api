@@ -63,6 +63,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * Name of the response body attribute.
 	 */
 	private static final String ATTR_RESPONSEBODY = "responseBody";
+	
+	private static final String ATTR_RESPONSEBODYSUPPLEMENT = "responseBodySupplement";
 
 	
 	/* === FIELDS === */
@@ -88,16 +90,23 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	private String responseBody;
 	
+	private String responseBodySupplement;
+	
 	
 	
 	/* === PUBLIC METHODS === */
 	/**
 	 * Use this when parsing a message that was received from the XMPP network. The parsing will fill all the attributes. 
 	 *  
+	 *  
+	 *  !!!! BS !!!
+	 *  
 	 * @param xmppMessage A 'raw' XMPP message. 
 	 */
 	public NetworkMessageResponse(XMLConfiguration config, Logger logger){
 		super(config, logger);
+		
+		initialise();
 		
 		messageType = NetworkMessageResponse.MESSAGE_TYPE;
 	}
@@ -112,6 +121,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	public NetworkMessageResponse(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
 		super(config, logger);
+		
+		initialise();
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
@@ -206,6 +217,15 @@ public class NetworkMessageResponse extends NetworkMessage {
 	}
 	
 	
+	public String getResponseBodySupplement() {
+		return responseBodySupplement;
+	}
+	
+	
+	public void setResponseBodySupplement(String responseBodySupplement) {
+		this.responseBodySupplement = responseBodySupplement;
+	}
+	
 	/**
 	 * Returns a JSON String that is to be sent over the XMPP network. The String is build from all the attributes that
 	 * were set with getters and setters. Use this when you are finished with setting the attributes, parameters etc.
@@ -228,77 +248,59 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	private boolean parseJson(JsonObject json){
 		
+		// first check out whether or not the message has everything it is supposed to have and stop if not
+		if (
+				!json.containsKey(ATTR_MESSAGETYPE) ||
+				!json.containsKey(ATTR_REQUESTID) ||
+				//!json.containsKey(ATTR_SOURCEOID) ||
+				//!json.containsKey(ATTR_DESTINATIONOID) ||
+				!json.containsKey(ATTR_ERROR) ||
+				!json.containsKey(ATTR_RESPONSECODE) ||
+				!json.containsKey(ATTR_RESPONSECODEREASON) ||
+				!json.containsKey(ATTR_RESPONSEBODY) ||
+				!json.containsKey(ATTR_RESPONSEBODYSUPPLEMENT)) {
+			
+			return false;
+		}
+		
+		// load values from JSON
 		try {
 			
-			// figure out the message type
 			messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
-			
-		} catch (Exception e) {
-			logger.warning("Exception while parsing NetworkMessageResponse: " + e.getMessage());
-			
-			return false;
-		}
-		
-		if (messageType != MESSAGE_TYPE){
-			logger.warning("Error while parsing NetworkMessageResponse: The messageType does not match. Should be " 
-								+ MESSAGE_TYPE + " but is " + messageType);
-			
-			// just a formality
-			return false;
-		}
-		
-		try {
-			
-			// the correlation ID of the request (in superclass)
 			requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
-			
-			// error indicator
 			error = json.getBoolean(ATTR_ERROR);
-			
-			// response code
 			responseCode = json.getInt(ATTR_RESPONSECODE);
 			
+			// null values are special cases in JSON, they get transported as "null" string...
+			if (!json.isNull(ATTR_RESPONSECODEREASON)) {
+				responseCodeReason = json.getString(ATTR_RESPONSECODEREASON);
+			}
+			
+			if (!json.isNull(ATTR_RESPONSEBODY)) {
+				responseBody = json.getString(ATTR_RESPONSEBODY);
+			}
+			
+			if (!json.isNull(ATTR_RESPONSEBODYSUPPLEMENT)) {
+				responseBodySupplement = json.getString(ATTR_RESPONSEBODYSUPPLEMENT);
+			}
+			
 		} catch (Exception e) {
-			logger.severe("Exception while parsing NetworkMessageResponse: " + e.getMessage());
+			logger.severe("NetworkMessageResponse: Exception while parsing NetworkMessageResponse: " + e.getMessage());
 			
 			return false;
 		}
 		
-		
-		String stringValue = new String();
-		
-		// response code reason phrase
-		if (json.containsKey(ATTR_RESPONSECODEREASON)){
-			if (!json.isNull(ATTR_RESPONSECODEREASON)){
-				stringValue = removeQuotes(json.getString(ATTR_RESPONSECODEREASON));
-			}	
-		}
-				
-		// and the null value got transported more like string... we have to make a rule for it
-		if (stringValue == null || stringValue.equals("null")){
-			responseCodeReason = null;
-		} else {
-			responseCodeReason = stringValue;
-		}
-		
-		
-		// the same for response body
-		if (!json.isNull(ATTR_RESPONSEBODY)){
-			stringValue = removeQuotes(json.getString(ATTR_RESPONSEBODY));
-		}
-				
-		if (stringValue == null || stringValue.equals("null")){
-			responseBody = null;
-		} else {
-			responseBody = stringValue;
-		}
+		// process non primitives
+		responseCodeReason = removeQuotes(responseCodeReason);
+		responseBody = removeQuotes(responseBody);
+		responseBodySupplement = removeQuotes(responseBodySupplement);
 		
 		return true;
 	}
 	
 	
 	/**
-	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over XMPP
+	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over 
 	 * network. 
 	 */
 	private void buildMessageJson(){
@@ -310,6 +312,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		mainBuilder.add(ATTR_MESSAGETYPE, messageType);
 		mainBuilder.add(ATTR_REQUESTID, requestId);
+		//mainBuilder.add(ATTR_SOURCEOID, sourceOid);
+		//mainBuilder.add(ATTR_DESTINATIONOID, destinationOid);
 		mainBuilder.add(ATTR_ERROR, error);
 		mainBuilder.add(ATTR_RESPONSECODE, responseCode);
 		
@@ -324,9 +328,24 @@ public class NetworkMessageResponse extends NetworkMessage {
 		} else {
 			mainBuilder.add(ATTR_RESPONSEBODY, responseBody);
 		}
+		
+		if (responseBodySupplement == null) {
+			mainBuilder.addNull(ATTR_RESPONSEBODYSUPPLEMENT);
+		} else {
+			mainBuilder.add(ATTR_RESPONSEBODYSUPPLEMENT, responseBodySupplement);
+		}
 				
 		// build the thing
 		jsonRepresentation = mainBuilder.build(); 
+	}
+	
+	
+	private void initialise() {
+		error = false;
+		responseCode = 0;
+		responseCodeReason = null;
+		responseBody = null;
+		responseBodySupplement = null;
 	}
 
 }

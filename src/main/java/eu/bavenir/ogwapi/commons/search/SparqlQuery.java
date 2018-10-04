@@ -18,7 +18,9 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 public class SparqlQuery {
 
 	
-	private static final String GWAPI_SERVICES_URL = "http://gws.vicinity.linkeddata.es/";
+	private static final String GWAPI_SERVICES_URL_PREFIXES = "http://gateway-services.vicinity.linkeddata.es/prefixes";
+	
+	private static final String GWAPI_SERVICES_URL_DISCOVERY = "http://gateway-services.vicinity.linkeddata.es/discovery";
 	
 
 	// this is necessary to send requests to all neighbours
@@ -83,7 +85,7 @@ public class SparqlQuery {
 	
 	private String retrieveTED() {
 		
-		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL);
+		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_DISCOVERY);
 		
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = clientResource.get();
@@ -106,7 +108,7 @@ public class SparqlQuery {
 	
 	private String retrievePrefixes() {
 		
-		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL);
+		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_PREFIXES);
 		
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = clientResource.get();
@@ -129,6 +131,7 @@ public class SparqlQuery {
 	
 	private String retrieveRDF(String neighboursThingIRI) {
 		
+		/*
 		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL);
 		
 		Writer writer = new StringWriter();
@@ -146,17 +149,22 @@ public class SparqlQuery {
 		}
 		
 		return writer.toString();
+		*/
+		
+		return null;
 	}
 	
 	
 	private String getPropertyOfRemoteObject(String remoteObjectID, String propertyName) {
 		
-		StatusMessage statusMessage = descriptor.getPropertyOfRemoteObject(remoteObjectID, propertyName);
+		/*StatusMessage statusMessage = descriptor.getPropertyOfRemoteObject(remoteObjectID, propertyName);
 		
 		if (statusMessage.isError()) {
 			return null;
 		}
 		
-		return statusMessage.getBody();
+		return statusMessage.getBody();*/
+		
+		return null;
 	}
 }

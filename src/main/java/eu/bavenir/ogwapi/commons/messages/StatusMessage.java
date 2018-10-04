@@ -1,15 +1,11 @@
 package eu.bavenir.ogwapi.commons.messages;
 
-
-import java.io.StringReader;
-import java.util.logging.Logger;
-
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 
 
 /*
@@ -22,6 +18,9 @@ import javax.json.JsonReader;
 
 
 /**
+ * 
+ * 1!! provides unified interface ...
+ * 
  * This is a helper class for a local status message - a message that is returned to an Adapter/Agent, but it does not 
  * originate in the P2P Network (unlike NetworkMessage). It is created e.g. after a successful login of an Adapter, 
  * when there is an success message that needs to be returned in a unified manner (a JSON), or an error message that
@@ -70,6 +69,10 @@ public class StatusMessage {
 	 */
 	public static final String ATTR_MESSAGE = "message";
 	
+	public static final String ATTR_VALUE = "value";
+	
+	
+	
 	/**
 	 * Text of the success message.
 	 */
@@ -83,45 +86,15 @@ public class StatusMessage {
 	
 	// this is a list of status message names, that can usually occur during operations of the OGWAPI
 	
-	/**
-	 * Attribute name for the status message body.  
-	 */
+	/*
 	public static final String MESSAGE_BODY = "body";
 	
-	
-	/**
-	 * Attribute name for the status code, returned by HTTP server on the remote site.  
-	 */
 	public static final String MESSAGE_CODE = "code";
-	
-	/**
-	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
-	 */
 	public static final String MESSAGE_REASON = "reason";
-	
-	/**
-	 * Attribute name for login.
-	 */
 	public static final String MESSAGE_LOGIN = "login";
-	
-	/**
-	 * Attribute name for login.
-	 */
 	public static final String MESSAGE_LOGOUT = "logout";
-	
-	/**
-	 * Attribute name for Event channel activation.
-	 */
 	public static final String MESSAGE_EVENT_ACTIVATION = "activateEventChannel";
-	
-	/**
-	 * Attribute name for Event channel deactivation.
-	 */
 	public static final String MESSAGE_EVENT_DEACTIVATION = "deactivateEventChannel";
-	
-	/**
-	 * Attribute name for sending the Event to subscribers.
-	 */
 	public static final String MESSAGE_EVENT_SENDTOSUBSCRIBERS = "sendEventToSubscribers";
 	
 	
@@ -143,36 +116,25 @@ public class StatusMessage {
 	
 	public static final String MESSAGE_TASKID = "taskID";
 	
-	
-	/**
-	 * Attribute name for getting value of a property.
-	 */
-	public static final String MESSAGE_PROPERTY_GETVALUE = "getValueOfAProperty";
-	
-	/**
-	 * Attribute name for setting value of a property.
-	 */
-	public static final String MESSAGE_PROPERTY_SETVALUE = "setValueOfAProperty";
-	
-	
+	*/
+
 	
 	/* === FIELDS === */
 	
 	/**
-	 * Logger for this class. 
+	 * Is the message we are transporting back an error?
 	 */
-	private Logger logger;
+	private boolean error;
+	
+	private int statusCode;
+	
+	private String statusCodeReason;
 	
 	
 	/**
 	 * Factory for JSON builders.
 	 */
 	private JsonBuilderFactory jsonBuilderFactory;
-	
-	/**
-	 * We need to return a JSON to the caller. This is the builder for it.
-	 */
-	private JsonObjectBuilder mainBuilder;
 	
 	/**
 	 * The message part is an array of JSONs.
@@ -184,68 +146,25 @@ public class StatusMessage {
 	 */
 	private JsonObjectBuilder innerBuilder;
 	
-	/**
-	 * The JSON to be returned.
-	 */
-	private JsonObject messageJson;
-	
-	/**
-	 * Is the message we are transporting back an error?
-	 */
-	private boolean error;
-	
-	/**
-	 * Is this message valid after parsing?
-	 */
-	private boolean valid;
-	
 	
 	/* === PUBLIC METHODS === */
+		
 	
 	/**
-	 * Default constructor initialises JSON object builders. You now have to set the values using setters, otherwise the
-	 * built JSON will look like this:
-	 * 
-	 * {
-	 *	"error": false,
-	 *	"message": []
-	 * }
-	 */
-	public StatusMessage(Logger logger) {
-		valid = true;
-		
-		initialize(logger);
-	}
-	
-	
-	/**
-	 * This constructor attempts to build this object by parsing incoming JSON. If the parsing operation is not 
-	 * successful, the result is an object with validity {@link StatusMessage#valid flag} set to false.
-	 * 
-	 * @param json JSON that arrived from the P2P network.
-	 */
-	public StatusMessage(String jsonString, Logger logger){
-		
-		initialize(logger);
-		
-		// parse the JSON, or mark this message as invalid
-		if (!parseJsonString(jsonString)){
-			valid = false;
-		}
-	}
-	
-	
-	
-	/**
-	 * More useful constructor, can be used to directly fill the basic payload of the status message. A message built
+	 * Constructor, fills the basic pay load of the status message. A message built
 	 * right after it was constructed this way will look like this:
 	 * 
 	 * {
-	 *	"error": error,
+	 *	"error": booleanValue,
+	 *	"statusCode": integerValue,
+	 *	"statusCodeReason": "string with status code reason"
 	 *	"message": [
-	 *	   {
-	 *        "attribute": value,
-	 *     }
+	 *		{
+	 *        ... returned JSON ...
+	 *		},
+	 *		{
+	 *        ... or multiple, if available ...
+	 *		}
 	 *  ]
 	 * }
 	 * 
@@ -255,23 +174,17 @@ public class StatusMessage {
 	 * @param attribute Attribute name in the message.
 	 * @param value A value of the attribute.
 	 */
-	public StatusMessage(boolean error, String attribute, String value, Logger logger) {
-		initialize(logger);
+	
+
+	public StatusMessage(boolean error, int statusCode, String statusCodeReason) {
 		
 		this.error = error;
+		this.statusCode = statusCode;
+		this.statusCodeReason = statusCodeReason;
 		
-		addMessage(attribute,value);
-	}
-
-	/**
-	 * Returns whether or not this StatusMessage is valid. This value is meaningful only in case it has been parsed
-	 * from a message that came from the network, when it would indicate any error that could occur during parsing. 
-	 * If the StatusMessage was created locally, the value would always be true, since there was no parsing.
-	 *  
-	 * @return Whether this StatusMessage was parsed successfully or not. 
-	 */
-	public boolean isValid() {
-		return valid;
+		// create the factory
+		jsonBuilderFactory = Json.createBuilderFactory(null);
+		arrayBuilder = jsonBuilderFactory.createArrayBuilder();
 	}
 	
 	
@@ -285,13 +198,18 @@ public class StatusMessage {
 	}
 
 
-	/**
-	 * Setter of the error flag.
-	 * 
-	 * @param error Whether the current status message should be error or not. 
-	 */
-	public void setError(boolean error) {
-		this.error = error;
+	public int getStatusCode() {
+		return statusCode;
+	}
+
+
+	public String getStatusCodeReason() {
+		return statusCodeReason;
+	}
+	
+	
+	public JsonArray getCurrentMessageArray() {
+		return arrayBuilder.build();
 	}
 
 
@@ -301,7 +219,7 @@ public class StatusMessage {
 	 * @param attribute Name of the attribute.
 	 * @param value Textual representation of the value.
 	 */
-	public void addMessage(String attribute, String value) {
+	public void addSimpleMessage(String attribute, String value) {
 		
 		// if attribute is null, there is no need to bother... 
 		if (attribute != null) {
@@ -317,6 +235,49 @@ public class StatusMessage {
 			arrayBuilder.add(innerBuilder);
 		}
 	}
+	
+	
+	public void addSimpleMessage(String attribute, int value) {
+		// if attribute is null, there is no need to bother... 
+		if (attribute != null) {
+			
+			innerBuilder = jsonBuilderFactory.createObjectBuilder();
+			innerBuilder.add(attribute, value);
+			
+			arrayBuilder.add(innerBuilder);
+		}
+		
+	}
+	
+	
+	public void addSimpleMessage(String attribute, float value) {
+		// if attribute is null, there is no need to bother... 
+		if (attribute != null) {
+			
+			innerBuilder = jsonBuilderFactory.createObjectBuilder();
+			innerBuilder.add(attribute, value);
+			
+			arrayBuilder.add(innerBuilder);
+		}
+	}
+	
+	// use when wanting to add more complex message
+	public void addMessageJson(JsonObjectBuilder messageJsonBuilder) {
+		
+		if (messageJsonBuilder != null) {
+			arrayBuilder.add(messageJsonBuilder);
+		}
+	}
+	
+	
+	public void addMessageJson(JsonObject json) {
+		
+		if (json != null) {
+			arrayBuilder.add(json);
+		}
+	}
+	
+	
 
 
 	/**
@@ -328,95 +289,18 @@ public class StatusMessage {
 	 */
 	public JsonObject buildMessage() {
 		
-		if (messageJson == null) {
-			mainBuilder.add(ATTR_ERROR, error);
-			mainBuilder.add(ATTR_MESSAGE, arrayBuilder);
-			
-			messageJson = mainBuilder.build();
-		} 
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		
-		return messageJson;
+		mainBuilder.add(ATTR_ERROR, error);
+		mainBuilder.add(ATTR_STATUSCODE, statusCode);
+		mainBuilder.add(ATTR_STATUSCODEREASON, statusCodeReason);
+		mainBuilder.add(ATTR_MESSAGE, arrayBuilder);
+			
+		return mainBuilder.build();
 		
 	}
 	
 	
 	/* === PRIVATE METHODS === */
-	
-	/**
-	 * Creates JSON builders.
-	 */
-	private void initialize(Logger logger) {
-		error = false;
-		messageJson = null;
-		
-		this.logger = logger;
-		
-		// create the factory
-		jsonBuilderFactory = Json.createBuilderFactory(null);
-		mainBuilder = jsonBuilderFactory.createObjectBuilder();
-		arrayBuilder = jsonBuilderFactory.createArrayBuilder();
-	}
-	
-
-	
-	/**
-	 * Takes the JSON object and fills necessary fields with values.
-	 * 
-	 * @param json JSON to parse.
-	 * @return True if parsing was successful, false otherwise.
-	 */
-	private boolean parseJsonString(String jsonString){
-		
-		// make a JSON from the incoming String - IMPORTANT! any string that is not a valid JSON will throw exception
-		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
-		JsonObject json;
-		
-		try {
-			json = jsonReader.readObject(); // right here
-		} catch (Exception e) {
-			
-			logger.warning("Error while parsing StatusMessage: Failed to convert string into valid JSON.");
-			
-			return false;
-		}
-		
-		if (json == null){
-			
-			logger.warning("Error while parsing StatusMessage: Failed to convert string into valid JSON.");
-			
-			// it is not a JSON...
-			return false;
-		}
-		
-		// first take a look on whether or not the JSON contains what it should
-		if (!json.containsKey(ATTR_ERROR)) {
-			logger.warning("Error while parsing StatusMessage: Missing key '" + ATTR_ERROR + "'");
-			
-			return false;
-		}
-		
-		if (!json.containsKey(ATTR_MESSAGE)) {
-			logger.warning("Error while parsing StatusMessage: Missing key '" + ATTR_MESSAGE + "'");
-			
-			return false;
-		}
-		
-		// now do the parsing
-		try {
-			error = json.getBoolean(ATTR_ERROR);
-		} catch (Exception e) {
-			logger.warning("Exception while parsing StatusMessage: " + e.getMessage());			
-			return false;
-		}
-		
-		messageJson = json;		
-		
-		// Remember, the parsing is there primarily to create this instance of a StatusMessage with the error indicator
-		// so it can be easily found out whether or not the message carries an error or not. Ergo, no more parsing
-		// is required.
-
-		return true;
-	}
-	
 	
 }

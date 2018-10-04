@@ -21,8 +21,19 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<security>false</security>
+		<encryption>false</encryption>
 		
+		<!--
+		Number of seconds to consider request message as no longer relevant. 
+		After a request is sent from point A to point B, point A waits for 
+		response. If the response does not arrive until this timeout expires, 
+		point B is considered unreachable. If the response arrives after this
+		happens, the response is ignored and discarded and a new request has
+		to be sent.
+		
+		Default is 60 seconds. 
+		-->
+		<requestMessageTimeout>60</requestMessageTimeout>
 	</general>
 
 
@@ -125,29 +136,8 @@
 		
 		Default is false.
 		-->
-		<debugging>true</debugging>
+		<debugging>false</debugging>
 		
-		<!--
-		Listen for changes in rosters (XMPP contact lists) of devices connected
-		to this Gateway. These changes include whether a partner device goes 
-		offline or online. It is recommended to have this feature turned on,
-		unless there are thousands of devices connected to this Gateway API. 
-		
-		Default is true.
-		-->
-		<listenForRosterChanges>true</listenForRosterChanges>
-		
-		<!--
-		Number of seconds to consider request message as no longer relevant. 
-		After a request is sent from point A to point B, point A waits for 
-		response. If the response does not arrive until this timeout expires, 
-		point B is considered unreachable. If the response arrives after this
-		happens, the response is ignored and discarded and a new request has
-		to be sent.
-		
-		Default is 30 seconds. 
-		-->
-		<messageTimeout>60</messageTimeout>
 	</xmpp>
 	
 	<api>

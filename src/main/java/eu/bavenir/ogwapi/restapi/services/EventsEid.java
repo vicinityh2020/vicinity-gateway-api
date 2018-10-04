@@ -69,14 +69,16 @@ public class EventsEid extends ServerResource {
 		
 		if (attrEid == null){
 			logger.info("EID: " + attrEid + " Invalid identifier.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid identifier.");
 		}
+		
+		String body = getRequestBody(entity, logger);
 		
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		StatusMessage statusMessage = communicationManager.activateEventChannel(callerOid, attrEid, queryParams);
+		StatusMessage statusMessage = communicationManager.activateEventChannel(callerOid, attrEid, queryParams, body);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
@@ -101,34 +103,17 @@ public class EventsEid extends ServerResource {
 		// check the mandatory attributes
 		if (attrEid == null){
 			logger.info("EID: " + attrEid + " Invalid identifier.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid identifier.");
 		}
+		
+		String body = getRequestBody(entity, logger);
 		
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		
-		// check the body of the event to be sent
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
-			logger.info("EID: " + attrEid + "\nInvalid event body - must be a valid JSON.");
-			
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid event body - must be a valid JSON.");
-		}
-		
-		// get the json
-		String eventJsonString = null;
-		try {
-			eventJsonString = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid event body");
-		}
-		
 		StatusMessage statusMessage 
-						= communicationManager.sendEventToSubscribedObjects(callerOid, attrEid, eventJsonString, 
+						= communicationManager.sendEventToSubscribedObjects(callerOid, attrEid, body, 
 								queryParams);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
@@ -143,7 +128,7 @@ public class EventsEid extends ServerResource {
 	 * @return statusMessage {@link StatusMessage StatusMessage} with the result of the operation.
 	 */
 	@Delete
-	public Representation remove() {
+	public Representation remove(Representation entity) {
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		Map<String, String> queryParams = getQuery().getValuesMap();
@@ -156,15 +141,42 @@ public class EventsEid extends ServerResource {
 					"Invalid identifier.");
 		}
 		
+		String body = getRequestBody(entity, logger);
+		
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		StatusMessage statusMessage = communicationManager.deactivateEventChannel(callerOid, attrEid, queryParams);
+		StatusMessage statusMessage = communicationManager.deactivateEventChannel(callerOid, attrEid, queryParams, body);
 		
 		return new JsonRepresentation(statusMessage.buildMessage().toString());
 	}
 	
 	
 	// === PRIVATE METHODS ===
-	
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
+		}
+		
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
+	}
 }

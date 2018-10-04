@@ -1,8 +1,10 @@
 package eu.bavenir.ogwapi.restapi.services;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -62,7 +64,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 	 * @return Latest property value.
 	 */
 	@Get
-	public Representation represent() {
+	public Representation represent(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -72,15 +74,18 @@ public class ObjectsOidEventsEid extends ServerResource {
 		
 		if (attrOid == null || attrEid == null){
 			logger.info("OID: " + attrOid + " EID: " + attrEid + " Invalid identifier.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid identifier.");
 		}
+		
+		String body = getRequestBody(entity, logger);
 		
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
 		
-		return new JsonRepresentation(communicationManager.getEventChannelStatus(callerOid, attrOid, attrEid, queryParams)); 
+		return new JsonRepresentation(communicationManager.getEventChannelStatus(callerOid, attrOid, attrEid, 
+				queryParams, body).buildMessage().toString()); 
 		
 	}
 	
@@ -93,7 +98,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 	 * @return A task to perform the action was submitted.
 	 */
 	@Post("json")
-	public Representation accept() {
+	public Representation accept(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -103,15 +108,18 @@ public class ObjectsOidEventsEid extends ServerResource {
 		
 		if (attrOid == null || attrEid == null){
 			logger.info("OID: " + attrOid + " EID: " + attrEid + " Invalid identifier.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid identifier.");
 		}
+		
+		String body = getRequestBody(entity, logger);
 
 		CommunicationManager communicationManager 
 					= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
 	
-		return new JsonRepresentation(communicationManager.subscribeToEventChannel(callerOid, attrOid, attrEid, queryParams));
+		return new JsonRepresentation(communicationManager.subscribeToEventChannel(callerOid, attrOid, attrEid, 
+				queryParams, body).buildMessage().toString());
 	}
 	
 	
@@ -122,7 +130,7 @@ public class ObjectsOidEventsEid extends ServerResource {
 	 * @return statusMessage {@link StatusMessage StatusMessage} with the result of the operation.
 	 */
 	@Delete
-	public Representation remove() {
+	public Representation remove(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrEid = getAttribute(ATTR_EID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
@@ -132,19 +140,48 @@ public class ObjectsOidEventsEid extends ServerResource {
 		
 		if (attrEid == null){
 			logger.info("EID: " + attrEid + " Given identifier does not exist.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Invalid identifier.");
 		}
+		
+		String body = getRequestBody(entity, logger);
 		
 		CommunicationManager communicationManager 
 						= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		return new JsonRepresentation(communicationManager.unsubscribeFromEventChannel(callerOid, attrOid, attrEid, queryParams));
+		return new JsonRepresentation(communicationManager.unsubscribeFromEventChannel(callerOid, attrOid, attrEid, 
+				queryParams, body).buildMessage().toString());
 	}
 	
 	
 	
 	// === PRIVATE METHODS ===
 	
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
+		}
+		
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
+	}
 
 }

@@ -1,12 +1,22 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
@@ -50,6 +60,19 @@ public class Action {
 	
 	private static final int SECOND = 1000;
 	
+	public static final String ATTR_TASKID = "taskId";
+	
+	public static final String ATTR_STATUS = "status";
+	
+	public static final String ATTR_CREATIONTIME = "createdAt";
+	
+	public static final String ATTR_STARTTIME = "startTime";
+	
+	public static final String ATTR_ENDTIME = "endTime";
+	
+	public static final String ATTR_TOTALTIME = "totalTime";
+	
+	public static final String ATTR_RETURNVALUE = "returnValue";
 	
 	/* === FIELDS === */
 	
@@ -57,12 +80,12 @@ public class Action {
 	 * This is the object ID of the action owner (usually the local object, represented by its 
 	 * {@link ConnectionDescriptor ConnectionDescriptor}). 
 	 */
-	private String objectID;
+	private String objectId;
 	
 	/**
 	 * The ID of the action. 
 	 */
-	private String actionID;
+	private String actionId;
 	
 	
 	private List<Task> pendingTasks;
@@ -79,15 +102,22 @@ public class Action {
 	
 	private AgentConnector connector;
 	
+	private Logger logger;
+	
+	private XMLConfiguration config;
+
+	
 	
 	
 	/* === PUBLIC METHODS === */
 	
-	public Action(XMLConfiguration config, String objectID, String actionID, AgentConnector connector) {
+	public Action(XMLConfiguration config, String objectId, String actionId, AgentConnector connector, Logger logger) {
 		
-		this.objectID = objectID;
-		this.actionID = actionID;
+		this.objectId = objectId;
+		this.actionId = actionId;
 		this.connector = connector;
+		this.logger = logger;
+		this.config = config;
 		
 		pendingTasks = Collections.synchronizedList(new LinkedList<Task>());
 		
@@ -112,7 +142,6 @@ public class Action {
 			@Override
 			public void run() {
 				workThroughTasks();
-				
 			}
 		}, TIMER1_START, SECOND);
 		
@@ -143,14 +172,14 @@ public class Action {
 	
 	
 	
-	public String getObjectID() {
-		return objectID;
+	public String getObjectId() {
+		return objectId;
 	}
 
 
 
-	public String getActionID() {
-		return actionID;
+	public String getActionId() {
+		return actionId;
 	}
 
 
@@ -165,17 +194,16 @@ public class Action {
 			}
 		}
 		
-		// TODO delete after test
-		System.out.println("Number of tasks is " + number);
+		logger.fine("Object ID " + this.objectId + " Action ID " + this.actionId + " Number of tasks in status " 
+					+ status + " is "+ number + ".");
 		
 		return number;
 	}
 	
 	
-	
-	public byte getTaskStatus(String taskID) {
+	public byte getTaskStatus(String taskId) {
 		
-		Task task = searchForTask(taskID, true);
+		Task task = searchForTask(taskId, true);
 		
 		if (task == null) {
 			
@@ -194,9 +222,9 @@ public class Action {
 	
 	
 	
-	public String getTaskStatusString(String taskID) {
+	public String getTaskStatusString(String taskId) {
 		
-		Task task = searchForTask(taskID, true);
+		Task task = searchForTask(taskId, true);
 		
 		if (task == null) {
 			
@@ -215,9 +243,9 @@ public class Action {
 	
 	
 	
-	public String getTaskReturnValue(String taskID) {
+	public String getTaskReturnValue(String taskId) {
 		
-		Task task = searchForTask(taskID, true);
+		Task task = searchForTask(taskId, true);
 		
 		if (task == null) {
 			
@@ -234,7 +262,7 @@ public class Action {
 	
 	
 	// start
-	public String createNewTask(String requestingObjectID, String body) {
+	public String createNewTask(String sourceOid, String body, Map<String, String> parameters) {
 		
 		if (pendingTasks.size() >= maxNumberOfPendingTasks) {
 			
@@ -245,23 +273,23 @@ public class Action {
 		}
 		
 		// start a task in a default pending status
-		Task task = new Task(this.objectID, requestingObjectID, actionID, body, connector);
+		Task task = new Task(config, logger, connector, sourceOid, this.objectId, actionId, body, parameters);
 		
 		pendingTasks.add(task);
 		
 		// TODO delete after test
 		System.out.println("Task created.");
 		
-		return task.getTaskID();
+		return task.getTaskId();
 	}
 	
 	
 	// update 
-	public boolean updateTask(String taskStatus, String returnValue) {
+	public boolean updateTask(String taskStatus, String returnValue, Map<String, String> parameters) {
 		
 		// only running task can be updated
 		if (runningTask == null) {
-			// TODO delete after test
+			// TODO delete after test and use the params
 			System.out.println("There is no running task.");
 			
 			return false;
@@ -276,19 +304,13 @@ public class Action {
 		
 		// if the new desired state is failed or finished, the task is to be moved into the set of finished tasks
 		if (!taskStatus.equals(Task.TASKSTATUS_STRING_RUNNING)) {
-			if (!finishedTasks.add(runningTask)) {
-				// TODO delete after test
-				System.out.println("Unknown error here.");
-				return false;
-			} 
+			
+			finishedTasks.add(runningTask);
 			
 			// clear the place for the next task to be run
 			runningTask = null;
 			
 		}
-		
-		// TODO delete after test
-		System.out.println("Task updated.");
 		
 		return true;
 		
@@ -296,57 +318,87 @@ public class Action {
 	
 	
 	// cancel
-	public NetworkMessageResponse cancelTask(String taskID) {
+	public NetworkMessageResponse cancelTask(String taskId, String body, Map<String, String> parameters) {
 		
-		Task task = searchForTask(taskID, false);
+		// this will ensure that the task is neither finished or cancelled (or non existing for that matter)
+		Task task = searchForTask(taskId, false);
 		
 		if (task == null) {
 			
-			// TODO delete after test
-			System.out.println("Canceling finished/failed task is not possible.");
-			
 			return null;
 		}
 		
-		// we can't cancel finished or failed job
-		if (task.getTaskStatus() == Task.TASKSTATUS_FAILED || task.getTaskStatus() == Task.TASKSTATUS_FINISHED) {
-			
-			// TODO delete after test
-			System.out.println("Canceling finished/failed task is not possible.");
+		NetworkMessageResponse response = task.cancel(body, parameters); 
+	
+		if (response == null) {
+
+			// the task is in a state that forbids cancelling 
 			return null;
 		}
 		
 		
-		// TODO delete after test
-		System.out.println("Canceling task.");
-		
-		NetworkMessageResponse response = task.cancel();
-		
-		if (response == null ) { 
-			// TODO delete after test
-			System.out.println("Something went wrong during the task cancelling.");
-			
-			return null;
-		} 
+		if (response.isError()) {
+
+			// something happened when the agent was asked to abort the action
+			return response;
+		}
 		
 		// now move it to finished task pool
-		finishedTasks.add(task);
 		if (runningTask.equals(task)) {
-			// TODO delete after test
-			System.out.println("Running task set to null.");
-			
 			runningTask = null;
 			
 		} else {
-			// TODO delete after test
-			System.out.println("Removed from pending tasks.");
 			pendingTasks.remove(task);
 		}
+		finishedTasks.add(task);
 		
 		return response;
 	}
 	
 	
+	public JsonObject createTaskStatusJson(String taskId) {
+		
+		Task task = searchForTask(taskId, true);
+		
+		if (task == null) {
+			return null;
+		}
+		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		// create the factory
+		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
+		
+		mainBuilder.add(ATTR_TASKID, taskId);
+		mainBuilder.add(ATTR_STATUS, task.getTaskStatusString());
+		
+		Date taskCreationTime = new Date(task.getCreationTime());
+		mainBuilder.add(ATTR_CREATIONTIME, df.format(taskCreationTime).toString());
+		
+		if (task.getRunningTime() > 0) {
+			Date taskStartTime = new Date(task.getStartTime());
+			mainBuilder.add(ATTR_STARTTIME, df.format(taskStartTime).toString());
+			
+			if (task.getEndTime() > 0) {
+				Date taskEndTime = new Date(task.getEndTime());
+				mainBuilder.add(ATTR_ENDTIME, df.format(taskEndTime).toString());
+			}
+			
+			mainBuilder.add(ATTR_TOTALTIME, task.getRunningTime());
+		}
+		
+		
+	
+		if (task.getReturnValue() == null){
+			mainBuilder.addNull(ATTR_RETURNVALUE);
+		} else {
+			mainBuilder.add(ATTR_RETURNVALUE, task.getReturnValue());
+		}
+	
+		return mainBuilder.build();
+		
+	}
 	
 
 	
@@ -358,7 +410,7 @@ public class Action {
 		// check whether or not a task is already running and if not, check if there are some tasks pending
 		if (runningTask == null && !pendingTasks.isEmpty()) {
 			
-			// take one non paused task from the queue
+			// take one non pending task from the queue
 			for (int i = 0; i < pendingTasks.size(); i++) {
 				
 				if (pendingTasks.get(i).getTaskStatus() == Task.TASKSTATUS_PENDING) {
@@ -368,7 +420,7 @@ public class Action {
 			
 			// TODO remove after testing
 			System.out.println("There is no task running, yet there are tasks pending. Taking the next task: " 
-						+ runningTask.getTaskID());
+						+ runningTask.getTaskId());
 			
 			runningTask.start();
 		}
@@ -381,7 +433,7 @@ public class Action {
 			if ((System.currentTimeMillis() - task.getEndTime()) > timeToKeepReturnValues) {
 				
 				//TODO delete after test
-				System.out.println("Finished/failed task " + task.getTaskID() + " was removed from the pool of finished tasks.");
+				System.out.println("Finished/failed task " + task.getTaskId() + " was removed from the pool of finished tasks.");
 				finishedTasks.remove(task);
 			}
 		}
@@ -394,7 +446,7 @@ public class Action {
 			if ((System.currentTimeMillis() - task.getCreationTime()) > pendingTaskTimeout) {
 				
 				//TODO delete after test
-				System.out.println("Pending task " + task.getTaskID() + " was removed from the pool of pending tasks.");
+				System.out.println("Pending task " + task.getTaskId() + " was removed from the pool of pending tasks.");
 				
 				pendingTasks.remove(task);
 			}
@@ -402,16 +454,16 @@ public class Action {
 	}
 	
 	
-	private Task searchForTask(String taskID, boolean searchAlsoAmongFinishedTasks) {
+	private Task searchForTask(String taskId, boolean searchAlsoAmongFinishedTasks) {
 		
 		// is it the running task?
-		if (runningTask != null && runningTask.getTaskID().equals(taskID)) {
+		if (runningTask != null && runningTask.getTaskId().equals(taskId)) {
 			return runningTask;
 		}
 		
 		// or among pending tasks?
 		for (Task task : pendingTasks) {	
-			if (task.getTaskID().equals(taskID)) {
+			if (task.getTaskId().equals(taskId)) {
 				return task;
 			}
 		}
@@ -419,7 +471,7 @@ public class Action {
 		if (searchAlsoAmongFinishedTasks) {
 			// or among finished tasks?
 			for (Task task : finishedTasks) {
-				if (task.getTaskID().equals(taskID)) {
+				if (task.getTaskId().equals(taskId)) {
 					return task;
 				}
 			}

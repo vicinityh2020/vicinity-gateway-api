@@ -48,18 +48,22 @@ public class NetworkMessage {
 	 */
 	public static final String ATTR_REQUESTID = "requestId";
 	
+	public static final String ATTR_SOURCEOID = "sourceOid";
+	
+	public static final String ATTR_DESTINATIONOID = "destinationOid";
+	
 	/**
 	 * Name of the configuration parameter for message timeout (expiration will make the message 'stale' and will
 	 * be discarded at nearest opportunity). 
 	 */
-	public static final String CONFIG_PARAM_XMPPMESSAGETIMEOUT = "xmpp.messageTimeout";
+	public static final String CONFIG_PARAM_REQUESTMESSAGETIMEOUT = "general.requestMessageTimeout";
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPMESSAGETIMEOUT CONFIG_PARAM_XMPPMESSAGETIMEOUT} 
+	 * Default value of {@link #CONFIG_PARAM_REQUESTMESSAGETIMEOUT CONFIG_PARAM_REQUESTMESSAGETIMEOUT} 
 	 * configuration parameter. This value is taken into account when no suitable value is found in the configuration
 	 * file.
 	 */
-	public static final int CONFIG_DEF_XMPPMESSAGETIMEOUT = 30;
+	public static final int CONFIG_DEF_REQUESTMESSAGETIMEOUT = 60;
 	
 	
 	/* === FIELDS === */
@@ -92,6 +96,11 @@ public class NetworkMessage {
 	 * this request ID. 
 	 */
 	protected int requestId;
+	
+	protected String destinationOid;
+	
+	protected String sourceOid;
+	
 	
 	/**
 	 * UNIX time stamp generated in the moment the instance of this class is constructed. 
@@ -127,14 +136,21 @@ public class NetworkMessage {
 	 * Basic constructor for the message. Only time stamp is computed.
 	 */
 	public NetworkMessage(XMLConfiguration config, Logger logger){
+		
+		// initialise
+		
 		timeStamp = System.currentTimeMillis();
 		valid = true;
 		stale = false;
 		messageType = NetworkMessage.MESSAGE_TYPE;
+		
+		sourceOid = null;
+		destinationOid = null;
+		jsonRepresentation = null;
+		
 		this.config = config;
 		this.logger = logger;
 		
-		jsonRepresentation = null;
 	}
 	
 	
@@ -160,6 +176,26 @@ public class NetworkMessage {
 	}
 
 
+	public String getDestinationOid() {
+		return destinationOid;
+	}
+
+
+	public void setDestinationOid(String destinationOid) {
+		this.destinationOid = destinationOid;
+	}
+
+
+	public String getSourceOid() {
+		return sourceOid;
+	}
+
+
+	public void setSourceOid(String sourceOid) {
+		this.sourceOid = sourceOid;
+	}
+
+
 	/**
 	 * Retrieves the time stamp of the message. The time stamp is always recorded when instance of this class is 
 	 * constructed.
@@ -182,7 +218,7 @@ public class NetworkMessage {
 	public boolean isValid() {
 		
 		if ((System.currentTimeMillis() - timeStamp) 
-				> (config.getInt(CONFIG_PARAM_XMPPMESSAGETIMEOUT, CONFIG_DEF_XMPPMESSAGETIMEOUT)*1000)){
+				> (config.getInt(CONFIG_PARAM_REQUESTMESSAGETIMEOUT, CONFIG_DEF_REQUESTMESSAGETIMEOUT)*1000)){
 			stale = true;
 		} else {
 			stale = false;
@@ -226,12 +262,13 @@ public class NetworkMessage {
 	 * Inserting a string into JSON has a side effect of the string becoming quoted when extracted back from the JSON.
 	 * This little toy just removes quotes if there are any (it tests for their existence first).
 	 *  
-	 * @param quotedString The original quoted string.
-	 * @return Unquoted string.
+	 * @param quotedString The original DOUBLE quoted string.
+	 * @return Unquoted string, or null if the string is either null, or it has zero length. It returns the original 
+	 * string if it is not quoted.
 	 */
 	public String removeQuotes(String quotedString){
 		
-		if (quotedString.isEmpty()){
+		if (quotedString == null || quotedString.isEmpty()){
 			return null;
 		}
 		
@@ -244,5 +281,6 @@ public class NetworkMessage {
 			return quotedString;
 		}
 	}
+	
 	/* === PRIVATE METHODS === */
 }

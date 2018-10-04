@@ -77,12 +77,6 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * How the object ID is to be marked in the message.
-	 */
-	public static final String ATTR_OID = "oid";
-	
-	
-	/**
 	 * How the property ID is to be marked in the message.
 	 */
 	public static final String ATTR_PID = "pid";
@@ -176,9 +170,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	private byte requestOperation;
 	
 	/**
-	 * Linked hash map with attribute names and their values.
+	 * Map with attribute names and their values.
 	 */
-	private LinkedHashMap<String, String> attributes = new LinkedHashMap<String, String>();
+	private Map<String, String> attributes;
 	
 	/**
 	 * Map with parameter names and their values.
@@ -202,6 +196,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 		// always call this guy
 		super(config, logger);
 		
+		initialise();
+		
 		messageType = NetworkMessageRequest.MESSAGE_TYPE;
 		
 		generateRequestId();
@@ -218,11 +214,10 @@ public class NetworkMessageRequest extends NetworkMessage {
 		// always call this guy
 		super(config, logger);
 		
+		initialise();
+		
 		// remember the json this message was created from
 		jsonRepresentation = json;
-		
-		// initialise the map for parameters
-		parameters = new LinkedHashMap<String, String>();
 		
 		// parse the JSON, or mark this message as invalid
 		if (!parseJson(json)){
@@ -286,44 +281,11 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * Inserts attributes into the message. For the purposes of this message protocol implementation, attributes are 
-	 * the parts of URL, that may contain keys (attribute names) with or without values.
-	 * 
-	 * /objects/{oid}/subscriptions -> 	example of a key with value (objects and {oid}) and a key with no value 
-	 * 									(subscription). 
-	 *  
-	 * @param name Attribute name - a key.
-	 * @param value Value of the attribute. Can be null.
-	 */
-	public void addAttribute(String name, String value){
-		// we don't want null keys (although it is possible to have one...)
-		if (name != null){
-			attributes.put(name, value);
-		}
-	}
-	
-	
-	/**
-	 * Inserts parameters into the message. For the purposes of this message protocol implementation, parameters are
-	 * the regular HTTP parameters, passed in the request.
-	 * 
-	 * @param name Parameter name - a key.
-	 * @param value Value of the parameter. Can be null.
-	 */
-	public void addParameter(String name, String value){
-		// we don't want null keys (although it is possible to have one...)
-		if (name != null){
-			parameters.put(name, value);
-		}
-	}
-	
-	
-	/**
 	 * Retrieves the attributes hash map.
 	 * 
 	 * @return Hash map with attributes.
 	 */
-	public LinkedHashMap<String, String> getAttributes() {
+	public Map<String, String> getAttributes() {
 		return attributes;
 	}
 
@@ -340,6 +302,11 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	public void setParameters(Map<String, String> parameters) {
 		this.parameters = parameters;
+	}
+	
+	
+	public void setAttributes(Map<String, String> attributes) {
+		this.attributes = attributes;
 	}
 	
 	
@@ -399,6 +366,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		mainBuilder.add(ATTR_MESSAGETYPE, messageType)
 			.add(ATTR_REQUESTID, requestId)
+			.add(ATTR_SOURCEOID, sourceOid)
+			.add(ATTR_DESTINATIONOID, destinationOid)
 			.add(ATTR_REQUESTOPERATION, requestOperation);
 		
 		if (requestBody == null){
@@ -418,36 +387,89 @@ public class NetworkMessageRequest extends NetworkMessage {
 	/**
 	 * Takes the JSON object and fills necessary fields with values.
 	 * 
+	 * !!!! describe what needs to be here in order to be valid
+	 * 
 	 * @param json JSON to parse.
 	 * @return True if parsing was successful, false otherwise.
 	 */
 	private boolean parseJson(JsonObject json){
 		
-		// figure out the message type
-		messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
-
-		// the correlation ID of the request
-		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
-		
-		// get and validate the request operation
-		requestOperation = (byte) json.getInt(NetworkMessageRequest.ATTR_REQUESTOPERATION);
-		
-		if (!validateRequestOperation(requestOperation)) {
-			setValid(false);
+		// first check out whether or not the message has everything it is supposed to have and stop if not
+		if (
+				!json.containsKey(ATTR_MESSAGETYPE) ||
+				!json.containsKey(ATTR_REQUESTID) ||
+				!json.containsKey(ATTR_SOURCEOID) ||
+				!json.containsKey(ATTR_DESTINATIONOID) ||
+				!json.containsKey(ATTR_REQUESTOPERATION) ||
+				!json.containsKey(ATTR_REQUESTBODY) ||
+				!json.containsKey(ATTR_ATTRIBUTES) ||
+				!json.containsKey(ATTR_PARAMETERS)) {
+			
 			return false;
 		}
 		
-		if (!json.isNull(NetworkMessageRequest.ATTR_REQUESTBODY)){
-			requestBody = removeQuotes(json.getString(NetworkMessageRequest.ATTR_REQUESTBODY));
+		// prepare objects for parameters and attributes
+		JsonObject attributesJson = null;
+		JsonObject parametersJson = null;
+		
+		// load values from JSON
+		try {
+			
+			messageType = json.getInt(ATTR_MESSAGETYPE);
+			requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
+			requestOperation = (byte) json.getInt(ATTR_REQUESTOPERATION);
+			
+			// null values are special cases in JSON, they get transported as "null" string and it requires special
+			// treatment
+			if (!json.isNull(ATTR_SOURCEOID)) {
+				sourceOid = json.getString(ATTR_SOURCEOID);
+			}
+			
+			if (!json.isNull(ATTR_DESTINATIONOID)) {
+				destinationOid = json.getString(ATTR_DESTINATIONOID);
+			}
+			
+			if (!json.isNull(ATTR_ATTRIBUTES)) {
+				attributesJson = json.getJsonObject(ATTR_ATTRIBUTES);
+			}
+			
+			if (!json.isNull(ATTR_PARAMETERS)) {
+				parametersJson = json.getJsonObject(ATTR_PARAMETERS);
+			}
+			
+			if (!json.isNull(ATTR_REQUESTBODY)) {
+				requestBody = json.getString(ATTR_REQUESTBODY);
+			}
+			
+		} catch (Exception e) {
+			logger.severe("NetworkMessageRequest: Exception while parsing NetworkMessageRequest: " + e.getMessage());
+			
+			return false;
 		}
+		
+		// validate the request operation
+		if (!validateRequestOperation(requestOperation)) {
+			return false;
+		}
+		
+		// process non primitives, start with strings
+		
+		sourceOid = removeQuotes(sourceOid);
+		destinationOid = removeQuotes(destinationOid);
+		requestBody = removeQuotes(requestBody);
+
+		// request body can be null, therefore it is not checked, but the variables are important
+		if (sourceOid == null || destinationOid == null) {
+			return false;
+		}
+
 		
 		// here both the parameters and attributes will be stored during reading
 		Set<Entry<String,JsonValue>> entrySet;
 		String stringValue;
 
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
-		JsonObject attributesJson = json.getJsonObject(ATTR_ATTRIBUTES);
+		// this can be null, but that should not be dangerous. we'll just leave the set clear in such case
 		if (attributesJson != null){
 			
 			entrySet = attributesJson.entrySet();
@@ -465,8 +487,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 			}
 		}
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
-		JsonObject parametersJson = json.getJsonObject(ATTR_PARAMETERS);
+		// this can be null, but that should not be dangerous. we'll just leave the set clear in such case
 		if (parametersJson != null){
 			
 			entrySet = parametersJson.entrySet();
@@ -524,6 +545,14 @@ public class NetworkMessageRequest extends NetworkMessage {
 		}
 		
 		return true;
+	}
+	
+	
+	private void initialise() {
+		requestOperation = 0x00;
+		attributes = new LinkedHashMap<String, String>();
+		parameters = new LinkedHashMap<String, String>();
+		requestBody = null;
 	}
 	
 }

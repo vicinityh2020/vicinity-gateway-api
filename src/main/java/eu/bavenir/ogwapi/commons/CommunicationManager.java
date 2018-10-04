@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
+import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
@@ -36,8 +37,6 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  */
 
 
-// TODO documentation (this main one - the others are good unless stated otherwise)
-// TODO make logging more meaningful - manager (INFO), descriptor (FINE), engine (FINER) and document it in the javadoc.
 /**
  * 
  * This class serves as a connection manager for XMPP communication over P2P network. There is usually only need
@@ -86,9 +85,7 @@ public class CommunicationManager {
 	
 	/* === FIELDS === */
 	
-	
-	// TODO all classes in the commons package should have fields described with javadoc
-	// hash map containing connections identified by 
+	// hash map containing connections identified by object IDs
 	private Map<String, ConnectionDescriptor> descriptorPool;
 	
 	
@@ -144,21 +141,22 @@ public class CommunicationManager {
 	 * Checks whether the connection {@link ConnectionDescriptor descriptor} instance exists for given object ID and 
 	 * whether or not it is connected to the network. Returns true or false accordingly.  
 	 * 
-	 * @param objectID Object ID in question. 
+	 * @param objectId Object ID in question. 
 	 * @return True if descriptor exists and the connection is established.
 	 */
-	public boolean isConnected(String objectID){
+	public boolean isConnected(String objectId){
 		
-		if (objectID == null || objectID.isEmpty()) {
-			//logger.warning(");
+		if (objectId == null) {
+			logger.warning("CommunicationManager.isConnected: Invalid object ID.");
+			return false;
 		}
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectId);
 		
 		if (descriptor != null){
 			return descriptor.isConnected();
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.info("Object ID: '" + objectId + "' is not connected yet.");
 			
 			return false;
 		}
@@ -171,17 +169,17 @@ public class CommunicationManager {
 	 * {@link #isConnected(String) isConnected} is used for making sure, that the object is actually connected. 
 	 * It is safe to use this method when processing authentication of every request, even in quick succession.
 	 * 
-	 * @param objectID Object ID in question.
+	 * @param objectId Object ID in question.
 	 * @param password The password that is to be verified. 
 	 * @return True, if the password is valid.
 	 */
-	public boolean verifyPassword(String objectID, String password){
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+	public boolean verifyPassword(String objectId, String password){
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectId);
 		
 		if (descriptor != null){
 			return descriptor.verifyPassword(password);
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectId + "'.");
 			
 			return false;
 		}
@@ -214,9 +212,6 @@ public class CommunicationManager {
 	
 	
 	
-	
-	
-	
 	// AUTHENTICATION INTERFACE
 	
 	
@@ -229,38 +224,39 @@ public class CommunicationManager {
 	 * 
 	 * NOTE: This is the equivalent of GET /objects/login in the REST API.
 	 * 
-	 * @param objectID Object ID.
+	 * @param objectId Object ID.
 	 * @param password Password.
 	 * @return StatusMessage, with the error flag set as false, if the login was successful. If not, the error flag is
 	 * set to true.
 	 */
-	public StatusMessage establishConnection(String objectID, String password){
+	public StatusMessage establishConnection(String objectId, String password){
 		
 		// if there is a previous descriptor we should close the connection first, before reopening it again
-		ConnectionDescriptor descriptor = descriptorPoolRemove(objectID);
+		ConnectionDescriptor descriptor = descriptorPoolRemove(objectId);
 		if (descriptor != null){
 	
 			descriptor.disconnect();
 			
-			logger.info("Reconnecting '" + objectID + "' to network.");
+			logger.info("Reconnecting '" + objectId + "' to network.");
 		}
 		
-		descriptor = new ConnectionDescriptor(objectID, password, config, logger);
+		descriptor = new ConnectionDescriptor(objectId, password, config, logger);
 		
 		StatusMessage statusMessage;
 		
 		if (descriptor.connect()){
-			logger.info("Connection for '" + objectID +"' was established.");
+			logger.info("Connection for '" + objectId +"' was established.");
 			
 			// insert the connection descriptor into the pool
-			descriptorPoolPut(objectID, descriptor);
-			logger.finest("A new connection for '" + objectID +"' was added into connection pool.");
+			descriptorPoolPut(objectId, descriptor);
 			
-			statusMessage = new StatusMessage(false, StatusMessage.MESSAGE_BODY, new String("Login successfull."), logger);
+			statusMessage = new StatusMessage(false, CodesAndReasons.CODE_200_OK, 
+					CodesAndReasons.REASON_200_OK + "Login successfull.");
 			
 		} else {
-			logger.info("Connection for '" + objectID +"' was not established.");
-			statusMessage = new StatusMessage(true, StatusMessage.MESSAGE_BODY, new String("Login unsuccessfull."), logger);
+			logger.info("Connection for '" + objectId +"' was not established.");
+			statusMessage = new StatusMessage(true, CodesAndReasons.CODE_401_UNAUTHORIZED, 
+					CodesAndReasons.REASON_401_UNAUTHORIZED + "Login unsuccessfull.");
 		}
 		
 		return statusMessage;
@@ -277,25 +273,25 @@ public class CommunicationManager {
 	 * 
 	 * This is the equivalent of GET /objects/logout in the REST API.
 	 * 
-	 * @param objectID User name used to establish the connection.
+	 * @param objectId User name used to establish the connection.
 	 * @param destroyConnectionDescriptor Whether the connection descriptor should also be destroyed or not. 
 	 */
-	public void terminateConnection(String objectID, boolean destroyConnectionDescriptor){
+	public void terminateConnection(String objectId, boolean destroyConnectionDescriptor){
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID); 
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectId); 
 		
 		if (descriptor != null){
 			descriptor.disconnect();
 		} else {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.info("Attempting to terminate nonexisting connection. Object ID: '" + objectId + "'.");
 		}
 		
 		if (destroyConnectionDescriptor){
-			descriptorPoolRemove(objectID);
-			logger.info("Connection for object ID '" + objectID + "' destroyed.");
+			descriptorPoolRemove(objectId);
+			logger.info("Connection for object ID '" + objectId + "' destroyed.");
 		} else {
 			// this will keep the connection in the pool
-			logger.info("Connection for object ID '" + objectID + "' closed.");
+			logger.info("Connection for object ID '" + objectId + "' closed.");
 		}
 
 	}
@@ -307,134 +303,232 @@ public class CommunicationManager {
 
 	
 	// TODO documentation
-	public StatusMessage getPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID,
-			Map<String, String> params) {
+	public StatusMessage getPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String, String> parameters) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when getting property of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting property of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (propertyId == null){
+			logger.warning("Error when getting property of remote object. The property ID is null. "
+					+ "Source object: '" + sourceOid + "', destination object: '" + destinationOid);
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		if (destinationObjectID == null){
-			logger.warning("Error when getting property of remote object. Destination object ID is null. "
-					+ "Source object: '" + objectID + "'.");
-			
-			return null;
-		}
-		
-		if (propertyID == null){
-			logger.warning("Error when getting property of remote object. The property name is null. "
-					+ "Source object: '" + objectID + "', destination object: '" + destinationObjectID);
-			
-			return null;
-		}
-		
-		
-		return descriptor.getPropertyOfRemoteObject(destinationObjectID, propertyID, params);
+		return descriptor.getPropertyOfRemoteObject(destinationOid, propertyId, parameters, body);
 		
 	}
 	
 	
 	// TODO documentation
-	public StatusMessage setPropertyOfRemoteObject(String objectID, String destinationObjectID, String propertyID, 
-			String body, Map<String,String> params) {
+	public StatusMessage setPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String,String> parameters) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when setting property of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when setting property of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (propertyId == null){
+			logger.warning("Error when setting property of remote object. The property ID is null. "
+					+ "Source object: '" + sourceOid + "', destination object: '" + destinationOid);
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		if (destinationObjectID == null){
-			logger.warning("Error when setting property of remote object. Destination object ID is null. "
-					+ "Source object: '" + objectID + "'.");
-			
-			return null;
-		}
-		
-		if (propertyID == null){
-			logger.warning("Error when setting property of remote object. The property name is null. "
-					+ "Source object: '" + objectID + "', destination object: '" + destinationObjectID);
-			
-			return null;
-		}
-		
-		if (body == null) {
-			
-		}
-		
-		return descriptor.setPropertyOfRemoteObject(destinationObjectID, propertyID, body, params);
+		return descriptor.setPropertyOfRemoteObject(destinationOid, propertyId, body, parameters);
 	}
 
 	
 	
 	// TODO documentation
-	public String startAction(String objectID, String destinationObjectID, String actionID, String body, 
-			Map<String, String> params) {
+	public StatusMessage startAction(String sourceOid, String destinationOid, String actionId, String body, 
+			Map<String, String> parameters) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when starting action. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when starting action. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (actionId == null){
+			logger.warning("Error when starting action of remote object. The action ID is null. "
+					+ "Source object: '" + sourceOid + "', destination object: '" + destinationOid);
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.startAction(destinationObjectID, actionID, body, params);
+		return descriptor.startAction(destinationOid, actionId, body, parameters);
 		
 	}
 	
 	
-	public StatusMessage updateTaskStatus(String objectID, String actionID, 
-					String newStatus, String returnValue, Map<String, String> params) {
+	public StatusMessage updateTaskStatus(String sourceOid, String actionId, 
+					String newStatus, String returnValue, Map<String, String> parameters) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when updating task status. Source object ID is null.");
+			
+			return null;
+		}
 		
-		if (descriptor == null) {
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+		if (actionId == null){
+			logger.warning("Error when updating task status. The action ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (newStatus == null){
+			logger.warning("Error when updating task status. The new status is null. "
+					+ "Source object: '" + sourceOid + "'.");
 			
 			return null;
 		}
 		
 		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
-		return descriptor.updateTaskStatus(actionID, newStatus, returnValue, params);
+		if (descriptor == null) {
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		return descriptor.updateTaskStatus(actionId, newStatus, returnValue, parameters);
 	}
 	
 	
-	public String retrieveTaskStatus(String objectID, String destinationObjectID, String actionID, String taskID, 
-			Map<String, String> params) {
+	public StatusMessage retrieveTaskStatus(String sourceOid, String destinationOid, String actionId, String taskId, 
+			Map<String, String> parameters, String body) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when retrieving task status. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when retrieving task status. Destination object ID is null.");
+			
+			return null;
+		}
+		
+		if (actionId == null){
+			logger.warning("Error when retrieving task status. The action ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (taskId == null){
+			logger.warning("Error when retrieving task status. The task ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.retrieveTaskStatus(destinationObjectID, actionID, taskID, params);
+		return descriptor.retrieveTaskStatus(destinationOid, actionId, taskId, parameters, body);
 	}
 	
 	
 	
-	public String cancelRunningTask(String objectID, String destinationObjectID, String actionID, String taskID, 
-			Map<String,String> params) {
+	public StatusMessage cancelRunningTask(String sourceOid, String destinationOid, String actionId, String taskId, 
+			Map<String,String> parameters, String body) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when canceling task. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when canceling task. Destination object ID is null.");
+			
+			return null;
+		}
+		
+		if (actionId == null){
+			logger.warning("Error when canceling task. The action ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		if (taskId == null){
+			logger.warning("Error when canceling task. The task ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.cancelRunningTask(destinationObjectID, actionID, taskID, params);
+		return descriptor.cancelRunningTask(destinationOid, actionId, taskId, parameters, body);
 	}
 	
 	
@@ -449,25 +543,30 @@ public class CommunicationManager {
 	 * 
 	 * NOTE: This is the equivalent of GET /objects in the REST API.
 	 * 
-	 * @param objectID Object ID the roster is to be retrieved for. 
+	 * @param objectId Object ID the roster is to be retrieved for. 
 	 * @return Set of roster entries. If no connection is established for the object ID, the collection is empty
 	 * (not null). 
 	 */
-	public Set<String> getRosterEntriesForObject(String objectID){
+	public Set<String> getRosterEntriesForObject(String objectId){
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (objectId == null){
+			logger.warning("Error when retrieving contact list. Object ID is null.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectId);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectId + "'.");
 			return Collections.emptySet();
 		}
 		
 		Set<String> entries = descriptor.getRoster();
 		
 		// log it
-		logger.finest("-- Roster for '" + objectID +"' --");
+		logger.finest("-- Roster for '" + objectId +"' --");
 		for (String entry : entries) {
-			// TODO make it possible for the roster to return presence!
 			logger.finest(entry + " Presence: " + "UNKNOWN");
 		}
 		logger.finest("-- End of roster --");
@@ -492,67 +591,69 @@ public class CommunicationManager {
 	 * 
 	 * NOTE: This is the equivalent of POST /events/[eid] in the REST API.
 	 * 
-	 * @param objectID Object ID of the event channel owner.
-	 * @param eventID Event ID.
+	 * @param sourceOid Object ID of the event channel owner.
+	 * @param eventId Event ID.
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
 	 * successfully.
 	 */
-	public StatusMessage activateEventChannel(String objectID, String eventID, Map<String, String> params) {
+	public StatusMessage activateEventChannel(String sourceOid, String eventId, Map<String, String> parameters, 
+				String body) {
 		
-		// check the validity of the calling object
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
-		
-		if (descriptor == null){
+		if (sourceOid == null){
+			logger.warning("Error when activating event channel. Source object ID is null.");
 			
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 			return null;
 		}
 		
-		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_ACTIVE, params);
+		if (eventId == null){
+			logger.warning("Error when activating event channel. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_ACTIVATION, new String("Channel activated."), logger);
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			return null;
+		}
+		
+		return descriptor.setLocalEventChannelStatus(eventId, true, parameters, body);
 	}
 	
 	
 	
 	// TODO documentation
 	// returns number of sent messages vs the number of subscribers
-	public StatusMessage sendEventToSubscribedObjects(String objectID, String eventID, String event, 
-			Map<String, String> params) {
+	public StatusMessage sendEventToSubscribedObjects(String sourceOid, String eventId, String body, 
+			Map<String, String> parameters) {
 		
-		String statusMessageText;
-		
-		// check the validity of the calling object
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
-		
-		if (descriptor == null){
+		if (sourceOid == null){
+			logger.warning("Error when sending event to subscribers. Source object ID is null.");
 			
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
 			return null;
 		}
 		
-		int numberOfSentMessages = 0;
-		int numberOfSubscribers = descriptor.getNumberOfSubscribers(eventID);
+		if (eventId == null){
+			logger.warning("Error when sending event to subscribers. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
-		// no need to waste cycles for nothing
-		if (numberOfSubscribers > 0) {
-			numberOfSentMessages = descriptor.sendEventToSubscribers(eventID, event, params);	
+		if (descriptor == null){
+			
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			return null;
 		}
 		
-		boolean error;
-		if (numberOfSentMessages < 0) {
-			statusMessageText = new String("Event " + eventID + " was not distributed to subscribers.");
-			error = true;
-		} else {
-			statusMessageText = new String("Event " + eventID + " was successfully sent to " 
-					+ numberOfSentMessages + " out of " 
-					+ numberOfSubscribers + " subscribers.");
-			error = false;
-		}
-		
-		logger.info(statusMessageText);
-		
-		return new StatusMessage(error, StatusMessage.MESSAGE_EVENT_SENDTOSUBSCRIBERS, statusMessageText, logger);
+		return descriptor.sendEventToSubscribers(eventId, body, parameters);
 		
 	}
 	
@@ -572,67 +673,140 @@ public class CommunicationManager {
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
 	 * successfully.
 	 */
-	public StatusMessage deactivateEventChannel(String objectID, String eventID, Map<String, String> params) {
+	public StatusMessage deactivateEventChannel(String sourceOid, String eventId, Map<String, String> parameters, 
+				String body) {
 		
-		// check the validity of the calling object
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
-		
-		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+		if (sourceOid == null){
+			logger.warning("Error when deactivating event channel. Source object ID is null.");
+			
 			return null;
 		}
 		
-		descriptor.setLocalEventChannelStatus(eventID, EventChannel.STATUS_INACTIVE, params);
+		if (eventId == null){
+			logger.warning("Error when deactivating event channel. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
 		
-		return new StatusMessage(false, StatusMessage.MESSAGE_EVENT_DEACTIVATION, new String("Channel deactivated."), logger);
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			return null;
+		}
+		
+		return descriptor.setLocalEventChannelStatus(eventId, false, parameters, body);
 	}
 	
 	
 	
 	// TODO documentation
-	public String getEventChannelStatus(String objectID, String destinationObjectID, String eventID, 
-			Map<String, String> params) {
+	public StatusMessage getEventChannelStatus(String sourceOid, String destinationOid, String eventId, 
+			Map<String, String> parameters, String body) {
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+		if (sourceOid == null){
+			logger.warning("Error when retrieving event channel status. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when retrieving event channel status. Destination object ID is null.");
+			
+			return null;
+		}
+		
+		if (eventId == null){
+			logger.warning("Error when retrieving event channel status. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.getRemoteEventChannelStatus(destinationObjectID, eventID, params);
+		return descriptor.getEventChannelStatus(destinationOid, eventId, parameters, body);
 	}
 	
 	
 	
 	// TODO documentation
-	public String subscribeToEventChannel(String objectID, String destinationObjectID, String eventID, 
-			Map<String, String> params) {
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+	public StatusMessage subscribeToEventChannel(String sourceOid, String destinationOid, String eventId, 
+			Map<String, String> parameters, String body) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when subscribing to an event channel. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when subscribing to an event channel. Destination object ID is null.");
+			
+			return null;
+		}
+		
+		if (eventId == null){
+			logger.warning("Error when subscribing to an event channel. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.subscribeToEventChannel(destinationObjectID, eventID, params);
+		return descriptor.subscribeToEventChannel(destinationOid, eventId, parameters, body);
 	}
 	
 	
 	// TODO documentation
-	public String unsubscribeFromEventChannel(String objectID, String destinationObjectID, String eventID, 
-			Map<String, String> params) {
-		ConnectionDescriptor descriptor = descriptorPoolGet(objectID);
+	public StatusMessage unsubscribeFromEventChannel(String sourceOid, String destinationOid, String eventId, 
+			Map<String, String> parameters, String body) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when unsubscribing from an event channel. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when unsubscribing from an event channel. Destination object ID is null.");
+			
+			return null;
+		}
+		
+		if (eventId == null){
+			logger.warning("Error when unsubscribing from an event channel. The event ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.unsubscribeFromEventChannel(destinationObjectID, eventID, params);
+		return descriptor.unsubscribeFromEventChannel(destinationOid, eventId, parameters, body);
+		
 	}
 
 	
