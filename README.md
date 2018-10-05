@@ -18,7 +18,8 @@ Hardware requirements are:
 VICINITY Open Gateway API source code should be checkout from repository:
 ```
 #!shell
-git clone git@cpsgit.informatik.uni-kl.de:VICINITY/vicinity-open-gateway-api.git
+git clone https://github.com/vicinityh2020/vicinity-gateway-api
+
 
 ```
 Afterwards source needs to be build:
