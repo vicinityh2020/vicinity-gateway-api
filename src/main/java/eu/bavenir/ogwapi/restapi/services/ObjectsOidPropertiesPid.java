@@ -13,7 +13,6 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.ogwapi.restapi.Api;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 

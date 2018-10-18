@@ -121,9 +121,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 	/* === PUBLIC METHODS === */
 	
 	// TODO documentation
-	public XmppMessageEngine(String objectID, String password, XMLConfiguration config, Logger logger, 
+	public XmppMessageEngine(String objectId, String password, XMLConfiguration config, Logger logger, 
 																		ConnectionDescriptor connectionDescriptor) {
-		super(objectID, password, config, logger, connectionDescriptor);
+		super(objectId, password, config, logger, connectionDescriptor);
 		
 		connection = null;
 		chatManager = null;
@@ -232,9 +232,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 			
 			connection.disconnect();
 			
-			logger.fine("XMPP user '" + objectID + "' disconnected.");
+			logger.fine("XMPP user '" + objectId + "' disconnected.");
 		} else {
-			logger.fine("XMPP user '" + objectID + "' is already disconnected.");
+			logger.fine("XMPP user '" + objectId + "' is already disconnected.");
 		}		
 	}
 
@@ -262,7 +262,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		Set<String> rosterSet = new HashSet<String>();
 		
 		if (connection == null || !connection.isConnected()){
-			logger.warning("Invalid connection in descriptor for username '" + objectID + "'.");
+			logger.warning("Invalid connection in descriptor for username '" + objectId + "'.");
 			return Collections.emptySet();
 		}
 		

@@ -668,7 +668,7 @@ public class CommunicationManager {
 	 * 
 	 * NOTE: This is the equivalent of DELETE /events/[eid] in the REST API.
 	 * 
-	 * @param objectID Object ID of the event channel owner
+	 * @param objectId Object ID of the event channel owner
 	 * @param eventID Event ID.
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
 	 * successfully.
@@ -821,23 +821,23 @@ public class CommunicationManager {
 	
 	// QUERY INTERFACE
 	
-	public String performSparqlSearch(String sourceObjectID, String sparqlQuery) {
+	public String performSparqlSearch(String sourceObjectId, String sparqlQuery, Map<String, String> parameters) {
 		
-		if (sourceObjectID == null || sourceObjectID.isEmpty() || sparqlQuery == null || sparqlQuery.isEmpty()) {
+		if (sourceObjectId == null || sourceObjectId.isEmpty() || sparqlQuery == null || sparqlQuery.isEmpty()) {
 			logger.warning("Method parameters can't be null nor empty.");
 			
 			return null;
 		}
 		
-		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectID);
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectId);
 		
 		if (descriptor == null){
-			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectID + "'.");
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectId + "'.");
 			
 			return null;
 		} 
 		
-		return descriptor.performSparqlQuery(sparqlQuery);
+		return descriptor.performSparqlQuery(sparqlQuery, parameters);
 	}
 	
 	

@@ -59,7 +59,7 @@ public class RestletThread extends Thread {
 	/**
 	 * Maximum number of threads the RESTLET will be allowed to spawn.
 	 */
-	private static final String MAX_THREADS = "256";
+	private static final String MAX_THREADS = "1000";
 	
 	
 	/* === FIELDS === */
@@ -117,6 +117,7 @@ public class RestletThread extends Thread {
 			serverType = "HTTP";
 		}
 		
+		server.getContext().getParameters().add("maxThreads", MAX_THREADS); 
 		server.getContext().getParameters().add("threadPool.maxThreads", MAX_THREADS); 
 		
 		// log message

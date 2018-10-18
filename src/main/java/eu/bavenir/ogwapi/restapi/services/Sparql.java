@@ -1,8 +1,11 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -35,11 +38,6 @@ import eu.bavenir.ogwapi.restapi.Api;
 public class Sparql extends ServerResource {
 	
 	// === CONSTANTS ===
-
-	/**
-	 * Name of the query parameter.
-	 */
-	private static final String PARAM_SPARQLQUERY = "query";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -51,32 +49,58 @@ public class Sparql extends ServerResource {
 	 * @param query New description for an already registered object (from request).
 	 */
 	@Post("json")
-	public Representation accept() {
+	public Representation accept(Representation entity) {
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
-		// get the query
-		String sparqlQuery = getQueryValue(PARAM_SPARQLQUERY);
+		// get the query in body
+		String sparqlQuery = getRequestBody(entity, logger);
 		
-		if (sparqlQuery == null || sparqlQuery.isEmpty()) {
-			logger.warning("Request parameter 'query' is not set.");
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Request parameter 'query' is not set.");
-		}
+		// and perhaps parameters
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
-		return performSearch(callerOid, sparqlQuery);
+		return performSearch(callerOid, sparqlQuery, queryParams);
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	private Representation performSearch(String sourceOid, String sparqlQuery){
+	private Representation performSearch(String sourceOid, String sparqlQuery, Map<String, String> parameters){
 
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.performSparqlSearch(sourceOid, sparqlQuery));
+		return new JsonRepresentation(communicationManager.performSparqlSearch(sourceOid, sparqlQuery, parameters));
 	
+	}
+	
+	
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
+		}
+		
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
 	}
 	
 	

@@ -16,6 +16,8 @@ import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
  */
 
 // TODO documentation
+// don't forget to mention the usage of configuration parameters that are (or could be) common to more 
+// than one engine, like general.encryption or general.sessionRecovery
 public abstract class CommunicationEngine {
 
 	/* === CONSTANTS === */
@@ -28,7 +30,7 @@ public abstract class CommunicationEngine {
 	protected Logger logger;
 	
 	// credentials
-	protected String objectID;
+	protected String objectId;
 	protected String password;
 	
 	// connection descriptor for call backs
@@ -38,13 +40,13 @@ public abstract class CommunicationEngine {
 	/* === PUBLIC METHODS === */
 	
 	
-	public CommunicationEngine(String objectID, String password, XMLConfiguration config, Logger logger, 
+	public CommunicationEngine(String objectId, String password, XMLConfiguration config, Logger logger, 
 																	ConnectionDescriptor connectionDescriptor) {
 		
 		this.config = config;
 		this.logger = logger;
 		
-		this.objectID = objectID;
+		this.objectId = objectId;
 		this.password = password;
 		
 		this.connectionDescriptor = connectionDescriptor;
@@ -55,11 +57,11 @@ public abstract class CommunicationEngine {
 	
 	/**
 	 * 
-	 * @param objectID
+	 * @param objectId
 	 * @param password
 	 * @return
 	 */
-	public abstract boolean connect(String objectID, String password);
+	public abstract boolean connect(String objectId, String password);
 	
 
 	public abstract void disconnect();
@@ -70,11 +72,11 @@ public abstract class CommunicationEngine {
 
 	/**
 	 * 
-	 * @param destinationObjectID
+	 * @param destinationObjectId
 	 * @param message
 	 * @return
 	 */
-	public abstract boolean sendMessage(String destinationObjectID, String message);
+	public abstract boolean sendMessage(String destinationObjectId, String message);
 	
 		
 	/* === PRIVATE METHODS === */

@@ -13,6 +13,7 @@ import org.restlet.security.ChallengeAuthenticator;
 import eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjectsDelete;
+import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjectsUpdate;
 import eu.bavenir.ogwapi.restapi.services.EventsEid;
 import eu.bavenir.ogwapi.restapi.services.Objects;
 import eu.bavenir.ogwapi.restapi.services.ObjectsLogin;
@@ -188,6 +189,8 @@ public class Api extends Application {
 		// REGISTRY
 		// post, put
 		router.attach("/agents/{agid}/objects", AgentsAgidObjects.class);
+		// put
+		router.attach("/agents/{agid}/objects/update", AgentsAgidObjectsUpdate.class);
 		// post
 		router.attach("/agents/{agid}/objects/delete", AgentsAgidObjectsDelete.class);
 		

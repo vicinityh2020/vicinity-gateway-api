@@ -5,7 +5,7 @@
 		<!--
 		URL/IP address of the communication server. If not set, the application exits.
 		-->
-		<server>vicinity.bavenir.eu</server>
+		<server>development.bavenir.eu</server>
 		
 		<!--
 		Port of the communication server.
@@ -15,8 +15,8 @@
 		<port>5222</port>
 		
 		<!-- 
-		Setting this parameter to true will enable encryption of communication. The policy is to
-		try the strongest mechanisms first.
+		Setting this parameter to true will enable encryption of communication. 
+		The policy is to try the strongest mechanisms first.
 		
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
@@ -34,6 +34,54 @@
 		Default is 60 seconds. 
 		-->
 		<requestMessageTimeout>60</requestMessageTimeout>
+		
+		
+		<!-- 
+		This parameter defines how the sessions that went down should be recovered.
+		A session is a connection created when individual object logs in and is
+		maintained as much as possible to remain open. 
+		
+		However there are cases when the OGWAPI will give up its attempts to 
+		maintain the session, e.g. when the communication with server is 
+		interrupted for prolonged time (depends on engine in use). In such cases
+		there usually is a need to recover the sessions after communication is 
+		restored. 'Aggressiveness' of OGWAPI required to recover lost sessions is 
+		scenario dependent. Following are accepted values for this parameter, 
+		along with explanations:
+		
+		
+		proactive
+		
+		After you log your objects in, OGWAPI will be trying hard to reconnect
+		lost sessions (if any) every 30 seconds until it succeeds or until you 
+		log your objects out. It does not care if your object is ready to listen
+		or not. Incoming requests may therefore still time out if your adapter
+		is not ready, although it will look online in the infrastructure. Good
+		for objects that are expected to be always online, like services.
+		
+		
+		none
+		
+		The OGWAPI will not make any extra effort to recover the sessions.
+		If you log your object in and the session for some reason fails, it will
+		remain so until you explicitly re-log your object. This was the behaviour
+		before this parameter was implemented.
+		
+		 
+		passive
+		
+		This will actually make OGWAPI terminate sessions that are not refreshed
+		periodically. Refreshing a connection means calling the login method at
+		least every 30 seconds. Call to login method is optimised, so there is no 
+		overhead and it will not attempt to actually log an object in if it already
+		is. Good for integrators that like to have things under control, implement
+		adapters on small end user devices or have a need to implement a kind of
+		presence into their application.
+		
+		Default is proactive.
+		
+		-->
+		<sessionRecovery>proactive</sessionRecovery>
 	</general>
 
 

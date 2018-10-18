@@ -2,7 +2,6 @@ package eu.bavenir.ogwapi.commons;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -11,12 +10,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonStructure;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
@@ -775,13 +771,13 @@ public class ConnectionDescriptor {
 	
 	
 	
-	public String performSparqlQuery(String query) {
+	public String performSparqlQuery(String query, Map<String, String> parameters) {
 		
 		if (query == null) {
 			return null;
 		}
 		
-		return sparql.performQuery(query);
+		return sparql.performQuery(query, parameters);
 	}
 	
 	

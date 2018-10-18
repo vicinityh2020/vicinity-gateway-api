@@ -2,6 +2,7 @@ eu/bavenir/ogwapi/commons/messages/CodesAndReasons.class
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine$2.class
 eu/bavenir/ogwapi/commons/messages/StatusMessage.class
 eu/bavenir/ogwapi/restapi/RestletThread.class
+eu/bavenir/ogwapi/restapi/services/AgentsAgidObjectsUpdate.class
 eu/bavenir/ogwapi/commons/Action$2.class
 eu/bavenir/ogwapi/commons/connectors/AgentConnector.class
 eu/bavenir/ogwapi/restapi/services/ObjectsOid.class
