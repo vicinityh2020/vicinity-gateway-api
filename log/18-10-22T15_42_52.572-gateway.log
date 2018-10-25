@@ -1,0 +1,196 @@
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/18-10-22T15_42_52.572-gateway.log
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+Oct 22, 2018 3:42:52 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+Oct 22, 2018 3:42:52 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+Oct 22, 2018 3:42:52 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'test_vcnt0' is not connected yet.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads enabled, all calls to an Agent via this connector will be simulated.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'development.bavenir.eu:5222' as 'test_vcnt0@bavenir.eu'
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'test_vcnt0' was established.
+Oct 22, 2018 3:42:58 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Oct 22, 2018 3:42:58 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Oct 22, 2018 3:42:58 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Oct 22, 2018 3:42:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+Oct 22, 2018 3:42:58 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+Oct 22, 2018 3:42:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+Oct 22, 2018 3:42:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+Oct 22, 2018 3:42:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Oct 22, 2018 3:42:58 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Oct 22, 2018 3:42:58 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Oct 22, 2018 3:42:58 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Oct 22, 2018 3:43:01 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Oct 22, 2018 3:43:01 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Oct 22, 2018 3:43:01 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/update" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/delete" URI pattern: 0.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/sparql" URI pattern: 1.0
+Oct 22, 2018 3:43:01 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/sparql" -> Finder for Sparql
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 7 characters were matched
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/sparql". No remaining part to match
+Oct 22, 2018 3:43:01 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Oct 22, 2018 3:43:01 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.Sparql.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.Sparql, restletMethod: POST, input: json, value: json, output: json, query: null]"= 0.5
+Oct 22, 2018 3:43:01 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/json]"= 0.08383334
+Oct 22, 2018 3:43:01 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@2d630693
+Oct 22, 2018 3:43:01 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for String: DefaultConverter
+Oct 22, 2018 3:43:01 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+Oct 22, 2018 3:43:01 PM org.restlet.engine.application.ApplicationHelper$1 handle
+FINE: Added runtime client for protocol: HTTP
+Oct 22, 2018 3:43:01 PM org.restlet.engine.connector.HttpClientHelper start
+INFO: Starting the internal HTTP client
+Oct 22, 2018 3:43:02 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Oct 22, 2018 3:56:12 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Oct 22, 2018 3:56:12 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Oct 22, 2018 3:56:12 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Oct 22, 2018 3:56:12 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+Oct 22, 2018 3:56:12 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+Oct 22, 2018 3:56:12 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+Oct 22, 2018 3:56:12 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+Oct 22, 2018 3:56:12 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Oct 22, 2018 3:56:12 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: null, value: null, output: null, query: null]"= 0.5
+Oct 22, 2018 3:56:12 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+Oct 22, 2018 3:56:12 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+Oct 22, 2018 3:56:41 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+Oct 22, 2018 3:56:41 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: test_vcnt0.
+Oct 22, 2018 3:56:41 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "test_vcnt0" using the HTTP_Basic scheme.
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/update" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/delete" URI pattern: 0.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/sparql" URI pattern: 1.0
+Oct 22, 2018 3:56:41 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/sparql" -> Finder for Sparql
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 7 characters were matched
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/sparql". No remaining part to match
+Oct 22, 2018 3:56:41 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+Oct 22, 2018 3:56:41 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.Sparql.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.Sparql, restletMethod: POST, input: json, value: json, output: json, query: null]"= 0.5
+Oct 22, 2018 3:56:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/json]"= 0.08383334
+Oct 22, 2018 3:56:41 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@2d630693
+Oct 22, 2018 3:56:41 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for String: DefaultConverter
+Oct 22, 2018 3:56:41 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+Oct 22, 2018 3:56:42 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter

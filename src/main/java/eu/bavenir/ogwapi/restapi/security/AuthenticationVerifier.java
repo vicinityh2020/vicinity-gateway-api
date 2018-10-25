@@ -71,19 +71,22 @@ public class AuthenticationVerifier implements Verifier {
 			return Verifier.RESULT_MISSING;
 		}
 		
-		String objectID = cr.getIdentifier();
+		String objectId = cr.getIdentifier();
 		String password = new String(cr.getSecret());
 		
-		if (communicationManager.isConnected(objectID)){
+		// TODO REMOVE AFTER TEST
+		logger.finest("CREDENTIALS\nusername: " + objectId + " password: " + password);
+		
+		if (communicationManager.isConnected(objectId)){
 			// if the client is already connected, just verify the password
-			if (!communicationManager.verifyPassword(objectID, password)){
+			if (!communicationManager.verifyPassword(objectId, password)){
 				logger.info("Invalid credentials in request from a client with IP " 
 						+ request.getClientInfo().getAddress() + ".");
 				return Verifier.RESULT_INVALID;
 			}
 		} else {
 			// if not, establish a connection
-			StatusMessage statusMessage = communicationManager.establishConnection(objectID, password); 
+			StatusMessage statusMessage = communicationManager.establishConnection(objectId, password); 
 			if (statusMessage.isError()){
 				logger.info("Invalid credentials in request from a client with IP " 
 											+ request.getClientInfo().getAddress() + ".");

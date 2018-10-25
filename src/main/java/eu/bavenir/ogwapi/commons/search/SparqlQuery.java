@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
+import client.VicinityAgoraClient;
 import client.VicinityClient;
 import client.model.Triple;
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
@@ -27,9 +29,9 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 public class SparqlQuery {
 
-	private static final int ARRAYINDEX_OID = 3;
+	private static final int ARRAYINDEX_OID = 2;
 	
-	private static final int ARRAYINDEX_PID = 5;
+	private static final int ARRAYINDEX_PID = 4;
 	
 	private static final String ATTR_RESOURCE = "resource";
 	
@@ -57,7 +59,6 @@ public class SparqlQuery {
 	
 	public String performQuery(String query, Map<String, String> parameters) {
 		
-	
 		// TODO remove after test
 		System.out.println("QUERY: \n" + query
 				+ "\nADDITIONAL PARAMETERS: \n" + parameters.toString()
@@ -67,7 +68,11 @@ public class SparqlQuery {
 		
 		Set<String> neighbours = descriptor.getRoster();
 		
-		neighbours.add("test-agora-1");
+		neighbours.add("ab6594e3-7924-4296-8b74-1cdce699cc5d");
+		neighbours.add("d53e4402-d895-4d1f-918f-310764c8a2b6");
+		neighbours.add("dda138c3-d05a-48f9-8d12-f19debe23d85");
+		neighbours.add("f3f9bf96-9af0-451b-be46-24821587f4a3");
+		neighbours.add("f6a67fe1-e185-4058-a95d-0d9e27ab052d");
 		
 		// TODO remove after test
 		System.out.println("NEIGHBOURS: \n" + neighbours.toString()); 
@@ -81,68 +86,29 @@ public class SparqlQuery {
 		System.out.println("RETRIEVED TED: \n" + jsonTED);
 		
 		
-		// Retrieve a JSON document containing VICINITY ontology prefixes from the Gateway API Services
-		String jsonPrefixes = retrievePrefixes();
-		
-		// TODO remove after test
-		System.out.println("RETRIEVED PREFIXES: \n" + jsonPrefixes);
-		
-		
 		// init the client
-		VicinityClient client = new VicinityClient(jsonTED, neighbours, jsonPrefixes);
+		VicinityClient client = new VicinityAgoraClient(jsonTED, neighbours, query);
 
-		
-		// TODO remove after test
-		System.out.println("===== STARTING THE DISCOVERY =======");
-		
-		// discovery
-		while(client.existIterativelyDiscoverableThings()){
-			
-			// TODO remove after test
-			System.out.println("DISCOVERY ITERATION STARTS");
-			
-			// discover relevant resources in the TED
-			List<String> neighboursThingsIRIs = client.discoverRelevantThingIRI();
-			// retrieve remote JSON data for each Thing IRI
-			for(String neighboursThingIRI:neighboursThingsIRIs){
-				
-				// TODO remove after test
-				System.out.println("DISCOVERED RELEVANT THING IRI: \n" + neighboursThingIRI);
-				
-				// TODO make this run in parallel
-				
-				// retrieve the JSON-LD exposed by the GATEWAY API SERVICES for this IRI Thing
-				String thingsJsonRDF = retrieveRDF(neighboursThingIRI); 
-				
-				// TODO remove after test
-				System.out.println("RETRIEVED THING RDF: \n" + thingsJsonRDF);
-				
-				client.updateDiscovery(thingsJsonRDF);
-			}
-		}
-		
-		// TODO remove after test
-		System.out.println("===== DISCOVERY FINISHED =======");
-		
-		List<Triple<String,String,String>> relevantGatewayAPIAddresses = client.getRelevantGatewayAPIAddresses();
+		List<Entry<String,String>> remoteEndpoints = client.getRelevantGatewayAPIAddresses();
 
 		
 		// TODO remove after test
 		System.out.println("===== STARTING DATA RETRIEVAL =======");
 		
 		// distributed access through secured channel
-		for(Triple<String,String,String> neighbourGatewayAPIAddress:relevantGatewayAPIAddresses){ 
-			String referenceString = neighbourGatewayAPIAddress.getThirdElement();
+		for(int i = 0; i < remoteEndpoints.size(); i++) {
+			String remoteGatewayAddress = remoteEndpoints.get(i).getValue(); 
 			
 			// TODO remove after test
-			System.out.println("REFERENCE STRING:  " + referenceString);
+			System.out.println("REFERENCE STRING:  " + remoteGatewayAddress);
 			
 			// we need to split the /adapter-endpoint/objects/{oid}/property/{pid} 
 			
-			String[] splitArray = referenceString.split("/");
-			
+			String[] splitArray = remoteGatewayAddress.split("/");
+						
 			String objectId = splitArray[ARRAYINDEX_OID];
 			String propertyId = splitArray[ARRAYINDEX_PID];
+			
 			
 			// TODO remove after test
 			System.out.println("OID: " + objectId + " PROPERTY ID: " + propertyId);
@@ -153,7 +119,8 @@ public class SparqlQuery {
 			// TODO remove after test
 			System.out.println("RETRIEVED DATA: \n" + jsonData);
 			
-			neighbourGatewayAPIAddress.setThirdElement(jsonData); 
+			
+			remoteEndpoints.get(i).setValue(jsonData);
 		}
 		
 		// TODO remove after test
@@ -161,17 +128,23 @@ public class SparqlQuery {
 		
 
 		// -- Solve query
-		List<Map<String,String>> queryResults = client.solveQuery(query, relevantGatewayAPIAddresses);
-		client.close();
+		List<Map<String,String>> queryResults = client.solveQuery(remoteEndpoints);
+
 		
 		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		JsonArrayBuilder arrayBuilder = jsonBuilderFactory.createArrayBuilder();
+		
+		// TODO remove
+		System.out.println("RESULT:\n");
 		
 		for (Map<String, String> map : queryResults) {
 			
 			JsonObjectBuilder innerBuilder = jsonBuilderFactory.createObjectBuilder();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				innerBuilder.add(entry.getKey(), entry.getValue());
+				
+				// TODO remove
+				System.out.println(entry.getKey() + " " + entry.getValue());
 			}
 			arrayBuilder.add(innerBuilder);
 		}
@@ -182,9 +155,7 @@ public class SparqlQuery {
 		System.out.println("RETURN VALUE: \n" + returnValue);
 		
 		return returnValue;
-		
-		//return mainBuilder.build().toString();
-		
+
 	}
 	
 	
@@ -193,8 +164,7 @@ public class SparqlQuery {
 		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_DISCOVERY);
 		
 		Writer writer = new StringWriter();
-		Representation responseRepresentation = clientResource.post(new JsonRepresentation(query), 
-				MediaType.APPLICATION_ALL_JSON);
+		Representation responseRepresentation = clientResource.post(query, MediaType.APPLICATION_ALL_JSON); 
 		
 		if (responseRepresentation == null){
 			return null;
