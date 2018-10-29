@@ -418,7 +418,7 @@ public class Action {
 				}
 			}
 			
-			// TODO remove after testing
+			// TODO put to logger
 			System.out.println("There is no task running, yet there are tasks pending. Taking the next task: " 
 						+ runningTask.getTaskId());
 			

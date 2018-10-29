@@ -139,7 +139,7 @@ public class ConnectionDescriptor {
 		this.config = config;
 		this.logger = logger;
 		
-		sparql = new SparqlQuery(this, logger);
+		//sparql = new SparqlQuery(this, logger);
 		
 		
 		// TODO decide what type of connector to use

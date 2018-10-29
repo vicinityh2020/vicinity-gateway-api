@@ -74,9 +74,6 @@ public class AuthenticationVerifier implements Verifier {
 		String objectId = cr.getIdentifier();
 		String password = new String(cr.getSecret());
 		
-		// TODO REMOVE AFTER TEST
-		logger.finest("CREDENTIALS\nusername: " + objectId + " password: " + password);
-		
 		if (communicationManager.isConnected(objectId)){
 			// if the client is already connected, just verify the password
 			if (!communicationManager.verifyPassword(objectId, password)){

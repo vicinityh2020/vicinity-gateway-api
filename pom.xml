@@ -129,8 +129,8 @@
 			<groupId>client</groupId>
 			<artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
 			<version>1.0</version>
-			<scope>system</scope>
 			<systemPath>${basedir}/lib/vicinity-open-gateway-api-distributed-query-client-1.0.jar</systemPath>
+			<scope>system</scope>
 		</dependency>
 		
 		<!-- Jena basic libraries (all in one): https://mvnrepository.com/artifact/org.apache.jena/apache-jena-libs -->

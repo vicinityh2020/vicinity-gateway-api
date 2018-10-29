@@ -17,13 +17,11 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.restlet.data.MediaType;
-import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
 import client.VicinityAgoraClient;
 import client.VicinityClient;
-import client.model.Triple;
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
@@ -33,13 +31,13 @@ public class SparqlQuery {
 	
 	private static final int ARRAYINDEX_PID = 4;
 	
-	private static final String ATTR_RESOURCE = "resource";
+	// private static final String ATTR_RESOURCE = "resource";
 	
-	private static final String GWAPI_SERVICES_URL_PREFIXES = "http://gateway-services.vicinity.linkeddata.es/prefixes";
+	// private static final String GWAPI_SERVICES_URL_PREFIXES = "http://gateway-services.vicinity.linkeddata.es/prefixes";
 	
 	private static final String GWAPI_SERVICES_URL_DISCOVERY = "http://gateway-services.vicinity.linkeddata.es/discovery";
 	
-	private static final String GWAPI_SERVICES_URL_RESOURCE = "http://gateway-services.vicinity.linkeddata.es/resource";
+	// private static final String GWAPI_SERVICES_URL_RESOURCE = "http://gateway-services.vicinity.linkeddata.es/resource";
 
 	// this is necessary to send requests to all neighbours
 	private ConnectionDescriptor descriptor;
@@ -181,7 +179,7 @@ public class SparqlQuery {
 	}
 	
 	
-	
+	/*
 	private String retrievePrefixes() {
 		
 		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_PREFIXES);
@@ -201,10 +199,10 @@ public class SparqlQuery {
 		}
 		
 		return writer.toString();
-	}
+	}*/
 	
 	
-	
+	/*
 	private String retrieveRDF(String neighboursThingIRI) {
 		
 		
@@ -233,7 +231,7 @@ public class SparqlQuery {
 		
 		return writer.toString();
 		
-	}
+	}*/
 	
 	
 	private String getPropertyOfRemoteObject(String remoteObjectID, String propertyName, 
