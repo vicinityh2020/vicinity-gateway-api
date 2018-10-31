@@ -22,6 +22,12 @@
 			<name>Public online Restlet repository</name>
 			<url>http://maven.restlet.com</url>
 		</repository>
+		
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+		
 	</repositories>
 
 	<dependencies>
@@ -126,12 +132,11 @@
 		
 		<!-- Andrea Cimmino's JClient -->
 		<dependency>
-			<groupId>client</groupId>
-			<artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
-			<version>1.0</version>
-			<systemPath>${basedir}/lib/vicinity-open-gateway-api-distributed-query-client-1.0.jar</systemPath>
-			<scope>system</scope>
-		</dependency>
+            <groupId>com.github.vicinityh2020</groupId>
+            <artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
+             <version>0.6.3</version>
+        </dependency>
+		 
 		
 		<!-- Jena basic libraries (all in one): https://mvnrepository.com/artifact/org.apache.jena/apache-jena-libs -->
 
@@ -192,6 +197,7 @@
 				</executions>
 				
 			</plugin>
+			
 		</plugins>
 	</build>
 

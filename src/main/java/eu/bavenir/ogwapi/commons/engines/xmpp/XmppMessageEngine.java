@@ -411,7 +411,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			xmppConfigBuilder.setSecurityMode(SecurityMode.disabled);
 			logger.config("XMPP secure connection is disabled.");
 		} else {
-			// default is enabled
+			xmppConfigBuilder.setSecurityMode(SecurityMode.required);
 			logger.config("XMPP secure connection is enabled.");
 		}
 		

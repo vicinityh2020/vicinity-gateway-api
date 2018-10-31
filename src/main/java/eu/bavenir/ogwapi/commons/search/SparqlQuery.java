@@ -16,6 +16,7 @@ import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
@@ -27,17 +28,22 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 public class SparqlQuery {
 
+	/**
+	 * Name of the configuration parameter for GW API services URL.
+	 */
+	private static final String CONFIG_PARAM_GWAPISERVICESURL = "search.sparql.gwapiservicesurl";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_GWAPISERVICESURL CONFIG_PARAM_GWAPISERVICESURL} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_GWAPISERVICESURL = "http://gateway-services.vicinity.linkeddata.es/discovery";
+	
+	
 	private static final int ARRAYINDEX_OID = 2;
 	
 	private static final int ARRAYINDEX_PID = 4;
 	
-	// private static final String ATTR_RESOURCE = "resource";
-	
-	// private static final String GWAPI_SERVICES_URL_PREFIXES = "http://gateway-services.vicinity.linkeddata.es/prefixes";
-	
-	private static final String GWAPI_SERVICES_URL_DISCOVERY = "http://gateway-services.vicinity.linkeddata.es/discovery";
-	
-	// private static final String GWAPI_SERVICES_URL_RESOURCE = "http://gateway-services.vicinity.linkeddata.es/resource";
 
 	// this is necessary to send requests to all neighbours
 	private ConnectionDescriptor descriptor;
@@ -46,12 +52,18 @@ public class SparqlQuery {
 	
 	private JsonBuilderFactory jsonBuilderFactory;
 	
+	private String gwapiServicesUrl;
 	
-	public SparqlQuery(ConnectionDescriptor descriptor, Logger logger) {
+	
+	public SparqlQuery(XMLConfiguration config, ConnectionDescriptor descriptor, Logger logger) {
 		this.descriptor = descriptor;
 		this.logger = logger;
 		
+		gwapiServicesUrl = config.getString(CONFIG_PARAM_GWAPISERVICESURL, CONFIG_DEF_GWAPISERVICESURL);
+		
 		jsonBuilderFactory = Json.createBuilderFactory(null);
+		
+		
 	}
 	
 	
@@ -65,13 +77,7 @@ public class SparqlQuery {
 		
 		
 		Set<String> neighbours = descriptor.getRoster();
-		
-		neighbours.add("ab6594e3-7924-4296-8b74-1cdce699cc5d");
-		neighbours.add("d53e4402-d895-4d1f-918f-310764c8a2b6");
-		neighbours.add("dda138c3-d05a-48f9-8d12-f19debe23d85");
-		neighbours.add("f3f9bf96-9af0-451b-be46-24821587f4a3");
-		neighbours.add("f6a67fe1-e185-4058-a95d-0d9e27ab052d");
-		
+
 		// TODO remove after test
 		System.out.println("NEIGHBOURS: \n" + neighbours.toString()); 
 		
@@ -159,7 +165,7 @@ public class SparqlQuery {
 	
 	private String retrieveTED(String query) {
 		
-		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_DISCOVERY);
+		ClientResource clientResource = new ClientResource(gwapiServicesUrl);
 		
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = clientResource.post(query, MediaType.APPLICATION_ALL_JSON); 
