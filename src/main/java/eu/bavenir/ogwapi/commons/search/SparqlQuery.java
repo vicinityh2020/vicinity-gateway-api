@@ -17,7 +17,10 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.Client;
+import org.restlet.Context;
 import org.restlet.data.MediaType;
+import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
@@ -165,7 +168,14 @@ public class SparqlQuery {
 	
 	private String retrieveTED(String query) {
 		
+		Client client = new Client(new Context(), Protocol.HTTP);
+		client.getContext().getParameters().add ( "idleTimeout", "6000000" );
+		client.getContext().getParameters().add ( "socketTimeout", "6000000" );
+		client.getContext().getParameters().add ( "stopIdleTimeout", "6000000" );
+		
 		ClientResource clientResource = new ClientResource(gwapiServicesUrl);
+		clientResource.setNext(client);
+		
 		
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = clientResource.post(query, MediaType.APPLICATION_ALL_JSON); 
