@@ -3,6 +3,7 @@ package eu.bavenir.ogwapi.commons.search;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +24,9 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Protocol;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
+
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import client.VicinityAgoraClient;
 import client.VicinityClient;
@@ -165,7 +169,7 @@ public class SparqlQuery {
 
 	}
 	
-	
+	/*
 	private String retrieveTED(String query) {
 		
 		Client client = new Client(new Context(), Protocol.HTTP);
@@ -192,6 +196,34 @@ public class SparqlQuery {
 		}
 		
 		return writer.toString();
+	}*/
+	
+	private String retrieveTED(String query) {	
+
+		Unirest.setTimeouts(1800000, 1800000);
+
+		Map<String, String> headers = new HashMap<String, String>();
+
+		headers.put("Accept", "application/ld+json");
+
+		headers.put("Content-Type", "application/ld+json");
+
+		String jsonTED= "{}";
+
+		try {
+
+			jsonTED = Unirest.post(gwapiServicesUrl).headers(headers).body(query).asString().getBody();
+
+			
+
+		} catch (UnirestException e) {
+
+			e.printStackTrace();
+
+		}
+
+		return jsonTED;
+
 	}
 	
 	
