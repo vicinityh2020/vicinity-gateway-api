@@ -244,7 +244,7 @@
 			
 			Defaults to false. 
 			-->
-			<useDummyCalls>true</useDummyCalls>
+			<useDummyCalls>false</useDummyCalls>
 			
 			<!-- 
 			Whether or not the OGWAPI should attempt to use HTTPS to connect to the REST

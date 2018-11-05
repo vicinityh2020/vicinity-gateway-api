@@ -289,8 +289,12 @@ public class SparqlQuery {
 				descriptor.getPropertyOfRemoteObject(remoteObjectID, propertyName, parameters, null);
 		
 		if (statusMessage.isError()) {
+			
+			// TODO delete after test
+			System.out.println("ERROR MESSAGE RETURNED: " + statusMessage.buildMessage().toString());
+			
 			return null;
-		}
+		} 
 		
 		JsonObject jsonObject  = statusMessage.buildMessage();
 		
