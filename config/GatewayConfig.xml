@@ -5,7 +5,7 @@
 		<!--
 		URL/IP address of the communication server. If not set, the application exits.
 		-->
-		<server>vicinity.bavenir.eu</server>
+		<server>development.bavenir.eu</server>
 		
 		<!--
 		Port of the communication server.
@@ -251,7 +251,7 @@
 			
 			Defaults to false. 
 			-->
-			<useDummyCalls>false</useDummyCalls>
+			<useDummyCalls>true</useDummyCalls>
 			
 			<!-- 
 			Whether or not the OGWAPI should attempt to use HTTPS to connect to the REST
