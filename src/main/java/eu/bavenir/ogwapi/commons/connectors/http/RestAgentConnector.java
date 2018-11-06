@@ -365,19 +365,24 @@ public class RestAgentConnector extends AgentConnector {
 				
 			}
 			
-			if (responseRepresentation != null){
-				
-				responseRepresentation.write(writer);
-				response.setResponseBody(writer.toString());
-
-			} 
+		} catch (ResourceException e) {
 			
-		} catch (ResourceException | IOException e) {
-			
-			logger.warning(e.getMessage());
+			logger.warning("Exception from the RESTLET client: " + e.getMessage());
 
 		} finally {
 			
+			// save the body
+			if (responseRepresentation != null){
+				try {
+					responseRepresentation.write(writer);
+				} catch (IOException e) {
+					
+					logger.warning("Exception during writing the response body: " + e.getMessage());
+				}
+				response.setResponseBody(writer.toString());
+			} 
+			
+			// save the status code and reason
 			if (clientResource.getStatus().getCode() / 200 == 1) {
 				response.setError(false);
 			} else {

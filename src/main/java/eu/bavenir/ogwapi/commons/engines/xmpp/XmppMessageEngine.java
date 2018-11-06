@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -101,6 +103,23 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 */
 	private static final String XMPP_RESOURCE = "communicationNode";
 	
+	/**
+	 * Presence string.
+	 */
+	private static final String XMPP_PRESENCE_STRING = "online";
+	
+	/**
+	 * The rosters in SMACK sometimes failed to initialise in the real production environment, often because 
+	 */
+	/**
+	 * Minimum time (s) the roster will go without reloading. See the constructor implementation, the part with timer.
+	 */
+	private static final int ROSTER_RELOAD_TIME_MIN = 60;
+	
+	/**
+	 * Maximum time (s) the roster will go without reloading. See the constructor implementation, the part with timer.
+	 */
+	private static final int ROSTER_RELOAD_TIME_MAX = 120;
 	
 	/* === FIELDS === */
 	
@@ -129,7 +148,25 @@ public class XmppMessageEngine extends CommunicationEngine {
 		chatManager = null;
 		roster = null;
 		
+		// initialise map with opened chats
 		openedChats = new HashMap<EntityBareJid, Chat>();
+		
+		// compute the random time in seconds after which a roster will be renewed
+		long timeForRosterRenewal = (long) ((Math.random() * ((ROSTER_RELOAD_TIME_MAX - ROSTER_RELOAD_TIME_MIN) + 1)) 
+				+ ROSTER_RELOAD_TIME_MIN) * 1000;
+		
+		logger.finest("XmppMessageEngine: The roster for " + objectId + " will be renewed every " 
+				+ timeForRosterRenewal + "ms.");
+		
+		
+		// timer for roster renewing
+		Timer timerForRosterRenewal = new Timer();
+		timerForRosterRenewal.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				renewPresenceAndRoster();
+			}
+		}, timeForRosterRenewal, timeForRosterRenewal);
 		
 		// enable debugging if desired
 		boolean debuggingEnabled = config.getBoolean(CONFIG_PARAM_XMPPDEBUG, CONFIG_DEF_XMPPDEBUG);
@@ -146,22 +183,27 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * connection (see {@link org.jivesoftware.smack.chat2.ChatManager ChatManager}).  In case of failure it is
 	 * possible to re-try. 
 	 * 
-	 * @param objectID ID that serves as XMPP user name.
+	 * @param objectId ID that serves as XMPP user name.
 	 * @param password Password for authentication.
 	 * @return True on success, false otherwise.
 	 */
 	@Override
-	public boolean connect(String objectID, String password) {
+	public boolean connect(String objectId, String password) {
 		
 		if (connection == null) {
-			connection = buildNewConnection(objectID, password);
+			logger.fine("XmppMessageEngine: Connection object not yet exists for " + objectId 
+					+ ". Attempting to build a new one.");
+			connection = buildNewConnection(objectId, password);
+		} else {
+			logger.fine("XmppMessageEngine: Connection object already exists for " + objectId 
+					+ ". Not attempting to build a new one.");
 		}
 		
 		// connect & login
 		try {
 			if (connection.connect() == null){
 				
-				logger.warning("Connection to XMPP could not be established for user '" + objectID + "'.");
+				logger.warning("Connection to XMPP could not be established for '" + objectId + "'.");
 				
 				return false;
 			}
@@ -186,7 +228,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			
 		});
 		
-		// spawn a roster and associate calls for changes in roster - if set
+		// spawn a roster and associate calls for changes in roster - if necessary
 		roster = Roster.getInstanceFor(connection);
 		
 		
@@ -212,11 +254,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 			}
 		});
 		
-		try {
-			roster.reloadAndWait();
-		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
-		}
+		
+		renewPresenceAndRoster();
 		
 		return true;
 	}
@@ -264,12 +303,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 		if (connection == null || !connection.isConnected()){
 			logger.warning("Invalid connection in descriptor for username '" + objectId + "'.");
 			return Collections.emptySet();
-		}
-		
-		try {
-			roster.reloadAndWait();
-		} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-			logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 		}
 		
 		Collection<RosterEntry> entries = roster.getEntries();
@@ -447,6 +480,41 @@ public class XmppMessageEngine extends CommunicationEngine {
 	
 		connectionDescriptor.processIncommingMessage(from.getLocalpart().toString(), xmppMessage.getBody());
 	}
+	
+	
+	
+	private void renewPresenceAndRoster() {
+		
+		if (connection != null && connection.isConnected() && roster != null) {
+			// send our presence first
+			Presence presence = new Presence(Presence.Type.available);
+			presence.setStatus(XMPP_PRESENCE_STRING);
+			
+			try {
+				connection.sendStanza(presence);
+			} catch (Exception e) {
+				
+				logger.warning("XmppMessageEngine: Can't send presence stanza for " + objectId + ". Exception: " 
+						+ e.getMessage());
+			} 
+			
+			
+			// then reload the roster
+			try {
+				roster.reloadAndWait();
+				
+				logger.finest("XmppMessageEngine: The roster for " + objectId + " was renewed.");
+				
+			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
+				logger.warning("Roster could not be reloaded for " + objectId + ". Exception: " + e.getMessage());
+			}
+			
+			
+		}
+		
+	}
+	
+	
 	
 
 	/**
