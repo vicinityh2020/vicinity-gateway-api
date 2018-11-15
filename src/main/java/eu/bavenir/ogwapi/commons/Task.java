@@ -233,7 +233,8 @@ public class Task {
 			
 			response = new NetworkMessageResponse(config, logger, 
 					false, 
-					CodesAndReasons.CODE_200_OK, 
+					CodesAndReasons.CODE_200_OK,
+					null,
 					CodesAndReasons.REASON_200_OK + "Canceled pending task", 
 					null);
 		}

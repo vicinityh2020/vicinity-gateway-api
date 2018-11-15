@@ -134,70 +134,69 @@
 		<dependency>
             <groupId>com.github.vicinityh2020</groupId>
             <artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
-             <version>0.6.3</version>
+             <version>74df5e822d01aa79ee87188fd710547712c1ca13</version>
         </dependency>
 		 
-		
-		<!-- Jena basic libraries (all in one): https://mvnrepository.com/artifact/org.apache.jena/apache-jena-libs -->
-
-        <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>apache-jena-libs</artifactId>
-            <version>3.6.0</version>
-            <type>pom</type>
-        </dependency>
-        
-        <!-- JsonPath: https://github.com/json-path/JsonPath -->
-
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-        
-        <!-- Rest requests-->
-		<dependency>
-			<groupId>com.mashape.unirest</groupId>
-			<artifactId>unirest-java</artifactId>
-			<version>1.4.9</version>
-		</dependency>
-		
 		
 	</dependencies>
 	
 	<!-- Build an executable JAR -->
 	<build>
-		<finalName>ogwapi</finalName>
+		<finalName>ogwapi-jar-with-dependencies</finalName>
 		<plugins>
+			
 			<plugin>
-			
-				<!-- 1st way to do it: 'mvn clean compile assembly:single' -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>eu.bavenir.ogwapi.App</mainClass>
-						</manifest>
-					</archive>
-					
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				
-				<!-- 2nd way to do it: 'mvn install' -->
-				<executions>
-					<execution>
-					<id>make-assembly</id>
-					<phase>package</phase>
-					<goals>
-						<goal>single</goal>
-					</goals>
-					</execution>
-				</executions>
-				
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-source-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>attach-sources</id>
+			      <goals>
+			        <goal>jar</goal>
+			      </goals>
+			    </execution>
+			  </executions>
 			</plugin>
-			
+		
+		<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <configuration>
+          <shadedArtifactAttached>false</shadedArtifactAttached>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>eu.bavenir.ogwapi.App</mainClass>
+            </transformer>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+              <addHeader>false</addHeader>
+            </transformer>
+          </transformers>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <!-- Some jars are signed but shading breaks that.
+                     Don't include signing files.
+                -->
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <!--<phase /><!- - Switch off -->
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 		</plugins>
 	</build>
 

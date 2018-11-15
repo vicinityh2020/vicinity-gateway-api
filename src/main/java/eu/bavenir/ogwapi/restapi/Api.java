@@ -26,7 +26,8 @@ import eu.bavenir.ogwapi.restapi.services.ObjectsOidEvents;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidProperties;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid;
-import eu.bavenir.ogwapi.restapi.services.Sparql;
+import eu.bavenir.ogwapi.restapi.services.SearchSemantic;
+import eu.bavenir.ogwapi.restapi.services.SearchSparql;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 
 
@@ -195,8 +196,11 @@ public class Api extends Application {
 		router.attach("/agents/{agid}/objects/delete", AgentsAgidObjectsDelete.class);
 		
 		
-		// QUERY
-		router.attach("/sparql", Sparql.class);
+		// SEARCH
+		// sparql query (VCNT)
+		router.attach("/search/sparql", SearchSparql.class);
+		// semantic query (SHQ)
+		router.attach("/search/semantic", SearchSemantic.class);
 		
 		// solve the question of API authentication
 		if (useAuthentication){

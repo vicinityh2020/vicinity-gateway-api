@@ -59,6 +59,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	private static final String ATTR_RESPONSECODEREASON = "responseCodeReason";
 	
+	private static final String ATTR_CONTENTTYPE = "contentType";
+	
 	/**
 	 * Name of the response body attribute.
 	 */
@@ -83,6 +85,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 * HTTP response code reason, in other words the status description.
 	 */
 	private String responseCodeReason;
+	
+	private String contentType;
 	
 	/**
 	 * If this NetworkMessage was constructed from incoming XMPP message, here is the HTTP response body from the remote
@@ -132,7 +136,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 	
 	
 	public NetworkMessageResponse(XMLConfiguration config, Logger logger, boolean error, int responseCode, 
-					String responseCodeReason, String responseBody) {
+					String responseCodeReason, String contentType, String responseBody) {
 		super(config, logger);
 		
 		messageType = NetworkMessageResponse.MESSAGE_TYPE;
@@ -140,6 +144,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 		this.error = error;
 		this.responseCode = responseCode;
 		this.responseCodeReason = responseCodeReason;
+		this.contentType = contentType;
 		this.responseBody = responseBody;
 	}
 	
@@ -194,6 +199,16 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	public void setResponseCodeReason(String responseCodeReason){
 		this.responseCodeReason = responseCodeReason;
+	}
+
+
+	public String getContentType() {
+		return contentType;
+	}
+
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 
@@ -276,6 +291,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 				responseCodeReason = json.getString(ATTR_RESPONSECODEREASON);
 			}
 			
+			if (!json.isNull(ATTR_CONTENTTYPE)) {
+				contentType = json.getString(ATTR_CONTENTTYPE);
+			}
+			
 			if (!json.isNull(ATTR_RESPONSEBODY)) {
 				responseBody = json.getString(ATTR_RESPONSEBODY);
 			}
@@ -292,6 +311,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		// process non primitives
 		responseCodeReason = removeQuotes(responseCodeReason);
+		contentType = removeQuotes(contentType);
 		responseBody = removeQuotes(responseBody);
 		responseBodySupplement = removeQuotes(responseBodySupplement);
 		
@@ -323,6 +343,12 @@ public class NetworkMessageResponse extends NetworkMessage {
 			mainBuilder.add(ATTR_RESPONSECODEREASON, responseCodeReason);
 		}
 		
+		if (contentType == null){
+			mainBuilder.addNull(ATTR_CONTENTTYPE);
+		} else {
+			mainBuilder.add(ATTR_CONTENTTYPE, contentType);
+		}
+		
 		if (responseBody == null){
 			mainBuilder.addNull(ATTR_RESPONSEBODY);
 		} else {
@@ -344,6 +370,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 		error = false;
 		responseCode = 0;
 		responseCodeReason = null;
+		contentType = null;
 		responseBody = null;
 		responseBodySupplement = null;
 	}

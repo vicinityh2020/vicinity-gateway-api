@@ -125,6 +125,7 @@ public class RestAgentConnector extends AgentConnector {
 	
 	private static final String ATTR_URL_ACTIONS = "/actions";
 	
+	private static final String ATTR_DUMMY = "dummy";
 	
 	private static final byte OPERATION_GET = 0x00;
 	
@@ -327,6 +328,7 @@ public class RestAgentConnector extends AgentConnector {
 			
 				// parameters
 				responseRepresentation = clientResource.get();
+			
 				break;
 				
 			case OPERATION_POST:
@@ -367,19 +369,32 @@ public class RestAgentConnector extends AgentConnector {
 			
 		} catch (ResourceException e) {
 			
+			// this is what happens when something else than 2xx got returned - in that case we don't have access
+			// to response body the regular way...
+			
 			logger.warning("Exception from the RESTLET client: " + e.getMessage());
+			
+			responseRepresentation = clientResource.getResponseEntity();
 
 		} finally {
+			
+			MediaType type = responseRepresentation.getMediaType();
 			
 			// save the body
 			if (responseRepresentation != null){
 				try {
 					responseRepresentation.write(writer);
+					response.setResponseBody(writer.toString());
+					
+					if (type != null && !type.getName().isEmpty()) {
+						response.setContentType(type.getName());
+					}
+					
 				} catch (IOException e) {
 					
 					logger.warning("Exception during writing the response body: " + e.getMessage());
 				}
-				response.setResponseBody(writer.toString());
+				
 			} 
 			
 			// save the status code and reason
@@ -391,6 +406,12 @@ public class RestAgentConnector extends AgentConnector {
 			
 			response.setResponseCode(clientResource.getStatus().getCode());
 			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
+			
+			try {
+				writer.close();
+			} catch (IOException e) {
+				logger.severe("IO exception during writer closure: " + e.getMessage());
+			}
 		}
 
 		return response;
@@ -419,7 +440,7 @@ public class RestAgentConnector extends AgentConnector {
 		
 		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
 		
-		builder.add("dummy", dummyResponseMessage);
+		builder.add(ATTR_DUMMY, dummyResponseMessage);
 		
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		

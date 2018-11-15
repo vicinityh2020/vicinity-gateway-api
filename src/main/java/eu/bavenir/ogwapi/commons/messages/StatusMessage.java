@@ -63,6 +63,8 @@ public class StatusMessage {
 	
 	public static final String ATTR_STATUSCODEREASON = "statusCodeReason";
 	
+	public static final String ATTR_CONTENTTYPE = "contentType";
+	
 	
 	/**
 	 * Name of the message attribute - for JSON building.
@@ -84,40 +86,8 @@ public class StatusMessage {
 	public static final String TEXT_FAILURE = "failure";
 	
 	
-	// this is a list of status message names, that can usually occur during operations of the OGWAPI
+	public static final String CONTENTTYPE_APPLICATIONJSON = "application/json";
 	
-	/*
-	public static final String MESSAGE_BODY = "body";
-	
-	public static final String MESSAGE_CODE = "code";
-	public static final String MESSAGE_REASON = "reason";
-	public static final String MESSAGE_LOGIN = "login";
-	public static final String MESSAGE_LOGOUT = "logout";
-	public static final String MESSAGE_EVENT_ACTIVATION = "activateEventChannel";
-	public static final String MESSAGE_EVENT_DEACTIVATION = "deactivateEventChannel";
-	public static final String MESSAGE_EVENT_SENDTOSUBSCRIBERS = "sendEventToSubscribers";
-	
-	
-	public static final String MESSAGE_EVENT_GETLOCALEVENTCHANNELSTATUS = "localEventChannelStatus";
-	
-	public static final String MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS = "remoteEventChannelStatus";
-	
-	public static final String MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL = "subscribeToEventChannel";
-	
-	public static final String MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL = "unsubscribeFromEventChannel";
-	
-	public static final String MESSAGE_ACTION_START = "startAction";
-	
-	public static final String MESSAGE_TASK_STATUS = "taskStatus";
-	
-	public static final String MESSAGE_TASK_RETURNVALUE = "returnValue";
-	
-	public static final String MESSAGE_TASK_STOP = "stopTask";
-	
-	public static final String MESSAGE_TASKID = "taskID";
-	
-	*/
-
 	
 	/* === FIELDS === */
 	
@@ -129,6 +99,8 @@ public class StatusMessage {
 	private int statusCode;
 	
 	private String statusCodeReason;
+	
+	private String contentType;
 	
 	
 	/**
@@ -174,13 +146,12 @@ public class StatusMessage {
 	 * @param attribute Attribute name in the message.
 	 * @param value A value of the attribute.
 	 */
-	
-
-	public StatusMessage(boolean error, int statusCode, String statusCodeReason) {
+	public StatusMessage(boolean error, int statusCode, String statusCodeReason, String contentType) {
 		
 		this.error = error;
 		this.statusCode = statusCode;
 		this.statusCodeReason = statusCodeReason;
+		this.contentType = contentType;
 		
 		// create the factory
 		jsonBuilderFactory = Json.createBuilderFactory(null);
@@ -211,6 +182,12 @@ public class StatusMessage {
 	public JsonArray getCurrentMessageArray() {
 		return arrayBuilder.build();
 	}
+
+
+	public String getContentType() {
+		return contentType;
+	}
+
 
 
 	/**
@@ -294,6 +271,13 @@ public class StatusMessage {
 		mainBuilder.add(ATTR_ERROR, error);
 		mainBuilder.add(ATTR_STATUSCODE, statusCode);
 		mainBuilder.add(ATTR_STATUSCODEREASON, statusCodeReason);
+		
+		if (contentType == null) {
+			mainBuilder.addNull(ATTR_CONTENTTYPE);
+		} else {
+			mainBuilder.add(ATTR_CONTENTTYPE, contentType);
+		}
+		
 		mainBuilder.add(ATTR_MESSAGE, arrayBuilder);
 			
 		return mainBuilder.build();

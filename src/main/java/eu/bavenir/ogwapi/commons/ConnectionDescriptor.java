@@ -75,7 +75,6 @@ public class ConnectionDescriptor {
 	private static final long THREAD_SLEEP_MILLIS = 100;
 	
 	
-	
 	/* === FIELDS === */
 	
 	// a set of event channels served by this object
@@ -103,6 +102,11 @@ public class ConnectionDescriptor {
 	// credentials
 	private String objectId;
 	private String password;
+	
+	/**
+	 * Necessary for passive session recovery setting.
+	 */
+	private long lastConnectionTimerReset;
 	
 	// message queue, FIFO structure for holding incoming messages 
 	private BlockingQueue<NetworkMessage> messageQueue;
@@ -139,8 +143,7 @@ public class ConnectionDescriptor {
 		this.config = config;
 		this.logger = logger;
 		
-		sparql = new SparqlQuery(config, this, logger);
-		
+		this.sparql = new SparqlQuery(config, this, logger);
 		
 		// TODO decide what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);
@@ -158,7 +161,6 @@ public class ConnectionDescriptor {
 		jsonBuilderFactory = Json.createBuilderFactory(null);
 		
 		
-		
 		// build new connection
 		// TODO this is also the place, where it should decide what engine to use
 		commEngine = new XmppMessageEngine(objectId, password, config, logger, this);
@@ -173,7 +175,7 @@ public class ConnectionDescriptor {
 	 *   
 	 * @return Object ID.
 	 */
-	public String getObjectID() {
+	public String getObjectId() {
 		return objectId;
 	}
 
@@ -191,6 +193,9 @@ public class ConnectionDescriptor {
 	
 	// TODO documentation
 	public boolean connect(){
+		
+		lastConnectionTimerReset = System.currentTimeMillis();
+		
 		return commEngine.connect(objectId, password);
 	}
 	
@@ -203,13 +208,23 @@ public class ConnectionDescriptor {
 
 	// TODO documentation
 	public boolean isConnected(){
+		
 		return commEngine.isConnected();
+	}
+	
+	public void resetConnectionTimer() {
+		lastConnectionTimerReset = System.currentTimeMillis();
+	}
+	
+	public long getLastConnectionTimerReset() {
+		return lastConnectionTimerReset;
 	}
 	
 	
 
 	// TODO documentation
 	public Set<String> getRoster(){
+		
 		return commEngine.getRoster();
 	}
 	
@@ -251,7 +266,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_404_NOTFOUND, 
-					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -266,7 +282,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_400_BADREQUEST, 
-					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 			
@@ -279,7 +296,8 @@ public class ConnectionDescriptor {
 		statusMessage = new StatusMessage(
 				false, 
 				CodesAndReasons.CODE_200_OK, 
-				CodesAndReasons.REASON_200_OK + statusCodeReason);
+				CodesAndReasons.REASON_200_OK + statusCodeReason,
+				StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 		
 		return statusMessage;
 		
@@ -362,7 +380,8 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						false, 
 						CodesAndReasons.CODE_200_OK, 
-						CodesAndReasons.REASON_200_OK + statusCodeReason);
+						CodesAndReasons.REASON_200_OK + statusCodeReason,
+						StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 				
 				return statusMessage;
 				
@@ -376,7 +395,8 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						CodesAndReasons.CODE_404_NOTFOUND, 
-						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason,
+						StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 				
 				return statusMessage;
 			}
@@ -392,7 +412,8 @@ public class ConnectionDescriptor {
 		statusMessage = new StatusMessage(
 				false, 
 				CodesAndReasons.CODE_200_OK, 
-				CodesAndReasons.REASON_200_OK + statusCodeReason);
+				CodesAndReasons.REASON_200_OK + statusCodeReason,
+				StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 		
 		return statusMessage;
 	}
@@ -420,19 +441,21 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						true, 
 						CodesAndReasons.CODE_404_NOTFOUND, 
-						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+						CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason,
+						StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 				
 				return statusMessage;
 
 			} else {
 				
 				statusCodeReason = new String("Received a request to provide status of event channel " 
-						 + eventId + " from " + this.getObjectID() + "(owner).");
+						 + eventId + " from " + this.getObjectId() + "(owner).");
 				
 				statusMessage = new StatusMessage(
 						false, 
 						CodesAndReasons.CODE_200_OK, 
-						CodesAndReasons.REASON_200_OK + statusCodeReason);
+						CodesAndReasons.REASON_200_OK + statusCodeReason,
+						StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 				
 				// also include that we are not subscribed to our channel
 				JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
@@ -480,7 +503,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_400_BADREQUEST, 
-					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -499,7 +523,8 @@ public class ConnectionDescriptor {
 				statusMessage = new StatusMessage(
 						false, 
 						CodesAndReasons.CODE_200_OK, 
-						CodesAndReasons.REASON_200_OK + statusCodeReason);
+						CodesAndReasons.REASON_200_OK + statusCodeReason,
+						StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 				
 				return statusMessage;
 			}
@@ -546,7 +571,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_400_BADREQUEST, 
-					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -564,7 +590,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					false, 
 					CodesAndReasons.CODE_200_OK, 
-					CodesAndReasons.REASON_200_OK + statusCodeReason);
+					CodesAndReasons.REASON_200_OK + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -614,7 +641,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_400_BADREQUEST, 
-					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason);
+					CodesAndReasons.REASON_400_BADREQUEST + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -647,7 +675,8 @@ public class ConnectionDescriptor {
 		statusMessage = new StatusMessage(
 				false, 
 				CodesAndReasons.CODE_200_OK, 
-				CodesAndReasons.REASON_200_OK + statusCodeReason);
+				CodesAndReasons.REASON_200_OK + statusCodeReason,
+				StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 		
 		return statusMessage;
 	}
@@ -1491,7 +1520,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_404_NOTFOUND, 
-					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason);
+					CodesAndReasons.REASON_404_NOTFOUND + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 			return statusMessage;
 		}
@@ -1510,7 +1540,8 @@ public class ConnectionDescriptor {
 			statusMessage = new StatusMessage(
 					true, 
 					CodesAndReasons.CODE_408_REQUESTTIMEOUT, 
-					CodesAndReasons.REASON_408_REQUESTTIMEOUT + statusCodeReason); 
+					CodesAndReasons.REASON_408_REQUESTTIMEOUT + statusCodeReason,
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON); 
 			
 			return statusMessage;
 		}
@@ -1519,7 +1550,8 @@ public class ConnectionDescriptor {
 		statusMessage = new StatusMessage(
 				response.isError(),
 				response.getResponseCode(),
-				response.getResponseCodeReason()
+				response.getResponseCodeReason(),
+				response.getContentType()
 				);
 		
 		JsonObject json = messageResolver.readJsonObject(response.getResponseBody());
@@ -1566,5 +1598,6 @@ public class ConnectionDescriptor {
 		
 		return builder.build().toString();
 	}
+	
 	
 }

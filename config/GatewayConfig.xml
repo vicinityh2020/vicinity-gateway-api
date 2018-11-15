@@ -5,7 +5,7 @@
 		<!--
 		URL/IP address of the communication server. If not set, the application exits.
 		-->
-		<server>development.bavenir.eu</server>
+		<server>vicinity.bavenir.eu</server>
 		
 		<!--
 		Port of the communication server.
@@ -79,7 +79,9 @@
 		
 		This will make OGWAPI terminate (!) sessions that are not refreshed
 		periodically. Refreshing a connection means calling the login method at
-		least every 30 seconds. Call to login method is optimised, so there is no 
+		least every 30 seconds by default, although this number can be altered 
+		with sessionExpiration parameter. 
+		Call to login method is optimised, so there is no 
 		overhead and it will not attempt to actually log an object in if it already
 		is. Good for integrators that like to have things under control, implement
 		adapters on small end user devices or have a need to implement a kind of
@@ -89,6 +91,16 @@
 		
 		-->
 		<sessionRecovery>proactive</sessionRecovery>
+		
+		<!--
+		When sessionRecovery is set to passive, use this to set the interval
+		after which a connection without refreshing will be terminated. 
+		
+		Note that this can't be smaller number than 5 seconds.
+		
+		Default is 30 seconds.  
+		-->
+		<sessionExpiration>30</sessionExpiration>
 	</general>
 
 
@@ -251,7 +263,7 @@
 			
 			Defaults to false. 
 			-->
-			<useDummyCalls>true</useDummyCalls>
+			<useDummyCalls>false</useDummyCalls>
 			
 			<!-- 
 			Whether or not the OGWAPI should attempt to use HTTPS to connect to the REST

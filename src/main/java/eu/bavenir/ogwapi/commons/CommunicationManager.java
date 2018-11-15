@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -81,12 +83,51 @@ public class CommunicationManager {
 	
 	/* === CONSTANTS === */
 	
-
+	private static final String CONFIG_PARAM_SESSIONRECOVERY = "general.sessionRecovery";
+	
+	private static final String CONFIG_DEF_SESSIONRECOVERY = "proactive";
+	
+	private static final String CONFIG_PARAM_SESSIONEXPIRATION = "general.sessionExpiration";
+	
+	private static final int CONFIG_DEF_SESSIONEXPIRATION = 30;
+	
+	
+	private static final int SESSIONRECOVERYPOLICY_INT_ERROR = 0;
+	
+	private static final int SESSIONRECOVERYPOLICY_INT_PASSIVE = 1;
+	
+	private static final int SESSIONRECOVERYPOLICY_INT_NONE = 2;
+	
+	private static final int SESSIONRECOVERYPOLICY_INT_PROACTIVE = 3;
+	
+	private static final String SESSIONRECOVERYPOLICY_STRING_PASSIVE = "passive";
+	
+	private static final String SESSIONRECOVERYPOLICY_STRING_NONE = "none";
+	
+	private static final String SESSIONRECOVERYPOLICY_STRING_PROACTIVE = "proactive";
+	
+	/**
+	 * How often will gateway check whether or not the connections are still up (ms).
+	 */
+	private static final int SESSIONRECOVERY_CHECKINTERVAL_PROACTIVE = 30000;
+	
+	private static final int SESSIONRECOVERY_CHECKINTERVAL_PASSIVE = 5000;
+	
+	private static final int SESSIONEXPIRATION_MINIMAL_VALUE = 5;
+	
+	
 	
 	/* === FIELDS === */
 	
 	// hash map containing connections identified by object IDs
 	private Map<String, ConnectionDescriptor> descriptorPool;
+	
+	/**
+	 * Indicates the policy that the OGWAPI should take during session recovery.
+	 */
+	private int sessionRecoveryPolicy;
+	
+	private int sessionExpiration;
 	
 	
 	
@@ -109,9 +150,66 @@ public class CommunicationManager {
 	public CommunicationManager(XMLConfiguration config, Logger logger){
 		descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
+		this.sessionExpiration = 0;
+		
 		this.config = config;
 		this.logger = logger;
 		
+		// load the configuration for the session recovery policy
+		String sessionRecoveryPolicyString = config.getString(CONFIG_PARAM_SESSIONRECOVERY, CONFIG_DEF_SESSIONRECOVERY);
+		
+		translateSessionRecoveryConf(sessionRecoveryPolicyString);
+		
+		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_ERROR) {
+			// wrong configuration parameter entered - set it to default
+			logger.severe("Wrong parameter entered for " + CONFIG_PARAM_SESSIONRECOVERY + " in the configuration file: "  
+					+ sessionRecoveryPolicyString + ". Setting to default: " + CONFIG_DEF_SESSIONRECOVERY);
+			
+			translateSessionRecoveryConf(CONFIG_DEF_SESSIONRECOVERY);
+			
+		} else {
+			logger.config("The session recovery policy is set to " + sessionRecoveryPolicyString + ".");
+		}
+				
+		// timer for session checking - N/A if the session recovery is set to none
+		if (sessionRecoveryPolicy != SESSIONRECOVERYPOLICY_INT_NONE) {
+			
+			int checkInterval;
+			
+			switch(sessionRecoveryPolicy) {
+			case SESSIONRECOVERYPOLICY_INT_PASSIVE:
+				checkInterval = SESSIONRECOVERY_CHECKINTERVAL_PASSIVE;
+				
+				sessionExpiration = config.getInt(CONFIG_PARAM_SESSIONEXPIRATION, CONFIG_DEF_SESSIONEXPIRATION);
+				
+				// if somebody put there too small number, we will turn it to default
+				if (sessionExpiration < SESSIONEXPIRATION_MINIMAL_VALUE) {
+					sessionExpiration = CONFIG_DEF_SESSIONEXPIRATION;
+				}
+				
+				sessionExpiration = sessionExpiration * 1000;
+				
+				logger.config("Session expiration is set to " + sessionExpiration + "ms");
+				break;
+				
+			case SESSIONRECOVERYPOLICY_INT_PROACTIVE:
+				checkInterval = SESSIONRECOVERY_CHECKINTERVAL_PROACTIVE;
+				break;
+				
+				default:
+					// if something goes wrong, don't let the timer stand in our way
+					checkInterval = Integer.MAX_VALUE;
+			}
+			
+			
+			Timer timerForSessionRecovery = new Timer();
+			timerForSessionRecovery.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					recoverSessions();
+				}
+			}, checkInterval, checkInterval);
+		}
 	}
 	
 	
@@ -145,6 +243,10 @@ public class CommunicationManager {
 	 * @return True if descriptor exists and the connection is established.
 	 */
 	public boolean isConnected(String objectId){
+		
+		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_ERROR) {
+			return false;
+		}
 		
 		if (objectId == null) {
 			logger.warning("CommunicationManager.isConnected: Invalid object ID.");
@@ -231,32 +333,55 @@ public class CommunicationManager {
 	 */
 	public StatusMessage establishConnection(String objectId, String password){
 		
-		// if there is a previous descriptor we should close the connection first, before reopening it again
-		ConnectionDescriptor descriptor = descriptorPoolRemove(objectId);
-		if (descriptor != null){
-	
-			descriptor.disconnect();
-			
-			logger.info("Reconnecting '" + objectId + "' to network.");
-		}
-		
-		descriptor = new ConnectionDescriptor(objectId, password, config, logger);
-		
+		ConnectionDescriptor descriptor;
+		boolean verifiedOrConnected;
 		StatusMessage statusMessage;
 		
-		if (descriptor.connect()){
+		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_PASSIVE) {
+			descriptor = descriptorPoolGet(objectId);
+			
+			if (descriptor.isConnected()) {
+				
+				if (descriptor.verifyPassword(password)) {
+					descriptor.resetConnectionTimer();
+					verifiedOrConnected = true;
+				} else {
+					verifiedOrConnected = false;
+				}
+				
+			} else {
+				verifiedOrConnected = descriptor.connect();
+			}
+			
+		} else {
+			// if there is a previous descriptor we should close the connection first, before reopening it again
+			descriptor = descriptorPoolRemove(objectId);
+			if (descriptor != null){
+		
+				descriptor.disconnect();
+				
+				logger.info("Reconnecting '" + objectId + "' to network.");
+			}
+			
+			descriptor = new ConnectionDescriptor(objectId, password, config, logger);
+			
+			verifiedOrConnected = descriptor.connect();
+		}
+		
+		if (verifiedOrConnected){
 			logger.info("Connection for '" + objectId +"' was established.");
 			
 			// insert the connection descriptor into the pool
 			descriptorPoolPut(objectId, descriptor);
 			
 			statusMessage = new StatusMessage(false, CodesAndReasons.CODE_200_OK, 
-					CodesAndReasons.REASON_200_OK + "Login successfull.");
+					CodesAndReasons.REASON_200_OK + "Login successfull.", StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 			
 		} else {
 			logger.info("Connection for '" + objectId +"' was not established.");
 			statusMessage = new StatusMessage(true, CodesAndReasons.CODE_401_UNAUTHORIZED, 
-					CodesAndReasons.REASON_401_UNAUTHORIZED + "Login unsuccessfull.");
+					CodesAndReasons.REASON_401_UNAUTHORIZED + "Login unsuccessfull.", 
+					StatusMessage.CONTENTTYPE_APPLICATIONJSON);
 		}
 		
 		return statusMessage;
@@ -564,6 +689,10 @@ public class CommunicationManager {
 		
 		Set<String> entries = descriptor.getRoster();
 		
+		if (entries == null) {
+			return null;
+		}
+		
 		// log it
 		logger.finest("-- Roster for '" + objectId +"' --");
 		for (String entry : entries) {
@@ -853,15 +982,15 @@ public class CommunicationManager {
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#put(Object, Object) put()} method. 
 	 *    
-	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectId The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @param descriptor The value part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The previous value associated with key, or null if there was no mapping for key. 
 	 * (A null return can also indicate that the map previously associated null with key, if the implementation 
 	 * supports null values.)
 	 */
-	private ConnectionDescriptor descriptorPoolPut(String objectID, ConnectionDescriptor descriptor){
+	private ConnectionDescriptor descriptorPoolPut(String objectId, ConnectionDescriptor descriptor){
 		synchronized (descriptorPool){
-			return descriptorPool.put(objectID, descriptor);
+			return descriptorPool.put(objectId, descriptor);
 		}
 	}
 	
@@ -874,13 +1003,13 @@ public class CommunicationManager {
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#get(Object) get()} method. 
 	 *    
-	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectId The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The value to which the specified key is mapped, or null if this map contains no mapping for the key.
 	 */
-	private ConnectionDescriptor descriptorPoolGet(String objectID){
+	private ConnectionDescriptor descriptorPoolGet(String objectId){
 		synchronized (descriptorPool){
 			
-			return descriptorPool.get(objectID);
+			return descriptorPool.get(objectId);
 		}
 	}
 	
@@ -893,13 +1022,13 @@ public class CommunicationManager {
 	 *    or modifying functionality of this class and avoid the original HashMap's
 	 *    {@link java.util.HashMap#remove(Object) remove()} method.
 	 *    
-	 * @param objectID The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
+	 * @param objectId The key part of the {@link java.util.HashMap HashMap} key-value pair in the descriptor pool.
 	 * @return The previous value associated with key, or null if there was no mapping for key.
 	 */
-	private ConnectionDescriptor descriptorPoolRemove(String objectID){
+	private ConnectionDescriptor descriptorPoolRemove(String objectId){
 		synchronized (descriptorPool){
 			
-			return descriptorPool.remove(objectID);
+			return descriptorPool.remove(objectId);
 		}
 	}
 	
@@ -916,5 +1045,64 @@ public class CommunicationManager {
 		synchronized (descriptorPool){
 			descriptorPool.clear();
 		}
+	}
+	
+	// this will save us a lot of cycles - it gets checked too often
+	private void translateSessionRecoveryConf(String recoveryConfigString) {
+		
+		switch (recoveryConfigString) {
+		case SESSIONRECOVERYPOLICY_STRING_PASSIVE:
+			sessionRecoveryPolicy = SESSIONRECOVERYPOLICY_INT_PASSIVE;
+			break;
+			
+		case SESSIONRECOVERYPOLICY_STRING_NONE:
+			sessionRecoveryPolicy = SESSIONRECOVERYPOLICY_INT_NONE;
+			break;
+			
+		case SESSIONRECOVERYPOLICY_STRING_PROACTIVE:
+			sessionRecoveryPolicy = SESSIONRECOVERYPOLICY_INT_PROACTIVE;
+			break;
+			
+			default:
+				sessionRecoveryPolicy = SESSIONRECOVERYPOLICY_INT_ERROR;
+				break;
+				
+		}
+	}
+	
+	
+	private void recoverSessions() {
+		
+		Set<String> connectionList = getConnectionList();
+		ConnectionDescriptor descriptor;
+		
+		// remember we have to use our own methods (descriptorPoolGet etc) to access the hash map in a thread safe manner
+		for (String oid : connectionList) {
+			descriptor = descriptorPoolGet(oid);
+			
+			if (descriptor != null) {
+				if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_PROACTIVE) {
+					if (!descriptor.isConnected()) {
+						logger.warning("Connection for " + descriptor.getObjectId() + " was interrupted. Reconnecting.");
+						
+						descriptor.connect();
+					}
+				}
+				
+				if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_PASSIVE) {
+					
+					// if the descriptor is connected but the connection timer is expired, disconnect
+					if(descriptor.isConnected() 
+							&& (System.currentTimeMillis() - descriptor.getLastConnectionTimerReset()) > sessionExpiration) {
+						
+						logger.warning("Session expired for object ID " + descriptor.getObjectId() + ". Disconnecting.");
+						descriptor.disconnect();
+						
+					}
+				}	
+			}
+		}
+		
+		
 	}
 }

@@ -1,14 +1,17 @@
 package eu.bavenir.ogwapi.commons.search;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -18,12 +21,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.restlet.Client;
-import org.restlet.Context;
-import org.restlet.data.MediaType;
-import org.restlet.data.Protocol;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
+import org.apache.jena.query.QueryFactory;
+import org.json.JSONObject;
+import org.restlet.resource.ResourceException;
 
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -33,6 +33,12 @@ import client.VicinityClient;
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
+
+/**
+ * 
+ * @author Andrea Cimmino (cimmino@fi.upm.es)
+ *
+ */
 public class SparqlQuery {
 
 	/**
@@ -51,6 +57,7 @@ public class SparqlQuery {
 	
 	private static final int ARRAYINDEX_PID = 4;
 	
+	private static final int MAX_PARALLEL_REQUESTS = 300;
 
 	// this is necessary to send requests to all neighbours
 	private ConnectionDescriptor descriptor;
@@ -75,87 +82,84 @@ public class SparqlQuery {
 	
 	
 	public String performQuery(String query, Map<String, String> parameters) {
-		
-		// TODO remove after test
-		System.out.println("QUERY: \n" + query
-				+ "\nADDITIONAL PARAMETERS: \n" + parameters.toString()
-				);
-		
-		
+		// 1. Retrieve TED
 		
 		Set<String> neighbours = descriptor.getRoster();
-
-		// TODO remove after test
-		System.out.println("NEIGHBOURS: \n" + neighbours.toString()); 
-		
-		
-		// Retrieve a JSON-LD with a relevant TED for the query from the Gateway API Services
-		String jsonTED = retrieveTED(query);
-		
-		
-		// TODO remove after test
-		System.out.println("RETRIEVED TED: \n" + jsonTED);
-		
-		
-		// init the client
+		logger.info("Neighbours: "+neighbours.toString());
+		logger.info("Requesting TED");
+		String jsonTED = retrieveTED(query, neighbours);
+		logger.info("TED retrieved");
+		System.out.println(jsonTED.length());
+		// 2. Init the client
 		VicinityClient client = new VicinityAgoraClient(jsonTED, neighbours, query);
-
+		System.out.println(query);
+		// 3. Retrieve remote data
 		List<Entry<String,String>> remoteEndpoints = client.getRelevantGatewayAPIAddresses();
-
-		
-		// TODO remove after test
-		System.out.println("===== STARTING DATA RETRIEVAL =======");
-		
-		// distributed access through secured channel
-		for(int i = 0; i < remoteEndpoints.size(); i++) {
+		logger.info("Remote endpoints to retrieve data from "+remoteEndpoints.size());
+		// 3.1 Prepare Futures
+		ExecutorService executor = Executors.newFixedThreadPool(MAX_PARALLEL_REQUESTS);
+        List<Future<String>> list = new ArrayList<Future<String>>();
+        for(int i = 0; i < remoteEndpoints.size(); i++) {
 			String remoteGatewayAddress = remoteEndpoints.get(i).getValue(); 
-			
-			// TODO remove after test
-			System.out.println("REFERENCE STRING:  " + remoteGatewayAddress);
-			
-			// we need to split the /adapter-endpoint/objects/{oid}/property/{pid} 
-			
-			String[] splitArray = remoteGatewayAddress.split("/");
-						
+			String accessIRI = remoteEndpoints.get(i).getKey();
+			// Transform into right request values
+			String[] splitArray = remoteGatewayAddress.split("/");		
 			String objectId = splitArray[ARRAYINDEX_OID];
 			String propertyId = splitArray[ARRAYINDEX_PID];
-			
-			
-			// TODO remove after test
-			System.out.println("OID: " + objectId + " PROPERTY ID: " + propertyId);
-			
-			// retrieve the JSON property
-			String jsonData = getPropertyOfRemoteObject(objectId, propertyId, parameters);
-			
-			// TODO remove after test
-			System.out.println("RETRIEVED DATA: \n" + jsonData);
-			
-			
-			remoteEndpoints.get(i).setValue(jsonData);
+        		Callable<String> callable = new Callable<String>() {
+                public String call() {
+                    return getPropertyOfRemoteObject(objectId, propertyId, parameters, accessIRI);
+                }
+            };
+            Future<String> future = executor.submit(callable);
+            list.add(future);
+        }
+        // 3.2 Execute Futures
+        for(Future<String> fut : list){
+            try {
+            		String jsonData = fut.get();
+            		if(jsonData!=null && !jsonData.contains("\"error\":") && jsonData.contains("\"status\":\"success\"") && isCorrectJSON(jsonData)) {
+            			JSONObject jsonDocument = new JSONObject(jsonData);
+            			if(jsonDocument.has("data")) {
+            				remoteEndpoints.get(list.indexOf(fut)).setValue(jsonDocument.getJSONObject("data").toString());
+            			}else {
+            				remoteEndpoints.get(list.indexOf(fut)).setValue(jsonData);
+            			}
+            			// TODO: UNCOMMENT THIS remoteEndpoints.get(list.indexOf(fut)).setValue(jsonData);
+        			}
+            } catch (Exception  e) {
+                e.printStackTrace();
+            }
+        }
+        // 3.3 shut down the executor service now
+        executor.shutdown();
+        // 3.4 Filter those remote enpoints without json
+        remoteEndpoints = remoteEndpoints.stream().filter(entry -> isCorrectJSON(entry.getValue())).collect(Collectors.toList());
+        System.out.println("===== DATA RETRIEVAL FINISHED =======");
+        for(Entry<String, String> entry:remoteEndpoints) {
+        		System.out.println("Remote JSON documents retrieved: "+entry.getValue());
+        }
+        
+        System.out.println("===== Solving query =======");		
+		List<Map<String,String>> queryResults = new ArrayList<>();
+		try {
+			QueryFactory.create(query) ;
+			queryResults = client.solveQuery(remoteEndpoints);
+		}catch(ResourceException e) {
+			logger.severe("Provided query has errors!");
+		}catch(Exception e) {
+			logger.severe("Something when wrong processing the query");
 		}
-		
-		// TODO remove after test
-		System.out.println("===== DATA RETRIEVAL FINISHED =======");
-		
-
-		// -- Solve query
-		List<Map<String,String>> queryResults = client.solveQuery(remoteEndpoints);
-
 		
 		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		JsonArrayBuilder arrayBuilder = jsonBuilderFactory.createArrayBuilder();
 		
-		// TODO remove
-		System.out.println("RESULT:\n");
 		
 		for (Map<String, String> map : queryResults) {
 			
 			JsonObjectBuilder innerBuilder = jsonBuilderFactory.createObjectBuilder();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				innerBuilder.add(entry.getKey(), entry.getValue());
-				
-				// TODO remove
-				System.out.println(entry.getKey() + " " + entry.getValue());
 			}
 			arrayBuilder.add(innerBuilder);
 		}
@@ -166,138 +170,42 @@ public class SparqlQuery {
 		System.out.println("RETURN VALUE: \n" + returnValue);
 		
 		return returnValue;
-
+		
 	}
 	
-	/*
-	private String retrieveTED(String query) {
-		
-		Client client = new Client(new Context(), Protocol.HTTP);
-		client.getContext().getParameters().add ( "idleTimeout", "6000000" );
-		client.getContext().getParameters().add ( "socketTimeout", "6000000" );
-		client.getContext().getParameters().add ( "stopIdleTimeout", "6000000" );
-		
-		ClientResource clientResource = new ClientResource(gwapiServicesUrl);
-		clientResource.setNext(client);
-		
-		
-		Writer writer = new StringWriter();
-		Representation responseRepresentation = clientResource.post(query, MediaType.APPLICATION_ALL_JSON); 
-		
-		if (responseRepresentation == null){
-			return null;
-		} 
-		
-		try {
-			responseRepresentation.write(writer);
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.info(e.getMessage());
-		}
-		
-		return writer.toString();
-	}*/
+	private Boolean isCorrectJSON(String object) {
+		Boolean condition1 = object.startsWith("{") && object.endsWith("}");
+		Boolean condition2 = object.startsWith("[") && object.endsWith("]");
+		Boolean isCorrect = condition1 || condition2 ;
+		if(!isCorrect)
+			logger.severe("Retrieve something that is not a JSON: "+object);
+		return isCorrect; 
+	}	
 	
-	private String retrieveTED(String query) {	
-
+	private String retrieveTED(String query, Set<String> neighbours) {	
 		Unirest.setTimeouts(1800000, 1800000);
-
-		Map<String, String> headers = new HashMap<String, String>();
-
+		Map<String, String> headers = new HashMap<>();
 		headers.put("Accept", "application/ld+json");
-
 		headers.put("Content-Type", "application/ld+json");
-
 		String jsonTED= "{}";
-
 		try {
-
-			jsonTED = Unirest.post(gwapiServicesUrl).headers(headers).body(query).asString().getBody();
-
-			
-
+			jsonTED = Unirest.post(gwapiServicesUrl+"?neighbors="+neighbours.toString().replace("[", "").replace("]","").replace(" ", "")).headers(headers).body(query).asString().getBody();
 		} catch (UnirestException e) {
-
 			e.printStackTrace();
-
 		}
-
 		return jsonTED;
-
 	}
 	
-	
-	/*
-	private String retrievePrefixes() {
 		
-		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_PREFIXES);
+	private String getPropertyOfRemoteObject(String remoteObjectID, String propertyName, Map<String, String> parameters, String key) {
 		
-		Writer writer = new StringWriter();
-		Representation responseRepresentation = clientResource.get();
-		
-		if (responseRepresentation == null){
-			return null;
-		} 
-		
-		try {
-			responseRepresentation.write(writer);
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.info(e.getMessage());
-		}
-		
-		return writer.toString();
-	}*/
-	
-	
-	/*
-	private String retrieveRDF(String neighboursThingIRI) {
-		
-		
-		ClientResource clientResource = new ClientResource(GWAPI_SERVICES_URL_RESOURCE);
-		
-		
-		JsonObjectBuilder jsonObjectBuilder = jsonBuilderFactory.createObjectBuilder();
-		
-		jsonObjectBuilder.add(ATTR_RESOURCE, neighboursThingIRI);
-		
-		
-		Writer writer = new StringWriter();
-		Representation responseRepresentation = clientResource.post(new JsonRepresentation(jsonObjectBuilder.build()), 
-				MediaType.APPLICATION_JSON);
-		
-		if (responseRepresentation == null){
-			return null;
-		} 
-		
-		try {
-			responseRepresentation.write(writer);
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.info(e.getMessage());
-		}
-		
-		return writer.toString();
-		
-	}*/
-	
-	
-	private String getPropertyOfRemoteObject(String remoteObjectID, String propertyName, 
-			Map<String, String> parameters) {
-		
-		StatusMessage statusMessage = 
-				descriptor.getPropertyOfRemoteObject(remoteObjectID, propertyName, parameters, null);
+		StatusMessage statusMessage = descriptor.getPropertyOfRemoteObject(remoteObjectID, propertyName, parameters, null);
 		
 		if (statusMessage.isError()) {
-			
-			// TODO delete after test
-			System.out.println("ERROR MESSAGE RETURNED: " + statusMessage.buildMessage().toString());
-			
 			return null;
-		} 
+		}
 		
 		JsonObject jsonObject  = statusMessage.buildMessage();
-		
 		JsonArray jsonArray = jsonObject.getJsonArray(StatusMessage.ATTR_MESSAGE);
 		
 		return jsonArray.get(0).toString();
