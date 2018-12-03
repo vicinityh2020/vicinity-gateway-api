@@ -40,7 +40,7 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
  */
 
 /**
- * RESTLET application that serves incoming calls for the Gateway API. After being instantialized, it initialises
+ * RESTLET application that serves incoming calls for the Gateway API. After being instantialised, it initialises
  * objects necessary to be available to all API services (like Communication Node). It routes the requests to their 
  * respective {@link org.restlet.resource.ServerResource Resources}. The HTTP authentication against Gateway API is 
  * also checked in the {@link eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier AuthenticationVerifier}.

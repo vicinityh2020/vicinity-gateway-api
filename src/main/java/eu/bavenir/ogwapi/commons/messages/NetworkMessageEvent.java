@@ -23,18 +23,29 @@ import org.apache.commons.configuration2.XMLConfiguration;
  */
 
 
-// TODO documentation
-// explain why there are two constructors
-// explain that it works as a wrapper for the incomming json
+// TODO make events capable of carrying content type
 /**
- * Although the destination OID is not passed in the arriving JSON, during the execution it is wise to set 
- * this field to an ID of the object that is the destination for this event (by the appropriate 
- * {@link ConnectionDescriptor ConnectionDescriptor} AFTER it arrives). 
+ * This extension of {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage} is adapted to facilitate
+ * event mechanism. Event messages are different from {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest requests}
+ * and {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse responses} - they are not a part of any request
+ * between two objects (therefore they don't fill request ID), they don't carry error indication, status code, status
+ * reason etc. They also flow in 'different direction' (from the serving object to client object).
+ *  
+ * Although the destination OID is not passed in the arriving JSON (that would necessitate creating separate instances
+ * of this class for every subscriber the event is meant for, filling it and building a JSON string out of it - imagine
+ * doing this for 1000s subscribers) it is filled AFTER ARRIVAL to the subscriber's OGWAPI, which has that information
+ * directly from the communication engine. We can say that the event message is actually completed not before it travels 
+ * all the way to its destination :). Although it can sound weird and removing the behaviour will NOT affect the protocol,
+ * it makes the processing of the message much easier.
  * 
- * This is not mandatory, but it helps keeping track and better control of where this should be routed.
- *   
+ * If there are any modification to this class, they will probably be about extending the range of fields that will be 
+ * transported over the network. Don't forget to put the new field into the {@link #parseJson(JsonObject) parser} and 
+ * {@link #buildMessageJson() builder}. Note that such modification will make the new OGWAPI incompatible with the 
+ * previous versions.
+ * 
+ * @author sulfo
+ * 
  */
-
 public class NetworkMessageEvent extends NetworkMessage{
 
 	/* === CONSTANTS === */
@@ -54,6 +65,9 @@ public class NetworkMessageEvent extends NetworkMessage{
 	 */
 	private static final String ATTR_EVENTBODY = "body";
 	
+	/**
+	 * Name of the attribute for parameters.
+	 */
 	private static final String ATTR_PARAMETERS = "parameters";
 	
 	
@@ -79,7 +93,14 @@ public class NetworkMessageEvent extends NetworkMessage{
 	/* === PUBLIC METHODS === */
 	
 	/**
-	 * Constructor of an event message that is to be sent across the network.  
+	 * Constructor of an event message that is to be sent across the network.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param sourceOid Object ID of the publisher,
+	 * @param eventId Event ID.
+	 * @param eventBody Event body.
+	 * @param parameters Parameters to be sent alongside the body.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public NetworkMessageEvent(XMLConfiguration config, String sourceOid, String eventId, String eventBody, 
 			Map<String, String> parameters, Logger logger) {
@@ -102,6 +123,8 @@ public class NetworkMessageEvent extends NetworkMessage{
 	 * successful, the result is an object with validity {@link NetworkMessage#valid flag} set to false.
 	 * 
 	 * @param json JSON that arrived from the network. 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public NetworkMessageEvent(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
@@ -123,8 +146,9 @@ public class NetworkMessageEvent extends NetworkMessage{
 
 
 	/**
+	 * Returns event ID.
 	 * 
-	 * @return
+	 * @return Event ID.
 	 */
 	public String getEventId() {
 		return eventId;
@@ -132,19 +156,30 @@ public class NetworkMessageEvent extends NetworkMessage{
 
 
 	/**
+	 * Sets event ID.
 	 * 
-	 * @param eventId
+	 * @param eventId Event ID.
 	 */
 	public void setEventId(String eventId) {
 		this.eventId = eventId;
 	}
 
 
+	/**
+	 * Returns event body.
+	 * 
+	 * @return Event body.
+	 */
 	public String getEventBody() {
 		return eventBody;
 	}
 
 
+	/**
+	 * Sets event body.
+	 * 
+	 * @param eventBody Event Body.
+	 */
 	public void setEventBody(String eventBody) {
 		this.eventBody = eventBody;
 	}
@@ -160,6 +195,11 @@ public class NetworkMessageEvent extends NetworkMessage{
 	}
 	
 	
+	/**
+	 * Sets the parameters hash map.
+	 * 
+	 * @param parameters Hash map with parameters.
+	 */
 	public void setParameters(Map<String, String> parameters) {
 		this.parameters = parameters;
 	}	
@@ -188,7 +228,6 @@ public class NetworkMessageEvent extends NetworkMessage{
 	 * network. 
 	 * 
 	 */
-	// remind of certain attributes that must not be null
 	private void buildMessageJson(){
 		
 		// create the factory

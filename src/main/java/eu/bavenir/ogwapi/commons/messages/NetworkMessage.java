@@ -16,15 +16,32 @@ import org.apache.commons.configuration2.XMLConfiguration;
 
 
 /**
- * This class serves as a wrapper for XMPP message, so we can add a few more attributes into it, such as type, 
- * request ID, time stamp etc. This class contains all the common fields and methods, that a NetworkMessage needs.
+ * This is the basis for OGWAPI network messaging protocol and serves as a parent class for {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest request},
+ * {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse response} and {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent event}.
+ * It contains fields that are common for all extending classes and ensure proper routing across the network, while the
+ * functionality gets extended in subclasses.
  * 
- * However in order to store a complete request or a response, this class needs to be extended. 
- * The subclasses of this class, extended with the right fields and methods, should then be used in the actual 
- * communication.
+ * If there is a need to create a new message class for the OGWAPI's protocol, make it a subclass of this one and give it
+ * its own {@link #MESSAGE_TYPE MESSAGE_TYPE} number (look into other message classes to see what number they are using
+ * and avoid those).
  * 
- * NOTE: When handling freshly parsed message of any type, always check for {@link #isValid() validity} and (after 
- * optional further examination) discard it.
+ * When extending OGWAPI's code with processes that handle freshly parsed message of any type, always check for 
+ * {@link #isValid() validity} and if the message is not valid, discard it.
+ * 
+ * Recommended general approach should be obvious from a quick glance on {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest request},
+ * {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse response} or {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent event}
+ * message implementation:
+ * 
+ *  1. Create a parsing method for your new message class. See {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest#parseJson parseJson}
+ *     of the request message to see how to do it.
+ *  2. In the constructor of your message use following (or similar) few lines of code:
+ *  
+ *     if (!parseJson(json)){
+ *         setValid(false);
+ *     }
+ *     
+ *  3. Add appropriate lines into {@link eu.bavenir.ogwapi.commons.messages.MessageResolver MessageResolver} constructor.
+ *     This will ensure correct translation of the incoming message.  
  * 
  * @author sulfo
  *
@@ -44,17 +61,27 @@ public class NetworkMessage {
 	public static final String ATTR_MESSAGETYPE = "messageType";
 	
 	/**
-	 * Name of the request ID field in JSON that is to be sent. 
+	 * Name of the request ID attribute in JSON that is to be transported. 
 	 */
 	public static final String ATTR_REQUESTID = "requestId";
 	
+	/**
+	 * Name of the source object ID attribute in JSON that is to be transported. 
+	 */
 	public static final String ATTR_SOURCEOID = "sourceOid";
 	
+	/**
+	 * Name of the destination object ID attribute in JSON that is to be transported. 
+	 */
 	public static final String ATTR_DESTINATIONOID = "destinationOid";
 	
 	/**
-	 * Name of the configuration parameter for message timeout (expiration will make the message 'stale' and will
-	 * be discarded at nearest opportunity). 
+	 * Number of seconds to consider request message as no longer relevant. 
+	 * After a request is sent from point A to point B, point A waits for 
+	 * response. If the response does not arrive until this timeout expires, 
+	 * point B is considered unreachable. If the response arrives after this
+	 * happens, the response is ignored and discarded and a new request has
+	 * to be sent.
 	 */
 	public static final String CONFIG_PARAM_REQUESTMESSAGETIMEOUT = "general.requestMessageTimeout";
 	
@@ -90,17 +117,22 @@ public class NetworkMessage {
 	protected boolean stale;
 	
 	/**
-	 * A service call to Gateway API will produce a XMPP message sent across the XMPP network for processing by a 
+	 * A service call to Gateway API will produce a message sent across the network for processing by a 
 	 * remote object. After processing a response message is sent back, received and inserted into a queue. The service
 	 * that was the original sender can then sort through the queue and find a the message it is waiting for based on
 	 * this request ID. 
 	 */
 	protected int requestId;
 	
+	/**
+	 * String with object ID of the destination.
+	 */
 	protected String destinationOid;
 	
+	/**
+	 * String with the object ID of the destination.
+	 */
 	protected String sourceOid;
-	
 	
 	/**
 	 * UNIX time stamp generated in the moment the instance of this class is constructed. 
@@ -134,6 +166,9 @@ public class NetworkMessage {
 
 	/**
 	 * Basic constructor for the message. Only time stamp is computed.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public NetworkMessage(XMLConfiguration config, Logger logger){
 		
@@ -157,7 +192,7 @@ public class NetworkMessage {
 	/**
 	 * Getter for the ID of the request. The request ID of the message is randomly generated when an instance of outgoing
 	 * message is constructed. In case when incoming message is being parsed, the request ID is extracted from the
-	 * arriving XMPP message. 
+	 * arriving message. 
 	 * 
 	 * @return Numerical ID of the request.
 	 */
@@ -176,29 +211,49 @@ public class NetworkMessage {
 	}
 
 
+	/**
+	 * Returns the object ID of the destination.
+	 * 
+	 * @return Object ID of the destination.
+	 */
 	public String getDestinationOid() {
 		return destinationOid;
 	}
 
 
+	/**
+	 * Sets the destination object ID.
+	 * 
+	 * @param destinationOid Object ID of the destination.
+	 */
 	public void setDestinationOid(String destinationOid) {
 		this.destinationOid = destinationOid;
 	}
 
 
+	/**
+	 * Returns the object ID of the source.
+	 * 
+	 * @return Object ID of the source.
+	 */
 	public String getSourceOid() {
 		return sourceOid;
 	}
 
 
+	/**
+	 * Sets the object ID of the source.
+	 * 
+	 * @param sourceOid Source object ID.
+	 */
 	public void setSourceOid(String sourceOid) {
 		this.sourceOid = sourceOid;
 	}
 
 
 	/**
-	 * Retrieves the time stamp of the message. The time stamp is always recorded when instance of this class is 
-	 * constructed.
+	 * Retrieves the time stamp of the message. The time stamp is always recorded when instance of this class or its subclass 
+	 * is constructed.
 	 *   
 	 * @return UNIX time stamp (milliseconds). 
 	 */
@@ -281,6 +336,7 @@ public class NetworkMessage {
 			return quotedString;
 		}
 	}
+	
 	
 	/* === PRIVATE METHODS === */
 }

@@ -75,7 +75,6 @@ public class ObjectsOid extends ServerResource{
 	 * Updates the description of an already registered exposed IoT object.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param description JSON - New description for an already registered object (from request).
 	 * 
 	 */
 	@Put("json")

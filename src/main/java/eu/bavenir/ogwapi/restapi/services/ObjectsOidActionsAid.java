@@ -60,7 +60,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Performs an action on an available IoT object.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param object Model (from request).
 	 * @return A task to perform an action was submitted.
 	 */
 	@Post("json")
@@ -88,7 +87,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Updates the status of the task, running on local object.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param object Model.
 	 */
 	@Put("json")
 	public Representation store(Representation entity) {
@@ -134,7 +132,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * @param destinationOid Called OID.
 	 * @param actionId Action ID.
 	 * @param body New representation of the Action.
-	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
 	private Representation startAction(String sourceOid, String destinationOid, String actionId, String body, 
@@ -153,9 +150,10 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Retrieves the Action defined as AID.
 	 * 
 	 * @param sourceOid Caller OID.
-	 * @param attrOid Called OID.
+	 * @param status Next status.
 	 * @param actionId Action ID.
-	 * @param logger Logger taken previously from Context.
+	 * @param returnValue New return value.
+	 * @param queryParams Query parameters to be send along.
 	 * @return Response text.
 	 */
 	private Representation updateActionStatus(String sourceOid, String actionId, String status, String returnValue, 

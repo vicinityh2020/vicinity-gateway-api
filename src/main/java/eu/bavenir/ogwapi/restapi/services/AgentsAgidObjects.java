@@ -161,7 +161,6 @@ public class AgentsAgidObjects extends ServerResource {
 	 * Update the thing descriptions of objects registered under the Agent.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param description New thing descriptions for already registered objects (from request).
 	 * 
 	 */
 	@Put("json")

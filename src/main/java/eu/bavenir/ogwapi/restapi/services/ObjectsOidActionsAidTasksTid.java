@@ -121,9 +121,10 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * 
 	 * @param sourceOid OID of the caller. 
 	 * @param destinationOid OID of the destination.
-	 * @param Aid AID of the Action.
-	 * @param attrTid TID of the Task.
-	 * @param logger Logger taken previously from Context.
+	 * @param actionId ID of the Action.
+	 * @param taskId ID of the Task.
+	 * @param queryParams Parameters to be sent along with the body.
+	 * @param body Request body.
 	 * 
 	 * @return Response from the remote station. 
 	 */

@@ -33,7 +33,6 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
-import eu.bavenir.ogwapi.App;
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
 import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
 
@@ -47,16 +46,35 @@ import eu.bavenir.ogwapi.commons.engines.CommunicationEngine;
  */
 
 
-// TODO documentation
+/**
+ * This is the reference implementation of XMPP message engine based on Ignite Realtime's SMACK library for OGWAPI.
+ * It uses messages to transport data across the XMPP network (as opposed to streams).
+ * 
+ * @author sulfo
+ *
+ */
 public class XmppMessageEngine extends CommunicationEngine {
 
 	/* === CONSTANTS === */
 	
+	/**
+	 * Name of the configuration parameter for a domain served by the XMPP server.
+	 */
+	public static final String CONFIG_PARAM_XMPPDOMAIN = "xmpp.domain";
 	
 	/**
-	 * Name of the configuration parameter for XMPP .
+	 * Default value of {@link #CONFIG_PARAM_XMPPDOMAIN CONFIG_PARAM_XMPPDOMAIN} configuration parameter. This value is
+	 * taken into account when no suitable value is found in the configuration file. 
 	 */
-	private static final String CONFIG_PARAM_XMPPDEBUG = "xmpp.debug";
+	public static final String CONFIG_DEF_XMPPDOMAIN = "bavenir.eu";
+	
+	/**
+	 * Enables debugging of the XMPP communication between the Gateway and the
+	 * server / other Gateways. Note that this is to be used in conjunction
+	 * with the SMACK debugger, which is external tool.
+	 * @see http://download.igniterealtime.org/smack/docs/latest/documentation/debugging.html.
+	 */
+	private static final String CONFIG_PARAM_XMPPDEBUG = "xmpp.debugging";
 	
 	/**
 	 * Default value of {@link #CONFIG_PARAM_XMPPDEBUG CONFIG_PARAM_XMPPDEBUG} configuration parameter. This value is
@@ -65,7 +83,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private static final boolean CONFIG_DEF_XMPPDEBUG = false;
 	
 	/**
-	 * Name of the configuration parameter for server URL.
+	 * Name of the configuration parameter for server URL. If not set, the application exits.
 	 */
 	private static final String CONFIG_PARAM_SERVER = "general.server";
 	
@@ -109,37 +127,52 @@ public class XmppMessageEngine extends CommunicationEngine {
 	private static final String XMPP_PRESENCE_STRING = "online";
 	
 	/**
-	 * The rosters in SMACK sometimes failed to initialise in the real production environment, often because 
-	 */
-	/**
-	 * Minimum time (s) the roster will go without reloading. See the constructor implementation, the part with timer.
+	 * Minimum time (in seconds) the roster will go without reloading. See the constructor implementation, the part with timer.
 	 */
 	private static final int ROSTER_RELOAD_TIME_MIN = 60;
 	
 	/**
-	 * Maximum time (s) the roster will go without reloading. See the constructor implementation, the part with timer.
+	 * Maximum time (in seconds) the roster will go without reloading. See the constructor implementation, the part with timer.
 	 */
 	private static final int ROSTER_RELOAD_TIME_MAX = 120;
 	
+	
 	/* === FIELDS === */
 	
-	// connection to communication server
+	/**
+	 * Connection to the server.
+	 */
 	private AbstractXMPPConnection connection;
 	
-	// chat manager for the current connection
+	/**
+	 * Chat manager for the current connection.
+	 */
 	private ChatManager chatManager;
 	
-	// roster for current connection
+	/**
+	 * Roster for current connection.
+	 */
 	private Roster roster;
 	
-	// a list of opened chats
+	/**
+	 * A list of opened chats.
+	 */
 	private HashMap<EntityBareJid, Chat> openedChats;
 	
 	
 	
 	/* === PUBLIC METHODS === */
 	
-	// TODO documentation
+	/**
+	 * Constructor for the XMPP message engine. It initialises fields and a {@link java.util.Timer Timer} that periodically
+	 * in interval that is randomly set, executes the {@link #renewPresenceAndRoster() renewPresenceAndRoster} method.
+	 * 
+	 * @param objectId String with the object ID that connects via this engine.
+	 * @param password Password string for authentication.
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI. 
+	 * @param connectionDescriptor Connection descriptor that is using this particular instance of engine.
+	 */
 	public XmppMessageEngine(String objectId, String password, XMLConfiguration config, Logger logger, 
 																		ConnectionDescriptor connectionDescriptor) {
 		super(objectId, password, config, logger, connectionDescriptor);
@@ -181,14 +214,15 @@ public class XmppMessageEngine extends CommunicationEngine {
 	/**
 	 * Connects to the XMPP server and logs the user in. It also registers a listener for incoming messages for this
 	 * connection (see {@link org.jivesoftware.smack.chat2.ChatManager ChatManager}).  In case of failure it is
-	 * possible to re-try. 
+	 * possible to re-try. It attempts to be optimised in a sense that it does not rebuilds a 
+	 * {@link org.jivesoftware.smack.AbstractXMPPConnection connection} object if it already exists.
 	 * 
 	 * @param objectId ID that serves as XMPP user name.
 	 * @param password Password for authentication.
 	 * @return True on success, false otherwise.
 	 */
 	@Override
-	public boolean connect(String objectId, String password) {
+	public boolean connect() {
 		
 		if (connection == null) {
 			logger.fine("XmppMessageEngine: Connection object not yet exists for " + objectId 
@@ -290,10 +324,10 @@ public class XmppMessageEngine extends CommunicationEngine {
 
 	
 	/**
-	 * Retrieves the roster of the current XMPP user.
+	 * Retrieves a contact list of the current XMPP user.
 	 * 
 	 * @return A set of object IDs from the {@link org.jivesoftware.smack.roster.Roster Roster} for this 
-	 * connection. 
+	 * connection. In case of error it just returns empty set (not null).
 	 */
 	@Override
 	public Set<String> getRoster() {
@@ -316,24 +350,16 @@ public class XmppMessageEngine extends CommunicationEngine {
 	
 	
 	/**
-	 * Sends a string to the destination XMPP user name. The recommended approach is to get the roster first (by the 
-	 * {@link #getRoster() getRoster()} method and then send the message, if the contact is online.  
+	 * Sends a string to the destination XMPP user name.  
 	 * 
 	 * @param destinationUsername Destination contact, for which the message is intended. 
 	 * @param message A string to send.
-	 * @param chat An instance of {@link org.jivesoftware.smack.chat2.Chat Chat} class. When a message is to be sent
-	 * over network as a new request, this should be left as null - a new chat will be created automatically and it
-	 * will check whether the receiving station is in the transmitting station roster (which serves as an 
-	 * authorisation method - you can't send messages to stations that are not visible to you). However if the message
-	 * is to be sent as a response, the Chat object that was created when the request message arrived should be provided
-	 * (as a way to overcome the roster authorisation - a station should be able to respond to a request, even if it 
-	 * does not see the requesting station).
 	 * @return True on success, false if the destination object is offline or if error occurred.
 	 */
 	@Override
 	public boolean sendMessage(String destinationObjectID, String message) {
 		destinationObjectID = destinationObjectID + "@" 
-									+ config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
+									+ config.getString(CONFIG_PARAM_XMPPDOMAIN, CONFIG_DEF_XMPPDOMAIN);
 
 		EntityBareJid jid;
 
@@ -357,15 +383,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 				logger.warning("XMPPMessageEngine: Roster could not be reloaded. Exception: " + e.getMessage());
 			}
 		}
-		
-		
-		// uncomment this to see all items in the contact list when debugging
-		/*
-		System.out.println("Roster for " + connection.getUser() + ", while trying to send message to " + destinationObjectID + ":");
-		Collection<RosterEntry> entries = roster.getEntries();
-		for (RosterEntry entry : entries) {
-			System.out.println(entry.getJid().getLocalpartOrNull().toString());
-		}*/
 		
 		
 		// check whether the destination is in our contact list
@@ -408,7 +425,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	/* === PRIVATE METHODS === */
 	
 	/**
-	 * Builds the connection object based on Gateway XML configuration file and the provided credentials.  
+	 * Builds the connection object based on OGWAPI configuration and the provided credentials.  
 	 * 
 	 * @param xmppUsername XMPP user name without the served domain (i.e. just 'user' instead of 'user@xmpp.server').
 	 * @param xmppPassword Password of the user.
@@ -419,7 +436,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		
 		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
 		int xmppPort = config.getInt(CONFIG_PARAM_PORT, CONFIG_DEF_PORT);
-		String xmppDomain = config.getString(App.CONFIG_PARAM_XMPPDOMAIN, App.CONFIG_DEF_XMPPDOMAIN);
+		String xmppDomain = config.getString(CONFIG_PARAM_XMPPDOMAIN, CONFIG_DEF_XMPPDOMAIN);
 		boolean xmppSecurity = config.getBoolean(CONFIG_PARAM_ENCRYPTION, CONFIG_DEF_ENCRYPTION);
 		
 		logger.config("Creating a new connection to XMPP server '" + xmppServer + ":" + xmppPort + "' as '" 
@@ -467,7 +484,14 @@ public class XmppMessageEngine extends CommunicationEngine {
 	}
 	
 	
-	//TODO documentation
+	/**
+	 * This method gets executed when a new message for this object ID arrives. It then gets forwarded to its 
+	 * {@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor}.
+	 * 
+	 * @param from XMPP JID of the originating object (with domain).
+	 * @param xmppMessage Received XMPP message.
+	 * @param chat A chat in which the messages were exchanged.
+	 */
 	private void processMessage(EntityBareJid from, Message xmppMessage, Chat chat) {
 		
 		// try to find an opened chat
@@ -482,7 +506,15 @@ public class XmppMessageEngine extends CommunicationEngine {
 	}
 	
 	
-	
+	/**
+	 * The rosters in SMACK sometimes failed to initialise in the real production environment, especially when 
+	 * OGWAPI is trying to log in many users at once. This method gets triggered by a timer initialised in the constructor
+	 * and periodically retrieves new version of roster, while also sending a presence stanza to server.
+	 *  
+	 * This might not be the best approach, but it seems to have solved some issues that users of OGWAPI were
+	 * experiencing.
+	 *    
+	 */
 	private void renewPresenceAndRoster() {
 		
 		if (connection != null && connection.isConnected() && roster != null) {
@@ -520,6 +552,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	/**
 	 * A callback method called when entries are added into the {@link org.jivesoftware.smack.roster.Roster roster}.
 	 * 
+	 * In this implementation it serves nothing, but can be helpful when debugging.
+	 * 
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were added.
 	 */
 	private void processRosterEntriesAdded(Collection<Jid> addresses){
@@ -544,6 +578,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	
 	/**
 	 * A callback method called when entries are deleted from the {@link org.jivesoftware.smack.roster.Roster roster}.
+	 * 
+	 * In this implementation it serves nothing, but can be helpful when debugging.
 	 * 
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were deleted.
 	 */
@@ -570,6 +606,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	/**
 	 * A callback method called when entries are updated in the {@link org.jivesoftware.smack.roster.Roster roster}.
 	 * 
+	 * In this implementation it serves nothing, but can be helpful when debugging.
+	 * 
 	 * @param addresses A collection of {@link org.jxmpp.jid.Jid JID} addresses that were updated.
 	 */
 	private void processRosterEntriesUpdated(Collection<Jid> addresses) {
@@ -594,6 +632,8 @@ public class XmppMessageEngine extends CommunicationEngine {
 	
 	/**
 	 * A callback method called when the presence of the current connection is changed.
+	 * 
+	 * In this implementation it serves nothing, but can be helpful when debugging.
 	 * 
 	 * @param presence A new {@link org.jivesoftware.smack.packet.Presence presence}.
 	 */

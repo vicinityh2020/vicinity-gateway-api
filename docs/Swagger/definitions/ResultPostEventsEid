@@ -1,0 +1,7 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK. Object '6d1df4af-c017-411b-a389-862c26f7639f' changed the activity of event channel 'event-1' to true",
+	"contentType": "application/json",
+	"message": []
+}

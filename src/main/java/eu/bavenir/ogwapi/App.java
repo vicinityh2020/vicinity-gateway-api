@@ -19,7 +19,7 @@ import eu.bavenir.ogwapi.restapi.RestletThread;
 
 
 /**
- * Main class of the Gateway API program. Loads configuration, initializes logger and runs the threads. It also waits
+ * Main class of the Gateway API program. Loads configuration, initialises logger and runs the threads. It also waits
  * for signal from the OS to run its shutdown hook and perform a cleanup.
  * 
  * @author sulfo
@@ -28,19 +28,6 @@ import eu.bavenir.ogwapi.restapi.RestletThread;
 public class App {
 
 	/* === CONSTANTS === */
-	
-	// TODO this needs to go to the engine...
-	
-	/**
-	 * Name of the configuration parameter for a domain served by the XMPP server.
-	 */
-	public static final String CONFIG_PARAM_XMPPDOMAIN = "xmpp.domain";
-	
-	/**
-	 * Default value of {@link #CONFIG_PARAM_XMPPDOMAIN CONFIG_PARAM_XMPPDOMAIN} configuration parameter. This value is
-	 * taken into account when no suitable value is found in the configuration file. 
-	 */
-	public static final String CONFIG_DEF_XMPPDOMAIN = "bavenir.eu";
 	
 	/**
 	 * Path to configuration file.

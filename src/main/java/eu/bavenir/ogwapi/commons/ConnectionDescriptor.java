@@ -38,18 +38,14 @@ import eu.bavenir.ogwapi.commons.search.SparqlQuery;
  * - private methods
  */
 
-// TODO documentation
+
 /**
- * A representation of a connection to network. In essence, it is a client connected into XMPP network, able to 
- * send / receive messages and process the requests that arrive in them. Basically, the flow is like this:
+ * A representation of a connection to network. In essence, it is a client connected into the P2P network through an 
+ * instance of {@link eu.bavenir.ogwapi.commons.engines.CommunicationEngine engine}, able to 
+ * send / receive messages and process the requests that arrive in them. Each object ID connected through this
+ * OGWAPI has its own instance of this class, however all share the same {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}
+ * instance to connect to local infrastructure.  
  * 
- * 1. construct an instance
- * 2. {@link #connect() connect()}
- * 3. use - since the clients connecting to XMPP network are going to use HTTP authentication, they will send
- * 		their credentials in every request. It is therefore necessary to verify, whether the password is correct. The 
- * 		{@link #verifyPassword() verifyPassword()} is used for this and it should be called by RESTLET authorisation 
- * 		verifier every time a request is made.
- * 4. {@link #disconnect() disconnect()}
  *  
  * @author sulfo
  *
@@ -77,30 +73,54 @@ public class ConnectionDescriptor {
 	
 	/* === FIELDS === */
 	
-	// a set of event channels served by this object
+	/**
+	 * A set of event channels served by this object.
+	 */
 	private Set<EventChannel> providedEventChannels;
 	
-	// a map of channels that this object is subscribed to (OID / EID)
+	/**
+	 * A set of channels that this object is subscribed to.
+	 */
 	private Set<Subscription> subscribedEventChannels;
 	
-	// a set of actions served by this object
+	/**
+	 * A set of actions served by this object.
+	 */
 	private Set<Action> providedActions;
 	
-	
-	// logger and configuration
+	/**
+	 * Configuration of the OGWAPI.
+	 */
 	private XMLConfiguration config;
+	
+	/**
+	 * Logger of the OGWAPI.
+	 */
 	private Logger logger;
 	
-	// sparql query search engine
+	/**
+	 * Sparql query search engine.
+	 */
 	private SparqlQuery sparql;
 	
+	/**
+	 * Message resolver for incoming messages. 
+	 */
 	private MessageResolver messageResolver;
 	
-	// the thing that communicates with agent
+	/**
+	 * The thing that communicates with an agent.
+	 */
 	private AgentConnector agentConnector;
 	
-	// credentials
+	/**
+	 * ID of the object connected through this ConnectionDescriptor.
+	 */
 	private String objectId;
+	
+	/**
+	 * Password.
+	 */
 	private String password;
 	
 	/**
@@ -108,10 +128,14 @@ public class ConnectionDescriptor {
 	 */
 	private long lastConnectionTimerReset;
 	
-	// message queue, FIFO structure for holding incoming messages 
+	/**
+	 * Message queue, FIFO structure for holding incoming messages. 
+	 */
 	private BlockingQueue<NetworkMessage> messageQueue;
 	
-	// the engine to use
+	/**
+	 * The communication engine to use.
+	 */
 	private CommunicationEngine commEngine;
 	
 	/**
@@ -126,14 +150,13 @@ public class ConnectionDescriptor {
 	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
 	 * the descriptor will not be able to connect (in the best case scenario, the other being a storm of null pointer 
 	 * exceptions).
+	 * 
 	 * @param objectId
 	 * @param password
 	 * @param config
 	 * @param logger
 	 */
 	public ConnectionDescriptor(String objectId, String password, XMLConfiguration config, Logger logger){
-		
-		
 		
 		// TODO this all should probably happen after successful login, so it does not use resources for nothing
 		
@@ -145,7 +168,7 @@ public class ConnectionDescriptor {
 		
 		this.sparql = new SparqlQuery(config, this, logger);
 		
-		// TODO decide what type of connector to use
+		// TODO decide here what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);
 		
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
@@ -191,47 +214,82 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Connects the object into to the network with provided credentials. 
+	 *  
+	 * @return True if the connection was successful, false otherwise.
+	 */
 	public boolean connect(){
 		
 		lastConnectionTimerReset = System.currentTimeMillis();
 		
-		return commEngine.connect(objectId, password);
+		return commEngine.connect();
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Disconnects the object from the network. 
+	 */
 	public void disconnect(){
 		commEngine.disconnect();
 	}
 
 
-	// TODO documentation
+	/**
+	 * Verifies the object is connected. 
+	 * 
+	 * @return True if it is connected, false otherwise. 
+	 */
 	public boolean isConnected(){
 		
 		return commEngine.isConnected();
 	}
 	
+	
+	/**
+	 * The connection timer is important in some levels of the OGWAPI's session recovery settings 
+	 * (see {@link eu.bavenir.ogwapi.commons.CommunicationManager#CONFIG_PARAM_SESSIONRECOVERY CONFIG_PARAM_SESSIONRECOVERY}).
+	 * 
+	 * The {@link eu.bavenir.ogwapi.commons.CommunicationManager CommunicationManager} uses this method to reset the timer.
+	 */
 	public void resetConnectionTimer() {
 		lastConnectionTimerReset = System.currentTimeMillis();
 	}
 	
+	
+	/**
+	 * The connection timer is important in some levels of the OGWAPI's session recovery settings 
+	 * (see {@link eu.bavenir.ogwapi.commons.CommunicationManager#CONFIG_PARAM_SESSIONRECOVERY CONFIG_PARAM_SESSIONRECOVERY}).
+	 * 
+	 * The {@link eu.bavenir.ogwapi.commons.CommunicationManager CommunicationManager} uses this method to retrieve 
+	 * the time of the last timer reset.
+	 */
 	public long getLastConnectionTimerReset() {
 		return lastConnectionTimerReset;
 	}
 	
 	
 
-	// TODO documentation
+	/**
+	 * Retrieves the contact list for this object.
+	 * 
+	 * @return Set of object IDs that this object can see.
+	 */
 	public Set<String> getRoster(){
 		
 		return commEngine.getRoster();
 	}
 	
 	
-
-
-	// TODO documentation
+	/**
+	 * Starts an action on a remote object.
+	 * 
+	 * @param destinationOid ID of the remote object.
+	 * @param actionId ID of the action.
+	 * @param body Body that will be transported to the object via its {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}.
+	 * @param parameters Parameters that will be transported along the body. 
+	 * @return Status message.
+	 */
 	public StatusMessage startAction(String destinationOid, String actionId, String body, 
 			Map<String, String> parameters) {
 		
@@ -248,6 +306,16 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Updates a status and a return value of locally run job of an action. See the {@link eu.bavenir.ogwapi.commons.Task Task}
+	 * and {@link eu.bavenir.ogwapi.commons.Action Action} for more information about valid states.  
+	 * 
+	 * @param actionId ID of the action that is being worked on right now (this is NOT a task ID).
+	 * @param newStatus New status of the job. 
+	 * @param returnValue New value to be returned to the object that ordered the job.
+	 * @param parameters Parameters that goes with the return value.
+	 * @return Status message.
+	 */
 	public StatusMessage updateTaskStatus(String actionId, String newStatus, String returnValue, 
 			Map<String, String> parameters) {
 		
@@ -304,8 +372,16 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	
+	/**
+	 * Retrieves a status of a remotely running {@link eu.bavenir.ogwapi.commons.Task Task}.
+	 * 
+	 * @param destinationOid The remote object running the task. 
+	 * @param actionId ID of the action.
+	 * @param taskId ID of the task.
+	 * @param parameters Any parameters that are necessary to be transported to other side (usually none).
+	 * @param body Any body that needs to be transported to the other side (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage retrieveTaskStatus(String destinationOid, String actionId, String taskId, 
 			Map<String, String> parameters, String body) {
 	
@@ -325,7 +401,16 @@ public class ConnectionDescriptor {
 	
 	
 	
-	
+	/**
+	 * Cancels remotely running task.
+	 * 
+	 * @param destinationOid The remote object running the task. 
+	 * @param actionId ID of the action.
+	 * @param taskId ID of the task.
+	 * @param parameters Any parameters that are necessary to be transported to other side (usually none).
+	 * @param body Any body that needs to be transported to the other side (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage cancelRunningTask(String destinationOid, String actionId, String taskId, 
 			Map<String, String> parameters, String body) {
 		
@@ -347,7 +432,7 @@ public class ConnectionDescriptor {
 	 * Sets the status of the {@link EventChannel EventChannel}. The status can be either active, or inactive, depending
 	 * on the 'status' parameter. 
 	 * 
-	 * If no channel with given 'eventID' exists and the 'status' is set to true, it gets created. If the 'status' is
+	 * If no channel with given 'eventId' exists and the 'status' is set to true, it gets created. If the 'status' is
 	 * false, the channel is not created if it does not exists previously.
 	 * 
 	 * @param eventId Event ID.
@@ -355,7 +440,7 @@ public class ConnectionDescriptor {
 	 * @return If the channel was found and its status set, returns true. It will also return true, if the channel was
 	 * not found, but was created (this is what happens when the status of the non existing channel is being set to
 	 * {@link EventChannel#STATUS_ACTIVE active}). If the channel was not found and the status was being set to 
-	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false.
+	 * {@link EventChannel#STATUS_INACTIVE inactive}, returns false. It gets wrapped into Status message.
 	 */
 	public StatusMessage setLocalEventChannelStatus(String eventId, boolean active, Map<String, String> parameters, 
 			String body) {
@@ -368,7 +453,7 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = searchForEventChannel(eventId);
 		
 		if (eventChannel == null) {
-			// TODO don't allow this behaviour - if there is no such event channel, stop the processing
+			// TODO don't allow this behaviour - if there is no such event channel, stop the processing (don't forget to alter javadoc)
 			
 			// if no event channel was found AND the caller wanted it to be active, create it
 			if (active) {
@@ -419,8 +504,15 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Retrieves the status of local or remote event channel. 
+	 * 
+	 * @param destinationOid ID of the object that is to be polled (it can be the local owner verifying the state of its channel.
+	 * @param eventId ID of the event.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage getEventChannelStatus(String destinationOid, String eventId, Map<String, String> parameters, 
 			String body) {
 		
@@ -485,7 +577,15 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Subscribes the current object to the destination object ID's {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 *  
+	 * @param destinationOid ID of the object to which event channel a subscription is attempted.
+	 * @param eventId Event ID.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage subscribeToEventChannel(String destinationOid, String eventId, Map<String, String> parameters,
 			String body) {
 		
@@ -554,7 +654,15 @@ public class ConnectionDescriptor {
 	
 	
 	
-	// TODO documentation
+	/**
+	 * Un-subscribes the current object from the destination object ID's {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 *  
+	 * @param destinationOid ID of the object from which event channel a un-subscription is attempted.
+	 * @param eventId Event ID.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage unsubscribeFromEventChannel(String destinationOid, String eventId, 
 			Map<String, String> parameters, String body) {
 		
@@ -621,8 +729,14 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Distributes an {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent event} to subscribers. 
+	 * 
+	 * @param eventId Event ID.
+	 * @param body Body of the event.
+	 * @param parameters Any parameters to be transported with the event body.
+	 * @return Status message.
+	 */
 	public StatusMessage sendEventToSubscribers(String eventId, String body, Map<String, String> parameters) {
 		
 		String statusCodeReason;
@@ -702,7 +816,15 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Retrieves a property of a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param propertyId ID of the property.
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
 	public StatusMessage getPropertyOfRemoteObject(String destinationOid, String propertyId, 
 			Map<String, String> parameters, String body) {
 				
@@ -720,10 +842,15 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	
-	
-	// TODO documentation
+	/**
+	 * Sets a new value of a property on a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param propertyId ID of the property.
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (a new value will probably be stored here).
+	 * @return Status message. 
+	 */
 	public StatusMessage setPropertyOfRemoteObject(String destinationOid, String propertyId, String body,
 			Map<String, String> parameters) {
 				
@@ -740,15 +867,16 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	
 	/**
-	 * This is a callback method called when a message arrives. There are two main scenarios that need to be handled:
-	 * a. A message arrives ('unexpected') from another node with request for data or action - this need to be routed 
+	 * This is a callback method called when a message arrives. There are three main scenarios that need to be handled:
+	 * a. A {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest NetworkMessageRequest} arrives ('unexpected') 
+	 * from another node with request for data or action - this need to be routed 
 	 * to a specific end point on agent side and then the result needs to be sent back to originating node. 
 	 * b. After sending a message with request to another node, the originating node expects an answer, which arrives
-	 * as a message. This is stored in a queue and is propagated back to originating services, that are expecting the
-	 * results.
+	 * as a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse NetworkMessageResponse}. This is stored in 
+	 * a queue and is propagated back to originating services, that are expecting the results.
+	 * c. A {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent NetworkMessageEvent} arrives and it is necessary
+	 * to process it and forward to respective object via an {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}.
 	 * 
 	 * NOTE: This method is to be called by the {@link CommunicationEngine engine } subclass instance.
 	 * 
@@ -764,6 +892,7 @@ public class ConnectionDescriptor {
 		
 		if (networkMessage != null){
 			
+			// TODO deal with this security issue
 			/* next time dont forget to put everywhere the source oids into the response messages omfg
 			// just a check whether or not somebody was tampering the message (and forgot to do it properly)
 			if (!sourceOid.equals(networkMessage.getSourceOid())) {
@@ -799,7 +928,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
+	/**
+	 * Performs a SPARQL search on all objects in the contact list.
+	 * 
+	 * @param query SPARQL query.
+	 * @param parameters Any parameters (if needed).
+	 * @return JSON with results. 
+	 */
 	public String performSparqlQuery(String query, Map<String, String> parameters) {
 		
 		if (query == null) {
@@ -814,12 +949,9 @@ public class ConnectionDescriptor {
 	/* === PRIVATE METHODS === */
 	
 	
-	
-	
 	/**
 	 * Processing method for {@link NetworkMessageRequest request} type of {@link NetworkMessage NetworkMessage}.
 	 * 
-	 * @param sourceOid ID of the object that sent the message.
 	 * @param networkMessage Message parsed from the incoming message. 
 	 */
 	private void processMessageRequest(NetworkMessage networkMessage){
@@ -905,11 +1037,11 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
 	/**
-	 * Processing method for {@link NetworkMessageResponse response} type of {@link NetworkMessage NetworkMessage}.
+	 * Processing method for {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse response} type of 
+	 * {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage}. It adds it to the message queue
+	 * where it will wait to be reaped (or expired).  
 	 * 
-	 * @param from ID of the object that sent the message.
 	 * @param networkMessage Message parsed from the incoming message.
 	 */
 	private void processMessageResponse(NetworkMessage networkMessage){
@@ -917,8 +1049,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Processing method for {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent event} type of
+	 * {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage}. It forwards it to the respective
+	 * object via the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}.
+	 * 
+	 * @param networkMessage Message parsed from the incoming message.
+	 */
 	private void processMessageEvent(NetworkMessage networkMessage) {
 		
 		// cast it to event message first (it is safe and also necessary)
@@ -956,6 +1093,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Responds to a request for getting the object property. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToGetObjectProperty(NetworkMessageRequest requestMessage) {
 		
 		// call the agent connector
@@ -974,6 +1118,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Responds to a request for setting the object property. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToSetObjectProperty(NetworkMessageRequest requestMessage) {
 		// call the agent connector
 		NetworkMessageResponse response = agentConnector.setObjectProperty(
@@ -991,6 +1142,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Responds to a request to check the status of an {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToEventChannelStatusQuery(NetworkMessageRequest requestMessage) {
 		
 		String eventId = null;
@@ -1036,7 +1193,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
+	/**
+	 * Responds to a request for subscription to an {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToEventSubscriptionRequest(NetworkMessageRequest requestMessage) {
 		
 		String eventId = null;
@@ -1088,8 +1250,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Responds to a request for cancelling a subscription to an {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToCancelSubscriptionRequest(NetworkMessageRequest requestMessage) {
 		String eventId = null;
 		EventChannel eventChannel = null;
@@ -1140,8 +1306,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Responds to a request for starting an {@link eu.bavenir.ogwapi.commons.Action Action}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToStartActionRequest(NetworkMessageRequest requestMessage) {
 		
 		String actionId = null;
@@ -1217,7 +1387,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
+	/**
+	 * Responds to a request for getting a status of a {@link eu.bavenir.ogwapi.commons.Task Task}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToGetTaskStatus(NetworkMessageRequest requestMessage) {
 		String actionId = null;
 		String taskId = null;
@@ -1292,7 +1467,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
+	/**
+	 * Responds to a request for cancelling a running {@link eu.bavenir.ogwapi.commons.Task Task}.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
 	private NetworkMessageResponse respondToCancelRunningTask(NetworkMessageRequest requestMessage) {
 		String actionId = null;
 		String taskId = null;
@@ -1361,18 +1541,17 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	
 	/**
-	 * Searches for {@link EventChannel EventChannel} with provided eventID. 
+	 * Searches for {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel} with provided eventID. 
 	 * 
-	 * @param eventID ID of the event.
-	 * @return {@link EventChannel EventChannel} with the ID, or null if no such channel exists. 
+	 * @param eventId ID of the event.
+	 * @return {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel} with the ID, or null if no such channel exists. 
 	 */
-	private EventChannel searchForEventChannel(String eventID) {
+	private EventChannel searchForEventChannel(String eventId) {
 		// search for given event channel
 		
 		for (EventChannel eventChannel : providedEventChannels) {
-			if (eventChannel.getEventID().equals(eventID)) {
+			if (eventChannel.getEventId().equals(eventId)) {
 				// found it
 				return eventChannel;
 			}
@@ -1382,6 +1561,12 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Searches for {@link eu.bavenir.ogwapi.commons.Action Action} with provided action ID.
+	 * 
+	 * @param actionId ID of the action.
+	 * @return {@link eu.bavenir.ogwapi.commons.Action Action} with the ID, or null if no such channel exists.
+	 */
 	private Action searchForAction(String actionId) {
 		
 		if (actionId == null) {
@@ -1401,11 +1586,16 @@ public class ConnectionDescriptor {
 	}
 	
 	
-	// TODO documentation
-	private Subscription searchForSubscription(String remoteObjectID) {
+	/**
+	 * Searches for {@link eu.bavenir.ogwapi.commons.Subscription Subscription} based on a remote object ID. 
+	 *  
+	 * @param remoteObjectId ID of the object that this object has a {@link eu.bavenir.ogwapi.commons.Subscription Subscription} created to.
+	 * @return
+	 */
+	private Subscription searchForSubscription(String remoteObjectId) {
 		
 		for (Subscription subscription : subscribedEventChannels) {
-			if (subscription.getObjectID().equals(remoteObjectID)) {
+			if (subscription.getObjectId().equals(remoteObjectId)) {
 				// found it
 				return subscription;
 			}
@@ -1415,11 +1605,11 @@ public class ConnectionDescriptor {
 	}
 
 	
-	
 	/**
-	 * Retrieves a {@link NetworkMessage NetworkMessage} from the queue of incoming messages based on the correlation 
-	 * request ID. It blocks the invoking thread if there is no message in the queue until it arrives or until timeout
-	 * is reached. The check for timeout is scheduled every {@link #POLL_INTERRUPT_INTERVAL_MILLIS POLL_INTERRUPT_INTERVAL_MILLIS}.
+	 * Retrieves a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage} from the queue of incoming 
+	 * messages based on the correlation request ID. It blocks the invoking thread if there is no message in the queue 
+	 * until it arrives or until timeout is reached. The check for timeout is scheduled every 
+	 * {@link #POLL_INTERRUPT_INTERVAL_MILLIS POLL_INTERRUPT_INTERVAL_MILLIS}.
 	 * 
 	 * @param requestId Correlation request ID. 
 	 * @return {@link NetworkMessage NetworkMessage} from the queue.
@@ -1479,6 +1669,22 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * This is common method for sending all request messages to remote objects. Respective methods, like 
+	 * {@link #getPropertyOfRemoteObject(String, String, Map, String) getPropertyOfRemoteObject} will 
+	 * just fill the appropriate operation ID. The operation ID is chosen from 
+	 * {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest NetworkMessageRequest} constants. 
+	 * 
+	 * @param operationId The ID of the operation, chosen from constants in {eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest NetworkMessageRequest}.
+	 * @param destinationOid Object ID of the destination.
+	 * @param attributes Attributes that are specific to given operation, usually common definition of JSON attribute with 
+	 * appropriate value. E.g. when a request to get a remote property is to be sent, an attribute pair needs to be 
+	 * created, where there will be "pid" as key and property ID as the value. Valid attributes are also to be found among 
+	 * constants in {eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest NetworkMessageRequest}.
+	 * @param parameters Any parameters to be sent with the request. 
+	 * @param body Any body to be sent with the request. 
+	 * @return Status message.
+	 */
 	private StatusMessage sendRequestForRemoteOperation(byte operationId, String destinationOid, 
 			Map<String, String> attributes, Map<String, String> parameters, String body) {
 		
@@ -1568,6 +1774,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Simple method for creating JSON string with one string value. 
+	 *  
+	 * @param key Name of the attribute.
+	 * @param value String value.
+	 * @return JSON string.
+	 */
 	private String createSimpleJsonString(String key, String value) {
 		// if key is null, there is no need to bother... 
 		if (key == null) {
@@ -1586,6 +1799,13 @@ public class ConnectionDescriptor {
 	}
 	
 	
+	/**
+	 * Simple method for creating JSON with one boolean value. 
+	 * 
+	 * @param key Name of the attribute.
+	 * @param value Boolean value. 
+	 * @return JSON String.
+	 */
 	private String createSimpleJsonString(String key, boolean value) {
 		// if key is null, there is no need to bother... 
 		if (key == null) {
@@ -1598,6 +1818,5 @@ public class ConnectionDescriptor {
 		
 		return builder.build().toString();
 	}
-	
 	
 }

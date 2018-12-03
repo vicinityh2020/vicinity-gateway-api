@@ -32,13 +32,26 @@ public class MessageResolver {
 	
 	
 	/* === FIELDS === */
+	
+	/**
+	 * Configuration of the OGWAPI.
+	 */
 	private XMLConfiguration config;
 	
+	/**
+	 * Logger of the OGWAPI.
+	 */
 	private Logger logger;
 	
 	
 	/* === PUBLIC METHODS === */
 	
+	/**
+	 * Constructor.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
+	 */
 	public MessageResolver(XMLConfiguration config, Logger logger){
 		this.config = config;
 		this.logger = logger;
@@ -90,6 +103,12 @@ public class MessageResolver {
 	}
 	
 	
+	/**
+	 * Creates a JSON object from a string. 
+	 * 
+	 * @param jsonString A string that is to be decoded as a JSON.
+	 * @return JsonObject if the decoding was successful, or null if something went wrong (string is not a valid JSON etc.).  
+	 */
 	public JsonObject readJsonObject(String jsonString) {
 		
 		if (jsonString == null) {

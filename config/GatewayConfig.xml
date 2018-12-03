@@ -279,7 +279,7 @@
 			
 			Defaults to localhost.
 			-->
-			<agentIP>localhost</agentIP>
+			<agentIp>localhost</agentIp>
 			
 			<!-- 
 			Port on which the REST Agent listens.
@@ -292,9 +292,14 @@
 	
 	</connector>
 	
+
 	<search>
 		<sparql>
-			<gwapiservicesurl>http://gateway-services.vicinity.linkeddata.es/discovery</gwapiservicesurl>
+			<!--
+			URL of the Gateway API Service facilitating the SPARQL search. Usually
+			there is no need to change this, unless informed that it is necessary. 
+			-->
+			<gwApiServicesUrl>http://gateway-services.vicinity.linkeddata.es/discovery</gwApiServicesUrl>
 		</sparql>
 	</search>
 	

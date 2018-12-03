@@ -19,29 +19,25 @@ import javax.json.JsonObjectBuilder;
 
 /**
  * 
- * 1!! provides unified interface ...
+ * This is a helper class for a local status message - a message that is returned to a requester, but it does not 
+ * originate in the P2P Network (unlike NetworkMessage). It provides unified interface for the local end point to obtain
+ * a status of requested operation. The issue with obtaining a unified status is, that for the end user it should look
+ * the same way no matter if it originated in an OGWAPI sitting on his local infrastructure or somewhere far away, from 
+ * where it gets transported by {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage}, which resembles 
+ * a StatusMessage a lot. There was a lot of thought process invested into making it better and not using two very similar
+ * classes that mostly copy values between them at the end, but so far this is the most flexible approach :). 
  * 
- * This is a helper class for a local status message - a message that is returned to an Adapter/Agent, but it does not 
- * originate in the P2P Network (unlike NetworkMessage). It is created e.g. after a successful login of an Adapter, 
- * when there is an success message that needs to be returned in a unified manner (a JSON), or an error message that
- * needs to be presented to requesting end point about something that happened far away, but only thing that returned 
- * from there is a response code and a reason that needs to be put into a nice JSON representation.
- * 
- * There are always two attributes that are mandatory:
- * 	- boolean 'error', that gives indication on whether or not the message is an error message,
- * 	- array of JSONs called 'message'.
- * 
- * Usually it looks like this:
+ * Usually after building it looks like this:
  * 
  * {
- *	"error": false,
- *	"message": [
- *		{message JSON 1}, {message JSON 2}, etc.
- *	]
+ *     "error": false,
+ *     "statusCode": 200,
+ *     "statusCodeReason": "OK. Operation successful.",
+ *     "contentType": "application/json",
+ *     "message": [
+ *         {message JSON 1}, {message JSON 2}, etc.
+ *     ]
  * }
- * 
- * Some often used attributes that are parts of inner message JSON X are included as constants, like MESSAGE_CODE
- * and MESSAGE_REASON (for transferring HTTP errors).
  * 
  * The class is used by first constructing an instance of it, setting the correct values and building the JSON.  
  * 
@@ -59,21 +55,30 @@ public class StatusMessage {
 	 */
 	public static final String ATTR_ERROR = "error";
 	
+	/**
+	 * Name of the response status code attribute.
+	 */
 	public static final String ATTR_STATUSCODE = "statusCode";
 	
+	/**
+	 * Attribute name for the status code reason.  
+	 */
 	public static final String ATTR_STATUSCODEREASON = "statusCodeReason";
 	
+	/**
+	 * Attribute name for the content type.
+	 */
 	public static final String ATTR_CONTENTTYPE = "contentType";
-	
 	
 	/**
 	 * Name of the message attribute - for JSON building.
 	 */
 	public static final String ATTR_MESSAGE = "message";
 	
+	/**
+	 * Attribute name for the value.
+	 */
 	public static final String ATTR_VALUE = "value";
-	
-	
 	
 	/**
 	 * Text of the success message.
@@ -85,21 +90,32 @@ public class StatusMessage {
 	 */
 	public static final String TEXT_FAILURE = "failure";
 	
-	
+	/**
+	 * Most used content type.
+	 */
 	public static final String CONTENTTYPE_APPLICATIONJSON = "application/json";
 	
 	
 	/* === FIELDS === */
 	
 	/**
-	 * Is the message we are transporting back an error?
+	 * Is the message we are creating an error?
 	 */
 	private boolean error;
 	
+	/**
+	 * Status code from the remote or local object (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 */
 	private int statusCode;
 	
+	/**
+	 * Response code reason, in other words the status description.
+	 */
 	private String statusCodeReason;
 	
+	/**
+	 * Content type of the body.
+	 */
 	private String contentType;
 	
 	
@@ -130,6 +146,7 @@ public class StatusMessage {
 	 *	"error": booleanValue,
 	 *	"statusCode": integerValue,
 	 *	"statusCodeReason": "string with status code reason"
+	 *  "contentType": "some content type"
 	 *	"message": [
 	 *		{
 	 *        ... returned JSON ...
@@ -140,11 +157,13 @@ public class StatusMessage {
 	 *  ]
 	 * }
 	 * 
-	 * It is then of course possible to add more JSONs into the 'message' array by using {@link #addMessage(String, String)}.
+	 * It is then of course possible to add more JSONs into the 'message' array by using e.g. 
+	 * {@link #addSimpleMessage(String, String) addSimpleMessage}.
 	 * 
 	 * @param error Boolean value telling whether this status message is an error or not.
-	 * @param attribute Attribute name in the message.
-	 * @param value A value of the attribute.
+	 * @param statusCode Status code from the remote or local object (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 * @param statusCodeReason Response code reason, in other words the status description.
+	 * @param contentType Content type of the body.
 	 */
 	public StatusMessage(boolean error, int statusCode, String statusCodeReason, String contentType) {
 		
@@ -160,7 +179,7 @@ public class StatusMessage {
 	
 	
 	/**
-	 * Getter of the error flag.
+	 * Getter for the error flag.
 	 * 
 	 * @return Whether the current status message is error or not.
 	 */
@@ -169,29 +188,48 @@ public class StatusMessage {
 	}
 
 
+	/**
+	 * Getter for the status code.
+	 * 
+	 * @return Status code. See {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
+	 */
 	public int getStatusCode() {
 		return statusCode;
 	}
 
 
+	/**
+	 * Getter for the status code reason.
+	 * 
+	 * @return Status code reason. See {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
+	 */
 	public String getStatusCodeReason() {
 		return statusCodeReason;
 	}
 	
 	
+	/**
+	 * Returns the current array of messages.
+	 * 
+	 * @return Messages from the array.
+	 */
 	public JsonArray getCurrentMessageArray() {
 		return arrayBuilder.build();
 	}
 
 
+	/**
+	 * Returns content type.
+	 * 
+	 * @return Content type string.
+	 */
 	public String getContentType() {
 		return contentType;
 	}
 
 
-
 	/**
-	 * Adds one JSON into the message array. The JSON carries one attribute-value pair. 
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
 	 * 
 	 * @param attribute Name of the attribute.
 	 * @param value Textual representation of the value.
@@ -214,6 +252,12 @@ public class StatusMessage {
 	}
 	
 	
+	/**
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
+	 * 
+	 * @param attribute Name of the attribute.
+	 * @param value Numerical (integer) representation of the value.
+	 */
 	public void addSimpleMessage(String attribute, int value) {
 		// if attribute is null, there is no need to bother... 
 		if (attribute != null) {
@@ -227,6 +271,12 @@ public class StatusMessage {
 	}
 	
 	
+	/**
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
+	 * 
+	 * @param attribute Name of the attribute.
+	 * @param value Numerical (floating point) representation of the value.
+	 */
 	public void addSimpleMessage(String attribute, float value) {
 		// if attribute is null, there is no need to bother... 
 		if (attribute != null) {
@@ -238,7 +288,12 @@ public class StatusMessage {
 		}
 	}
 	
-	// use when wanting to add more complex message
+	
+	/**
+	 * Adds more complex JSON into the message array. The JSON can be arbitrary.
+	 * 
+	 * @param messageJsonBuilder Builder of the JSON to be added.
+	 */
 	public void addMessageJson(JsonObjectBuilder messageJsonBuilder) {
 		
 		if (messageJsonBuilder != null) {
@@ -247,6 +302,11 @@ public class StatusMessage {
 	}
 	
 	
+	/**
+	 * Adds more complex JSON into the message array. The JSON can be arbitrary.
+	 * 
+	 * @param messageJsonBuilder JSON object to be added.
+	 */
 	public void addMessageJson(JsonObject json) {
 		
 		if (json != null) {
@@ -254,8 +314,6 @@ public class StatusMessage {
 		}
 	}
 	
-	
-
 
 	/**
 	 * Builds the status message JSON. This method can be called repeatedly but the returned value will always reflect

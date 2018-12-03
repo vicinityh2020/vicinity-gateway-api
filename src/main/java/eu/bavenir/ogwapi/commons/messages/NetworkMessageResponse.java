@@ -19,19 +19,30 @@ import org.apache.commons.configuration2.XMLConfiguration;
 
 
 /**
- * Extended {@link NetworkMessage NetworkMessage} that represents a response. Same as {@link NetworkMessageRequest request}
- * but with HTTP response.
+ * Extended {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage} that represents a response. Same as {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest request}
+ * but with response from the remote site. There are many similarities between implementation of these two classes.
+ * This class contains extra fields for error indication, status code, status code reason and response body. The 
+ * similarity to HTTP response is in place, since the OGWAPI's first design was to transport HTTP requests, though it
+ * can (and does) work with any other protocol. 
  * 
- * Use it like this:
+ * OGWAPI uses it like this:
  * 
- * In your Gateway API service:
- * 	1. Construct an instance of this class - use the constructor without parameter
- *  2. Call {@link #setResponseCode(int) setResponseCode} and pass the number returned from an Agent.
- *  3. Call {@link #setResponseBody(String) setResponseBody} and pass the response body from an Agent.
- *  4. Build the message by {@link #buildMessageJson buildMessageJson}. By calling its toString you obtain a string to 
- *  	be sent through {@link CommunicationManager CommunicationNode}. 
+ * 	1. Constructs an instance of this class and sets the {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage#requestId requestId}
+ *     to match the request ID of the {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest request} that 
+ *     arrived previously and was the reason for starting the process that eventually lead into creation of this message.
+ *  2. Calls {@link #setResponseCode(int) setResponseCode} and {@link #setResponseCodeReason(String) setResponseCodeReason} 
+ *     to values representing the outcome of the operation (either from Agent or internal). Also, it never forgets to 
+ *     set {@link #setError(boolean) setError} - error propagation down the line depends on it.
+ *  3. Calls {@link #setResponseBody(String) setResponseBody} and passes the response body from an Agent (or internal process).
+ *  4. If there is a content type set in the response from an Agent, the OGWAPI sets the same by {@link #setContentType(String) setContentType}.
+ *     If not (such as when the response is a product of internal operation), it uses the same method to set it to application/json.
+ *  4. Builds the message by {@link #buildMessageJson buildMessageJson} and sends the string through the network.
  * 
- * 
+ *  If there are any modification to this class, they will probably be about extending the range of fields that will be 
+ *  transported over the network. Don't forget to put the new field into the {@link #parseJson(JsonObject) parser} and 
+ *  {@link #buildMessageJson() builder}. Note that such modification will make the new OGWAPI incompatible with the 
+ *  previous versions.
+ *  
  * @author sulfo
  *
  */
@@ -55,10 +66,13 @@ public class NetworkMessageResponse extends NetworkMessage {
 	private static final String ATTR_RESPONSECODE = "responseCode";
 	
 	/**
-	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
+	 * Attribute name for the status code reason.  
 	 */
 	private static final String ATTR_RESPONSECODEREASON = "responseCodeReason";
 	
+	/**
+	 * Attribute name for the content type.
+	 */
 	private static final String ATTR_CONTENTTYPE = "contentType";
 	
 	/**
@@ -66,6 +80,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 	 */
 	private static final String ATTR_RESPONSEBODY = "responseBody";
 	
+	/**
+	 * Name of the response body supplement attribute. Sometimes one body is not enough... in that case, use the second
+	 * one.
+	 */
 	private static final String ATTR_RESPONSEBODYSUPPLEMENT = "responseBodySupplement";
 
 	
@@ -77,35 +95,39 @@ public class NetworkMessageResponse extends NetworkMessage {
 	private boolean error;
 	
 	/**
-	 * HTTP response code from the remote object.
+	 * Response code from the remote object (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
 	 */
 	private int responseCode;
 	
 	/**
-	 * HTTP response code reason, in other words the status description.
+	 * Response code reason, in other words the status description.
 	 */
 	private String responseCodeReason;
 	
+	/**
+	 * Content type of the body.
+	 */
 	private String contentType;
 	
 	/**
-	 * If this NetworkMessage was constructed from incoming XMPP message, here is the HTTP response body from the remote
+	 * If this NetworkMessage was constructed from incoming message, here is a response body from the remote
 	 * object.
 	 */
 	private String responseBody;
 	
+	/**
+	 * Sometimes one body may not be enough. In such cases, use this supplementary storage as well.
+	 */
 	private String responseBodySupplement;
 	
 	
 	
 	/* === PUBLIC METHODS === */
 	/**
-	 * Use this when parsing a message that was received from the XMPP network. The parsing will fill all the attributes. 
+	 * Use this when constructing a message that is to be sent across the network.  
 	 *  
-	 *  
-	 *  !!!! BS !!!
-	 *  
-	 * @param xmppMessage A 'raw' XMPP message. 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public NetworkMessageResponse(XMLConfiguration config, Logger logger){
 		super(config, logger);
@@ -118,9 +140,11 @@ public class NetworkMessageResponse extends NetworkMessage {
 	
 	/**
 	 * This constructor attempts to build this object by parsing incoming JSON. If the parsing operation is not 
-	 * successful, the result is an object with validity {@link NetworkMessage#valid flag} set to false.
+	 * successful, the result is an object with validity {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage#valid flag} set to false.
 	 * 
 	 * @param json JSON that arrived from the P2P network. 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public NetworkMessageResponse(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
@@ -135,6 +159,17 @@ public class NetworkMessageResponse extends NetworkMessage {
 	}
 	
 	
+	/**
+	 * Sometimes it can be beneficial to create the response message all at once, and not fill it piece by piece.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
+	 * @param error Indicates an error during operation.
+	 * @param responseCode Numerical response code (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 * @param responseCodeReason Human readable code reason (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 * @param contentType Content type of the body.
+	 * @param responseBody Body of the response.
+	 */
 	public NetworkMessageResponse(XMLConfiguration config, Logger logger, boolean error, int responseCode, 
 					String responseCodeReason, String contentType, String responseBody) {
 		super(config, logger);
@@ -149,20 +184,31 @@ public class NetworkMessageResponse extends NetworkMessage {
 	}
 	
 	
+	/**
+	 * Was there an error during the operation?
+	 * 
+	 * @return True or false.
+	 */
 	public boolean isError() {
 		return error;
 	}
 	
+	
+	/**
+	 * Set this to true if there was an error during the operation.
+	 * 
+	 * @param error True or false.
+	 */
 	public void setError(boolean error) {
 		this.error = error;
 	}
 	
 
 	/**
-	 * Returns the HTTP response status code from the remote object.
+	 * Returns the response status code from the remote object. For more info see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
-	 * @return HTTP response status code from the remote object.
+	 * @return Response status code from the operation.
 	 */
 	public int getResponseCode() {
 		return responseCode;
@@ -170,10 +216,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 
 
 	/**
-	 * Sets the HTTP response status code from the remote object.
+	 * Sets the response status code from the operation. For more info see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
-	 * @param responseCode Response status code of the remote object.
+	 * @param responseCode Response status code of the operation.
 	 */
 	public void setResponseCode(int responseCode) {
 		this.responseCode = responseCode;
@@ -181,10 +227,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 	
 	
 	/**
-	 * Returns the HTTP response status code reason from the remote object.
+	 * Returns the response status code reason from the operation. For more info see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
-	 * @return HTTP response status code reason phrase from the remote object.
+	 * @return HTTP response status code reason phrase from the operation.
 	 */
 	public String getResponseCodeReason(){
 		return responseCodeReason;
@@ -192,30 +238,40 @@ public class NetworkMessageResponse extends NetworkMessage {
 	
 	
 	/**
-	 * Sets the HTTP response status code reason from the remote object.
+	 * Sets the response status code reason from the operation. For more info see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
 	 * 
 	 * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status codes</a>
-	 * @param responseCode Response status code reason phrase of the remote object.
+	 * @param responseCode Response status code reason phrase of the operation.
 	 */
 	public void setResponseCodeReason(String responseCodeReason){
 		this.responseCodeReason = responseCodeReason;
 	}
 
 
+	/**
+	 * Retrieves the content type of the response body.
+	 * 
+	 * @return Content type string (e.g. application/json)
+	 */
 	public String getContentType() {
 		return contentType;
 	}
 
 
+	/**
+	 * Sets the content type of the response body.
+	 * 
+	 * @param  Content type string (e.g. application/json)
+	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
 
 
 	/**
-	 * Returns the body of a response NetworkMessage. This is the actual data that are returned by the remote object.
+	 * Returns the body of a response. This is the actual data that are returned by the operation.
 	 *  
-	 * @return Data from the remote object.
+	 * @return Data from the operation.
 	 */
 	public String getResponseBody() {
 		return responseBody;
@@ -223,29 +279,40 @@ public class NetworkMessageResponse extends NetworkMessage {
 
 
 	/**
-	 * Sets the body of a response NetworkMessage. Use this when creating a response.
+	 * Sets the body of a response. Use this when creating an instance of this class.
 	 *  
-	 * @param responseBody The actual data that are returned by the remote object.
+	 * @param responseBody The actual data that are returned by the operation.
 	 */
 	public void setResponseBody(String responseBody) {
 		this.responseBody = responseBody;
 	}
 	
 	
+	/**
+	 * Retrieves supplemental response body.
+	 *   
+	 * @return Supplemental response body.
+	 */
 	public String getResponseBodySupplement() {
 		return responseBodySupplement;
 	}
 	
 	
+	/**
+	 * Sets supplemental response body.
+	 * 
+	 * @param responseBodySupplement Supplemental response body.
+	 */
 	public void setResponseBodySupplement(String responseBodySupplement) {
 		this.responseBodySupplement = responseBodySupplement;
 	}
 	
+	
 	/**
-	 * Returns a JSON String that is to be sent over the XMPP network. The String is build from all the attributes that
+	 * Returns a JSON String that is to be sent over the network. The String is build from all the attributes that
 	 * were set with getters and setters. Use this when you are finished with setting the attributes, parameters etc.
 	 * 
-	 * @return JSON String that can be sent over the XMPP network.
+	 * @return JSON String that can be sent over the network.
 	 */
 	public String buildMessageString(){
 		buildMessageJson();
@@ -256,7 +323,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 	/* === PRIVATE METHODS === */
 	
 	/**
-	 * Takes the JSON object and fills necessary fields with values.
+	 * Takes the JSON object that came over the network and fills necessary fields with values.
 	 * 
 	 * @param json JSON to parse.
 	 * @return True if parsing was successful, false otherwise.
@@ -265,10 +332,9 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		// first check out whether or not the message has everything it is supposed to have and stop if not
 		if (
+				//TODO make it also check the destination and source oids if possible
 				!json.containsKey(ATTR_MESSAGETYPE) ||
 				!json.containsKey(ATTR_REQUESTID) ||
-				//!json.containsKey(ATTR_SOURCEOID) ||
-				//!json.containsKey(ATTR_DESTINATIONOID) ||
 				!json.containsKey(ATTR_ERROR) ||
 				!json.containsKey(ATTR_RESPONSECODE) ||
 				!json.containsKey(ATTR_RESPONSECODEREASON) ||
@@ -366,6 +432,9 @@ public class NetworkMessageResponse extends NetworkMessage {
 	}
 	
 	
+	/**
+	 * Initialises fields.
+	 */
 	private void initialise() {
 		error = false;
 		responseCode = 0;

@@ -44,7 +44,7 @@ public class SparqlQuery {
 	/**
 	 * Name of the configuration parameter for GW API services URL.
 	 */
-	private static final String CONFIG_PARAM_GWAPISERVICESURL = "search.sparql.gwapiservicesurl";
+	private static final String CONFIG_PARAM_GWAPISERVICESURL = "search.sparql.gwApiServicesUrl";
 	
 	/**
 	 * Default value of {@link #CONFIG_PARAM_GWAPISERVICESURL CONFIG_PARAM_GWAPISERVICESURL} configuration parameter. 

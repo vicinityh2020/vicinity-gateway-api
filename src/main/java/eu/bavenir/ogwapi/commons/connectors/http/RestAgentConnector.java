@@ -18,6 +18,7 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
@@ -32,10 +33,9 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
 
 /**
- * Class that processes a request received in {@link NetworkMessageRequest NetworkMessageRequest}. The reasoning behind 
- * this is, that in order to invoke the required action on the Agent, a REST service on its side has to be called. By 
- * receiving the pieces of the URL and its parameters in the incoming message, the URL can be assembled without a need 
- * to hard code it. 
+ * Implementation of an {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector} based on HTTP
+ * REST services. This connector uses Restlet framework to deliver requests to an Agent component specified in the
+ * configuration file. 
  * 
  * @author sulfo
  *
@@ -43,6 +43,14 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 public class RestAgentConnector extends AgentConnector {
 	
 	/* === CONSTANTS === */
+	
+	/**
+	 * Reserved word for source OID parameter. Since it is impossible to incorporate the source object ID into the request
+	 * other way than in parameters (without changing the request body), one parameter with this name is reserved and
+	 * the source object ID is sent as its value. If there was a parameter with the same name before, it will get
+	 * overwritten. 
+	 */
+	private static final String PARAM_SOURCEOID = "sourceOid";
 	
 	/**
 	 * Name of the configuration parameter for whether the REST Agent Connector uses simulated calls (such configuration
@@ -70,7 +78,7 @@ public class RestAgentConnector extends AgentConnector {
 	/**
 	 * Name of the configuration parameter for Agent IP.
 	 */
-	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIP";
+	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIp";
 	
 	/**
 	 * Name of the configuration parameter for Agent port.
@@ -116,43 +124,80 @@ public class RestAgentConnector extends AgentConnector {
 	 */
 	private static final String AGENT_API_STRING = "/agent";
 	
-	
+	/**
+	 * Name of the 'objects' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_OBJECTS = "/objects";
 	
+	/**
+	 * Name of the 'properties' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_PROPERTIES = "/properties";
 	
+	/**
+	 * Name of the 'events' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_EVENTS = "/events";
 	
+	/**
+	 * Name of the 'actions' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_ACTIONS = "/actions";
 	
+	/**
+	 * Name of the 'dummy' attribute in the returned JSON.
+	 */
 	private static final String ATTR_DUMMY = "dummy";
 	
+	/**
+	 * Operation code for GET.
+	 */
 	private static final byte OPERATION_GET = 0x00;
 	
+	/**
+	 * Operation code for POST.
+	 */
 	private static final byte OPERATION_POST = 0x01;
 	
+	/**
+	 * Operation code for PUT.
+	 */
 	private static final byte OPERATION_PUT = 0x02;
 	
+	/**
+	 * Operation code for DELETE.
+	 */
 	private static final byte OPERATION_DELETE = 0x03;
 	
 	
 	
 	/* === FIELDS === */
 	
-	// for the sake of making it easier to send the info about HTTPS into the logs
+	/**
+	 * Configuration flag for HTTPS.
+	 */
 	private boolean useHttps;
 	
-	// REST agent will be using dummy calls
+	/**
+	 * Configuration flag for using dummy operations instead of the real ones.
+	 */
 	private boolean dummyCalls;
 	
-	// this is the agent service URL, without attributes (basically something like http://ip:port/apiname) 
+	/**
+	 * This is the agent service URL, without attributes (basically something like http://ip:port/apiname) .
+	 */
 	private String agentServiceUrl;
+	
+	
 	
 	/* === PUBLIC METHODS === */
 	
 	/**
 	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
 	 * a storm of null pointer exceptions is imminent.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public RestAgentConnector(XMLConfiguration config, Logger logger){
 		super(config, logger);
@@ -173,8 +218,6 @@ public class RestAgentConnector extends AgentConnector {
 			logger.config("REST Agent Connector: HTTPS protocol disabled for Agent communication.");
 			useHttps = false;
 		}
-		
-		
 		
 		agentServiceUrl = assembleAgentServiceUrl();
 		
@@ -256,9 +299,6 @@ public class RestAgentConnector extends AgentConnector {
 	 * This method takes incoming {@link NetworkMessageRequest request} and parses it into URL of an Agent service. 
 	 * See the main Javadoc section for the {@link NetworkMessageRequest request} class for more details.
 	 * 
-	 * @param networkMessageRequest Message with action request.
-	 * @return URL on the Agent side that is to be called.
-	 * 
 	 */
 	private String assembleAgentServiceUrl(){
 		
@@ -283,11 +323,15 @@ public class RestAgentConnector extends AgentConnector {
 	
 	
 	/**
-	 * Processes the {@link NetworkMessageRequest request} that arrived from the XMPP network. After the URL of the 
-	 * required Agent service is assembled, the URL is called with the necessary HTTP method and the result is returned. 
+	 * Processes the {@link NetworkMessageRequest request} that arrived from the network. After the URL of the 
+	 * required Agent service is assembled, the URL is called with the necessary HTTP method and the result is returned.
 	 * 
-	 * @param request {@link NetworkMessageRequest Message} received over XMPP network. 
-	 * @return {@link NetworkMessageResponse Response} from the Agent. 
+	 * @param operationCode Code of the HTTP operation, see the constants.
+	 * @param sourceOid The object ID of the source. 
+	 * @param fullUrl Full URL of the Agent's endpoint to be reached. 
+	 * @param body Body of the request.
+	 * @param parameters Parameters passed in the request.
+	 * @return Response message with the results.
 	 */
 	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
 			Map<String, String> parameters){
@@ -297,7 +341,7 @@ public class RestAgentConnector extends AgentConnector {
 		}
 		
 		// don't forget to put source OID as one of the parameters
-		parameters.put(AgentConnector.PARAM_SOURCEOID, sourceOid);
+		parameters.put(PARAM_SOURCEOID, sourceOid);
 		
 		logger.finest("REST Agent Connector:\nOperation code: " + operationCode
 				+ "\nAssembled full URL: " + fullUrl
@@ -418,15 +462,23 @@ public class RestAgentConnector extends AgentConnector {
 	}
 	
 	
-	/*
-	 * Very handy testing method that can be used instead of performOperation. This one does not rely on 
-	 * functional agent and always returns positive results.
-	*/
+
+	/**
+	 * Very handy testing method that, if set in the configuration file, can be used instead of performOperation. This one does 
+	 * not rely on functional agent and always returns positive results.
+	 * 
+	 * @param operationCode Code of the HTTP operation, see the constants.
+	 * @param sourceOid The object ID of the source. 
+	 * @param fullUrl Full URL of the Agent's end point to be reached. 
+	 * @param body Body of the request.
+	 * @param parameters Parameters passed in the request.
+	 * @return Response message with the results.
+	 */
 	private NetworkMessageResponse performDummyOperation (byte operationCode, String sourceOid, String fullUrl, 
 			String body, Map<String, String> parameters) {
 		
 		// don't forget to put source OID as one of the parameters
-		parameters.put(AgentConnector.PARAM_SOURCEOID, sourceOid);
+		parameters.put(PARAM_SOURCEOID, sourceOid);
 		
 		String dummyResponseMessage = 
 				new String("Dummy REST Agent Connector received following data to perform request:"
@@ -445,8 +497,8 @@ public class RestAgentConnector extends AgentConnector {
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 		
 		response.setError(false);
-		response.setResponseCode(200);
-		response.setResponseCodeReason("OK");
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK);
 		response.setResponseBody(builder.build().toString());
 		
 		return response;

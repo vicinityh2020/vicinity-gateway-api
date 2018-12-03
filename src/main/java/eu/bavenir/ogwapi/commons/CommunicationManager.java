@@ -12,8 +12,6 @@ import java.util.logging.Logger;
 import org.apache.commons.configuration2.XMLConfiguration;
 
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 /*
@@ -24,6 +22,7 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  * - private methods
  */
 
+//TODO unit testing
 /*
  * Unit testing:
  * 1. connecting multiple users
@@ -41,14 +40,16 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 
 /**
  * 
- * This class serves as a connection manager for XMPP communication over P2P network. There is usually only need
- * for a single instance of this class, even if there are several devices connecting through the Gateway API. The 
+ * This class serves as a connection manager for OGWAPI's communication over P2P network. There is usually only need
+ * for a single instance of this class, even if there are several devices connecting through the OGWAPI. The 
  * instance of this class maintains a pool of connection descriptors, where each descriptor represents one separate 
- * client connection. The thread safe pool is based on a synchronized {@link java.util.HashMap HashMap} implementation.
+ * client connection. The thread safe pool is based on a synchronised {@link java.util.HashMap HashMap} implementation.
  * 
- *  It is important that the private methods for operations over the descriptor pool are used when extending or 
- *  modifying this class instead of the direct approach to the descriptorPool HashMap (direct methods can however still
- *  be used if they don't alter the HashMap's structure or values).
+ *  It is important that the private methods for operations over the descriptor pool {@link #descriptorPoolClear() descriptorPoolClear},
+ *  {@link #descriptorPoolGet(String) descriptorPoolGet}, {@link #descriptorPoolPut(String, ConnectionDescriptor) descriptorPoolPut},
+ *  {@link #descriptorPoolRemove(String) descriptorPoolRemove}) are used when extending or 
+ *  modifying this class instead of the direct approach to the descriptorPool's HashMap (which can cause significant 
+ *  race conditions).
  *  
  *  Usual modus operandi of this class is as follows:
  *  
@@ -58,22 +59,6 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  *  4. terminateAllConnections - cleanup when the application shuts down. 
  *  
  *  After step 4, it is safe to start a new with step 1. 
- *  
- *  
- *  MESSAGES
- *  
- *  All communication among connected XMPP clients is exchanged via XMPP messages. In general there are only 2 types
- *  of messages that are exchanged:
- *  
- *  a) requests  -	An Object is requesting an access to a service of another Object (or Agent). This request needs to 
- *  				be propagated across XMPP network and at the end of the communication pipe, the message has to be
- *  				translated into valid HTTP request to an Agent service. Translating the message is as well as 
- *  				their detailed structure is described in {@link RestAgentConnector AgentCommunicator}. See
- *  				{@link NetworkMessageRequest NetworkMessageRequest}.
- *  
- *  b) responses -	The value returned by Object / Agent services in JSON, that is propagated back to the caller. See
- *  				{@link NetworkMessageResponse NetworkMessageResponse}.
- *  
  *    
  * @author sulfo
  *
@@ -83,43 +68,140 @@ public class CommunicationManager {
 	
 	/* === CONSTANTS === */
 	
+	/**
+	 * This parameter defines how the sessions that went down should be recovered.
+	 * A session is a connection created when individual object logs in and the
+	 * OGWAPI tries as much as possible to keep it open. 
+	 * 
+	 * However there are cases when the OGWAPI will give up its attempts to 
+	 * maintain the session, e.g. when the communication with server is 
+	 * interrupted for prolonged time (depends on engine in use). In such cases
+	 * there usually is a need to recover the sessions after communication is 
+	 * restored. 'Aggressiveness' of OGWAPI required to recover lost sessions is 
+	 * scenario dependent. Following are accepted values for this parameter, 
+	 * along with explanations:
+	 * 
+	 * 
+	 * proactive
+	 * 
+	 * After you log your objects in and a session will go down for some reason,
+	 * OGWAPI will be trying hard to reconnect every 30 seconds until it succeeds 
+	 * or until you log your objects out. It does not care if your object is 
+	 * ready to listen to incoming requests or not. Incoming requests may 
+	 * therefore still time out if your adapter is not ready, although it will 
+	 * look online in the infrastructure. Good for objects that are expected 
+	 * to be always online and will likely be ready to respond, e.g. VAS or 
+	 * other services.
+	 * NOTE OF CAUTION: When you are testing (or better said debugging...) your
+	 * scenarios on two machines with identical credentials, the machine that 
+	 * runs OGWAPI with this parameter set to 'proactive' will keep stealing
+	 * your connection. If both of them are configured to do so, it will produce
+	 * plenty of exceptions. 
+	 * 
+	 * 
+	 * none
+	 * 
+	 * The OGWAPI will not make any extra effort to recover the sessions.
+	 * If you log your object in and the session for some reason fails, it will
+	 * remain so until you explicitly re-log your object. This was the original
+	 * behaviour in previous versions of OGWAPI.
+	 * 
+	 * 
+	 * passive
+	 * 
+	 * This will make OGWAPI terminate (!) sessions that are not refreshed
+	 * periodically. Refreshing a connection means calling the login method at
+	 * least every 30 seconds by default, although this number can be altered 
+	 * with sessionExpiration parameter. 
+	 * Call to login method is optimised, so there is no 
+	 * overhead and it will not attempt to actually log an object in if it already
+	 * is. Good for integrators that like to have things under control, implement
+	 * adapters on small end user devices or have a need to implement a kind of
+	 * presence into their application.
+	 */
 	private static final String CONFIG_PARAM_SESSIONRECOVERY = "general.sessionRecovery";
 	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_SESSIONRECOVERY CONFIG_PARAM_SESSIONRECOVERY} parameter. 
+	 */
 	private static final String CONFIG_DEF_SESSIONRECOVERY = "proactive";
 	
+	/**
+	 * When sessionRecovery is set to passive, use this to set the interval
+	 * after which a connection without refreshing will be terminated. 
+	 * 
+	 * Note that this can't be smaller number than 5 seconds.
+	 */
 	private static final String CONFIG_PARAM_SESSIONEXPIRATION = "general.sessionExpiration";
 	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_SESSIONEXPIRATION CONFIG_PARAM_SESSIONEXPIRATION} parameter. 
+	 */
 	private static final int CONFIG_DEF_SESSIONEXPIRATION = 30;
 	
-	
+	/**
+	 * Session recovery policy code after translation from its string format in configuration file. This one means that 
+	 * somebody entered wrong string.  
+	 */
 	private static final int SESSIONRECOVERYPOLICY_INT_ERROR = 0;
 	
+	/**
+	 * Session recovery policy code after translation from its string format in configuration file. This one means that 
+	 * somebody entered {@link #SESSIONRECOVERYPOLICY_STRING_PASSIVE SESSIONRECOVERYPOLICY_STRING_PASSIVE}.  
+	 */
 	private static final int SESSIONRECOVERYPOLICY_INT_PASSIVE = 1;
 	
+	/**
+	 * Session recovery policy code after translation from its string format in a configuration file.This one means that 
+	 * somebody entered {@link #SESSIONRECOVERYPOLICY_STRING_NONE SESSIONRECOVERY_POLICY_STRING_NONE}.
+	 */
 	private static final int SESSIONRECOVERYPOLICY_INT_NONE = 2;
 	
+	/**
+	 * Session recovery policy code after translation from its string format in configuration file. This one means that 
+	 * somebody entered {@link #SESSIONRECOVERYPOLICY_STRING_PROACTIVE SESSIONRECOVERY_POLICY_STRING_PROACTIVE}. 
+	 */
 	private static final int SESSIONRECOVERYPOLICY_INT_PROACTIVE = 3;
 	
+	/**
+	 * Session recovery policy string, one of the valid values that are to be entered in the configuration file.
+	 */
 	private static final String SESSIONRECOVERYPOLICY_STRING_PASSIVE = "passive";
 	
+	/**
+	 * Session recovery policy string, one of the valid values that are to be entered in the configuration file.
+	 */
 	private static final String SESSIONRECOVERYPOLICY_STRING_NONE = "none";
 	
+	/**
+	 * Session recovery policy string, one of the valid values that are to be entered in the configuration file.
+	 */
 	private static final String SESSIONRECOVERYPOLICY_STRING_PROACTIVE = "proactive";
 	
 	/**
-	 * How often will gateway check whether or not the connections are still up (ms).
+	 * How often will gateway check whether or not the connections are still up when proactive session recovery is 
+	 * on (ms).
 	 */
 	private static final int SESSIONRECOVERY_CHECKINTERVAL_PROACTIVE = 30000;
 	
+	/**
+	 * How often will gateway check whether or not the connections are still up when passive session recovery is 
+	 * on (ms).
+	 */
 	private static final int SESSIONRECOVERY_CHECKINTERVAL_PASSIVE = 5000;
 	
+	/**
+	 * Minimal number of seconds allowed in the configuration parameter {@link #CONFIG_PARAM_SESSIONEXPIRATION CONFIG_PARAM_SESSIONEXPIRATION}
+	 */
 	private static final int SESSIONEXPIRATION_MINIMAL_VALUE = 5;
 	
 	
 	
 	/* === FIELDS === */
 	
-	// hash map containing connections identified by object IDs
+	/**
+	 * Hash map containing connections of local objects.
+	 */
 	private Map<String, ConnectionDescriptor> descriptorPool;
 	
 	/**
@@ -127,12 +209,19 @@ public class CommunicationManager {
 	 */
 	private int sessionRecoveryPolicy;
 	
+	/**
+	 * Expiration time when passive session recovery policy is on.
+	 */
 	private int sessionExpiration;
 	
-	
-	
-	// logger and configuration
+	/**
+	 * Configuration of the OGWAPI.
+	 */
 	private XMLConfiguration config;
+	
+	/**
+	 * Logger of the OGWAPI.
+	 */
 	private Logger logger;
 	
 	
@@ -290,7 +379,8 @@ public class CommunicationManager {
 	
 	/**
 	 * Closes all open connections to network. It will also clear these connection handlers off the connection 
-	 * descriptor pool table, preventing the re-connection (they have to be reconfigured to be opened again).
+	 * descriptor pool table, (they have to be reconfigured to be opened again, thus this should be done 
+	 * only when the application is about to be closed).
 	 */
 	public void terminateAllConnections(){
 		
@@ -323,8 +413,6 @@ public class CommunicationManager {
 	 * 
 	 * If the connection descriptor for given object already exists, it get terminated, discarded and then recreated.
 	 * 
-	 * 
-	 * NOTE: This is the equivalent of GET /objects/login in the REST API.
 	 * 
 	 * @param objectId Object ID.
 	 * @param password Password.
@@ -396,7 +484,6 @@ public class CommunicationManager {
 	 * Otherwise connection will have to be build a new (which can be useful when the connection needs to be 
 	 * reconfigured). 
 	 * 
-	 * This is the equivalent of GET /objects/logout in the REST API.
 	 * 
 	 * @param objectId User name used to establish the connection.
 	 * @param destroyConnectionDescriptor Whether the connection descriptor should also be destroyed or not. 
@@ -427,7 +514,16 @@ public class CommunicationManager {
 	// CONSUMPTION INTERFACE
 
 	
-	// TODO documentation
+	/**
+	 * Retrieves a property of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param propertyId ID of the property.
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
 	public StatusMessage getPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
 			String body, Map<String, String> parameters) {
 		
@@ -464,7 +560,16 @@ public class CommunicationManager {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Sets a new value of a property on a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param propertyId ID of the property.
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (a new value will probably be stored here).
+	 * @return Status message. 
+	 */
 	public StatusMessage setPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
 			String body, Map<String,String> parameters) {
 		
@@ -498,10 +603,18 @@ public class CommunicationManager {
 		
 		return descriptor.setPropertyOfRemoteObject(destinationOid, propertyId, body, parameters);
 	}
-
 	
 	
-	// TODO documentation
+	/**
+	 * Starts an action on a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the remote object.
+	 * @param actionId ID of the action.
+	 * @param body Body that will be transported to the object via its {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}.
+	 * @param parameters Parameters that will be transported along the body. 
+	 * @return Status message.
+	 */
 	public StatusMessage startAction(String sourceOid, String destinationOid, String actionId, String body, 
 			Map<String, String> parameters) {
 		
@@ -538,6 +651,18 @@ public class CommunicationManager {
 	}
 	
 	
+	/**
+	 * Updates a status and a return value of locally run job of an action. See the {@link eu.bavenir.ogwapi.commons.Task Task}
+	 * and {@link eu.bavenir.ogwapi.commons.Action Action} for more information about valid states. The source object must 
+	 * be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param actionId ID of the action that is being worked on right now (this is NOT a task ID).
+	 * @param newStatus New status of the job. 
+	 * @param returnValue New value to be returned to the object that ordered the job.
+	 * @param parameters Parameters that goes with the return value.
+	 * @return Status message.
+	 */
 	public StatusMessage updateTaskStatus(String sourceOid, String actionId, 
 					String newStatus, String returnValue, Map<String, String> parameters) {
 		
@@ -574,6 +699,18 @@ public class CommunicationManager {
 	}
 	
 	
+	/**
+	 * Retrieves a status of a remotely running {@link eu.bavenir.ogwapi.commons.Task Task}. The source object must 
+	 * be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid The remote object running the task. 
+	 * @param actionId ID of the action.
+	 * @param taskId ID of the task.
+	 * @param parameters Any parameters that are necessary to be transported to other side (usually none).
+	 * @param body Any body that needs to be transported to the other side (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage retrieveTaskStatus(String sourceOid, String destinationOid, String actionId, String taskId, 
 			Map<String, String> parameters, String body) {
 		
@@ -615,7 +752,17 @@ public class CommunicationManager {
 	}
 	
 	
-	
+	/**
+	 * Cancels remotely running task. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object. 
+	 * @param destinationOid The remote object running the task. 
+	 * @param actionId ID of the action.
+	 * @param taskId ID of the task.
+	 * @param parameters Any parameters that are necessary to be transported to other side (usually none).
+	 * @param body Any body that needs to be transported to the other side (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage cancelRunningTask(String sourceOid, String destinationOid, String actionId, String taskId, 
 			Map<String,String> parameters, String body) {
 		
@@ -666,7 +813,6 @@ public class CommunicationManager {
 	 * Retrieves a collection of roster entries for object ID (i.e. its contact list). If there is no connection 
 	 * established for the given object ID, returns empty {@link java.util.Set Set}. 
 	 * 
-	 * NOTE: This is the equivalent of GET /objects in the REST API.
 	 * 
 	 * @param objectId Object ID the roster is to be retrieved for. 
 	 * @return Set of roster entries. If no connection is established for the object ID, the collection is empty
@@ -712,13 +858,12 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Activates the event channel identified by the eventID. From the moment of activation, other devices in the 
+	 * Activates the event channel identified by the event ID. From the moment of activation, other devices in the 
 	 * network will be able to subscribe to it and will receive events in case they are generated. 
 	 * 
 	 * If the event channel was never activated before (or there is other reason why it was not saved previously), it 
 	 * gets created anew. In that case, the list of subscribers is empty.  
 	 * 
-	 * NOTE: This is the equivalent of POST /events/[eid] in the REST API.
 	 * 
 	 * @param sourceOid Object ID of the event channel owner.
 	 * @param eventId Event ID.
@@ -754,9 +899,16 @@ public class CommunicationManager {
 	}
 	
 	
-	
-	// TODO documentation
-	// returns number of sent messages vs the number of subscribers
+	/**
+	 * Distributes an {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent event} to subscribers. 
+	 * The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param eventId Event ID.
+	 * @param body Body of the event.
+	 * @param parameters Any parameters to be transported with the event body.
+	 * @return Status message.
+	 */
 	public StatusMessage sendEventToSubscribedObjects(String sourceOid, String eventId, String body, 
 			Map<String, String> parameters) {
 		
@@ -789,14 +941,15 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * De-activates the event channel identified by the eventID. From the moment of de-activation, other devices in the
+	 * De-activates the event channel identified by the event ID. From the moment of de-activation, other devices in the
 	 * network will not be able to subscribe to it. Also no events are sent in case they are generated. 
 	 * 
 	 * The channel will still exist though along with the list of subscribers. If it gets re-activated, the list of
 	 * subscribers will be the same as in the moment of de-activation.  
 	 * 
-	 * NOTE: This is the equivalent of DELETE /events/[eid] in the REST API.
+	 * The source object must be logged in first. 
 	 * 
+	 * @param sourceOid ID of the source object. 
 	 * @param objectId Object ID of the event channel owner
 	 * @param eventID Event ID.
 	 * @return {@link StatusMessage StatusMessage} with error flag set to false, if the event channel was activated
@@ -831,8 +984,16 @@ public class CommunicationManager {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Retrieves the status of local or remote event channel. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that is to be polled (it can be the local owner verifying the state of its channel.
+	 * @param eventId ID of the event.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage getEventChannelStatus(String sourceOid, String destinationOid, String eventId, 
 			Map<String, String> parameters, String body) {
 		
@@ -867,8 +1028,17 @@ public class CommunicationManager {
 	}
 	
 	
-	
-	// TODO documentation
+	/**
+	 * Subscribes the current object to the destination object ID's {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 * The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object. 
+	 * @param destinationOid ID of the object to which event channel a subscription is attempted.
+	 * @param eventId Event ID.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage subscribeToEventChannel(String sourceOid, String destinationOid, String eventId, 
 			Map<String, String> parameters, String body) {
 		
@@ -903,7 +1073,17 @@ public class CommunicationManager {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Un-subscribes the current object from the destination object ID's {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel}.
+	 * The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object from which event channel a un-subscription is attempted.
+	 * @param eventId Event ID.
+	 * @param parameters Any parameters to be sent (usually none).
+	 * @param body Any body to be sent (usually none).
+	 * @return Status message.
+	 */
 	public StatusMessage unsubscribeFromEventChannel(String sourceOid, String destinationOid, String eventId, 
 			Map<String, String> parameters, String body) {
 		
@@ -950,6 +1130,14 @@ public class CommunicationManager {
 	
 	// QUERY INTERFACE
 	
+	/**
+	 * Performs a SPARQL search on all objects in the contact list. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object. 
+	 * @param query SPARQL query.
+	 * @param parameters Any parameters (if needed).
+	 * @return JSON with results. 
+	 */
 	public String performSparqlSearch(String sourceObjectId, String sparqlQuery, Map<String, String> parameters) {
 		
 		if (sourceObjectId == null || sourceObjectId.isEmpty() || sparqlQuery == null || sparqlQuery.isEmpty()) {
@@ -1047,7 +1235,13 @@ public class CommunicationManager {
 		}
 	}
 	
-	// this will save us a lot of cycles - it gets checked too often
+	
+	/**
+	 * Translates the string value from configuration file into a valid code for the recovery policy. The recovery
+	 * policy is checked quite often, therefore it is a good idea to make it numerical value.
+	 * 
+	 * @param recoveryConfigString The string from configuration file.
+	 */
 	private void translateSessionRecoveryConf(String recoveryConfigString) {
 		
 		switch (recoveryConfigString) {
@@ -1071,6 +1265,9 @@ public class CommunicationManager {
 	}
 	
 	
+	/**
+	 * Periodically called to recover sessions according to the confgiuration file. 
+	 */
 	private void recoverSessions() {
 		
 		Set<String> connectionList = getConnectionList();

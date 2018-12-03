@@ -1,0 +1,7 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK. Event event-1 was successfully distributed to 10 out of 10 subscribers.",
+	"contentType": "application/json",
+	"message": []
+}
