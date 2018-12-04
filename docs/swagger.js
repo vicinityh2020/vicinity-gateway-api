@@ -1,4 +1,4 @@
-{
+var data = {{
   "swagger": "2.0",
   "info": {
     "description": "The standalone Open Gateway API enables your IoT infrastructure to interconnect with other IoT infrastructures by using HTTP REST requests. Among its features there is retrieving and setting a property on remote objects, executing an action, or subscribing to an event channel and receiving asynchronously fired event whenever one is published. After installation and start, the OGWAPI serves the following REST API on your local host's port as configured in the configuration file (default is 8181).",
