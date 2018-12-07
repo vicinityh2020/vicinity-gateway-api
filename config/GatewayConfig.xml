@@ -299,7 +299,7 @@
 			URL of the Gateway API Service facilitating the SPARQL search. Usually
 			there is no need to change this, unless informed that it is necessary. 
 			-->
-			<gwApiServicesUrl>http://gateway-services.vicinity.linkeddata.es/discovery</gwApiServicesUrl>
+			<gwApiServicesUrl>http://vicinity-gateway-services.vicinity.linkeddata.es</gwApiServicesUrl>
 		</sparql>
 	</search>
 	

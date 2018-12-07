@@ -134,13 +134,14 @@
 		<dependency>
 			<groupId>com.github.vicinityh2020</groupId>
 			<artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
-			<version>74df5e822d01aa79ee87188fd710547712c1ca13</version>
+			<version>76f9dac9d7ca86d3219feb7c634fa653023d9f1e</version>
 		</dependency>
 	</dependencies>
 	
 	<!-- Build an executable JAR -->
 	<build>
 		<finalName>ogwapi-jar-with-dependencies</finalName>
+
 		<plugins>
 			
 			<plugin>
@@ -193,5 +194,6 @@
 				</executions>
 			</plugin>
 		</plugins>
+
 	</build>
 </project>

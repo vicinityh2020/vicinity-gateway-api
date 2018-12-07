@@ -50,7 +50,7 @@ public class SparqlQuery {
 	 * Default value of {@link #CONFIG_PARAM_GWAPISERVICESURL CONFIG_PARAM_GWAPISERVICESURL} configuration parameter. 
 	 * This value is taken into account when no suitable value is found in the configuration file.
 	 */
-	private static final String CONFIG_DEF_GWAPISERVICESURL = "http://gateway-services.vicinity.linkeddata.es/discovery";
+	private static final String CONFIG_DEF_GWAPISERVICESURL = "http://vicinity-gateway-services.vicinity.linkeddata.es/advanced-discovery";
 	
 	
 	private static final int ARRAYINDEX_OID = 2;
@@ -118,14 +118,13 @@ public class SparqlQuery {
         for(Future<String> fut : list){
             try {
             		String jsonData = fut.get();
-            		if(jsonData!=null && !jsonData.contains("\"error\":") && jsonData.contains("\"status\":\"success\"") && isCorrectJSON(jsonData)) {
+            		if(jsonData!=null && !jsonData.contains("\"error\":") && isCorrectJSON(jsonData)) {
             			JSONObject jsonDocument = new JSONObject(jsonData);
             			if(jsonDocument.has("data")) {
             				remoteEndpoints.get(list.indexOf(fut)).setValue(jsonDocument.getJSONObject("data").toString());
             			}else {
             				remoteEndpoints.get(list.indexOf(fut)).setValue(jsonData);
             			}
-            			// TODO: UNCOMMENT THIS remoteEndpoints.get(list.indexOf(fut)).setValue(jsonData);
         			}
             } catch (Exception  e) {
                 e.printStackTrace();
@@ -207,6 +206,8 @@ public class SparqlQuery {
 		
 		JsonObject jsonObject  = statusMessage.buildMessage();
 		JsonArray jsonArray = jsonObject.getJsonArray(StatusMessage.ATTR_MESSAGE);
+		
+		System.out.println("!!!THE JSON STRING: " + jsonArray.get(0).toString());
 		
 		return jsonArray.get(0).toString();
 	}
