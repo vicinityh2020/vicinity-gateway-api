@@ -33,7 +33,7 @@
 		
 		Default is 60 seconds. 
 		-->
-		<requestMessageTimeout>60</requestMessageTimeout>
+		<requestMessageTimeout>90</requestMessageTimeout>
 		
 		
 		<!-- 
@@ -162,6 +162,7 @@
 		will not be recorded. The list of levels in descending order is 
 		following:
 		
+		OFF
 		SEVERE
 		WARNING
 		INFO
@@ -174,7 +175,7 @@
 		which the Vicinity Gateway utilises for event logging. This value can also
 		be set to OFF, which will disable the logging mechanism completely. 
 		-->
-		<level>FINEST</level>
+		<level>FINER</level>
 		
 		<!-- 
 		Setting this value to 'true' will cause the application to log its output
