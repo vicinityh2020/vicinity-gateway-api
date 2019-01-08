@@ -32,6 +32,12 @@
 
 	<dependencies>
 	
+		<dependency>
+		    <groupId>com.github.jsonld-java</groupId>
+		    <artifactId>jsonld-java</artifactId>
+		    <version>0.2</version>
+		</dependency>
+	
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
