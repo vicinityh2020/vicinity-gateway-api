@@ -75,6 +75,11 @@
 			<artifactId>javax.json</artifactId>
 			<version>1.0.4</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.github.jsonld-java</groupId>
+		    <artifactId>jsonld-java</artifactId>
+		    <version>0.2</version>
+		</dependency>
 		
 		<!-- SMACK -->
 		<dependency>

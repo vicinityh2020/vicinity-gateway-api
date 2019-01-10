@@ -28,7 +28,6 @@ import eu.bavenir.ogwapi.restapi.services.ObjectsOidProperties;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid;
 import eu.bavenir.ogwapi.restapi.services.SearchSemantic;
 import eu.bavenir.ogwapi.restapi.services.SearchSparql;
-import eu.bavenir.ogwapi.restapi.services.Timeout;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 
 
@@ -160,8 +159,6 @@ public class Api extends Application {
 		Router router = new Router(getContext());
 
 		// define routes
-		// TODO REMOVE
-		router.attach("/timeout", Timeout.class);
 		
 		// AUTHENTICATION
 		router.attach("/objects/login", ObjectsLogin.class);
