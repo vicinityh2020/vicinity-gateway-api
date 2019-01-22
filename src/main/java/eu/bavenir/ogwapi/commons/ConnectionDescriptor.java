@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -54,7 +55,6 @@ public class ConnectionDescriptor {
 
 	/* === CONSTANTS === */
 	
-	
 	/**
 	 * How long is the thread supposed to wait for message arrival before checking whether timeout was reached. After
 	 * the check, the thread resumes to waiting for message and the cycle repeats until either message arrives or
@@ -74,19 +74,9 @@ public class ConnectionDescriptor {
 	/* === FIELDS === */
 	
 	/**
-	 * A set of event channels served by this object.
+	 * ID of the object connected through this ConnectionDescriptor
 	 */
-	private Set<EventChannel> providedEventChannels;
-	
-	/**
-	 * A set of channels that this object is subscribed to.
-	 */
-	private Set<Subscription> subscribedEventChannels;
-	
-	/**
-	 * A set of actions served by this object.
-	 */
-	private Set<Action> providedActions;
+	private String objectId;
 	
 	/**
 	 * Configuration of the OGWAPI.
@@ -114,11 +104,6 @@ public class ConnectionDescriptor {
 	private AgentConnector agentConnector;
 	
 	/**
-	 * ID of the object connected through this ConnectionDescriptor.
-	 */
-	private String objectId;
-	
-	/**
 	 * Password.
 	 */
 	private String password;
@@ -143,6 +128,10 @@ public class ConnectionDescriptor {
 	 */
 	private JsonBuilderFactory jsonBuilderFactory;
 	
+	/**
+	 * Data class
+	 */
+	private Data data;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -173,25 +162,17 @@ public class ConnectionDescriptor {
 		
 		messageQueue = new LinkedTransferQueue<NetworkMessage>();
 		
-		providedEventChannels = new HashSet<EventChannel>();
-		
-		subscribedEventChannels = new HashSet<Subscription>();
-		
-		providedActions = new HashSet<Action>();
-		
 		messageResolver = new MessageResolver(config, logger);
 		
 		jsonBuilderFactory = Json.createBuilderFactory(null);
-		
 		
 		// build new connection
 		// TODO this is also the place, where it should decide what engine to use
 		commEngine = new XmppMessageEngine(objectId, password, config, logger, this);
 		
-		// TODO load the event channels and actions - either from a file or server
-		
+		// load the event channels and actions - either from a file or server
+		data = new Data(objectId, config, logger);
 	}
-	
 	
 	/**
 	 * Retrieves the object ID used for this connection.
@@ -457,7 +438,7 @@ public class ConnectionDescriptor {
 			
 			// if no event channel was found AND the caller wanted it to be active, create it
 			if (active) {
-				providedEventChannels.add(new EventChannel(objectId, eventId, true));
+				data.addProvidedEventChannel(new EventChannel(objectId, eventId, true));
 				
 				statusCodeReason = new String("Object '" + objectId + "' created active event channel '" + eventId + "'");
 				logger.info(statusCodeReason);
@@ -488,7 +469,10 @@ public class ConnectionDescriptor {
 			
 		}
 		
+		// this change of setting will not be written to the file (persistence)
 		eventChannel.setActive(active);
+		// write to the file manually (persistence)
+		data.saveData();
 		
 		statusCodeReason = new String("Object '" + objectId + "' changed the activity of event channel '" 
 					+ eventId + "' to " + active);
@@ -646,7 +630,7 @@ public class ConnectionDescriptor {
 		if (!statusMessage.isError()) {
 			// keep the track
 			subscription.addToSubscriptions(eventId);
-			subscribedEventChannels.add(subscription);
+			data.addSubscribedEventChannel(subscription);
 		}
 		
 		return statusMessage;
@@ -722,7 +706,7 @@ public class ConnectionDescriptor {
 		
 		// clean up
 		if (subscription.getNumberOfSubscriptions() == 0) {
-			subscribedEventChannels.remove(subscription);
+			data.removeSubscribedEventChannel(subscription);
 		}
 		
 		return statusMessage;
@@ -943,8 +927,6 @@ public class ConnectionDescriptor {
 		
 		return sparql.performQuery(query, parameters);
 	}
-	
-	
 	
 	/* === PRIVATE METHODS === */
 	
@@ -1237,6 +1219,9 @@ public class ConnectionDescriptor {
 			
 			eventChannel.addToSubscribers(requestMessage.getSourceOid());
 			
+			// manually save data to file because eventChannel was changed
+			data.saveData();
+			
 			response.setError(false);
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);
 			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Subscribed.");
@@ -1335,7 +1320,7 @@ public class ConnectionDescriptor {
 		// be possible
 		if (action == null) {
 			action = new Action (config, this.objectId, actionId, agentConnector, logger);
-			providedActions.add(action);
+			data.addProvidedAction(action);
 		}
 		
 		String statusString;
@@ -1550,7 +1535,7 @@ public class ConnectionDescriptor {
 	private EventChannel searchForEventChannel(String eventId) {
 		// search for given event channel
 		
-		for (EventChannel eventChannel : providedEventChannels) {
+		for (EventChannel eventChannel : data.getProvidedEventChannels()) {
 			if (eventChannel.getEventId().equals(eventId)) {
 				// found it
 				return eventChannel;
@@ -1575,7 +1560,7 @@ public class ConnectionDescriptor {
 		
 		// search for given action
 		
-		for (Action action : providedActions) {
+		for (Action action : data.getProvidedActions()) {
 			if (action.getActionId().equals(actionId)) {
 				// found it
 				return action;
@@ -1594,7 +1579,7 @@ public class ConnectionDescriptor {
 	 */
 	private Subscription searchForSubscription(String remoteObjectId) {
 		
-		for (Subscription subscription : subscribedEventChannels) {
+		for (Subscription subscription : data.getSubscribedEventChannels()) {
 			if (subscription.getObjectId().equals(remoteObjectId)) {
 				// found it
 				return subscription;
@@ -1818,5 +1803,6 @@ public class ConnectionDescriptor {
 		
 		return builder.build().toString();
 	}
-	
+
+
 }
