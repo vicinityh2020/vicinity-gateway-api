@@ -1,0 +1,83 @@
+jan 15, 2019 10:31:08 AM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-15T10_31_08.945-gateway.log
+jan 15, 2019 10:31:08 AM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 15, 2019 10:31:08 AM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 15, 2019 10:31:09 AM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 15, 2019 10:31:09 AM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 15, 2019 10:31:09 AM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 15, 2019 10:31:09 AM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 15, 2019 10:31:09 AM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 15, 2019 10:31:09 AM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+jan 15, 2019 10:31:17 AM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org1dev1' is not connected yet.
+jan 15, 2019 10:31:21 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+jan 15, 2019 10:31:21 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+jan 15, 2019 10:31:25 AM eu.bavenir.ogwapi.commons.PersistenceManager LoadData
+FINE: Data was loaded from file - data/org1dev1-data.ser
+jan 15, 2019 10:31:29 AM org.restlet.engine.application.StatusFilter doHandle
+WARNING: Exception or error caught by status service
+java.lang.NullPointerException
+	at eu.bavenir.ogwapi.commons.ConnectionDescriptorData.<init>(ConnectionDescriptorData.java:67)
+	at eu.bavenir.ogwapi.commons.ConnectionDescriptor.<init>(ConnectionDescriptor.java:185)
+	at eu.bavenir.ogwapi.commons.CommunicationManager.establishConnection(CommunicationManager.java:454)
+	at eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier.verify(AuthenticationVerifier.java:86)
+	at org.restlet.security.ChallengeAuthenticator.authenticate(ChallengeAuthenticator.java:152)
+	at org.restlet.security.Authenticator.beforeHandle(Authenticator.java:193)
+	at org.restlet.routing.Filter.handle(Filter.java:195)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+jan 15, 2019 10:31:29 AM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+jan 15, 2019 10:31:29 AM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+jan 15, 2019 10:31:29 AM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter

@@ -1,0 +1,10 @@
+jan 15, 2019 12:54:46 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-15T12_54_46.079-gateway.log
+jan 15, 2019 12:54:47 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 15, 2019 12:54:47 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 15, 2019 12:54:47 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 15, 2019 12:54:50 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.

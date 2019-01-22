@@ -101,6 +101,24 @@
 		Default is 30 seconds.  
 		-->
 		<sessionExpiration>30</sessionExpiration>
+		
+		<!-- 
+		This parameter represents a URL path to Neighborhood Manager API.
+		-->
+		<neighborhoodManagerAPI>https://vicinity.bavenir.eu:3000/commServer/items/searchItems</neighborhoodManagerAPI>
+		
+		<!-- 
+		This parameter represents a path to file for storing data. Each object has
+		its own file. A '%s' parameter will be replaced by a id of object.
+		-->
+		<persistencePath>data/%s-data.ser</persistencePath>
+		
+		<!-- 
+		This parameter represents a path to JSON file for storing TD. Each object has
+		its own file. A '%s' parameter will be replaced by a id of object.
+		-->
+		<TDPath>data/%s-TD.json</TDPath>
+		
 	</general>
 
 

@@ -1,0 +1,27 @@
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-10T15_34_50.001-gateway.log
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+SEVERE: Can't start RESTLET component. Exited with exception:
+Address already in use
+jan 10, 2019 3:35:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:35:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+jan 10, 2019 3:35:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:35:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+jan 10, 2019 3:36:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:36:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --

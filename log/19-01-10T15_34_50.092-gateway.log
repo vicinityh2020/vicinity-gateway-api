@@ -1,0 +1,34 @@
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-10T15_34_50.092-gateway.log
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 10, 2019 3:34:50 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 10, 2019 3:34:50 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 10, 2019 3:34:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+jan 10, 2019 3:35:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:35:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+jan 10, 2019 3:35:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:35:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+jan 10, 2019 3:36:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:36:20 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+jan 10, 2019 3:36:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+jan 10, 2019 3:36:50 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --

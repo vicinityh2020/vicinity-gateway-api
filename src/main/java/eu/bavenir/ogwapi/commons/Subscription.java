@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,19 +24,29 @@ import java.util.Set;
  * @author sulfo
  *
  */
-public class Subscription {
+public class Subscription implements Serializable {
 	
 	/* === CONSTANTS === */
+	
+	/**
+	 * A unique serial version identifier
+	 * @see Serializable
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	/* === FIELDS === */
 	
 	/**
 	 * Object ID of the remote publishing object.
+	 * 
+	 * @Serialize
 	 */
 	private String objectId;
 	
 	/**
 	 * Thread-safe HashSet with synchronizedSet wrapper to store object IDs that are subscribed.
+	 * 
+	 * @Serialize
 	 */ 
 	private Set<String> eventSubscriptions;
 	
@@ -53,6 +64,16 @@ public class Subscription {
 		eventSubscriptions = Collections.synchronizedSet(new HashSet<String>());
 	}
 	
+	/**
+	 * Constructor that initialises the Subscription object with a pre-loaded set of eventSubscriptions.
+	 * 
+	 * @param objectId ID of the remote publishing object.
+	 * @param eventSubscriptions A set eventSubscriptions
+	 */
+	public Subscription(String objectId, Set<String> eventSubscriptions) {
+		this.objectId = objectId;
+		this.eventSubscriptions = Collections.synchronizedSet(eventSubscriptions);
+	}
 	
 	/**
 	 * Getter for the ID of the remote publishing object.
@@ -63,6 +84,15 @@ public class Subscription {
 		return objectId;
 	}
 
+	/**
+	 * Returns the set of event subscriptions in the form of Set.
+	 * 
+	 * @return A set of subscribers. 
+	 */
+	public Set<String> getEventSubscriptionsSet(){
+		
+		return eventSubscriptions;
+	}
 
 	/**
 	 * Adds an {@link eu.bavenir.ogwapi.commons.EventChannel EventChannel} into a set of those channels that the local object

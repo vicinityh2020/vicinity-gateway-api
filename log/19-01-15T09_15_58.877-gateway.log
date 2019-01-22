@@ -1,0 +1,66 @@
+jan 15, 2019 9:15:58 AM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-15T09_15_58.877-gateway.log
+jan 15, 2019 9:15:58 AM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 15, 2019 9:15:58 AM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 15, 2019 9:15:59 AM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 15, 2019 9:15:59 AM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 15, 2019 9:15:59 AM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 15, 2019 9:15:59 AM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 15, 2019 9:15:59 AM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 15, 2019 9:15:59 AM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+jan 15, 2019 9:16:11 AM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org1dev1' is not connected yet.
+jan 15, 2019 9:16:14 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+jan 15, 2019 9:16:14 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+jan 15, 2019 9:16:19 AM eu.bavenir.ogwapi.commons.PersistenceManager LoadData
+WARNING: There are no file to read.
+jan 15, 2019 9:16:20 AM eu.bavenir.ogwapi.commons.PersistenceManager SaveData
+FINE: Serialized data is saved in data/org1dev1-data.ser
+jan 15, 2019 9:16:20 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for org1dev1. Attempting to build a new one.
+jan 15, 2019 9:16:20 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'vicinity.bavenir.eu:5222' as 'org1dev1@bavenir.eu'
+jan 15, 2019 9:16:20 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+jan 15, 2019 9:16:21 AM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'org1dev1' was established.
+jan 15, 2019 9:16:21 AM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 15, 2019 9:16:21 AM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 15, 2019 9:16:21 AM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 15, 2019 9:16:21 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+jan 15, 2019 9:16:21 AM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+jan 15, 2019 9:16:21 AM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+jan 15, 2019 9:16:21 AM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+jan 15, 2019 9:16:21 AM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 15, 2019 9:16:21 AM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+jan 15, 2019 9:16:21 AM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 15, 2019 9:16:21 AM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 15, 2019 9:17:01 AM eu.bavenir.ogwapi.commons.PersistenceManager SaveData
+FINE: Serialized data is saved in data/org1dev1-data.ser
+jan 15, 2019 9:17:16 AM eu.bavenir.ogwapi.commons.ConnectionDescriptor respondToStartActionRequest
+FINE: Object ID org1dev1 received a request to start action action1 from org2dev1.
+jan 15, 2019 9:18:10 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector performOperation
+WARNING: Exception from the RESTLET client: Connection Error (1000) - The connector failed to connect to the server
+jan 15, 2019 9:18:45 AM eu.bavenir.ogwapi.commons.ConnectionDescriptor respondToStartActionRequest
+FINE: Object org1dev1 created task 5ee60482-393b-426e-bc63-53df2eeef847 of action action1 and added it to the queue.

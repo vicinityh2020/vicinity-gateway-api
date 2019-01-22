@@ -1,0 +1,18 @@
+jan 10, 2019 2:49:51 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-10T14_49_51.018-gateway.log
+jan 10, 2019 2:49:54 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 10, 2019 2:49:54 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 10, 2019 2:50:43 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 10, 2019 2:52:42 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 10, 2019 3:04:38 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 10, 2019 3:05:00 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 10, 2019 3:09:18 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 10, 2019 3:09:48 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.

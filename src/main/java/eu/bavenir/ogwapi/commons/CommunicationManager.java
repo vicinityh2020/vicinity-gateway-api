@@ -225,7 +225,6 @@ public class CommunicationManager {
 	private Logger logger;
 	
 	
-	
 	/* === PUBLIC METHODS === */
 	
 	

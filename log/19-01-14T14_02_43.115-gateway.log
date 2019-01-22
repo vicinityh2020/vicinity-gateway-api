@@ -1,0 +1,216 @@
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-14T14_02_43.115-gateway.log
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 14, 2019 2:02:43 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 14, 2019 2:02:43 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 14, 2019 2:02:43 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+jan 14, 2019 2:02:54 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org1dev1' is not connected yet.
+jan 14, 2019 2:02:58 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads enabled, all calls to an Agent via this connector will be simulated.
+jan 14, 2019 2:02:58 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+jan 14, 2019 2:03:01 PM eu.bavenir.ogwapi.commons.PersistenceManager LoadData
+FINE: Data was loaded from file - data/org1dev1-data.ser
+jan 14, 2019 2:03:01 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for org1dev1. Attempting to build a new one.
+jan 14, 2019 2:03:01 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'vicinity.bavenir.eu:5222' as 'org1dev1@bavenir.eu'
+jan 14, 2019 2:03:01 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+jan 14, 2019 2:03:02 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'org1dev1' was established.
+jan 14, 2019 2:03:02 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 14, 2019 2:03:02 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 14, 2019 2:03:02 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 14, 2019 2:03:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+jan 14, 2019 2:03:02 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+jan 14, 2019 2:03:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+jan 14, 2019 2:03:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+jan 14, 2019 2:03:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 14, 2019 2:03:02 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+jan 14, 2019 2:03:02 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 14, 2019 2:03:02 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 14, 2019 2:04:27 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 14, 2019 2:04:27 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 14, 2019 2:04:27 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 1.0
+jan 14, 2019 2:04:27 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/events/{eid}" -> Finder for EventsEid
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 15 characters were matched
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/events/event-1". No remaining part to match
+jan 14, 2019 2:04:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 14, 2019 2:04:27 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.EventsEid.remove(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.EventsEid, restletMethod: DELETE, input: "", value: "", output: "", query: null]"= 0.5
+jan 14, 2019 2:04:27 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 14, 2019 2:04:37 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor setLocalEventChannelStatus
+INFO: Object 'org1dev1' changed the activity of event channel 'event-1' to false
+jan 14, 2019 2:04:37 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 14, 2019 2:04:51 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 14, 2019 2:04:51 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 14, 2019 2:04:51 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 1.0
+jan 14, 2019 2:04:51 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/events/{eid}" -> Finder for EventsEid
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 15 characters were matched
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/events/event-1". No remaining part to match
+jan 14, 2019 2:04:51 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 14, 2019 2:04:51 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.EventsEid.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.EventsEid, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+jan 14, 2019 2:04:51 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 14, 2019 2:04:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor setLocalEventChannelStatus
+INFO: Object 'org1dev1' changed the activity of event channel 'event-1' to true
+jan 14, 2019 2:04:57 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 14, 2019 2:05:27 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 14, 2019 2:05:27 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 14, 2019 2:05:27 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 1.0
+jan 14, 2019 2:05:27 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/events/{eid}" -> Finder for ObjectsOidEventsEid
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 32 characters were matched
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/org1dev1/events/event-1". No remaining part to match
+jan 14, 2019 2:05:27 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 14, 2019 2:05:27 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid.represent(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+jan 14, 2019 2:05:27 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 14, 2019 2:05:45 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 14, 2019 2:07:03 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+jan 14, 2019 2:07:03 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+jan 14, 2019 2:07:03 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 1.0
+jan 14, 2019 2:07:03 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/properties/{pid}" -> Finder for ObjectsOidPropertiesPid
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 43 characters were matched
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/org1dev1/properties/device-1-pid-1". No remaining part to match
+jan 14, 2019 2:07:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+jan 14, 2019 2:07:03 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid.store(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid, restletMethod: PUT, input: "json", value: "json", output: "json", query: null]"= 0.5
+jan 14, 2019 2:07:03 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+jan 14, 2019 2:07:03 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@3d01e720
+jan 14, 2019 2:08:22 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine sendMessage
+WARNING: XMPPMessageEngine: Message not sent. The OID org1dev1@bavenir.eu is not in the roster.
+jan 14, 2019 2:08:27 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendRequestForRemoteOperation
+WARNING: Destination object org1dev1 is not in the list of available objects or it was not possible to send the message.
+jan 14, 2019 2:08:39 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+jan 14, 2019 2:40:51 PM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for org1dev1 was interrupted. Reconnecting.
+jan 14, 2019 2:40:51 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object already exists for org1dev1. Not attempting to build a new one.

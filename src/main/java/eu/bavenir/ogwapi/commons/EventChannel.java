@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,40 +24,46 @@ import java.util.Set;
  * @author sulfo
  *
  */
-public class EventChannel {
+public class EventChannel implements Serializable {
 
 
 	/* === CONSTANTS === */
 
 	/**
+	 * A unique serial version identifier
+	 * @see Serializable
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	/**
 	 * Inactive status of the channel. 
 	 */
-	public static final boolean STATUS_INACTIVE = false;
+	public transient static final boolean STATUS_INACTIVE = false;
 	
 	/**
 	 * Active status of the channel.
 	 */
-	public static final boolean STATUS_ACTIVE = true;
+	public transient static final boolean STATUS_ACTIVE = true;
 	
 	/**
 	 * String with representation of the active state.
 	 */
-	public static final String STATUS_STRING_ACTIVE = "active";
+	public transient static final String STATUS_STRING_ACTIVE = "active";
 	
 	/**
 	 * String with representation of the inactive state.
 	 */
-	public static final String STATUS_STRING_INACTIVE = "inactive";
+	public transient static final String STATUS_STRING_INACTIVE = "inactive";
 	
 	/**
 	 * Attribute for activity.
 	 */
-	public static final String ATTR_ACTIVE = "active";
+	public transient static final String ATTR_ACTIVE = "active";
 	
 	/**
 	 * Attribute for subscription.
 	 */
-	public static final String ATTR_SUBSCRIBED = "subscribed";
+	public transient static final String ATTR_SUBSCRIBED = "subscribed";
 	
 	
 	/* === FIELDS === */
@@ -64,22 +71,30 @@ public class EventChannel {
 	/**
 	 * This is the object ID of the channel owner (usually the local object, represented by its 
 	 * {@link ConnectionDescriptor ConnectionDescriptor}). 
+	 * 
+	 * @Serialize
 	 */
 	private String objectId;
 	
 	/**
 	 * The ID of the event channel. 
+	 * 
+	 * @Serialize
 	 */
 	private String eventId;
 	
 	/**
 	 * Status of the event channel.
+	 * 
+	 * @Serialize
 	 */
 	private boolean active;
 	
 	/**
 	 * A Set of remote object IDs that are subscribed to this event. The chosen implementation is HashSet with 
 	 * synchronizedSet wrapper. 
+	 * 
+	 * @Serialize
 	 */
 	private Set<String> subscribers;
 	
@@ -110,7 +125,7 @@ public class EventChannel {
 	 * @param active Status of the channel.
 	 * @param subscribers A set of subscribers to this EventChannel. 
 	 */
-	public EventChannel(String objectId, String eventId, boolean active, HashSet<String> subscribers) {
+	public EventChannel(String objectId, String eventId, boolean active, Set<String> subscribers) {
 		this.objectId = objectId;
 		this.eventId = eventId;
 		this.active = active;

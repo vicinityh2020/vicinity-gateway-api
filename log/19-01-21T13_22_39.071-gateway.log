@@ -1,0 +1,30 @@
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-21T13_22_39.071-gateway.log
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 21, 2019 1:22:39 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+jan 21, 2019 1:22:39 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+jan 21, 2019 1:22:39 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+jan 21, 2019 1:22:42 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org2dev1' is not connected yet.
+jan 21, 2019 1:22:42 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+jan 21, 2019 1:22:42 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+jan 21, 2019 1:22:42 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+jan 21, 2019 1:23:13 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromServer
+INFO: TD was loaded from server.
+jan 21, 2019 1:24:00 PM eu.bavenir.ogwapi.commons.PersistenceManager saveThingDescription
+WARNING: Thing description data could not be written to file. data/org2dev1-TD.json

@@ -1,0 +1,15 @@
+jan 09, 2019 5:29:49 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-01-09T17_29_49.841-gateway.log
+jan 09, 2019 5:29:49 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+jan 09, 2019 5:29:49 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+jan 09, 2019 5:29:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+jan 09, 2019 5:29:50 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+jan 09, 2019 5:29:50 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+jan 09, 2019 5:29:50 PM eu.bavenir.ogwapi.restapi.RestletThread run
+SEVERE: Can't start RESTLET component. Exited with exception:
+Address already in use
