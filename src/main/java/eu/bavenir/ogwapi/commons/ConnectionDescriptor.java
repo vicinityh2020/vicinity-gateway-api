@@ -16,6 +16,9 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.json.JSONObject;
+
+import com.mashape.unirest.http.JsonNode;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
 import eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector;
@@ -799,6 +802,27 @@ public class ConnectionDescriptor {
 		return eventChannel.getSubscribersSet().size();
 	}
 	
+	/**
+	 * Retrieves a events of a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getEventsOfRemoteObject(String destinationOid, 
+			Map<String, String> parameters, String body) {
+				
+		Map<String, String> attributes = new HashMap<String,String>();
+		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETLISTOFEVENTS, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
+
+	}
 	
 	/**
 	 * Retrieves a property of a remote object. 
@@ -967,6 +991,9 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
 			
+			response = respondToGetObjectEvents(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
@@ -1074,6 +1101,31 @@ public class ConnectionDescriptor {
 		// no need to send the response message back to sender
 	}
 	
+	/**
+	 * Responds to a request for getting the object events. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
+	private NetworkMessageResponse respondToGetObjectEvents(NetworkMessageRequest requestMessage) {
+		
+		JsonObject events = data.getEvents();
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		response.setResponseBody(events.toString());
+		response.setContentType("application/json");
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Events retrieved.");
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
 	
 	/**
 	 * Responds to a request for getting the object property. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
@@ -1098,7 +1150,6 @@ public class ConnectionDescriptor {
 		return response;
 		
 	}
-	
 	
 	/**
 	 * Responds to a request for setting the object property. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
