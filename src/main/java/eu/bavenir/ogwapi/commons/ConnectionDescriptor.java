@@ -847,6 +847,28 @@ public class ConnectionDescriptor {
 	}
 	
 	/**
+	 * Retrieves a thing description of a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the thing description. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getThingDescriptionOfRemoteObject(String destinationOid, 
+			Map<String, String> parameters, String body) {
+				
+		Map<String, String> attributes = new HashMap<String,String>();
+		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
+
+	}
+	
+	/**
 	 * Retrieves a properties of a remote object. 
 	 * 
 	 * @param destinationOid ID of the object that owns the properties. 
@@ -1068,6 +1090,11 @@ public class ConnectionDescriptor {
 			
 			response = respondToCancelSubscriptionRequest(requestMessage);
 			break;
+			
+		case NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION:
+			
+			response = respondToGetObjectThingDescription(requestMessage);
+			break;
 		}
 		
 		commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
@@ -1199,6 +1226,32 @@ public class ConnectionDescriptor {
 		response.setError(false);
 		response.setResponseCode(CodesAndReasons.CODE_200_OK);
 		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Properties retrieved.");
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
+	
+	/**
+	 * Responds to a request for getting the object thing description. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
+	private NetworkMessageResponse respondToGetObjectThingDescription(NetworkMessageRequest requestMessage) {
+		
+		JsonObject thingDescription = data.getThingDescription();
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		response.setResponseBody(thingDescription.toString());
+		response.setContentType("application/json");
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Thing description retrieved.");
 		
 		// don't forget to set the correlation id so the other side can identify what 
 		// request does this response belong to

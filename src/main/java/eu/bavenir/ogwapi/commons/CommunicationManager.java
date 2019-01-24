@@ -587,6 +587,43 @@ public class CommunicationManager {
 	}
 	
 	/**
+	 * Retrieves a thing description of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the thing description. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getThingDescriptionOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting thing description of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting thing description of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getThingDescriptionOfRemoteObject(destinationOid, parameters, body);
+		
+	}
+	
+	/**
 	 * Retrieves a properties of a remote object. The source object must be logged in first. 
 	 * 
 	 * @param sourceOid ID of the source object.

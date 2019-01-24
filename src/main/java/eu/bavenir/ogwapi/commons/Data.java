@@ -178,6 +178,57 @@ public class Data implements Serializable {
 		persistenceManager.saveData(objectId, this);
 	}
 	
+	
+	/* === PRIVATE METHODS === */
+	
+	/**
+	 * Load data through persistence manager from file
+	 * 
+	 * @return this class {@link u.bavenir.ogwapi.commons.Data Data}
+	 */
+	private Data loadData() {
+		return (Data) persistenceManager.loadData(objectId);
+	}
+	
+	
+	/* === GETTERS === */
+
+	/**
+	 * Get object id
+	 * 
+	 * @return String objectId 
+	 */
+	public String getObjectId() {
+		return objectId;
+	}
+	
+	/**
+	 * Get provided event channels
+	 * 
+	 * @return Set<EventChannel> providedEventChannels 
+	 */
+	public Set<EventChannel> getProvidedEventChannels() {
+		return providedEventChannels;
+	}
+
+	/**
+	 * Get provided actions
+	 * 
+	 * @return Set<Action> providedActions 
+	 */
+	public Set<Action> getProvidedActions() {
+		return providedActions;
+	}
+
+	/**
+	 * Get subscribed event channels
+	 * 
+	 * @return Set<Subscription> subscribedEventChannels 
+	 */
+	public Set<Subscription> getSubscribedEventChannels() {
+		return subscribedEventChannels;
+	}
+
 	/**
 	 * Get events
 	 * 
@@ -247,53 +298,13 @@ public class Data implements Serializable {
 		return properties;
 	}
 	
-	/* === PRIVATE METHODS === */
-	
 	/**
-	 * Load data through persistence manager from file
+	 * Get thing description
 	 * 
-	 * @return this class {@link u.bavenir.ogwapi.commons.Data Data}
+	 * @return TD file in JsonObject format 
 	 */
-	private Data loadData() {
-		return (Data) persistenceManager.loadData(objectId);
-	}
-	
-	
-	/* === GETTERS === */
-
-	/**
-	 * Get object id
-	 * 
-	 * @return String objectId 
-	 */
-	public String getObjectId() {
-		return objectId;
-	}
-	
-	/**
-	 * Get provided event channels
-	 * 
-	 * @return Set<EventChannel> providedEventChannels 
-	 */
-	public Set<EventChannel> getProvidedEventChannels() {
-		return providedEventChannels;
-	}
-
-	/**
-	 * Get provided actions
-	 * 
-	 * @return Set<Action> providedActions 
-	 */
-	public Set<Action> getProvidedActions() {
-		return providedActions;
-	}
-
-	/**
-	 * Get subscribed event channels
-	 * 
-	 * @return Set<Subscription> subscribedEventChannels 
-	 */
-	public Set<Subscription> getSubscribedEventChannels() {
-		return subscribedEventChannels;
+	public JsonObject getThingDescription() {
+		
+		return thingDescription;
 	}
 }
