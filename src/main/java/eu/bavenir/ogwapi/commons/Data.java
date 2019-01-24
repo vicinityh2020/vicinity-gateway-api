@@ -10,11 +10,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.json.JSONArray;
 import org.json.JSONException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.JsonNode;
 
 public class Data implements Serializable {
 
@@ -225,6 +222,29 @@ public class Data implements Serializable {
 			}
 		} 
 		return actions;
+	}
+	
+	/**
+	 * Get properties
+	 * 
+	 * @return all properties from TD file in JsonObject format 
+	 */
+	public JsonObject getProperties() {
+		
+		JsonObject properties = null;
+		
+		if (thingDescription != null) {
+			try {
+				
+				JsonArray propertiesArr = thingDescription.getJsonArray("properties");
+				properties = Json.createObjectBuilder().add("properties", propertiesArr).build();
+			
+			} catch (JSONException e) {
+				
+				logger.info("There are no properties in TD for object: " + objectId);
+			}
+		} 
+		return properties;
 	}
 	
 	/* === PRIVATE METHODS === */

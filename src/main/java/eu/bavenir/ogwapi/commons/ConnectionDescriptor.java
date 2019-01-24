@@ -805,7 +805,7 @@ public class ConnectionDescriptor {
 	/**
 	 * Retrieves a events of a remote object. 
 	 * 
-	 * @param destinationOid ID of the object that owns the property. 
+	 * @param destinationOid ID of the object that owns the events. 
 	 * @param parameters Any parameters to be sent with the request (if needed).
 	 * @param body Body to be sent (if needed).
 	 * @return Status message. 
@@ -827,7 +827,7 @@ public class ConnectionDescriptor {
 	/**
 	 * Retrieves a actions of a remote object. 
 	 * 
-	 * @param destinationOid ID of the object that owns the property. 
+	 * @param destinationOid ID of the object that owns the actions. 
 	 * @param parameters Any parameters to be sent with the request (if needed).
 	 * @param body Body to be sent (if needed).
 	 * @return Status message. 
@@ -839,6 +839,28 @@ public class ConnectionDescriptor {
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETLISTOFACTIONS, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
+
+	}
+	
+	/**
+	 * Retrieves a properties of a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the properties. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getPropertiesOfRemoteObject(String destinationOid, 
+			Map<String, String> parameters, String body) {
+				
+		Map<String, String> attributes = new HashMap<String,String>();
+		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES, 
 				destinationOid, 
 				attributes, 
 				parameters, 
@@ -987,86 +1009,68 @@ public class ConnectionDescriptor {
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
 		
-		NetworkMessageResponse response;
+		NetworkMessageResponse response = null;
 		
 		// create response and send it back
 		switch (requestMessage.getRequestOperation()){
 		
-		// TODO move the send back lines to one single line after the persistence is finished
 		case NetworkMessageRequest.OPERATION_CANCELTASK:
 			
 			response = respondToCancelRunningTask(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
 			
 			response = respondToEventChannelStatusQuery(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
 			
 			response = respondToGetObjectActions(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
 			
 			response = respondToGetObjectEvents(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
 			
+			response = respondToGetObjectProperties(requestMessage);
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
 			
 			response = respondToGetObjectProperty(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
 			
 			response = respondToGetTaskStatus(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
 			
 			response = respondToSetObjectProperty(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_STARTACTION:
 			
 			response = respondToStartActionRequest(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
 			
 			response = respondToEventSubscriptionRequest(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
 			
 			response = respondToCancelSubscriptionRequest(requestMessage);
-			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
-			
 			break;
 		}
+		
+		commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
 		
 	}
 	
@@ -1169,6 +1173,32 @@ public class ConnectionDescriptor {
 		response.setError(false);
 		response.setResponseCode(CodesAndReasons.CODE_200_OK);
 		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Actions retrieved.");
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
+	
+	/**
+	 * Responds to a request for getting the object properties. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
+	private NetworkMessageResponse respondToGetObjectProperties(NetworkMessageRequest requestMessage) {
+		
+		JsonObject properties = data.getProperties();
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		response.setResponseBody(properties.toString());
+		response.setContentType("application/json");
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Properties retrieved.");
 		
 		// don't forget to set the correlation id so the other side can identify what 
 		// request does this response belong to

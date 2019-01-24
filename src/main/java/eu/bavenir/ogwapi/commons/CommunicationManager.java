@@ -516,7 +516,7 @@ public class CommunicationManager {
 	 * Retrieves a events of a remote object. The source object must be logged in first. 
 	 * 
 	 * @param sourceOid ID of the source object.
-	 * @param destinationOid ID of the object that owns the property. 
+	 * @param destinationOid ID of the object that owns the events. 
 	 * @param parameters Any parameters to be sent with the request (if needed).
 	 * @param body Body to be sent (if needed).
 	 * @return Status message. 
@@ -553,7 +553,7 @@ public class CommunicationManager {
 	 * Retrieves a actions of a remote object. The source object must be logged in first. 
 	 * 
 	 * @param sourceOid ID of the source object.
-	 * @param destinationOid ID of the object that owns the property. 
+	 * @param destinationOid ID of the object that owns the actions. 
 	 * @param parameters Any parameters to be sent with the request (if needed).
 	 * @param body Body to be sent (if needed).
 	 * @return Status message. 
@@ -583,6 +583,43 @@ public class CommunicationManager {
 		} 
 		
 		return descriptor.getActionsOfRemoteObject(destinationOid, parameters, body);
+		
+	}
+	
+	/**
+	 * Retrieves a properties of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the properties. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getPropertiesOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting properties of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting properties of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getPropertiesOfRemoteObject(destinationOid, parameters, body);
 		
 	}
 	
