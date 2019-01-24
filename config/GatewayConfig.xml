@@ -119,6 +119,12 @@
 		-->
 		<TDPath>data/%s-TD.json</TDPath>
 		
+		<!-- 
+		This parameter is for debug reason.
+		Default is true.
+		-->
+		<loadTDFromServer>false</loadTDFromServer>
+		
 	</general>
 
 

@@ -4,18 +4,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -81,6 +87,17 @@ public class PersistenceManager {
 	 */
 	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERAPI = "https://vicinity.bavenir.eu:3000/commServer/items/searchItems";
 	
+	/**
+	 * For debug reason, default value is true. If false, do not loading TD from server
+	 */
+	private static final String CONFIG_PARAM_LOADTDFROMSERVER = "general.loadTDFromServer";
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_LOADTDFROMSERVER } parameter. 
+	 */
+	private static final Boolean CONFIG_DEF_LOADTDFROMSERVER = true;
+	
+	
 	/* === FIELDS === */
 	
 	/**
@@ -97,6 +114,11 @@ public class PersistenceManager {
 	 * URL Path to Neighborhood Manager API
 	 */
 	private String neighborhoodManagerAPIURL; 
+	
+	/**
+	 * Boolean value for debug reason, If false, do not loading TD from server
+	 */
+	private Boolean loadTDFromServer; 
 	
 	/**
 	 * Configuration of the OGWAPI.
@@ -122,6 +144,7 @@ public class PersistenceManager {
 		persistenceFile = config.getString(CONFIG_PARAM_PERSISTENCEFILE, CONFIG_DEF_PERSISTENCEFILE);
 		thingDescriptionFile = config.getString(CONFIG_PARAM_TDFILE, CONFIG_DEF_TDFILE);
 		neighborhoodManagerAPIURL = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERAPI, CONFIG_DEF_NEIGHBORHOODMANAGERAPI);
+		loadTDFromServer = config.getBoolean(CONFIG_PARAM_LOADTDFROMSERVER, CONFIG_DEF_LOADTDFROMSERVER);
 	}
 	
 	/**
@@ -218,20 +241,25 @@ public class PersistenceManager {
 	 * 
 	 * @param objectId - specify object
 	 */
-	public JsonNode loadThingDescription(String objectId) {
+	public JsonObject loadThingDescription(String objectId) {
 		
 		// First, try to load from server
-		JsonNode loadedTD = loadThingDescriptionFromServer(objectId);
-		if (loadedTD != null) {
-			
-			if (!loadedTD.getObject().getBoolean("error")) {
+		JsonObject loadedTD;
+		
+		// for debug reason, it can be set in config file
+		if (loadTDFromServer) {
+			loadedTD = loadThingDescriptionFromServer(objectId);
+			if (loadedTD != null) {
 				
-				saveThingDescription(objectId, loadedTD.toString());
-				return loadedTD;
-			} else {
-				
-				logger.warning("TD json for " + objectId + " contains error message! Try to load TD from file.");
-			}	
+				if (!loadedTD.getBoolean("error")) {
+					
+					saveThingDescription(objectId, loadedTD);
+					return loadedTD;
+				} else {
+					
+					logger.warning("TD json for " + objectId + " contains error message! Try to load TD from file.");
+				}	
+			}
 		}
 		
 		// Try to load from file
@@ -250,7 +278,7 @@ public class PersistenceManager {
 	 * 
 	 * @param objectId - specify object
 	 */
-	public JsonNode loadThingDescriptionFromServer(String objectId) {
+	public JsonObject loadThingDescriptionFromServer(String objectId) {
 		
 		// create headers
 		Map<String, String> headers = new HashMap<>();
@@ -284,7 +312,23 @@ public class PersistenceManager {
 			logger.warning("TD json for " + objectId + " could not be loaded from server.");
 		}
 		
-		return response;
+		// transform to standart JsonObject
+		JsonReader jsonReader = Json.createReader(new StringReader(response.getObject().toString()));
+		JsonObject json;
+		
+		try {
+			json = jsonReader.readObject();
+		} catch (Exception e) {
+			
+			logger.severe("PersistanceManager#loadThingDescriptionFromServer: Exception during reading JSON object: " 
+						+ e.getMessage());
+			
+			return null;
+		} finally {
+			jsonReader.close();
+		}
+		
+		return json;
 	}
 	
 	/**
@@ -292,7 +336,7 @@ public class PersistenceManager {
 	 * 
 	 * @param objectId - specify object
 	 */
-	public JsonNode loadThingDescriptionFromFile(String objectId) {
+	public JsonObject loadThingDescriptionFromFile(String objectId) {
 		
 		// get the file name and create file object
 		String objectTDFileName = String.format(thingDescriptionFile, objectId);
@@ -307,19 +351,34 @@ public class PersistenceManager {
 	 * 
 	 * @param file - specify file
 	 */
-	public JsonNode loadThingDescriptionFromFile(File file) {
+	public JsonObject loadThingDescriptionFromFile(File file) {
 		
 		// loaded data
-		JsonNode data;
+		JsonObject data;
 		
 		// if file exist then try to open file and load data
         if(file.exists()) {
         	
         	try {
     			
-        		ObjectMapper mapper = new ObjectMapper();
-    			data = new JsonNode(mapper.readValue(file, new TypeReference<String>(){}));
-    			
+        		InputStream is = new FileInputStream(file);
+                String jsonTxt = IOUtils.toString(is, "UTF-8");
+                is.close();
+                
+                JsonReader jsonReader = Json.createReader(new StringReader(jsonTxt));
+                
+                try {
+        			data = jsonReader.readObject();
+        		} catch (Exception e) {
+        			
+        			logger.severe("PersistanceManager#loadThingDescriptionFromFile: Exception during reading JSON object: " 
+        						+ e.getMessage());
+        			
+        			return null;
+        		} finally {
+        			jsonReader.close();
+        		}
+                
     			logger.info("TD json was loaded from file - " + file.getName() );
     			
     	    } catch (IOException i) {
@@ -343,23 +402,24 @@ public class PersistenceManager {
 	 * @param objectId - specify object
 	 * @param data - data to save
 	 */
-	public void saveThingDescription(String objectId, Object data) {
+	public void saveThingDescription(String objectId, JsonObject data) {
 		
 		// get the file name 
 		String objectTDFileName = String.format(thingDescriptionFile, objectId);
 		
 		// try to write data to file
-		try {
+		try { 
 			
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeValue(new File(objectTDFileName), data);
-			
+			OutputStream os = new FileOutputStream(objectTDFileName);
+            os.write(data.toString().getBytes());
+            os.close();
+            
 			logger.fine("TD json for " + objectId + " is saved in " + objectTDFileName );
 			
 		} catch (IOException i) {
 			
 			logger.warning("TD json for " + objectId + " could not be written to file. " + objectTDFileName );
 			i.printStackTrace();
-		}
+		} 
 	}
 }

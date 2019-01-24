@@ -5,8 +5,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration2.XMLConfiguration;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
+import org.apache.commons.configuration2.XMLConfiguration;
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 
 public class Data implements Serializable {
@@ -73,18 +80,25 @@ public class Data implements Serializable {
 	 */
 	private String objectId;
 	
-
 	/**
 	 * json representation of thing description 
 	 */
-	private transient JsonNode thingDescription; 
-	
+	private transient JsonObject thingDescription; 
 	
 	/**
 	 * Persistence manager
 	 */
 	private transient PersistenceManager persistenceManager;
 	
+	/**
+	 * Configuration of the OGWAPI.
+	 */
+	private transient XMLConfiguration config;
+	
+	/**
+	 * Logger of the OGWAPI.
+	 */
+	private transient Logger logger;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -94,6 +108,9 @@ public class Data implements Serializable {
 	public Data(String objectId, XMLConfiguration config, Logger logger) {
 		
 		this.objectId = objectId;
+		
+		this.config = config;
+		this.logger = logger;
 		
 		// create persistence manager
 		persistenceManager = new PersistenceManager(config, logger);
@@ -164,6 +181,28 @@ public class Data implements Serializable {
 		persistenceManager.saveData(objectId, this);
 	}
 	
+	/**
+	 * Get events
+	 * 
+	 * @return all events from TD file in JSONObject format 
+	 */
+	public JsonObject getEvents() {
+		
+		JsonObject events = null;
+		
+		if (thingDescription != null) {
+			try {
+				
+				JsonArray eventsArr = thingDescription.getJsonArray("events");
+				events = Json.createObjectBuilder().add("events", eventsArr).build();
+			
+			} catch (JSONException e) {
+				
+				logger.info("There are no events in TD for object: " + objectId);
+			}
+		} 
+		return events;
+	}
 	
 	/* === PRIVATE METHODS === */
 	
