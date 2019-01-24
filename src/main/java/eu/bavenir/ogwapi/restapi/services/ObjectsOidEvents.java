@@ -80,11 +80,10 @@ public class ObjectsOidEvents extends ServerResource {
 	// === PRIVATE METHODS ===
 	
 	/**
-	 * Retrieves the property defined as PID.
+	 * Retrieves all events of specific object
 	 * 
 	 * @param sourceOid Caller OID.
 	 * @param attrOid Called OID.
-	 * @param attrPid Property ID.
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */ 

@@ -825,6 +825,28 @@ public class ConnectionDescriptor {
 	}
 	
 	/**
+	 * Retrieves a actions of a remote object. 
+	 * 
+	 * @param destinationOid ID of the object that owns the property. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getActionsOfRemoteObject(String destinationOid, 
+			Map<String, String> parameters, String body) {
+				
+		Map<String, String> attributes = new HashMap<String,String>();
+		
+		return sendRequestForRemoteOperation(
+				NetworkMessageRequest.OPERATION_GETLISTOFACTIONS, 
+				destinationOid, 
+				attributes, 
+				parameters, 
+				body);
+
+	}
+	
+	/**
 	 * Retrieves a property of a remote object. 
 	 * 
 	 * @param destinationOid ID of the object that owns the property. 
@@ -987,6 +1009,9 @@ public class ConnectionDescriptor {
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
 			
+			response = respondToGetObjectActions(requestMessage);
+			commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
+			
 			break;
 			
 		case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
@@ -1118,6 +1143,32 @@ public class ConnectionDescriptor {
 		response.setError(false);
 		response.setResponseCode(CodesAndReasons.CODE_200_OK);
 		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Events retrieved.");
+		
+		// don't forget to set the correlation id so the other side can identify what 
+		// request does this response belong to
+		response.setRequestId(requestMessage.getRequestId());
+				
+		return response;
+		
+	}
+	
+	/**
+	 * Responds to a request for getting the object actions. It creates a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse
+	 * response} that is then sent back to the requesting object.
+	 * 
+	 * @param requestMessage A message that came from the network.
+	 * @return Response to be sent back.
+	 */
+	private NetworkMessageResponse respondToGetObjectActions(NetworkMessageRequest requestMessage) {
+		
+		JsonObject actions = data.getActions();
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		response.setResponseBody(actions.toString());
+		response.setContentType("application/json");
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Actions retrieved.");
 		
 		// don't forget to set the correlation id so the other side can identify what 
 		// request does this response belong to

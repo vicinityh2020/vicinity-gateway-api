@@ -184,7 +184,7 @@ public class Data implements Serializable {
 	/**
 	 * Get events
 	 * 
-	 * @return all events from TD file in JSONObject format 
+	 * @return all events from TD file in JsonObject format 
 	 */
 	public JsonObject getEvents() {
 		
@@ -202,6 +202,29 @@ public class Data implements Serializable {
 			}
 		} 
 		return events;
+	}
+	
+	/**
+	 * Get actions
+	 * 
+	 * @return all actions from TD file in JsonObject format 
+	 */
+	public JsonObject getActions() {
+		
+		JsonObject actions = null;
+		
+		if (thingDescription != null) {
+			try {
+				
+				JsonArray actionsArr = thingDescription.getJsonArray("actions");
+				actions = Json.createObjectBuilder().add("actions", actionsArr).build();
+			
+			} catch (JSONException e) {
+				
+				logger.info("There are no actions in TD for object: " + objectId);
+			}
+		} 
+		return actions;
 	}
 	
 	/* === PRIVATE METHODS === */
