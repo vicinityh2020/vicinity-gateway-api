@@ -1,8 +1,11 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -63,22 +66,25 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * @return Task status.
 	 */
 	@Get
-	public Representation represent() {
+	public Representation represent(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null || attrAid == null || attrTid == null){
 			logger.info("OID: " + attrOid + " AID: " + attrAid + " TID: " + attrTid 
 					+ " Given identifier does not exist.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Given identifier does not exist.");
 		}
 		
-		return getActionTaskStatus(callerOid, attrOid, attrAid, attrTid);
+		String body = getRequestBody(entity, logger);
+		
+		return getActionTaskStatus(callerOid, attrOid, attrAid, attrTid, queryParams, body);
 	}
 	
 	
@@ -86,22 +92,25 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * Deletes the given task to perform an action.
 	 */
 	@Delete
-	public Representation remove() {
+	public Representation remove(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String attrTid = getAttribute(ATTR_TID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null || attrAid == null || attrTid == null){
 			logger.info("OID: " + attrOid + " AID: " + attrAid + " TID: " + attrTid 
 					+ " Given identifier does not exist.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Given identifier does not exist.");
 		}
 		
-		return deleteActionTask(callerOid, attrOid, attrAid, attrTid);
+		String body = getRequestBody(entity, logger);
+		
+		return deleteActionTask(callerOid, attrOid, attrAid, attrTid, queryParams, body);
 	}
 	
 	
@@ -111,29 +120,64 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	 * Retrieves the Task status.
 	 * 
 	 * @param sourceOid OID of the caller. 
-	 * @param attrOid OID of the destination.
-	 * @param attrAid AID of the Action.
-	 * @param attrTid TID of the Task.
-	 * @param logger Logger taken previously from Context.
+	 * @param destinationOid OID of the destination.
+	 * @param actionId ID of the Action.
+	 * @param taskId ID of the Task.
+	 * @param queryParams Parameters to be sent along with the body.
+	 * @param body Request body.
 	 * 
 	 * @return Response from the remote station. 
 	 */
-	private Representation getActionTaskStatus(String sourceOid, String attrOid, String attrAid, String attrTid){
+	private Representation getActionTaskStatus(String sourceOid, String destinationOid, String actionId, 
+			String taskId, Map<String, String> queryParams, String body){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.retrieveTaskStatus(sourceOid, attrOid, attrAid, attrTid));
+		return new JsonRepresentation(communicationManager.retrieveTaskStatus(sourceOid, destinationOid, actionId,
+				taskId, queryParams, body).buildMessage().toString());
 		
 	}
 	
 	
 	// TODO documentation
-	private Representation deleteActionTask(String SourceOid, String attrOid, String attrAid, String attrTid){
+	private Representation deleteActionTask(String sourceOid, String destinationOid, String actionId, 
+			String taskId, Map<String, String> queryParams, String body){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.cancelRunningTask(SourceOid, attrOid, attrAid, attrTid));
+		return new JsonRepresentation(communicationManager.cancelRunningTask(sourceOid, destinationOid, actionId,
+				taskId, queryParams, body).buildMessage().toString());
+	}
+	
+	
+	
+	// === PRIVATE METHODS ===
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
+		}
+		
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
 	}
 }

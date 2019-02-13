@@ -1,0 +1,7 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK. Running task of action device-1-aid-1 was updated to finished.",
+	"contentType": "application/json",
+	"message": []
+}

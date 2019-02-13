@@ -22,9 +22,28 @@
 			<name>Public online Restlet repository</name>
 			<url>http://maven.restlet.com</url>
 		</repository>
+		
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+		
 	</repositories>
 
 	<dependencies>
+	
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.6</version>
+		</dependency>
+			
+	
+		<dependency>
+		    <groupId>com.github.jsonld-java</groupId>
+		    <artifactId>jsonld-java</artifactId>
+		    <version>0.2</version>
+		</dependency>
 	
 		<!-- Testing -->
 		<dependency>
@@ -65,9 +84,14 @@
 			<version>1.0</version>
 		</dependency>
 		<dependency>
-		<groupId>org.glassfish</groupId>
+			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
 			<version>1.0.4</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.github.jsonld-java</groupId>
+		    <artifactId>jsonld-java</artifactId>
+		    <version>0.2</version>
 		</dependency>
 		
 		<!-- SMACK -->
@@ -126,48 +150,68 @@
 		
 		<!-- Andrea Cimmino's JClient -->
 		<dependency>
-			<groupId>client</groupId>
+			<groupId>com.github.vicinityh2020</groupId>
 			<artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/vicinity-open-gateway-api-distributed-query-client-1.0.jar</systemPath>
+			<version>76f9dac9d7ca86d3219feb7c634fa653023d9f1e</version>
 		</dependency>
-		
 	</dependencies>
 	
 	<!-- Build an executable JAR -->
 	<build>
-		<finalName>ogwapi</finalName>
+		<finalName>ogwapi-jar-with-dependencies</finalName>
+
 		<plugins>
-			<plugin>
 			
-				<!-- 1st way to do it: 'mvn clean compile assembly:single' -->
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>eu.bavenir.ogwapi.App</mainClass>
-						</manifest>
-					</archive>
-					
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
-				
-				<!-- 2nd way to do it: 'mvn install' -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
 				<executions>
 					<execution>
-					<id>make-assembly</id>
-					<phase>package</phase>
-					<goals>
-						<goal>single</goal>
-					</goals>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 					</execution>
 				</executions>
-				
+			</plugin>
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<configuration>
+					<shadedArtifactAttached>false</shadedArtifactAttached>
+					<transformers>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+							<mainClass>eu.bavenir.ogwapi.App</mainClass>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+							<addHeader>false</addHeader>
+						</transformer>
+					</transformers>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+							<!-- Some jars are signed but shading breaks that. Don't include signing files. -->
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
-	</build>
 
+	</build>
 </project>

@@ -1,0 +1,7 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK. Login successfull.",
+	"contentType": "application/json",
+	"message": []
+}

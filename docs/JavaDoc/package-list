@@ -1,0 +1,12 @@
+eu.bavenir.ogwapi
+eu.bavenir.ogwapi.commons
+eu.bavenir.ogwapi.commons.connectors
+eu.bavenir.ogwapi.commons.connectors.http
+eu.bavenir.ogwapi.commons.engines
+eu.bavenir.ogwapi.commons.engines.xmpp
+eu.bavenir.ogwapi.commons.messages
+eu.bavenir.ogwapi.commons.search
+eu.bavenir.ogwapi.restapi
+eu.bavenir.ogwapi.restapi.security
+eu.bavenir.ogwapi.restapi.services
+eu.bavenir.vicinity.Node

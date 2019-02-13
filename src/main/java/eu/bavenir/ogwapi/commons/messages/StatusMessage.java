@@ -1,11 +1,12 @@
 package eu.bavenir.ogwapi.commons.messages;
 
-
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
 
 /*
  * STRUCTURE:
@@ -17,27 +18,26 @@ import javax.json.JsonObjectBuilder;
 
 
 /**
- * This is a helper class for a local status message - a message that is returned to an Adapter/Agent, but it does not 
- * originate in the P2P Network (unlike NetworkMessage). It is created e.g. after a successful login of an Adapter, 
- * when there is an success message that needs to be returned in a unified manner (a JSON), or an error message that
- * needs to be presented to requesting end point about something that happened far away, but only thing that returned 
- * from there is a response code and a reason that needs to be put into a nice JSON representation.
  * 
- * There are always two attributes that are mandatory:
- * 	- boolean 'error', that gives indication on whether or not the message is an error message,
- * 	- array of JSONs called 'message'.
+ * This is a helper class for a local status message - a message that is returned to a requester, but it does not 
+ * originate in the P2P Network (unlike NetworkMessage). It provides unified interface for the local end point to obtain
+ * a status of requested operation. The issue with obtaining a unified status is, that for the end user it should look
+ * the same way no matter if it originated in an OGWAPI sitting on his local infrastructure or somewhere far away, from 
+ * where it gets transported by {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage}, which resembles 
+ * a StatusMessage a lot. There was a lot of thought process invested into making it better and not using two very similar
+ * classes that mostly copy values between them at the end, but so far this is the most flexible approach :). 
  * 
- * Usually it looks like this:
+ * Usually after building it looks like this:
  * 
  * {
- *	"error": false,
- *	"message": [
- *		{message JSON 1}, {message JSON 2}, etc.
- *	]
+ *     "error": false,
+ *     "statusCode": 200,
+ *     "statusCodeReason": "OK. Operation successful.",
+ *     "contentType": "application/json",
+ *     "message": [
+ *         {message JSON 1}, {message JSON 2}, etc.
+ *     ]
  * }
- * 
- * Some often used attributes that are parts of inner message JSON X are included as constants, like MESSAGE_CODE
- * and MESSAGE_REASON (for transferring HTTP errors).
  * 
  * The class is used by first constructing an instance of it, setting the correct values and building the JSON.  
  * 
@@ -56,9 +56,29 @@ public class StatusMessage {
 	public static final String ATTR_ERROR = "error";
 	
 	/**
+	 * Name of the response status code attribute.
+	 */
+	public static final String ATTR_STATUSCODE = "statusCode";
+	
+	/**
+	 * Attribute name for the status code reason.  
+	 */
+	public static final String ATTR_STATUSCODEREASON = "statusCodeReason";
+	
+	/**
+	 * Attribute name for the content type.
+	 */
+	public static final String ATTR_CONTENTTYPE = "contentType";
+	
+	/**
 	 * Name of the message attribute - for JSON building.
 	 */
 	public static final String ATTR_MESSAGE = "message";
+	
+	/**
+	 * Attribute name for the value.
+	 */
+	public static final String ATTR_VALUE = "value";
 	
 	/**
 	 * Text of the success message.
@@ -70,93 +90,39 @@ public class StatusMessage {
 	 */
 	public static final String TEXT_FAILURE = "failure";
 	
-	
-	// this is a list of status message names, that can usually occur during operations of the OGWAPI
-	
 	/**
-	 * Attribute name for the status message body.  
+	 * Most used content type.
 	 */
-	public static final String MESSAGE_BODY = "body";
-	
-	
-	/**
-	 * Attribute name for the status code, returned by HTTP server on the remote site.  
-	 */
-	public static final String MESSAGE_CODE = "code";
-	
-	/**
-	 * Attribute name for the status code reason, returned by HTTP server on the remote site.  
-	 */
-	public static final String MESSAGE_REASON = "reason";
-	
-	/**
-	 * Attribute name for login.
-	 */
-	public static final String MESSAGE_LOGIN = "login";
-	
-	/**
-	 * Attribute name for login.
-	 */
-	public static final String MESSAGE_LOGOUT = "logout";
-	
-	/**
-	 * Attribute name for Event channel activation.
-	 */
-	public static final String MESSAGE_EVENT_ACTIVATION = "activateEventChannel";
-	
-	/**
-	 * Attribute name for Event channel deactivation.
-	 */
-	public static final String MESSAGE_EVENT_DEACTIVATION = "deactivateEventChannel";
-	
-	/**
-	 * Attribute name for sending the Event to subscribers.
-	 */
-	public static final String MESSAGE_EVENT_SENDTOSUBSCRIBERS = "sendEventToSubscribers";
-	
-	
-	public static final String MESSAGE_EVENT_GETLOCALEVENTCHANNELSTATUS = "localEventChannelStatus";
-	
-	public static final String MESSAGE_EVENT_GETREMOTEEVENTCHANNELSTATUS = "remoteEventChannelStatus";
-	
-	public static final String MESSAGE_EVENT_SUBSCRIBETOEVENTCHANNEL = "subscribeToEventChannel";
-	
-	public static final String MESSAGE_EVENT_UNSUBSCRIBEFROMEVENTCHANNEL = "unsubscribeFromEventChannel";
-	
-	public static final String MESSAGE_ACTION_START = "startAction";
-	
-	public static final String MESSAGE_TASK_STATUS = "taskStatus";
-	
-	public static final String MESSAGE_TASK_RETURNVALUE = "returnValue";
-	
-	public static final String MESSAGE_TASK_STOP = "stopTask";
-	
-	public static final String MESSAGE_TASKID = "taskID";
-	
-	
-	/**
-	 * Attribute name for getting value of a property.
-	 */
-	public static final String MESSAGE_PROPERTY_GETVALUE = "getValueOfAProperty";
-	
-	/**
-	 * Attribute name for setting value of a property.
-	 */
-	public static final String MESSAGE_PROPERTY_SETVALUE = "setValueOfAProperty";
-	
+	public static final String CONTENTTYPE_APPLICATIONJSON = "application/json";
 	
 	
 	/* === FIELDS === */
 	
 	/**
+	 * Is the message we are creating an error?
+	 */
+	private boolean error;
+	
+	/**
+	 * Status code from the remote or local object (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 */
+	private int statusCode;
+	
+	/**
+	 * Response code reason, in other words the status description.
+	 */
+	private String statusCodeReason;
+	
+	/**
+	 * Content type of the body.
+	 */
+	private String contentType;
+	
+	
+	/**
 	 * Factory for JSON builders.
 	 */
 	private JsonBuilderFactory jsonBuilderFactory;
-	
-	/**
-	 * We need to return a JSON to the caller. This is the builder for it.
-	 */
-	private JsonObjectBuilder mainBuilder;
 	
 	/**
 	 * The message part is an array of JSONs.
@@ -168,67 +134,52 @@ public class StatusMessage {
 	 */
 	private JsonObjectBuilder innerBuilder;
 	
-	/**
-	 * The JSON to be returned.
-	 */
-	private JsonObject messageJson;
-	
-	/**
-	 * Is the message we are transporting back an error?
-	 */
-	private boolean error = false;
-	
-	
-	// TODO this is so wrong - there must be some other way around this
-	private String body;
-
 	
 	/* === PUBLIC METHODS === */
+		
 	
 	/**
-	 * Default constructor initialises JSON object builders. You now have to set the values using setters, otherwise the
-	 * built JSON will look like this:
-	 * 
-	 * {
-	 *	"error": false,
-	 *	"message": []
-	 * }
-	 */
-	public StatusMessage() {
-		initializeBuilders();
-	}
-	
-	
-	/**
-	 * More useful constructor, can be used to directly fill the basic payload of the status message. A message built
+	 * Constructor, fills the basic pay load of the status message. A message built
 	 * right after it was constructed this way will look like this:
 	 * 
 	 * {
-	 *	"error": error,
+	 *	"error": booleanValue,
+	 *	"statusCode": integerValue,
+	 *	"statusCodeReason": "string with status code reason"
+	 *  "contentType": "some content type"
 	 *	"message": [
-	 *	   {
-	 *        "attribute": value,
-	 *     }
+	 *		{
+	 *        ... returned JSON ...
+	 *		},
+	 *		{
+	 *        ... or multiple, if available ...
+	 *		}
 	 *  ]
 	 * }
 	 * 
-	 * It is then of course possible to add more JSONs into the 'message' array by using {@link #addMessage(String, String)}.
+	 * It is then of course possible to add more JSONs into the 'message' array by using e.g. 
+	 * {@link #addSimpleMessage(String, String) addSimpleMessage}.
 	 * 
 	 * @param error Boolean value telling whether this status message is an error or not.
-	 * @param attribute Attribute name in the message.
-	 * @param value A value of the attribute.
+	 * @param statusCode Status code from the remote or local object (see {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}).
+	 * @param statusCodeReason Response code reason, in other words the status description.
+	 * @param contentType Content type of the body.
 	 */
-	public StatusMessage(boolean error, String attribute, String value) {
-		initializeBuilders();
+	public StatusMessage(boolean error, int statusCode, String statusCodeReason, String contentType) {
 		
 		this.error = error;
+		this.statusCode = statusCode;
+		this.statusCodeReason = statusCodeReason;
+		this.contentType = contentType;
 		
-		addMessage(attribute,value);
+		// create the factory
+		jsonBuilderFactory = Json.createBuilderFactory(null);
+		arrayBuilder = jsonBuilderFactory.createArrayBuilder();
 	}
-
+	
 	
 	/**
-	 * Getter of the error flag.
+	 * Getter for the error flag.
 	 * 
 	 * @return Whether the current status message is error or not.
 	 */
@@ -238,22 +189,52 @@ public class StatusMessage {
 
 
 	/**
-	 * Setter of the error flag.
+	 * Getter for the status code.
 	 * 
-	 * @param error Whether the current status message should be error or not. 
+	 * @return Status code. See {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
 	 */
-	public void setError(boolean error) {
-		this.error = error;
+	public int getStatusCode() {
+		return statusCode;
 	}
 
 
 	/**
-	 * Adds one JSON into the message array. The JSON carries one attribute-value pair. 
+	 * Getter for the status code reason.
+	 * 
+	 * @return Status code reason. See {@link eu.bavenir.ogwapi.commons.messages.CodesAndReasons CodesAndReasons}.
+	 */
+	public String getStatusCodeReason() {
+		return statusCodeReason;
+	}
+	
+	
+	/**
+	 * Returns the current array of messages.
+	 * 
+	 * @return Messages from the array.
+	 */
+	public JsonArray getCurrentMessageArray() {
+		return arrayBuilder.build();
+	}
+
+
+	/**
+	 * Returns content type.
+	 * 
+	 * @return Content type string.
+	 */
+	public String getContentType() {
+		return contentType;
+	}
+
+
+	/**
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
 	 * 
 	 * @param attribute Name of the attribute.
 	 * @param value Textual representation of the value.
 	 */
-	public void addMessage(String attribute, String value) {
+	public void addSimpleMessage(String attribute, String value) {
 		
 		// if attribute is null, there is no need to bother... 
 		if (attribute != null) {
@@ -269,17 +250,70 @@ public class StatusMessage {
 			arrayBuilder.add(innerBuilder);
 		}
 	}
-
 	
-	public String getBody() {
-		return body;
+	
+	/**
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
+	 * 
+	 * @param attribute Name of the attribute.
+	 * @param value Numerical (integer) representation of the value.
+	 */
+	public void addSimpleMessage(String attribute, int value) {
+		// if attribute is null, there is no need to bother... 
+		if (attribute != null) {
+			
+			innerBuilder = jsonBuilderFactory.createObjectBuilder();
+			innerBuilder.add(attribute, value);
+			
+			arrayBuilder.add(innerBuilder);
+		}
+		
 	}
-
-
-	public void setBody(String body) {
-		this.body = body;
+	
+	
+	/**
+	 * Adds one simple JSON into the message array. The JSON carries one attribute-value pair. 
+	 * 
+	 * @param attribute Name of the attribute.
+	 * @param value Numerical (floating point) representation of the value.
+	 */
+	public void addSimpleMessage(String attribute, float value) {
+		// if attribute is null, there is no need to bother... 
+		if (attribute != null) {
+			
+			innerBuilder = jsonBuilderFactory.createObjectBuilder();
+			innerBuilder.add(attribute, value);
+			
+			arrayBuilder.add(innerBuilder);
+		}
 	}
-
+	
+	
+	/**
+	 * Adds more complex JSON into the message array. The JSON can be arbitrary.
+	 * 
+	 * @param messageJsonBuilder Builder of the JSON to be added.
+	 */
+	public void addMessageJson(JsonObjectBuilder messageJsonBuilder) {
+		
+		if (messageJsonBuilder != null) {
+			arrayBuilder.add(messageJsonBuilder);
+		}
+	}
+	
+	
+	/**
+	 * Adds more complex JSON into the message array. The JSON can be arbitrary.
+	 * 
+	 * @param messageJsonBuilder JSON object to be added.
+	 */
+	public void addMessageJson(JsonObject json) {
+		
+		if (json != null) {
+			arrayBuilder.add(json);
+		}
+	}
+	
 
 	/**
 	 * Builds the status message JSON. This method can be called repeatedly but the returned value will always reflect
@@ -290,27 +324,25 @@ public class StatusMessage {
 	 */
 	public JsonObject buildMessage() {
 		
-		if (messageJson == null) {
-			mainBuilder.add(ATTR_ERROR, error);
-			mainBuilder.add(ATTR_MESSAGE, arrayBuilder);
-			
-			messageJson = mainBuilder.build();
-		} 
+		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		
-		return messageJson;
+		mainBuilder.add(ATTR_ERROR, error);
+		mainBuilder.add(ATTR_STATUSCODE, statusCode);
+		mainBuilder.add(ATTR_STATUSCODEREASON, statusCodeReason);
+		
+		if (contentType == null) {
+			mainBuilder.addNull(ATTR_CONTENTTYPE);
+		} else {
+			mainBuilder.add(ATTR_CONTENTTYPE, contentType);
+		}
+		
+		mainBuilder.add(ATTR_MESSAGE, arrayBuilder);
+			
+		return mainBuilder.build();
 		
 	}
 	
 	
 	/* === PRIVATE METHODS === */
 	
-	/**
-	 * Creates JSON builders.
-	 */
-	private void initializeBuilders() {
-		// create the factory
-		jsonBuilderFactory = Json.createBuilderFactory(null);
-		mainBuilder = jsonBuilderFactory.createObjectBuilder();
-		arrayBuilder = jsonBuilderFactory.createArrayBuilder();
-	}
 }

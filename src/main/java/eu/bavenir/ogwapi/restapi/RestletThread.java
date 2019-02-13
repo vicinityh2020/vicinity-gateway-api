@@ -56,6 +56,12 @@ public class RestletThread extends Thread {
 	private static final long THREAD_SLEEP = 100; 
 	
 	
+	/**
+	 * Maximum number of threads the RESTLET will be allowed to spawn.
+	 */
+	private static final String MAX_THREADS = "1000";
+	
+	
 	/* === FIELDS === */
 	
 	private volatile boolean threadRunning; 
@@ -63,13 +69,13 @@ public class RestletThread extends Thread {
 	private XMLConfiguration config;
 	private Logger logger;
 	
-	private Component component;
+	private Component server;
 	
 	
 	/* === PUBLIC METHODS === */
 	
 	/**
-	 * Constructor, initializes the configuration and logger instances.
+	 * Constructor, initialises the configuration and logger instances.
 	 * 
 	 * @param config
 	 * @param logger
@@ -97,29 +103,32 @@ public class RestletThread extends Thread {
 	public void run() {
 		
 		// create a new component
-		component = new Component();  
+		server = new Component();  
 
 		// this is just to make the logs look smarter
 		String serverType;
 		
 		// add a new HTTP/HTTPS server listening on set port
 		if (config.getBoolean(CONF_PARAM_APIENABLEHTTPS, CONF_DEF_APIENABLEHTTPS) == true){
-			component.getServers().add(Protocol.HTTPS, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));	
+			server.getServers().add(Protocol.HTTPS, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));	
 			serverType = "HTTPS";
 		} else {
-			component.getServers().add(Protocol.HTTP, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));
+			server.getServers().add(Protocol.HTTP, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));
 			serverType = "HTTP";
 		}
+		
+		server.getContext().getParameters().add("maxThreads", MAX_THREADS); 
+		server.getContext().getParameters().add("threadPool.maxThreads", MAX_THREADS); 
 		
 		// log message
 		logger.config(serverType + " server configured.");
 
 		// attach the API application  
-		component.getDefaultHost().attach(API_URL_PATH, new Api(config, logger));  
+		server.getDefaultHost().attach(API_URL_PATH, new Api(config, logger));  
 
 		// start the component
 		try {
-			component.start();
+			server.start();
 			logger.fine(serverType + " server component started.");
 		} catch (Exception e) {
 			logger.severe("Can't start RESTLET component. Exited with exception:\n" + e.getMessage());
@@ -134,7 +143,7 @@ public class RestletThread extends Thread {
 			
 			// exit
 			try {
-				component.stop();
+				server.stop();
 				// this logger call will probably never execute on OpenJDK VM because of the shutdown hook...
 				logger.fine("RESTLET thread stopping.");
 				

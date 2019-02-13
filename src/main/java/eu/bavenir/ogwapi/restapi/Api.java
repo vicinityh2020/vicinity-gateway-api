@@ -13,6 +13,7 @@ import org.restlet.security.ChallengeAuthenticator;
 import eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects;
 import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjectsDelete;
+import eu.bavenir.ogwapi.restapi.services.AgentsAgidObjectsUpdate;
 import eu.bavenir.ogwapi.restapi.services.EventsEid;
 import eu.bavenir.ogwapi.restapi.services.Objects;
 import eu.bavenir.ogwapi.restapi.services.ObjectsLogin;
@@ -25,7 +26,8 @@ import eu.bavenir.ogwapi.restapi.services.ObjectsOidEvents;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidProperties;
 import eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid;
-import eu.bavenir.ogwapi.restapi.services.Sparql;
+import eu.bavenir.ogwapi.restapi.services.SearchSemantic;
+import eu.bavenir.ogwapi.restapi.services.SearchSparql;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 
 
@@ -38,7 +40,7 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
  */
 
 /**
- * RESTLET application that serves incoming calls for the Gateway API. After being instantialized, it initialises
+ * RESTLET application that serves incoming calls for the Gateway API. After being instantialised, it initialises
  * objects necessary to be available to all API services (like Communication Node). It routes the requests to their 
  * respective {@link org.restlet.resource.ServerResource Resources}. The HTTP authentication against Gateway API is 
  * also checked in the {@link eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier AuthenticationVerifier}.
@@ -158,7 +160,6 @@ public class Api extends Application {
 
 		// define routes
 		
-		
 		// AUTHENTICATION
 		router.attach("/objects/login", ObjectsLogin.class);
 		router.attach("/objects/logout", ObjectsLogout.class);
@@ -188,12 +189,17 @@ public class Api extends Application {
 		// REGISTRY
 		// post, put
 		router.attach("/agents/{agid}/objects", AgentsAgidObjects.class);
+		// put
+		router.attach("/agents/{agid}/objects/update", AgentsAgidObjectsUpdate.class);
 		// post
 		router.attach("/agents/{agid}/objects/delete", AgentsAgidObjectsDelete.class);
 		
 		
-		// QUERY
-		router.attach("/sparql", Sparql.class);
+		// SEARCH
+		// sparql query (VCNT)
+		router.attach("/search/sparql", SearchSparql.class);
+		// semantic query (SHQ)
+		router.attach("/search/semantic", SearchSemantic.class);
 		
 		// solve the question of API authentication
 		if (useAuthentication){

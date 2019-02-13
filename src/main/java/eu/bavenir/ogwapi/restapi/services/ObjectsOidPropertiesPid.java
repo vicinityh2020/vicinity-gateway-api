@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -12,7 +13,6 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.ogwapi.restapi.Api;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 
@@ -59,20 +59,23 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @return Latest property value.
 	 */
 	@Get
-	public Representation represent() {
+	public Representation represent(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null || attrPid == null){
-			logger.info("OID: " + attrOid + " PID: " + attrPid + " Given identifier does not exist.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+			logger.info("OID: " + attrOid + " PID: " + attrPid + " Invalid identifier.");
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid identifier.");
 		}
 		
-		return getObjectProperty(callerOid, attrOid, attrPid, logger);
+		String body = getRequestBody(entity, logger);
+		
+		return getObjectProperty(callerOid, attrOid, attrPid, body, queryParams);
 		
 	}
 	
@@ -88,36 +91,21 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrPid = getAttribute(ATTR_PID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null || attrPid == null){
 			logger.info("OID: " + attrOid + " PID: " + attrPid 
-									+ " Object or property does not exist under given identifier.");
-			
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Object or property does not exist under given identifier.");
-		}
-		
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
-			logger.info("OID: " + attrOid + " PID: " + attrPid 
-					+ " Invalid property description - must be a valid JSON.");
+									+ " Invalid identifier.");
 			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description - must be a valid JSON.");
+					"Invalid identifier.");
 		}
 		
-		// get the json
-		String propertyJsonString = null;
-		try {
-			propertyJsonString = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description");
-		}
+		String body = getRequestBody(entity, logger);
 		
-		return updateProperty(callerOid, attrOid, attrPid, propertyJsonString, logger);
+		return updateProperty(callerOid, attrOid, attrPid, body, queryParams);
 	}
 	
 	
@@ -127,28 +115,20 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * Updates the property defined as PID.
 	 * 
 	 * @param sourceOid Caller OID.
-	 * @param attrOid Called OID.
-	 * @param attrPid Property ID.
-	 * @param jsonString New representation of the property.
+	 * @param destinationOid Called OID.
+	 * @param propertyId Property ID.
+	 * @param body New representation of the property.
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation updateProperty(String sourceOid, String attrOid, String attrPid, String jsonString, Logger logger){
+	private Representation updateProperty(String sourceOid, String destinationOid, String propertyId, String body, 
+			Map<String, String> queryParams){
+		
 		CommunicationManager communicationManager 
 								= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 		
-		StatusMessage statusMessage 
-					= communicationManager.setPropertyOfRemoteObject(sourceOid, attrOid, attrPid, jsonString);
-		
-		if (statusMessage == null) {
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");
-		}
-		
-		if (statusMessage.isError()) {
-			return new JsonRepresentation(statusMessage.buildMessage().toString());
-		}
-		
-		return new JsonRepresentation(statusMessage.getBody());
+		return new JsonRepresentation(communicationManager.setPropertyOfRemoteObject(sourceOid, destinationOid, 
+				propertyId, body, queryParams).buildMessage().toString());
 		
 	}
 	
@@ -162,23 +142,43 @@ public class ObjectsOidPropertiesPid extends ServerResource {
 	 * @param logger Logger taken previously from Context.
 	 * @return Response text.
 	 */
-	private Representation getObjectProperty(String sourceOid, String attrOid, String attrPid, Logger logger){
+	private Representation getObjectProperty(String sourceOid, String destinationOid, String propertyId, String body, 
+			Map<String, String> queryParams){
 		
 		CommunicationManager communicationManager 
 			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
-
-		StatusMessage statusMessage 
-				= communicationManager.getPropertyOfRemoteObject(sourceOid, attrOid, attrPid);
 		
-		if (statusMessage == null) {
-			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Internal server error.");
+		return new JsonRepresentation(communicationManager.getPropertyOfRemoteObject(sourceOid, destinationOid, 
+				propertyId, body, queryParams).buildMessage().toString());
+	}
+	
+	
+	
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
 		}
 		
-		if (statusMessage.isError()) {
-			return new JsonRepresentation(statusMessage.buildMessage().toString());
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
 		}
 		
-		return new JsonRepresentation(statusMessage.getBody());
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
 	}
 	
 }

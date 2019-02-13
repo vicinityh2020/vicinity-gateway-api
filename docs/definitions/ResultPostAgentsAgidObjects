@@ -1,0 +1,29 @@
+{
+	"error": false,
+	"message": [
+		{
+			"oid": "b7fd267b-5555-4ff0-85ae-b72ebfd01c9e",
+			"password": "VKu1ovltRp+eBR3WTO1LfRsueSUZE02Tt1XGAqCXUw=",
+			"infrastructure-id": "smart_bulb_12",
+			"nm-id": "5bc74b401871094273cdced5",
+			"name": "Smart bulb 12",
+			"error": false
+		},
+		{
+			"oid": "bba927e1-4cd5-4e56-973d-a0d52b1abd7e",
+			"password": "cc7RzvltRp+eBR3WTO1LfRsDTkVWTTicPWWBoNdK0kU4=",
+			"infrastructure-id": "smart_bulb_17",
+			"nm-id": "5bc74b401871094273cdced6",
+			"name": "Smart bulb 17",
+			"error": false
+		},
+		{
+			"oid": "c7d2439e-6d03-4cd5-bdec-0ae3a54cde36",
+			"password": "sCvltRp+eBR3WTO1LfRsbz7jYZOXI0b4xJt0nOATEGk2I=",
+			"infrastructure-id": "smart_bulb_11",
+			"nm-id": "5bc74b401871094273cdced4",
+			"name": "Smart bulb 11",
+			"error": false
+		}
+	]
+}

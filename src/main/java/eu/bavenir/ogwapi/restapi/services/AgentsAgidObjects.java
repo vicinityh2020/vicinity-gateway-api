@@ -8,7 +8,6 @@ import org.restlet.data.Status;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
-import org.restlet.resource.Patch;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -88,10 +87,7 @@ public class AgentsAgidObjects extends ServerResource {
 	private static final String REGISTRATION_SERVICE = "items/register";
 	
 	
-	/**
-	 * Update service string.
-	 */
-	private static final String LIGHTWEIGHTUPDATE_SERVICE = "items/update";
+
 	
 	/**
 	 * Modify service string.
@@ -165,7 +161,6 @@ public class AgentsAgidObjects extends ServerResource {
 	 * Update the thing descriptions of objects registered under the Agent.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param description New thing descriptions for already registered objects (from request).
 	 * 
 	 */
 	@Put("json")
@@ -193,29 +188,7 @@ public class AgentsAgidObjects extends ServerResource {
 	}
 	
 	
-	@Patch("json")
-	public Representation modify(Representation entity) {
-		
-		String attrAgid = getAttribute(ATTR_AGID);
-		
-		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
-		XMLConfiguration config = (XMLConfiguration) getContext().getAttributes().get(Api.CONTEXT_CONFIG);
-		
-		if (attrAgid == null){
-			logger.info("AGID: " + attrAgid + " Invalid Agent ID.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Invalid Agent ID.");
-		}
-		
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
-			logger.info("AGID: " + attrAgid + " Invalid object descriptions.");
-			
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid object descriptions");
-		}
-		
-		return lightweightUpdate(entity, logger, config);
-	}
+
 	
 	
 	// === PRIVATE METHODS ===
@@ -242,21 +215,6 @@ public class AgentsAgidObjects extends ServerResource {
 		
 		return responseRepresentation;
 	}
-	
-	
-	private Representation lightweightUpdate(Representation json, Logger logger, XMLConfiguration config){
-		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
-		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + LIGHTWEIGHTUPDATE_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-
-		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
-	}
-	
 	
 	
 	

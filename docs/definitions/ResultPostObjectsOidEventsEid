@@ -1,0 +1,7 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK. Subscribed.",
+	"contentType": "application/json",
+	"message": []
+}

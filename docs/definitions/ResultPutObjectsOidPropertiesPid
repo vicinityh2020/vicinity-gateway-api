@@ -1,0 +1,15 @@
+{
+	"error": false,
+	"statusCode": 200,
+	"statusCodeReason": "OK",
+	"contentType": "application/json",
+	"message": [
+		{
+			"data": {
+				"echo": "set property on custom endpoint",
+				"oid": "device-1"
+			},
+			"status": "success"
+		}
+	]
+}

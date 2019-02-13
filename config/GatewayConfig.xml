@@ -15,14 +15,92 @@
 		<port>5222</port>
 		
 		<!-- 
-		Setting this parameter to true will enable encryption of communication. The policy is to
-		try the strongest mechanisms first.
+		Setting this parameter to true will enable encryption of communication. 
+		The policy is to try the strongest mechanisms first.
 		
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<security>false</security>
+		<encryption>false</encryption>
 		
+		<!--
+		Number of seconds to consider request message as no longer relevant. 
+		After a request is sent from point A to point B, point A waits for 
+		response. If the response does not arrive until this timeout expires, 
+		point B is considered unreachable. If the response arrives after this
+		happens, the response is ignored and discarded and a new request has
+		to be sent.
+		
+		Default is 60 seconds. 
+		-->
+		<requestMessageTimeout>60</requestMessageTimeout>
+		
+		
+		<!-- 
+		This parameter defines how the sessions that went down should be recovered.
+		A session is a connection created when individual object logs in and the
+		OGWAPI tries as much as possible to keep it open. 
+		
+		However there are cases when the OGWAPI will give up its attempts to 
+		maintain the session, e.g. when the communication with server is 
+		interrupted for prolonged time (depends on engine in use). In such cases
+		there usually is a need to recover the sessions after communication is 
+		restored. 'Aggressiveness' of OGWAPI required to recover lost sessions is 
+		scenario dependent. Following are accepted values for this parameter, 
+		along with explanations:
+		
+		
+		proactive
+		
+		After you log your objects in and a session will go down for some reason,
+		OGWAPI will be trying hard to reconnect every 30 seconds until it succeeds 
+		or until you log your objects out. It does not care if your object is 
+		ready to listen to incoming requests or not. Incoming requests may 
+		therefore still time out if your adapter is not ready, although it will 
+		look online in the infrastructure. Good for objects that are expected 
+		to be always online and will likely be ready to respond, e.g. VAS or 
+		other services.
+		NOTE OF CAUTION: When you are testing (or better said debugging...) your
+		scenarios on two machines with identical credentials, the machine that 
+		runs OGWAPI with this parameter set to 'proactive' will keep stealing
+		your connection. If both of them are configured to do so, it will produce
+		plenty of exceptions. 
+		
+		
+		none
+		
+		The OGWAPI will not make any extra effort to recover the sessions.
+		If you log your object in and the session for some reason fails, it will
+		remain so until you explicitly re-log your object. This was the original
+		behaviour in previous versions of OGWAPI.
+		
+		 
+		passive
+		
+		This will make OGWAPI terminate (!) sessions that are not refreshed
+		periodically. Refreshing a connection means calling the login method at
+		least every 30 seconds by default, although this number can be altered 
+		with sessionExpiration parameter. 
+		Call to login method is optimised, so there is no 
+		overhead and it will not attempt to actually log an object in if it already
+		is. Good for integrators that like to have things under control, implement
+		adapters on small end user devices or have a need to implement a kind of
+		presence into their application.
+		
+		Default is proactive.
+		
+		-->
+		<sessionRecovery>proactive</sessionRecovery>
+		
+		<!--
+		When sessionRecovery is set to passive, use this to set the interval
+		after which a connection without refreshing will be terminated. 
+		
+		Note that this can't be smaller number than 5 seconds.
+		
+		Default is 30 seconds.  
+		-->
+		<sessionExpiration>30</sessionExpiration>
 	</general>
 
 
@@ -30,7 +108,7 @@
 		
 		<!--
 		This parameter sets how long (in minutes) after successful or failed 
-		finish a task's return value should be retained. In other words, if a 
+		execution a task's return value should be retained. In other words, if a 
 		task is finished or failed, its return value will be deleted from the 
 		OGWAPI after this number of minutes. This is to prevent the return
 		values from piling up in the device's memory.
@@ -44,9 +122,9 @@
 		If a task is pending to be run, how long (in minutes) it should remain in the 
 		queue before being tagged as failed by timing out. This is infrastructure
 		specific - if a task usually takes hours to complete, this value should 
-		be set to higher number (maybe even days). If it takes only a few seconds,
+		be set to higher number. If it takes only a few seconds,
 		it usually makes no sense to wait for more than an hour. Again, it 
-		highly depends on what the action is about and common sense.  
+		highly depends on what the action is about and integrator's common sense.  
 		
 		Default value is 120 minutes (2 hours).
 		-->
@@ -58,9 +136,9 @@
 		run. This depends on number of objects that are connecting via this 
 		gateway, and the memory size of the device it runs on. Setting a 
 		limit prevents a malicious object to fill the memory with pending 
-		requests. Note that is is a limit per action, so if you have two
-		actions that can be executed on you local infrastructure, 
-		maximum number of pending tasks will be twice this number.  
+		requests. Note that is a limit per action, so if you have two
+		actions that can be executed on your local object, 
+		maximum number of pending tasks in memory will be twice this number.  
 		
 		Default is 128.  
 		-->
@@ -125,29 +203,8 @@
 		
 		Default is false.
 		-->
-		<debugging>true</debugging>
+		<debugging>false</debugging>
 		
-		<!--
-		Listen for changes in rosters (XMPP contact lists) of devices connected
-		to this Gateway. These changes include whether a partner device goes 
-		offline or online. It is recommended to have this feature turned on,
-		unless there are thousands of devices connected to this Gateway API. 
-		
-		Default is true.
-		-->
-		<listenForRosterChanges>true</listenForRosterChanges>
-		
-		<!--
-		Number of seconds to consider request message as no longer relevant. 
-		After a request is sent from point A to point B, point A waits for 
-		response. If the response does not arrive until this timeout expires, 
-		point B is considered unreachable. If the response arrives after this
-		happens, the response is ignored and discarded and a new request has
-		to be sent.
-		
-		Default is 30 seconds. 
-		-->
-		<messageTimeout>60</messageTimeout>
 	</xmpp>
 	
 	<api>
@@ -222,7 +279,7 @@
 			
 			Defaults to localhost.
 			-->
-			<agentIP>localhost</agentIP>
+			<agentIp>localhost</agentIp>
 			
 			<!-- 
 			Port on which the REST Agent listens.
@@ -234,6 +291,24 @@
 		</restAgentConnector>
 	
 	</connector>
+	
+
+	<search>
+		<sparql>
+			<!--
+			URL of the Gateway API Service facilitating the SPARQL search. Usually
+			there is no need to change this, unless informed that it is necessary. 
+			-->
+			<gwApiServicesUrl>http://vicinity-gateway-services.vicinity.linkeddata.es</gwApiServicesUrl>
+		</sparql>
+		
+		<semantic>
+			<!--
+			This parameter represents a URL path to Semantic Search API.
+			-->
+			<semanticSearchAPI>http://repo.sharq.se.rwth-aachen.de/search/</semanticSearchAPI>
+		</semantic>
+	</search>
 	
 
 </configuration>

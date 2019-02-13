@@ -1,0 +1,356 @@
+{
+	"error": false,
+	"message": [
+		{
+			"id": {
+				"_id": "5bc72fd0fc349e78c9b4e028",
+				"info": {
+					"adapter-id": "dev-adapter-gorenje",
+					"name": "Smart refrigerator 16",
+					"oid": "6ac5a607-6cb0-4035-adce-82ec62add559",
+					"type": "core:Device",
+					"actions": [],
+					"properties": [
+						{
+							"pid": "device_status",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "device_status"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:DeviceStatus"
+						},
+						{
+							"pid": "freezer_door",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "freezer_door"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:FreezerDoorStatus"
+						},
+						{
+							"write_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "boolean"
+											},
+											"name": "result"
+										}
+									],
+									"type": "object"
+								},
+								"input": {
+									"field": [
+										{
+											"schema": {
+												"type": "integer"
+											},
+											"name": "refrigerator_temperature"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"pid": "refrigerator_temperature",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "integer"
+											},
+											"name": "refrigerator_temperature"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:RefrigeratorTemperature"
+						},
+						{
+							"pid": "refrigerator_door",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "refrigerator_door"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:RefrigeratorDoorStatus"
+						},
+						{
+							"write_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "boolean"
+											},
+											"name": "result"
+										}
+									],
+									"type": "object"
+								},
+								"input": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "supercool"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"pid": "supercool",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "supercool"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:SuperCool"
+						},
+						{
+							"write_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "boolean"
+											},
+											"name": "result"
+										}
+									],
+									"type": "object"
+								},
+								"input": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "child_lock"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"pid": "child_lock",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "child_lock"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:ChildLock"
+						},
+						{
+							"write_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "boolean"
+											},
+											"name": "result"
+										}
+									],
+									"type": "object"
+								},
+								"input": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "fastfreeze"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"pid": "fastfreeze",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "fastfreeze"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:FastFreeze"
+						},
+						{
+							"pid": "refrigerator_light",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "refrigerator_light"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:RefrigeratorLightStatus"
+						},
+						{
+							"write_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "boolean"
+											},
+											"name": "result"
+										}
+									],
+									"type": "object"
+								},
+								"input": {
+									"field": [
+										{
+											"schema": {
+												"type": "integer"
+											},
+											"name": "freezer_temperature"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"pid": "freezer_temperature",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "integer"
+											},
+											"name": "freezer_temperature"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:FreezerTemperature"
+						},
+						{
+							"pid": "freezer_light",
+							"read_link": {
+								"output": {
+									"field": [
+										{
+											"schema": {
+												"type": "string"
+											},
+											"name": "freezer_light"
+										}
+									],
+									"type": "object"
+								},
+								"href": "/objects/{oid}/properties/{pid}"
+							},
+							"monitors": "adapters:FreezerLightStatus"
+						}
+					],
+					"events": [
+						{
+							"output": {
+								"field": [
+									{
+										"schema": {
+											"type": "string"
+										},
+										"name": "freezer_door"
+									}
+								],
+								"type": "object"
+							},
+							"eid": "freezer_door",
+							"monitors": "adapters:FreezerDoorStatus"
+						},
+						{
+							"output": {
+								"field": [
+									{
+										"schema": {
+											"type": "string"
+										},
+										"name": "refrigerator_door"
+									}
+								],
+								"type": "object"
+							},
+							"eid": "refrigerator_door",
+							"monitors": "adapters:RefrigeratorDoorStatus"
+						}
+					]
+				}
+			}
+		}
+	]
+}

@@ -1,6 +1,7 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.restlet.data.MediaType;
@@ -59,7 +60,6 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Performs an action on an available IoT object.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param object Model (from request).
 	 * @return A task to perform an action was submitted.
 	 */
 	@Post("json")
@@ -67,32 +67,19 @@ public class ObjectsOidActionsAid extends ServerResource {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null || attrAid == null){
 			logger.info("OID: " + attrOid + " AID: " + attrAid + " Given identifier does not exist.");
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
 					"Given identifier does not exist.");
 		}
 
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
-			logger.info("OID: " + attrOid + " AID: " + attrAid + " Invalid action description.");
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid action description.");
-		}
-		
-		// get the json
-		String actionRequestBody = null;
-		try {
-			actionRequestBody = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid action description");
-		}
+		String body = getRequestBody(entity, logger);
 	
-		return startAction(callerOid, attrOid, attrAid, actionRequestBody);
+		return startAction(callerOid, attrOid, attrAid, body, queryParams);
 	}
 	
 	
@@ -100,13 +87,13 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Updates the status of the task, running on local object.
 	 * 
 	 * @param entity Representation of the incoming JSON.
-	 * @param object Model.
 	 */
 	@Put("json")
 	public Representation store(Representation entity) {
 		String attrOid = getAttribute(ATTR_OID);
 		String attrAid = getAttribute(ATTR_AID);
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
@@ -114,8 +101,8 @@ public class ObjectsOidActionsAid extends ServerResource {
 			logger.info("OID: " + attrOid + " PID: " + attrAid 
 									+ " Object or property does not exist under given identifier.");
 			
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Object or property does not exist under given identifier.");
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Object or action does not exist under given identifier.");
 		}
 		
 		if (!attrOid.equals(callerOid)) {
@@ -126,28 +113,12 @@ public class ObjectsOidActionsAid extends ServerResource {
 					"OID and caller ID must match.");
 		}
 		
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
-			logger.info("OID: " + attrOid + " PID: " + attrAid 
-					+ " Invalid property description - must be a valid JSON.");
-			
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description - must be a valid JSON.");
-		}
-		
 		// get the new status
 		String newStatus = getQueryValue(PARAM_STATUS);
 		
-		// get the json
-		String returnValue = null;
-		try {
-			returnValue = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid property description");
-		}
+		String returnValue = getRequestBody(entity, logger);
 		
-		return updateActionStatus(callerOid, attrAid, newStatus,returnValue);
+		return updateActionStatus(callerOid, attrAid, newStatus, returnValue, queryParams);
 	}
 	
 	
@@ -158,18 +129,19 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Stores new action.
 	 * 
 	 * @param sourceOid Caller OID.
-	 * @param attrOid Called OID.
-	 * @param attrAid Action ID.
-	 * @param actionRequestBody New representation of the Action.
-	 * @param logger Logger taken previously from Context.
+	 * @param destinationOid Called OID.
+	 * @param actionId Action ID.
+	 * @param body New representation of the Action.
 	 * @return Response text.
 	 */
-	private Representation startAction(String sourceOid, String attrOid, String attrAid, String actionRequestBody){
+	private Representation startAction(String sourceOid, String destinationOid, String actionId, String body, 
+			Map<String, String> queryParams){
 
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.startAction(sourceOid, attrOid, attrAid, actionRequestBody));
+		return new JsonRepresentation(communicationManager.startAction(sourceOid, destinationOid, actionId, body, 
+				queryParams).buildMessage().toString());
 	
 	}
 	
@@ -178,16 +150,48 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 * Retrieves the Action defined as AID.
 	 * 
 	 * @param sourceOid Caller OID.
-	 * @param attrOid Called OID.
-	 * @param attrAid Action ID.
-	 * @param logger Logger taken previously from Context.
+	 * @param status Next status.
+	 * @param actionId Action ID.
+	 * @param returnValue New return value.
+	 * @param queryParams Query parameters to be send along.
 	 * @return Response text.
 	 */
-	private Representation updateActionStatus(String sourceOid, String attrAid, String status, String returnValue){
+	private Representation updateActionStatus(String sourceOid, String actionId, String status, String returnValue, 
+			Map<String, String> queryParams){
+		
 		CommunicationManager communicationManager 
 				= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(communicationManager.updateTaskStatus(sourceOid, attrAid, status, returnValue));
+		return new JsonRepresentation(communicationManager.updateTaskStatus(sourceOid, actionId, status, returnValue, 
+				queryParams).buildMessage().toString());
 		
+	}
+	
+	// === PRIVATE METHODS ===
+	private String getRequestBody(Representation entity, Logger logger) {
+		
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body - must be a valid JSON.");
+		}
+		
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
+		}
+		
+		return eventJsonString;
 	}
 }

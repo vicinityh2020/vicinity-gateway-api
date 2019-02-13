@@ -1,4 +1,0 @@
-tunnels:
-  agent:
-    proto: http
-    addr: 8181

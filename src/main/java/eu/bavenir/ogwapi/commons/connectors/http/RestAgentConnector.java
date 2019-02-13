@@ -3,8 +3,12 @@ package eu.bavenir.ogwapi.commons.connectors.http;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.json.Json;
+import javax.json.JsonBuilderFactory;
+import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
@@ -14,6 +18,7 @@ import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
+import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
@@ -26,15 +31,11 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
  * - private methods
  */
 
-// TODO documentation
-// TODO the creation of the response message (and tinkering with request messages) should be done one
-// level higher
 
 /**
- * Class that processes a request received in {@link NetworkMessageRequest NetworkMessageRequest}. The reasoning behind 
- * this is, that in order to invoke the required action on the Agent, a REST service on its side has to be called. By 
- * receiving the pieces of the URL and its parameters in the incoming message, the URL can be assembled without a need 
- * to hard code it. 
+ * Implementation of an {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector} based on HTTP
+ * REST services. This connector uses Restlet framework to deliver requests to an Agent component specified in the
+ * configuration file. 
  * 
  * @author sulfo
  *
@@ -42,6 +43,14 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 public class RestAgentConnector extends AgentConnector {
 	
 	/* === CONSTANTS === */
+	
+	/**
+	 * Reserved word for source OID parameter. Since it is impossible to incorporate the source object ID into the request
+	 * other way than in parameters (without changing the request body), one parameter with this name is reserved and
+	 * the source object ID is sent as its value. If there was a parameter with the same name before, it will get
+	 * overwritten. 
+	 */
+	private static final String PARAM_SOURCEOID = "sourceOid";
 	
 	/**
 	 * Name of the configuration parameter for whether the REST Agent Connector uses simulated calls (such configuration
@@ -55,10 +64,21 @@ public class RestAgentConnector extends AgentConnector {
 	 */
 	private static final String CONFIG_PARAM_CONNECTORRESTUSEHTTPS = "connector.restAgentConnector.useHttps";
 	
+	/*
+	private static final String CONFIG_PARAM_HTTPSACCEPTSALLCERTIFICATES = 
+														"connector.restAgentConnector.acceptAllCertificates";
+	
+	private static final String CONFIG_PARAM_AUTHENTICATIONSCHEMA = "connector.restAgentConnector.authenticationSchema";
+	
+	private static final String CONFIG_PARAM_LOGIN = "connector.restAgentConnector.login";
+	
+	private static final String CONFIG_PARAM_PASSWORD = "connector.restAgentConnector.password";
+	
+	*/
 	/**
 	 * Name of the configuration parameter for Agent IP.
 	 */
-	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIP";
+	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIp";
 	
 	/**
 	 * Name of the configuration parameter for Agent port.
@@ -104,42 +124,80 @@ public class RestAgentConnector extends AgentConnector {
 	 */
 	private static final String AGENT_API_STRING = "/agent";
 	
-	
+	/**
+	 * Name of the 'objects' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_OBJECTS = "/objects";
 	
+	/**
+	 * Name of the 'properties' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_PROPERTIES = "/properties";
 	
+	/**
+	 * Name of the 'events' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_EVENTS = "/events";
 	
+	/**
+	 * Name of the 'actions' attribute in the final URL.
+	 */
 	private static final String ATTR_URL_ACTIONS = "/actions";
 	
+	/**
+	 * Name of the 'dummy' attribute in the returned JSON.
+	 */
+	private static final String ATTR_DUMMY = "dummy";
 	
+	/**
+	 * Operation code for GET.
+	 */
 	private static final byte OPERATION_GET = 0x00;
 	
+	/**
+	 * Operation code for POST.
+	 */
 	private static final byte OPERATION_POST = 0x01;
 	
+	/**
+	 * Operation code for PUT.
+	 */
 	private static final byte OPERATION_PUT = 0x02;
 	
+	/**
+	 * Operation code for DELETE.
+	 */
 	private static final byte OPERATION_DELETE = 0x03;
 	
 	
 	
 	/* === FIELDS === */
 	
-	// for the sake of making it easier to send the info about HTTPS into the logs
+	/**
+	 * Configuration flag for HTTPS.
+	 */
 	private boolean useHttps;
 	
-	// REST agent will be using dummy calls
+	/**
+	 * Configuration flag for using dummy operations instead of the real ones.
+	 */
 	private boolean dummyCalls;
 	
-	// this is the agent service URL, without attributes (basically something like http://ip:port/apiname) 
+	/**
+	 * This is the agent service URL, without attributes (basically something like http://ip:port/apiname) .
+	 */
 	private String agentServiceUrl;
+	
+	
 	
 	/* === PUBLIC METHODS === */
 	
 	/**
 	 * Constructor. It is necessary to provide all parameters. If null is provided in place of any of them, 
 	 * a storm of null pointer exceptions is imminent.
+	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
 	public RestAgentConnector(XMLConfiguration config, Logger logger){
 		super(config, logger);
@@ -161,120 +219,73 @@ public class RestAgentConnector extends AgentConnector {
 			useHttps = false;
 		}
 		
-		
-		
 		agentServiceUrl = assembleAgentServiceUrl();
 		
 	}
 	
 
 	@Override
-	public NetworkMessageResponse forwardEventToObject(String objectID, String eventID, String eventBody) {
+	public NetworkMessageResponse forwardEventToObject(String sourceOid, String destinationOid, String eventId, 
+			String body, Map<String, String> parameters) {
 		
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_EVENTS + "/" + eventID;
+		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + destinationOid + ATTR_URL_EVENTS + "/" + eventId;
 		
-		return performOperation(OPERATION_PUT, fullEndpointUrl, eventBody);
+		return performOperation(OPERATION_PUT, sourceOid, fullEndpointUrl, body, parameters);
 	}
 
 	
 
 	@Override
-	public NetworkMessageResponse getObjectProperty(NetworkMessageRequest requestMessage) {
+	public NetworkMessageResponse getObjectProperty(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String, String> parameters) {
 		
-		NetworkMessageResponse response;
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-		// finalise the URL
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		fullEndpointUrl = 
+				fullEndpointUrl + ATTR_URL_OBJECTS + "/" + destinationOid + ATTR_URL_PROPERTIES + "/" + propertyId;
+
 		
-		if (!attributesMap.isEmpty()){
-			
-			// get the object ID
-			fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS;
-			String objectID = attributesMap.get(NetworkMessageRequest.ATTR_OID);
-			
-			if (objectID != null) {
-				fullEndpointUrl = fullEndpointUrl + "/" + objectID;
-			}
-			
-			// get the property ID
-			fullEndpointUrl = fullEndpointUrl + ATTR_URL_PROPERTIES;
-			String propertyID = attributesMap.get(NetworkMessageRequest.ATTR_PID);
-			
-			if (propertyID != null) {
-				fullEndpointUrl = fullEndpointUrl + "/" + propertyID;
-			}
-			
-		}
-		
-		response = performOperation(OPERATION_GET, fullEndpointUrl, null);
-		
-		// set the correlation ID 
-		response.setRequestId(requestMessage.getRequestId());
-		
-		return response;
+		return performOperation(OPERATION_GET, sourceOid, fullEndpointUrl, body, parameters);
 	}
 
 
 	@Override
-	public NetworkMessageResponse setObjectProperty(NetworkMessageRequest requestMessage) {
+	public NetworkMessageResponse setObjectProperty(String sourceOid, String destinationOid, String propertyId, 
+			String body, Map<String, String> parameters) {
 
-		NetworkMessageResponse response;
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-	
-		// finalise the URL
-		LinkedHashMap<String, String> attributesMap = requestMessage.getAttributes();
+		fullEndpointUrl = 
+				fullEndpointUrl + ATTR_URL_OBJECTS + "/" + destinationOid + ATTR_URL_PROPERTIES + "/" + propertyId;
 		
-		if (!attributesMap.isEmpty()){
-			
-			// get the object ID
-			fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS;
-			String objectID = attributesMap.get(NetworkMessageRequest.ATTR_OID);
-			
-			if (objectID != null) {
-				fullEndpointUrl = fullEndpointUrl + "/" + objectID;
-			}
-			
-			// get the property ID
-			fullEndpointUrl = fullEndpointUrl + ATTR_URL_PROPERTIES;
-			String propertyID = attributesMap.get(NetworkMessageRequest.ATTR_PID);
-			
-			if (propertyID != null) {
-				fullEndpointUrl = fullEndpointUrl + "/" + propertyID;
-			}
-		}
-		
-		response = performOperation(OPERATION_PUT, fullEndpointUrl, requestMessage.getRequestBody());
-		
-		// set the correlation ID 
-		response.setRequestId(requestMessage.getRequestId());
-		
-		return response;
+		return performOperation(OPERATION_PUT, sourceOid, fullEndpointUrl, body, parameters);
 	}
 
 
 	@Override
-	public NetworkMessageResponse startObjectAction(String objectID, String actionID, String requestBody) {
+	public NetworkMessageResponse startObjectAction(String sourceOid, String destinationOid, String actionId, 
+			String body, Map<String, String> parameters) {
 		
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
+		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + destinationOid + ATTR_URL_ACTIONS + "/" + actionId;
 
-		return performOperation(OPERATION_POST, fullEndpointUrl, requestBody);
+		return performOperation(OPERATION_POST, sourceOid, fullEndpointUrl, body, parameters);
 	}
 
 
 
 	@Override
-	public NetworkMessageResponse cancelTask(String objectID, String actionID) {
+	public NetworkMessageResponse stopObjectAction(String sourceOid, String destinationOid, String actionId, String body, 
+			Map<String, String> parameters) {
+		
 		String fullEndpointUrl = new String(agentServiceUrl);
 		
-		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + objectID + ATTR_URL_ACTIONS + "/" + actionID;
+		fullEndpointUrl = fullEndpointUrl + ATTR_URL_OBJECTS + "/" + destinationOid + ATTR_URL_ACTIONS + "/" + actionId;
 		
-		return performOperation(OPERATION_DELETE, fullEndpointUrl, null);
+		return performOperation(OPERATION_DELETE, sourceOid, fullEndpointUrl, body, parameters);
 	}
 	
 	
@@ -284,13 +295,9 @@ public class RestAgentConnector extends AgentConnector {
 	
 	/* === PRIVATE METHODS === */
 	
-	// TODO documentation
 	/**
 	 * This method takes incoming {@link NetworkMessageRequest request} and parses it into URL of an Agent service. 
 	 * See the main Javadoc section for the {@link NetworkMessageRequest request} class for more details.
-	 * 
-	 * @param networkMessageRequest Message with action request.
-	 * @return URL on the Agent side that is to be called.
 	 * 
 	 */
 	private String assembleAgentServiceUrl(){
@@ -315,31 +322,48 @@ public class RestAgentConnector extends AgentConnector {
 	}
 	
 	
-	
-	// TODO documentation
 	/**
-	 * Processes the {@link NetworkMessageRequest request} that arrived from the XMPP network. After the URL of the 
-	 * required Agent service is assembled, the URL is called with the necessary HTTP method and the result is returned. 
+	 * Processes the {@link NetworkMessageRequest request} that arrived from the network. After the URL of the 
+	 * required Agent service is assembled, the URL is called with the necessary HTTP method and the result is returned.
 	 * 
-	 * @param request {@link NetworkMessageRequest Message} received over XMPP network. 
-	 * @return {@link NetworkMessageResponse Response} from the Agent. 
+	 * @param operationCode Code of the HTTP operation, see the constants.
+	 * @param sourceOid The object ID of the source. 
+	 * @param fullUrl Full URL of the Agent's endpoint to be reached. 
+	 * @param body Body of the request.
+	 * @param parameters Parameters passed in the request.
+	 * @return Response message with the results.
 	 */
-	private NetworkMessageResponse performOperation(byte operationCode, String fullUrl, String body){
+	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
+			Map<String, String> parameters){
 		
 		if (dummyCalls) {
-			return performDummyOperation(operationCode, fullUrl, body);
+			return performDummyOperation(operationCode, sourceOid, fullUrl, body, parameters);
 		}
 		
-		logger.finest("REST Agent Connector: Operation code: " + operationCode);
-		logger.finest("REST Agent Connector: Assembled URL: " + fullUrl);
+		// don't forget to put source OID as one of the parameters
+		parameters.put(PARAM_SOURCEOID, sourceOid);
 		
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		logger.finest("REST Agent Connector:\nOperation code: " + operationCode
+				+ "\nAssembled full URL: " + fullUrl
+				+ "\nParameters: " + parameters.toString()
+				+ "\nBody: " + body
+				);
 		
-		ClientResource clientResource = new ClientResource(fullUrl);
-		
+		// create stuff
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+
 		Writer writer = new StringWriter();
 		Representation responseRepresentation = null;
 		
+		ClientResource clientResource = new ClientResource(fullUrl);
+		
+		// fill the parameters
+		if (parameters != null) {
+			for (String paramName : parameters.keySet()) {
+				clientResource.addQueryParameter(paramName, parameters.get(paramName));
+			}
+		}
+	
 		try {
 			
 			switch (operationCode){
@@ -348,6 +372,7 @@ public class RestAgentConnector extends AgentConnector {
 			
 				// parameters
 				responseRepresentation = clientResource.get();
+			
 				break;
 				
 			case OPERATION_POST:
@@ -374,7 +399,7 @@ public class RestAgentConnector extends AgentConnector {
 					responseRepresentation = clientResource.put(new JsonRepresentation(body), 
 							MediaType.APPLICATION_JSON);
 				} else {
-					logger.warning("REST Agent Connector: PUT request contains no body.");
+					logger.finest("REST Agent Connector: PUT request contains no body.");
 					responseRepresentation = clientResource.put(null);
 				}
 				
@@ -386,38 +411,95 @@ public class RestAgentConnector extends AgentConnector {
 				
 			}
 			
-			if (responseRepresentation != null){
-				
-				responseRepresentation.write(writer);
-				response.setResponseBody(writer.toString());
-
-			} 
+		} catch (ResourceException e) {
 			
-		} catch (ResourceException | IOException e) {
+			// this is what happens when something else than 2xx got returned - in that case we don't have access
+			// to response body the regular way...
 			
-			logger.warning(e.getMessage());
+			logger.warning("Exception from the RESTLET client: " + e.getMessage());
+			
+			responseRepresentation = clientResource.getResponseEntity();
 
 		} finally {
 			
+			MediaType type = responseRepresentation.getMediaType();
+			
+			// save the body
+			if (responseRepresentation != null){
+				try {
+					responseRepresentation.write(writer);
+					response.setResponseBody(writer.toString());
+					
+					if (type != null && !type.getName().isEmpty()) {
+						response.setContentType(type.getName());
+					}
+					
+				} catch (IOException e) {
+					
+					logger.warning("Exception during writing the response body: " + e.getMessage());
+				}
+				
+			} 
+			
+			// save the status code and reason
+			if (clientResource.getStatus().getCode() / 200 == 1) {
+				response.setError(false);
+			} else {
+				response.setError(true);
+			}
+			
 			response.setResponseCode(clientResource.getStatus().getCode());
 			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
+			
+			try {
+				writer.close();
+			} catch (IOException e) {
+				logger.severe("IO exception during writer closure: " + e.getMessage());
+			}
 		}
 
 		return response;
 	}
 	
 	
-	/*
-	 * Very handy testing method that can be used instead of performOperation. This one does not rely on 
-	 * functional agent and always returns positive results.
-	*/
-	private NetworkMessageResponse performDummyOperation (byte operationCode, String fullUrl, String body) {
+
+	/**
+	 * Very handy testing method that, if set in the configuration file, can be used instead of performOperation. This one does 
+	 * not rely on functional agent and always returns positive results.
+	 * 
+	 * @param operationCode Code of the HTTP operation, see the constants.
+	 * @param sourceOid The object ID of the source. 
+	 * @param fullUrl Full URL of the Agent's end point to be reached. 
+	 * @param body Body of the request.
+	 * @param parameters Parameters passed in the request.
+	 * @return Response message with the results.
+	 */
+	private NetworkMessageResponse performDummyOperation (byte operationCode, String sourceOid, String fullUrl, 
+			String body, Map<String, String> parameters) {
 		
-		NetworkMessageResponse response = new NetworkMessageResponse(config);
+		// don't forget to put source OID as one of the parameters
+		parameters.put(PARAM_SOURCEOID, sourceOid);
 		
-		response.setResponseCode(200);
-		response.setResponseCodeReason("OK");
-		response.setResponseBody("REST Agent Connector: Dummy reply from REST Agent Connector. URL: " + fullUrl);
+		String dummyResponseMessage = 
+				new String("Dummy REST Agent Connector received following data to perform request:"
+						+ "\nOperation code: " + operationCode
+						+ "\nFull URL: " + fullUrl
+						+ "\nBody: " + body);
+		
+		logger.info(dummyResponseMessage);
+		
+		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
+		
+		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
+		
+		builder.add(ATTR_DUMMY, dummyResponseMessage);
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK);
+		response.setResponseBody(builder.build().toString());
 		
 		return response;
 	}

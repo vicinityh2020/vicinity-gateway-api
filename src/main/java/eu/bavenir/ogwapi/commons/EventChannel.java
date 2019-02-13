@@ -14,11 +14,10 @@ import java.util.Set;
  */
 
 
-// TODO documentation
-
-// napisat ze je to thread safe a ako sa to pouziva.
 /**
- * 
+ * This class represents an event channel to which other objects can subscribe, unsubscribe, check its status and facilitates
+ * the distribution of event message to subscriber by providing the up to date list of subscribed objects to the supervising 
+ * {@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor}. 
  * 
  * 
  * @author sulfo
@@ -39,9 +38,25 @@ public class EventChannel {
 	 */
 	public static final boolean STATUS_ACTIVE = true;
 	
+	/**
+	 * String with representation of the active state.
+	 */
 	public static final String STATUS_STRING_ACTIVE = "active";
 	
+	/**
+	 * String with representation of the inactive state.
+	 */
 	public static final String STATUS_STRING_INACTIVE = "inactive";
+	
+	/**
+	 * Attribute for activity.
+	 */
+	public static final String ATTR_ACTIVE = "active";
+	
+	/**
+	 * Attribute for subscription.
+	 */
+	public static final String ATTR_SUBSCRIBED = "subscribed";
 	
 	
 	/* === FIELDS === */
@@ -50,12 +65,12 @@ public class EventChannel {
 	 * This is the object ID of the channel owner (usually the local object, represented by its 
 	 * {@link ConnectionDescriptor ConnectionDescriptor}). 
 	 */
-	private String objectID;
+	private String objectId;
 	
 	/**
 	 * The ID of the event channel. 
 	 */
-	private String eventID;
+	private String eventId;
 	
 	/**
 	 * Status of the event channel.
@@ -75,13 +90,13 @@ public class EventChannel {
 	/**
 	 * Constructor that initialises the EventChannel object with empty set of subscribers. 
 	 * 
-	 * @param objectID Object ID of the owner of this event channel.
-	 * @param eventID ID of the event channel.
+	 * @param objectId Object ID of the owner of this event channel.
+	 * @param eventId ID of the event channel.
 	 * @param active Status of the channel. 
 	 */
-	public EventChannel(String objectID, String eventID, boolean active) {
-		this.objectID = objectID;
-		this.eventID = eventID;
+	public EventChannel(String objectId, String eventId, boolean active) {
+		this.objectId = objectId;
+		this.eventId = eventId;
 		this.active = active;
 		subscribers = Collections.synchronizedSet(new HashSet<String>());
 	}
@@ -90,14 +105,14 @@ public class EventChannel {
 	/**
 	 * Constructor that initialises the EventChannel object with a pre-loaded set of subscribers.
 	 * 
-	 * @param objectID Object ID of the owner of this event channel.
-	 * @param eventID ID of the event channel. 
+	 * @param objectId Object ID of the owner of this event channel.
+	 * @param eventId ID of the event channel. 
 	 * @param active Status of the channel.
 	 * @param subscribers A set of subscribers to this EventChannel. 
 	 */
-	public EventChannel(String objectID, String eventID, boolean active, HashSet<String> subscribers) {
-		this.objectID = objectID;
-		this.eventID = eventID;
+	public EventChannel(String objectId, String eventId, boolean active, HashSet<String> subscribers) {
+		this.objectId = objectId;
+		this.eventId = eventId;
 		this.active = active;
 		this.subscribers = Collections.synchronizedSet(subscribers);
 		
@@ -134,11 +149,11 @@ public class EventChannel {
 	 * 
 	 *  This is a thread safe operation.
 	 * 
-	 * @param objectID Object ID of the new subscriber.
+	 * @param objectId Object ID of the new subscriber.
 	 */
-	public void addToSubscribers(String objectID) {
+	public void addToSubscribers(String objectId) {
 		synchronized(subscribers) {
-			subscribers.add(objectID);
+			subscribers.add(objectId);
 		}
 	}
 	
@@ -148,11 +163,11 @@ public class EventChannel {
 	 * 
 	 * This is a thread safe operation.
 	 *  
-	 * @param objectID Object ID of the subscriber to be removed. 
+	 * @param objectId Object ID of the subscriber to be removed. 
 	 */
-	public void removeFromSubscribers(String objectID) {
+	public void removeFromSubscribers(String objectId) {
 		synchronized(subscribers) {
-			subscribers.remove(objectID);
+			subscribers.remove(objectId);
 		}
 	}
 	
@@ -160,11 +175,11 @@ public class EventChannel {
 	/**
 	 * Checks whether the given object ID is in the set of subscribers for the current event. 
 	 * 
-	 * @param objectID Object ID to be checked. 
+	 * @param objectId Object ID to be checked. 
 	 * @return True if the object ID is among the subscribers.
 	 */
-	public boolean isSubscribed(String objectID) {
-		return subscribers.contains(objectID);
+	public boolean isSubscribed(String objectId) {
+		return subscribers.contains(objectId);
 	}
 	
 	
@@ -173,8 +188,8 @@ public class EventChannel {
 	 * 
 	 * @return Object ID of the object that generates the events. 
 	 */
-	public String getOwnerObjectID() {
-		return objectID;
+	public String getOwnerObjectId() {
+		return objectId;
 	}
 
 	
@@ -183,8 +198,8 @@ public class EventChannel {
 	 * 
 	 * @return Event ID.
 	 */
-	public String getEventID() {
-		return eventID;
+	public String getEventId() {
+		return eventId;
 	}
 
 

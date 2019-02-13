@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.Map.Entry;
 
 import javax.json.Json;
@@ -23,24 +24,34 @@ import org.apache.commons.configuration2.XMLConfiguration;
  */
 
 
-// explain why there are two constructors
 /**
- * Extended {@link NetworkMessage NetworkMessage} that represents a request. In order to transport a request across P2P
- * network, it has to be disassembled at the place of origin (HTTP method, URL attributes, parameters, etc. have to 
- * be parsed), sent over the network (in this case as JSON string) and then reassembled at the destination into
- * valid HTTP request.
+ * Extended {@link NetworkMessage NetworkMessage} that represents a request. Aside from fields inherited from parent
+ * it also facilitates transport of request body, parameters and attributes (which are basically just identifiers 
+ * of respective properties, actions, tasks, ...). 
  * 
- * Use it like this:
+ * OGWAPI uses it like this:
  * 
- * In your Gateway API Service implementation:
- *  1. Construct an instance of this class - use the constructor without parameter.
- *  2. Call {@link #setRequestOperation(String) setRequestOperation} and set GET, POST, etc.
- *  3. Call {@link #addAttribute(String, String) addAttribute} as many times as needed.
- *  4. Do the same as for parameters.
- *  5. Build the message by {@link #buildMessageJson buildMessageJson}. By calling its toString you obtain a string to 
- *  	be sent through {@link CommunicationManager CommunicationNode}.
- *  6. Expect {@link NetworkMessageResponse NetworkMessageResponse} by using 
- *  {@link CommunicationManager#retrieveSingleMessage(String,int) retireveSingleMessage} method.
+ *  1. It construct an instance of this class - uses the constructor without parameter.
+ *  2. Calls {@link #setRequestOperation(byte) setRequestOperation} and sets the requested operation etc.
+ *  3. Compiles a {@link java.util.Map Map} of attributes (like a property ID if there is a request that involves some 
+ *     property etc.) and calls {@link #setAttributes(Map) setAttributes}.
+ *  4. Does the same for parameters.
+ *  5. Builds the message by {@link #buildMessageString() buildMessageString} and obtains a string to be sent across
+ *     the network.
+ *     
+ * The final message is a JSON string, which was chosen as universal format to transport messages in the system. It was 
+ * preferred over serialisation of the whole NetworkMessageRequest instance and sending it as a byte stream, because:
+ * 
+ *  a. There is no guarantee that future engines will be able to transmit such byte stream easily, but transport
+ *     of a string should be a guaranteed feature of almost any protocol worth consideration (this is non-rigorous 
+ *     assumption of course, but necessary in the early stages of the project).
+ *  b. The final JSON string is smaller than a byte stream of serialised NetworkMessageRequest instance (common sense :)). 
+ *  
+ *  If there are any modification to this class, they will probably be about extending the range of operations or 
+ *  adding more fields that will be transported over the network. In the first case, add a constant with new operation code 
+ *  into the list and don't forget to add it also into the {@link #validateRequestOperation(byte) validateRequestOperation}.
+ *  In the second case don't forget to put the new field into the {@link #parseJson(JsonObject) parser} and {@link #buildMessageJson() builder}.
+ *  Note that such modification will make the new OGWAPI incompatible with the previous versions.
  *  
  * @author sulfo
  *
@@ -55,7 +66,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 	public static final int MESSAGE_TYPE = 0x01;
 	
 	/**
-	 * Name of the request method field in JSON that is to be sent. 
+	 * Name of the request operation attribute in JSON that is to be sent. 
 	 */
 	private static final String ATTR_REQUESTOPERATION = "requestOperation";
 	
@@ -70,15 +81,9 @@ public class NetworkMessageRequest extends NetworkMessage {
 	private static final String ATTR_PARAMETERS = "parameters";
 	
 	/**
-	 * Name of the request body attribute.
+	 * Name of the request body attribute in the JSON.
 	 */
 	private static final String ATTR_REQUESTBODY = "requestBody";
-	
-	
-	/**
-	 * How the object ID is to be marked in the message.
-	 */
-	public static final String ATTR_OID = "oid";
 	
 	
 	/**
@@ -175,14 +180,14 @@ public class NetworkMessageRequest extends NetworkMessage {
 	private byte requestOperation;
 	
 	/**
-	 * Linked hash map with attribute names and their values.
+	 * Map with attribute names and their values.
 	 */
-	private LinkedHashMap<String, String> attributes = new LinkedHashMap<String, String>();
+	private Map<String, String> attributes;
 	
 	/**
-	 * Linked hash map with parameter names and their values.
+	 * Map with parameter names and their values.
 	 */
-	private LinkedHashMap<String, String> parameters = new LinkedHashMap<String, String>();
+	private Map<String, String> parameters;
 	
 	/**
 	 * Request body. 
@@ -191,15 +196,18 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/* === PUBLIC METHODS === */
-	
 	/**
 	 * Constructor of a request message that is to be sent across the network. Request ID is computed during 
-	 * object's construction. The rest of attributes, codes, parameters, etc. need to be filled as needed.  
+	 * object's construction. The rest of attributes, codes, parameters, etc. need to be filled as needed. 
 	 * 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
-	public NetworkMessageRequest(XMLConfiguration config){
+	public NetworkMessageRequest(XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
+		
+		initialise();
 		
 		messageType = NetworkMessageRequest.MESSAGE_TYPE;
 		
@@ -212,10 +220,14 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * successful, the result is an object with validity {@link NetworkMessage#valid flag} set to false.
 	 * 
 	 * @param json JSON that arrived from the network. 
+	 * @param config Configuration of the OGWAPI.
+	 * @param logger Logger of the OGWAPI.
 	 */
-	public NetworkMessageRequest(JsonObject json, XMLConfiguration config){
+	public NetworkMessageRequest(JsonObject json, XMLConfiguration config, Logger logger){
 		// always call this guy
-		super(config);
+		super(config, logger);
+		
+		initialise();
 		
 		// remember the json this message was created from
 		jsonRepresentation = json;
@@ -229,7 +241,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	/**
 	 * Retrieves the request's body.
-	 * @return
+	 * 
+	 * @return Body of the request.
 	 */
 	public String getRequestBody() {
 		return requestBody;
@@ -238,7 +251,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 
 	/**
 	 * Sets the request's body.
-	 * @param requestBody
+	 * 
+	 * @param requestBody Body of the request.
 	 */
 	public void setRequestBody(String requestBody) {
 		this.requestBody = requestBody;
@@ -246,7 +260,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 
 
 	/**
-	 * Returns a JSON String that is to be sent over the network. The String is build from all the attributes that
+	 * Returns a JSON String that is to be sent over the network. The String is build from all the fields that
 	 * were set with getters and setters. Use this when you are finished with setting the attributes, parameters etc.
 	 * 
 	 * @return JSON String that can be sent over the network.
@@ -282,44 +296,11 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * Inserts attributes into the message. For the purposes of this message protocol implementation, attributes are 
-	 * the parts of URL, that may contain keys (attribute names) with or without values.
-	 * 
-	 * /objects/{oid}/subscriptions -> 	example of a key with value (objects and {oid}) and a key with no value 
-	 * 									(subscription). 
-	 *  
-	 * @param name Attribute name - a key.
-	 * @param value Value of the attribute. Can be null.
-	 */
-	public void addAttribute(String name, String value){
-		// we don't want null keys (although it is possible to have one...)
-		if (name != null){
-			attributes.put(name, value);
-		}
-	}
-	
-	
-	/**
-	 * Inserts parameters into the message. For the purposes of this message protocol implementation, parameters are
-	 * the regular HTTP parameters, passed in the request.
-	 * 
-	 * @param name Parameter name - a key.
-	 * @param value Value of the parameter. Can be null.
-	 */
-	public void addParameter(String name, String value){
-		// we don't want null keys (although it is possible to have one...)
-		if (name != null){
-			parameters.put(name, value);
-		}
-	}
-	
-	
-	/**
 	 * Retrieves the attributes hash map.
 	 * 
 	 * @return Hash map with attributes.
 	 */
-	public LinkedHashMap<String, String> getAttributes() {
+	public Map<String, String> getAttributes() {
 		return attributes;
 	}
 
@@ -329,8 +310,28 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 * 
 	 * @return Hash map with parameters.
 	 */
-	public LinkedHashMap<String, String> getParameters() {
+	public Map<String, String> getParameters() {
 		return parameters;
+	}
+	
+	
+	/**
+	 * Sets the {@link java.util.Map Map} filled with parameters.
+	 * 
+	 * @param parameters Map of parameters.
+	 */
+	public void setParameters(Map<String, String> parameters) {
+		this.parameters = parameters;
+	}
+	
+	
+	/**
+	 * Sets the {@link java.util.Map Map} filled with attributes.
+	 * 
+	 * @param attributes Map of attributes.
+	 */
+	public void setAttributes(Map<String, String> attributes) {
+		this.attributes = attributes;
 	}
 	
 	
@@ -390,6 +391,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 		JsonObjectBuilder mainBuilder = jsonBuilderFactory.createObjectBuilder();
 		mainBuilder.add(ATTR_MESSAGETYPE, messageType)
 			.add(ATTR_REQUESTID, requestId)
+			.add(ATTR_SOURCEOID, sourceOid)
+			.add(ATTR_DESTINATIONOID, destinationOid)
 			.add(ATTR_REQUESTOPERATION, requestOperation);
 		
 		if (requestBody == null){
@@ -407,38 +410,92 @@ public class NetworkMessageRequest extends NetworkMessage {
 	
 	
 	/**
-	 * Takes the JSON object and fills necessary fields with values.
+	 * Takes the JSON object and fills necessary fields with values. There are attributes that needs to be included in 
+	 * the JSON that is to be parsed ( see the implementation ). Therefore the JSON is first checked for these attributes
+	 * and it is not until the check is complete when the parsing itself starts. 
 	 * 
-	 * @param json JSON to parse.
+	 * 
+	 * @param json JSON to be parsed.
 	 * @return True if parsing was successful, false otherwise.
 	 */
 	private boolean parseJson(JsonObject json){
 		
-		// figure out the message type
-		messageType = json.getInt(NetworkMessage.ATTR_MESSAGETYPE);
-
-		// the correlation ID of the request
-		requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
-		
-		// get and validate the request operation
-		requestOperation = (byte) json.getInt(NetworkMessageRequest.ATTR_REQUESTOPERATION);
-		
-		if (!validateRequestOperation(requestOperation)) {
-			setValid(false);
+		// first check out whether or not the message has everything it is supposed to have and stop if not
+		if (
+				!json.containsKey(ATTR_MESSAGETYPE) ||
+				!json.containsKey(ATTR_REQUESTID) ||
+				!json.containsKey(ATTR_SOURCEOID) ||
+				!json.containsKey(ATTR_DESTINATIONOID) ||
+				!json.containsKey(ATTR_REQUESTOPERATION) ||
+				!json.containsKey(ATTR_REQUESTBODY) ||
+				!json.containsKey(ATTR_ATTRIBUTES) ||
+				!json.containsKey(ATTR_PARAMETERS)) {
+			
 			return false;
 		}
 		
-		if (!json.isNull(NetworkMessageRequest.ATTR_REQUESTBODY)){
-			requestBody = removeQuotes(json.getString(NetworkMessageRequest.ATTR_REQUESTBODY));
+		// prepare objects for parameters and attributes
+		JsonObject attributesJson = null;
+		JsonObject parametersJson = null;
+		
+		// load values from JSON
+		try {
+			
+			messageType = json.getInt(ATTR_MESSAGETYPE);
+			requestId = json.getInt(NetworkMessage.ATTR_REQUESTID);
+			requestOperation = (byte) json.getInt(ATTR_REQUESTOPERATION);
+			
+			// null values are special cases in JSON, they get transported as "null" string and it requires special
+			// treatment
+			if (!json.isNull(ATTR_SOURCEOID)) {
+				sourceOid = json.getString(ATTR_SOURCEOID);
+			}
+			
+			if (!json.isNull(ATTR_DESTINATIONOID)) {
+				destinationOid = json.getString(ATTR_DESTINATIONOID);
+			}
+			
+			if (!json.isNull(ATTR_ATTRIBUTES)) {
+				attributesJson = json.getJsonObject(ATTR_ATTRIBUTES);
+			}
+			
+			if (!json.isNull(ATTR_PARAMETERS)) {
+				parametersJson = json.getJsonObject(ATTR_PARAMETERS);
+			}
+			
+			if (!json.isNull(ATTR_REQUESTBODY)) {
+				requestBody = json.getString(ATTR_REQUESTBODY);
+			}
+			
+		} catch (Exception e) {
+			logger.severe("NetworkMessageRequest: Exception while parsing NetworkMessageRequest: " + e.getMessage());
+			
+			return false;
 		}
+		
+		// validate the request operation
+		if (!validateRequestOperation(requestOperation)) {
+			return false;
+		}
+		
+		// process non primitives, start with strings
+		
+		sourceOid = removeQuotes(sourceOid);
+		destinationOid = removeQuotes(destinationOid);
+		requestBody = removeQuotes(requestBody);
+
+		// request body can be null, therefore it is not checked, but the variables are important
+		if (sourceOid == null || destinationOid == null) {
+			return false;
+		}
+
 		
 		// here both the parameters and attributes will be stored during reading
 		Set<Entry<String,JsonValue>> entrySet;
 		String stringValue;
 
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
-		JsonObject attributesJson = json.getJsonObject(ATTR_ATTRIBUTES);
+		// this can be null, but that should not be dangerous. we'll just leave the set clear in such case
 		if (attributesJson != null){
 			
 			entrySet = attributesJson.entrySet();
@@ -456,8 +513,7 @@ public class NetworkMessageRequest extends NetworkMessage {
 			}
 		}
 		
-		// this can return null, but that should not be dangerous... much... we'll just leave the set clear
-		JsonObject parametersJson = json.getJsonObject(ATTR_PARAMETERS);
+		// this can be null, but that should not be dangerous. we'll just leave the set clear in such case
 		if (parametersJson != null){
 			
 			entrySet = parametersJson.entrySet();
@@ -515,6 +571,17 @@ public class NetworkMessageRequest extends NetworkMessage {
 		}
 		
 		return true;
+	}
+	
+	
+	/**
+	 * Initialises empty fields.
+	 */
+	private void initialise() {
+		requestOperation = 0x00;
+		attributes = new LinkedHashMap<String, String>();
+		parameters = new LinkedHashMap<String, String>();
+		requestBody = null;
 	}
 	
 }
