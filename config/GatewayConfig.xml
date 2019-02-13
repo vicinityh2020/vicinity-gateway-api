@@ -301,6 +301,13 @@
 			-->
 			<gwApiServicesUrl>http://vicinity-gateway-services.vicinity.linkeddata.es</gwApiServicesUrl>
 		</sparql>
+		
+		<semantic>
+			<!--
+			This parameter represents a URL path to Semantic Search API.
+			-->
+			<semanticSearchAPI>http://repo.sharq.se.rwth-aachen.de/search/</semanticSearchAPI>
+		</semantic>
 	</search>
 	
 

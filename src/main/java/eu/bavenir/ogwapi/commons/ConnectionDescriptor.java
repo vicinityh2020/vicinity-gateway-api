@@ -27,6 +27,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
+import eu.bavenir.ogwapi.commons.search.SemanticQuery;
 import eu.bavenir.ogwapi.commons.search.SparqlQuery;
 
 
@@ -104,6 +105,11 @@ public class ConnectionDescriptor {
 	private SparqlQuery sparql;
 	
 	/**
+	 * Semantic query search engine.
+	 */
+	private SemanticQuery semantic;
+	
+	/**
 	 * Message resolver for incoming messages. 
 	 */
 	private MessageResolver messageResolver;
@@ -167,6 +173,7 @@ public class ConnectionDescriptor {
 		this.logger = logger;
 		
 		this.sparql = new SparqlQuery(config, this, logger);
+		this.semantic = new SemanticQuery(config, logger);
 		
 		// TODO decide here what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);
@@ -944,6 +951,22 @@ public class ConnectionDescriptor {
 		return sparql.performQuery(query, parameters);
 	}
 	
+	
+	/**
+	 * Performs a Semantic search 
+	 * 
+	 * @param query Semantic query.
+	 * @param parameters Any parameters (if needed).
+	 * @return JSON with results. 
+	 */
+	public String performSemanticQuery(String query, Map<String, String> parameters) {
+		
+		if (query == null) {
+			return null;
+		}
+		
+		return semantic.performQuery(query, parameters);
+	}
 	
 	
 	/* === PRIVATE METHODS === */
