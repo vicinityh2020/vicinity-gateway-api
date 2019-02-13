@@ -1157,7 +1157,32 @@ public class CommunicationManager {
 		return descriptor.performSparqlQuery(sparqlQuery, parameters);
 	}
 	
-	
+	/**
+	 * Performs a Semantic search 
+	 * 
+	 * @param sourceOid ID of the source object. 
+	 * @param query Semantic query.
+	 * @param parameters Any parameters (if needed).
+	 * @return JSON with results. 
+	 */
+	public String performSemanticSearch(String sourceObjectId, String semanticQuery, Map<String, String> parameters) {
+		
+		if (sourceObjectId == null || sourceObjectId.isEmpty() || semanticQuery == null || semanticQuery.isEmpty()) {
+			logger.warning("Method parameters can't be null nor empty.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectId);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectId + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.performSemanticQuery(semanticQuery, parameters);
+	}
 	
 	
 	/* === PRIVATE METHODS === */
