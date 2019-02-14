@@ -65,6 +65,14 @@ var data = {
         "description": "There is a JavaDoc and cookbook documentation here:",
         "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
       }
+    },
+    {
+      "name": "query",
+      "description": "Endpoints for providing intelligent querying the P2P network for specific data.",
+      "externalDocs": {
+        "description": "There is a JavaDoc and cookbook documentation here:",
+        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
+      }
     }
   ],
   "schemes": [
@@ -72,30 +80,6 @@ var data = {
     "http"
   ],
   "paths": {
-    "/objects": {
-      "get": {
-        "tags": [
-          "discovery"
-        ],
-        "summary": "Retrieve available objects.",
-        "description": "Retrieves a list of all IoT objects that are visible to that particular Agent/Adapter based on the permissions set in Neighbourhood Manager Web interface. This includes both your own and foreign devices. In order to make it into the list, it is necessary for the object to be online.",
-        "operationId": "getObjects",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "$ref": "#/definitions/ResultGetObjects"
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
     "/objects/login": {
       "get": {
         "tags": [
@@ -145,6 +129,30 @@ var data = {
             "description": "Successful operation",
             "schema": {
               "$ref": "#/definitions/ResultGetObjectsLogout"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/objects": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Retrieve available objects.",
+        "description": "Retrieves a list of all IoT objects that are visible to that particular Agent/Adapter based on the permissions set in Neighbourhood Manager Web interface. This includes both your own and foreign devices. In order to make it into the list, it is necessary for the object to be online.",
+        "operationId": "getObjects",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResultGetObjects"
             }
           },
           "401": {
@@ -772,6 +780,54 @@ var data = {
           }
         }
       }
+    },
+    "/search/sparql": {
+      "post": {
+        "tags": [
+          "query"
+        ],
+        "summary": "Query the P2P Networ by using SPARQL.",
+        "description": "Query  the  VICINITY  P2P  Network  by  means  of  a  combination  of  discovery  and  access functions, by using SPARQL and the VICINITY Ontology.",
+        "operationId": "postSearchSparql",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResultPostSearchSparql"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/search/semantic": {
+      "post": {
+        "tags": [
+          "query"
+        ],
+        "summary": "Query the P2P Networ by using semantic query.",
+        "description": "Query  the  VICINITY  P2P  Network  by  means  of  a  combination  of  discovery  and  access functions, by using semantic query and the VICINITY Ontology.",
+        "operationId": "postSearchSemantic",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "$ref": "#/definitions/ResultPostSearchSemantic"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1274,6 +1330,12 @@ var data = {
           }
         }
       }
+    },
+    "ResultPostSearchSparql": {
+      "type": "object"
+    },
+    "ResultPostSearchSemantic": {
+      "type": "object"
     }
   }
 }
