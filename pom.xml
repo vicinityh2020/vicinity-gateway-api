@@ -31,19 +31,6 @@
 	</repositories>
 
 	<dependencies>
-
-		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>4.5.6</version>
-		</dependency>
-			
-	
-		<dependency>
-		    <groupId>com.github.jsonld-java</groupId>
-		    <artifactId>jsonld-java</artifactId>
-		    <version>0.2</version>
-		</dependency>
 	
 		<!-- Testing -->
 		<dependency>
@@ -87,11 +74,6 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
 			<version>1.0.4</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.github.jsonld-java</groupId>
-		    <artifactId>jsonld-java</artifactId>
-		    <version>0.2</version>
 		</dependency>
 		
 		<!-- SMACK -->

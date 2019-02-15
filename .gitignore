@@ -1,0 +1,4 @@
+log/*.log
+data/*
+target/*
+!target/ogwapi-jar-with-dependencies.jar
