@@ -1,21 +1,14 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
@@ -104,6 +97,13 @@ public class ObjectsOid extends ServerResource{
 		return new JsonRepresentation(communicationManager.getThingDescriptionOfRemoteObject(sourceOid, destinationOid, body, queryParams).buildMessage().toString());
 	}
 	
+	
+	/**
+	 * 
+	 * @param entity
+	 * @param logger
+	 * @return
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

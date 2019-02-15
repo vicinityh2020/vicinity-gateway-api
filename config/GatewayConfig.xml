@@ -3,9 +3,10 @@
 
 	<general>
 		<!--
-		URL/IP address of the communication server. If not set, the application exits.
+		Domain name of the communication server. If not set, the application exits.
+		This value can't be just an IP address if encryption is to be used.
 		-->
-		<server>vicinity.bavenir.eu</server>
+		<server>commserver.vicinity.ws</server>
 		
 		<!--
 		Port of the communication server.
@@ -13,6 +14,21 @@
 		Defaults to 5222.
 		-->
 		<port>5222</port>
+		
+		<!-- 
+		This parameter represents a URL to Neighbourhood Manager API. This value 
+		can't be just an IP address.
+		
+		Default is vicinity.bavenir.eu.
+		-->
+		<neighbourhoodManagerServer>vicinity.bavenir.eu</neighbourhoodManagerServer>
+		
+		<!-- 
+		Port on which the NM listens for incoming requests.
+		
+		Default is 3000.
+		-->
+		<neighourhoodManagerPort>3000</neighourhoodManagerPort>
 		
 		<!-- 
 		Setting this parameter to true will enable encryption of communication. 
@@ -103,21 +119,11 @@
 		<sessionExpiration>30</sessionExpiration>
 		
 		<!-- 
-		This parameter represents a URL path to Neighborhood Manager API.
-		-->
-		<neighborhoodManagerAPI>https://vicinity.bavenir.eu:3000/commServer/items/searchItems</neighborhoodManagerAPI>
+		This parameter represents a path to directory for storing data. 
 		
-		<!-- 
-		This parameter represents a path to file for storing data. Each object has
-		its own file. A '%s' parameter will be replaced by a id of object.
+		Default is 'data/' inside the directory where the OGWAPI is run.
 		-->
-		<persistencePath>data/%s-data.ser</persistencePath>
-		
-		<!-- 
-		This parameter represents a path to JSON file for storing TD. Each object has
-		its own file. A '%s' parameter will be replaced by a id of object.
-		-->
-		<TDPath>data/%s-TD.json</TDPath>
+		<dataDirectory>data/</dataDirectory>
 		
 		<!-- 
 		This parameter is for debug reason.

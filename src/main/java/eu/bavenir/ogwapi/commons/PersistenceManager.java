@@ -43,7 +43,7 @@ public class PersistenceManager {
 	 * There are two types of data files:
 	 * 		1. Data which is using for remembering gateway current state (EventChannels, Subscriptions and Actions)
 	 * 		2. JSON file with information called thing description (TD)
-	 * For first type of data is used serialization for storing them.
+	 * For first type of data is used serialisation for storing them.
 	 * Second type is storing in JSON format and this JSON file is getting from server by Unirest post.
 	 * 
 	 * Mentioned data exist for each object which is logged in OGWAPI.
@@ -58,34 +58,34 @@ public class PersistenceManager {
 	/* === CONSTANTS === */
 
 	/**
-	 * Name of the configuration parameter for path to data file.
+	 * Name of the configuration parameter for path to data files.
 	 */
-	private static final String CONFIG_PARAM_PERSISTENCEFILE = "general.persistencePath";
+	private static final String CONFIG_PARAM_DATADIR = "general.dataDirectory";
 	
 	/**
 	 * Default value for {@link #CONFIG_PARAM_PERSISTENCEROOTPATH } parameter. 
 	 */
-	private static final String CONFIG_DEF_PERSISTENCEFILE = "data/%s-data.ser";
+	private static final String CONFIG_DEF_PERSISTENCEFILE = "data/";
 	
 	/**
-	 * Name of the configuration parameter for path to JSON TD file.
+	 * Name of the configuration parameter for URL path to Neighbourhood Manager server.
 	 */
-	private static final String CONFIG_PARAM_TDFILE = "general.TDPath";
+	private static final String CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER = "general.neighbourhoodManagerServer";
 	
 	/**
-	 * Default value for {@link #CONFIG_PARAM_TDFILE } parameter. 
+	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER } parameter. 
 	 */
-	private static final String CONFIG_DEF_TDFILE = "data/%s-TD.json";
+	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "vicinity.bavenir.eu";
 	
 	/**
-	 * Name of the configuration parameter for URL path to Neighborhood Manager API.
+	 * Name of the configuration parameter for Neighbourhood Manager port.
 	 */
-	private static final String CONFIG_PARAM_NEIGHBORHOODMANAGERAPI = "general.neighborhoodManagerAPI";
+	private static final String CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT = "general.neighourhoodManagerPort";
 	
 	/**
-	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERAPI } parameter. 
+	 * Default value for {@link #CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT } parameter.
 	 */
-	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERAPI = "https://vicinity.bavenir.eu:3000/commServer/items/searchItems";
+	private static final int CONFIG_DEF_NEIGHBOURHOODMANAGERPORT = 3000;
 	
 	/**
 	 * For debug reason, default value is true. If false, do not loading TD from server
@@ -97,6 +97,25 @@ public class PersistenceManager {
 	 */
 	private static final Boolean CONFIG_DEF_LOADTDFROMSERVER = true;
 	
+	/**
+	 * Protocol to be used when connecting to NM API.
+	 */
+	private static final String PROTOCOL = "https://";
+	
+	/**
+	 * Path to NM API. 
+	 */
+	private static final String NM_API_PATH = "/commServer/items/searchItems";
+	
+	/**
+	 * Name of persistence file.
+	 */
+	private static final String PERSISTENCE_FILENAME = "%s-data.ser";
+	
+	/**
+	 * Name of TD file.
+	 */
+	private static final String TD_FILENAME = "%s-TD.json";
 	
 	/* === FIELDS === */
 	
@@ -106,12 +125,12 @@ public class PersistenceManager {
 	private String persistenceFile; 
 	
 	/**
-	 * Path to TD json file 
+	 * Path to TD JSON file 
 	 */
 	private String thingDescriptionFile; 
 	
 	/**
-	 * URL Path to Neighborhood Manager API
+	 * URL Path to Neighbourhood Manager API
 	 */
 	private String neighborhoodManagerAPIURL; 
 	
@@ -119,11 +138,6 @@ public class PersistenceManager {
 	 * Boolean value for debug reason, If false, do not loading TD from server
 	 */
 	private Boolean loadTDFromServer; 
-	
-	/**
-	 * Configuration of the OGWAPI.
-	 */
-	private XMLConfiguration config;
 	
 	/**
 	 * Logger of the OGWAPI.
@@ -138,12 +152,19 @@ public class PersistenceManager {
 	 */
 	public PersistenceManager(XMLConfiguration config, Logger logger) {
 		
-		this.config = config;
 		this.logger = logger;
 		
-		persistenceFile = config.getString(CONFIG_PARAM_PERSISTENCEFILE, CONFIG_DEF_PERSISTENCEFILE);
-		thingDescriptionFile = config.getString(CONFIG_PARAM_TDFILE, CONFIG_DEF_TDFILE);
-		neighborhoodManagerAPIURL = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERAPI, CONFIG_DEF_NEIGHBORHOODMANAGERAPI);
+		persistenceFile = config.getString(CONFIG_PARAM_DATADIR, CONFIG_DEF_PERSISTENCEFILE) + PERSISTENCE_FILENAME;
+		thingDescriptionFile = config.getString(CONFIG_PARAM_DATADIR, CONFIG_DEF_PERSISTENCEFILE) + TD_FILENAME;
+		
+		// lets compile something like this: https://vicinity.bavenir.eu:3000/commServer/items/searchItems
+		neighborhoodManagerAPIURL = 
+				PROTOCOL + 
+				config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER) +
+				":" +
+				config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT) +
+				NM_API_PATH;
+		
 		loadTDFromServer = config.getBoolean(CONFIG_PARAM_LOADTDFROMSERVER, CONFIG_DEF_LOADTDFROMSERVER);
 	}
 	

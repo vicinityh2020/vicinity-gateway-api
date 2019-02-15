@@ -21,15 +21,27 @@ public class AgentsAgidObjectsUpdate extends ServerResource {
 	private static final String ATTR_AGID = "agid";
 	
 	/**
-	 * Name of the configuration parameter for server URL.
+	 * Name of the configuration parameter for URL path to Neighbourhood Manager server.
 	 */
-	private static final String CONFIG_PARAM_SERVER = "general.server";
+	private static final String CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER = "general.neighbourhoodManagerServer";
+	
 	
 	/**
-	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
-	 * taken into account when no suitable value is found in the configuration file. 
+	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER } parameter. 
 	 */
-	private static final String CONFIG_DEF_SERVER = "";
+	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "vicinity.bavenir.eu";
+	
+	
+	/**
+	 * Name of the configuration parameter for Neighbourhood Manager port.
+	 */
+	private static final String CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT = "general.neighourhoodManagerPort";
+	
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT } parameter.
+	 */
+	private static final int CONFIG_DEF_NEIGHBOURHOODMANAGERPORT = 3000;
 	
 	/**
 	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
@@ -42,7 +54,10 @@ public class AgentsAgidObjectsUpdate extends ServerResource {
 	private static final String SERVER_PROTOCOL = "https://"; 
 	
 	
-	private static final String SERVER_PART2 = ":3000/commServer/";
+	/**
+	 * The part of the URL containing the API path.
+	 */
+	private static final String API_PATH = "/commServer/";
 	
 	/**
 	 * Update service string.
@@ -78,9 +93,11 @@ public class AgentsAgidObjectsUpdate extends ServerResource {
 	
 	private Representation lightweightUpdate(Representation json, Logger logger, XMLConfiguration config){
 		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
+		String neighbourhoodManagerServer = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER);
 		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + LIGHTWEIGHTUPDATE_SERVICE;
+		int port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
+		
+		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + LIGHTWEIGHTUPDATE_SERVICE;
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
 

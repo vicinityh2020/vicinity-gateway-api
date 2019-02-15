@@ -88,11 +88,6 @@ public class Data implements Serializable {
 	private transient PersistenceManager persistenceManager;
 	
 	/**
-	 * Configuration of the OGWAPI.
-	 */
-	private transient XMLConfiguration config;
-	
-	/**
 	 * Logger of the OGWAPI.
 	 */
 	private transient Logger logger;
@@ -106,7 +101,6 @@ public class Data implements Serializable {
 		
 		this.objectId = objectId;
 		
-		this.config = config;
 		this.logger = logger;
 		
 		// create persistence manager
