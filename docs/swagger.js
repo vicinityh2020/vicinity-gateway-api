@@ -1,7 +1,7 @@
 var data = {
   "swagger": "2.0",
   "info": {
-    "description": "The standalone Open Gateway API enables your IoT infrastructure to interconnect with other IoT infrastructures by using HTTP REST requests. Among its features there is retrieving and setting a property on remote objects, executing an action, or subscribing to an event channel and receiving asynchronously fired event whenever one is published. After installation and start, the OGWAPI serves the following REST API on your local host's port as configured in the configuration file (default is 8181).",
+    "description": "\nThe standalone Open Gateway API (OGWAPI) enables your IoT infrastructure to interconnect with other IoT infrastructures by using HTTP REST requests. (more about [OGWAPI](https://vicinity-get-started.readthedocs.io/en/latest/open-gateway-api.html)). OGWAPI is one of few components, which represents VICINITY Node. (more about [VICINITY architecture](https://vicinity-get-started.readthedocs.io/en/latest/architecture.html)).\n\nEvery IoT infrastructure is composed of objects (e.g. smart devices, smart meters etc.) and this infrastructure components have to be registrated in Neighbourhood manager which store information about permitions of devices (e.g. device A can request property of device B from another infrastructure). There are also assigned identifiers and passwords to individual devices. This credentials are using in every HTTP requests (Basic Authentication), whether the device is eligible to make request. (more about [Neighbourhood manager](https://vicinity-get-started.readthedocs.io/en/latest/neighbourhood.html))\n\nAmong features of OGWAPI there is:\n  * getting and setting a property of remote objects (e.g. brightness of bulb)\n  * executing an action (e.g. raising curtains)\n  * subscribing to an event channel and receiving asynchronously fired event whenever one is published. (e.g. door were opened)\n\nAfter installation and start, the OGWAPI serves the following REST API on your local host's port as configured in the configuration file (default is 8181).\n",
     "version": "0.6.3",
     "title": "Open Gateway API",
     "termsOfService": "http://swagger.io/terms/",
@@ -28,81 +28,40 @@ var data = {
   "tags": [
     {
       "name": "authentication",
-      "description": "Endpoints that let you log in your objects.",
-      "externalDocs": {
-        "description": "There is a JavaDoc and cookbook documentation here:",
-        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
-      }
+      "description": "Endpoints that let you login or logout your objects.\n\nThis can get confusing in the beginning, because you have to send credentials in every request anyways, making the object logged in automatically. However objects that are not logged in will not be visible/reachable on the network and although an object is logged in automatically after it makes its first request to OGWAPI (provided it has correct credentials), it is wise to explicitly log them in before it happens.\n"
     },
     {
       "name": "discovery",
-      "description": "Endpoints for registering your objects and perform a discovery of new ones.",
-      "externalDocs": {
-        "description": "There is a JavaDoc and cookbook documentation here:",
-        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
-      }
+      "description": "Endpoints for registering your objects and perform a discovery of new\nones.\n\nIt is very likely that your IoT infrastructure possesses many objects. In order to avoid setting up each one of your objects manually, you can register automatically several objects at once. For this purpose, it serves the discovery endpoints, which use agent. Agent is component which provides common functionalities, such as automatic objects discovery, log in/out of objects into P2P network. (more about [Agent](https://github.com/vicinityh2020/vicinity-agent)).\n\nThe basic data type that describes objects is a thing descriptions (TDs). Example TD of [light bulb](https://github.com/bAvenir/thing_description_common_format/blob/master/device/vicinity/lightbulb.js)\n"
     },
     {
       "name": "properties",
-      "description": "Setting and retrieving properties on remote objects.",
-      "externalDocs": {
-        "description": "There is a JavaDoc and cookbook documentation here:",
-        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
-      }
+      "description": "Setting and retrieving properties of remote objects.\n"
     },
     {
       "name": "actions",
-      "description": "Starting, stopping and retrieving a status of remotely executed action.",
-      "externalDocs": {
-        "description": "There is a JavaDoc and cookbook documentation here:",
-        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
-      }
+      "description": "Starting, stopping and retrieving a status of remotely executed action."
     },
     {
       "name": "events",
-      "description": "Subscribing a remote event channel and receiving published events.",
-      "externalDocs": {
-        "description": "There is a JavaDoc and cookbook documentation here:",
-        "url": "https://github.com/vicinityh2020/vicinity-gateway-api/tree/master/docs"
-      }
+      "description": "Subscribing a remote event channel and receiving published events."
+    },
+    {
+      "name": "query",
+      "description": "Endpoints for providing intelligent querying the P2P network for specific data."
     }
   ],
   "schemes": [
-    "https",
     "http"
   ],
   "paths": {
-    "/objects": {
-      "get": {
-        "tags": [
-          "discovery"
-        ],
-        "summary": "Retrieve available objects.",
-        "description": "Retrieves a list of all IoT objects that are visible to that particular Agent/Adapter based on the permissions set in Neighbourhood Manager Web interface. This includes both your own and foreign devices. In order to make it into the list, it is necessary for the object to be online.",
-        "operationId": "getObjects",
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "schema": {
-              "$ref": "#/definitions/ResultGetObjects"
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      }
-    },
     "/objects/login": {
       "get": {
         "tags": [
           "authentication"
         ],
         "summary": "Logs your object into the network.",
-        "description": "Provides login endpoint for your objects. This can get confusing in the beginning, because you have to send credentials in every request anyways, making the object logged in automatically. However objects that are not logged in will not be visible/reachable on the network and although an object is logged in automatically after it makes its first request to OGWAPI (provided it has correct credentials), it is wise to explicitly log them in before it happens.",
+        "description": "Provides login endpoint for your objects (devices, services). ",
         "operationId": "getObjectsLogin",
         "produces": [
           "application/json"
@@ -111,7 +70,31 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetObjectsLogin"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string",
+                  "default": "OK. Login successfull."
+                },
+                "contentType": {
+                  "type": "string",
+                  "default": "application/json"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -125,26 +108,78 @@ var data = {
         "tags": [
           "authentication"
         ],
-        "summary": "Logs your object out of the network.",
-        "description": "Provides logout endpoint for your objects. The connection for given object is terminated.",
+        "summary": "Logs out your object from the network.",
+        "description": "Provides logout endpoint for your objects (devices, services). The connection for given object is terminated.",
         "operationId": "getObjectsLogout",
         "produces": [
           "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "agid",
-            "in": "path",
-            "description": "agent id",
-            "required": true,
-            "type": "string"
-          }
         ],
         "responses": {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetObjectsLogout"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string",
+                  "default": "OK. Logout successfull."
+                },
+                "contentType": {
+                  "type": "string",
+                  "default": "application/json"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/objects": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Retrieve available objects.",
+        "description": "Retrieves a list of all IoT objects identifiers that are visible to that particular object (send object credentials in head HTTP request) based on the permissions set in Neighbourhood Manager Web interface. This includes both your own and foreign devices. In order to make it into the list, it is necessary for the object to be online.\n",
+        "operationId": "getObjects",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "objects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "oid": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -159,7 +194,7 @@ var data = {
           "discovery"
         ],
         "summary": "Retrieve a list of object TDs connected to this agent.",
-        "description": "Retrieves a list of object TDs that are connected to this particular Agent (identified by his AGID – Agent ID). It is necessary to call this endpoint before an automatic registration is attempted, so you know which objects need to be registered.",
+        "description": "Retrieves a list of object TDs that are connected to this particular Agent (identified by his AGID – Agent ID). It is necessary to call this endpoint before an automatic registration is attempted, so you know which objects need to be registered.\n",
         "operationId": "getAgentsAgidObjects",
         "produces": [
           "application/json"
@@ -177,7 +212,67 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetAgentsAgidObjects"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "info": {
+                            "type": "object",
+                            "properties": {
+                              "adapter_id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "oid": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "actions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "description": "Flexible schema - see agent documentation"
+                                }
+                              },
+                              "properties": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "description": "Flexible schema - see agent documentation"
+                                }
+                              },
+                              "events": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "description": "Flexible schema - see agent documentation"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -190,12 +285,61 @@ var data = {
           "discovery"
         ],
         "summary": "Register a set of new objects.",
-        "description": "Agent can use this endpoint to register a set of new objects.",
+        "description": "Agent can use this endpoint to register a set of new objects. Set of new objects are represents like list of thing descriptions (TDs) and needs to be sended in request body.",
         "operationId": "postAgentsAgidObjects",
         "produces": [
           "application/json"
         ],
         "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "thingDescriptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "message": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "oid": {
+                              "type": "string"
+                            },
+                            "password": {
+                              "type": "string"
+                            },
+                            "infrastructure-id": {
+                              "type": "string"
+                            },
+                            "nm-id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "error": {
+                              "type": "boolean",
+                              "default": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           {
             "name": "agid",
             "in": "path",
@@ -208,7 +352,40 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPostAgentsAgidObjects"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "oid": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      },
+                      "infrastructure-id": {
+                        "type": "string"
+                      },
+                      "nm-id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "error": {
+                        "type": "boolean",
+                        "default": false
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -239,7 +416,30 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPutAgentsAgidObjects"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "oid": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      },
+                      "infrastructure-id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -272,7 +472,30 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPutAgentsAgidObjectsUpdate"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "oid": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      },
+                      "infrastructure-id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -305,7 +528,27 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPostAgentsAgidObjectsDelete"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string"
+                      },
+                      "result": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -320,7 +563,7 @@ var data = {
           "properties"
         ],
         "summary": "Get a property value from a remote object.",
-        "description": "Retrieves a value of a given property from a remote object. You can add any parameters, just remember that on the other side the request to agent/adapter will automatically have 'sourceOid' parameter added. Therefore, any parameter with the same name will be overwritten. IMPORTANT - Reception of this request will cause the receiving OGWAPI to fire following request to an Agent / Adapter - GET http://[agent / adapter IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent / Adapter capable of receving such requests and retrieving given property from the object.",
+        "description": "Retrieves a value of a given property from a remote object. Object from property is retrieves has to be visible for object, which is requesting. This visibiliti is configurable in neighbourhood manager. First parameter oid determines remote object and secound identify the property af remote object, both parameters are mandatory.\n\nReception of this request will cause the receiving OGWAPI to fire following request to an Agent - GET http://[agent IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent capable of receving such requests and retrieving given property from the object.\n",
         "operationId": "getObjectsOidPropertiesPid",
         "produces": [
           "application/json"
@@ -345,7 +588,31 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetObjectsOidPropertiesPid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -358,12 +625,26 @@ var data = {
           "properties"
         ],
         "summary": "Set a property value on a remote object.",
-        "description": "Sets a new value of a property on a remote object. You can add any parameters, just remember that on the other side the request to agent/adapter will automatically have 'sourceOid' parameter added. Therefore, any parameter with the same name will be overwritten. IMPORTANT - Reception of this request will cause the receiving OGWAPI to fire following request to an Agent / Adapter - PUT http://[agent / adapter IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent / Adapter capable of receving such requests and retrieving given property from the object.",
+        "description": "Sets a new value of a property on a remote object. Object which property is setting has to be visible for object, which is requesting. This visibiliti is configurable in neighbourhood manager. First parameter oid determines remote object and secound identify the property of remote object, both parameters are mandatory. Setting value is sending in body of request. \n\nReception of this request will cause the receiving OGWAPI to fire following request to an Agent - PUT http://[agent IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent capable of receving such requests and retrieving given property from the object.\n",
         "operationId": "putObjectsOidPropertiesPid",
         "produces": [
           "application/json"
         ],
         "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "default": 0
+                }
+              }
+            }
+          },
           {
             "name": "oid",
             "in": "path",
@@ -383,7 +664,42 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPutObjectsOidPropertiesPid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "echo": {
+                            "type": "string"
+                          },
+                          "oid": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -423,7 +739,31 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPostObjectsOidActionsAid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "default": 201
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "taskId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -461,7 +801,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPutObjectsOidActionsAid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 201
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -508,7 +861,53 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetObjectsOidActionsAidTasksTid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "taskId": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "description": "date"
+                      },
+                      "startTime": {
+                        "type": "string",
+                        "description": "date"
+                      },
+                      "totalTime": {
+                        "type": "number"
+                      },
+                      "returnValue": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -553,7 +952,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultDeleteObjectsOidActionsAidTasksTid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -586,7 +998,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPostEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -617,7 +1042,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPutEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -648,7 +1086,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultDeleteEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -688,7 +1139,31 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultGetObjectsOidEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "integer",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "active": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "401": {
@@ -726,7 +1201,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultPostObjectsOidEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -764,7 +1252,20 @@ var data = {
           "200": {
             "description": "Successful operation",
             "schema": {
-              "$ref": "#/definitions/ResultDeleteObjectsOidEventsEid"
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "statusCode": {
+                  "type": "number",
+                  "default": 200
+                },
+                "statusCodeReason": {
+                  "type": "string"
+                }
+              }
             }
           },
           "401": {
@@ -772,505 +1273,80 @@ var data = {
           }
         }
       }
-    }
-  },
-  "definitions": {
-    "ResultGetObjects": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "oid": {
-            "type": "string"
+    },
+    "/search/sparql": {
+      "post": {
+        "tags": [
+          "query"
+        ],
+        "summary": "Query the VICINITY P2P Networ by using SPARQL.",
+        "description": "Query  the  VICINITY  P2P  Network  by  means  of  a  combination  of  discovery  and  access functions, by using SPARQL and the VICINITY Ontology.",
+        "operationId": "postSearchSparql",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "description": "Body is SPARQL query in JSON format.\n",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
     },
-    "ResultGetObjectsLogin": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultGetObjectsLogout": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultGetAgentsAgidObjects": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "object",
-                "properties": {
-                  "_id": {
-                    "type": "string"
-                  },
-                  "info": {
-                    "$ref": "#/definitions/TD"
-                  }
+    "/search/semantic": {
+      "post": {
+        "tags": [
+          "query"
+        ],
+        "summary": "Query the SHAR-Q P2P Networ by using semantic query.",
+        "description": "Retrieve all compatible interfaces for a given semantic interface. Semantic interface is sending in body of request in JSON object format, see below. \n\nResponse format is JSON array with string representation of the compatible interfaces.\n",
+        "operationId": "postSearchSemantic",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "semanticInterface": {
+                  "type": "string"
                 }
               }
             }
           }
-        }
-      }
-    },
-    "ResultPostAgentsAgidObjects": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "oid": {
-                "type": "string"
-              },
-              "password": {
-                "type": "string"
-              },
-              "infrastructure-id": {
-                "type": "string"
-              },
-              "nm-id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "error": {
-                "type": "boolean",
-                "default": false
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPutAgentsAgidObjects": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "oid": {
-                "type": "string"
-              },
-              "password": {
-                "type": "string"
-              },
-              "infrastructure-id": {
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
                 "type": "string"
               }
             }
-          }
-        }
-      }
-    },
-    "ResultPutAgentsAgidObjectsUpdate": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "oid": {
-                "type": "string"
-              },
-              "password": {
-                "type": "string"
-              },
-              "infrastructure-id": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPostAgentsAgidObjectsDelete": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "string"
-              },
-              "result": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultGetObjectsOidPropertiesPid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "value": {
-                "type": "number"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPutObjectsOidPropertiesPid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "data": {
-                "type": "object",
-                "properties": {
-                  "echo": {
-                    "type": "string"
-                  },
-                  "oid": {
-                    "type": "string"
-                  }
-                }
-              },
-              "status": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPostObjectsOidActionsAid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "integer",
-          "default": 201
-        },
-        "statusCodeReason": {
-          "type": "string"
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "taskId": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPutObjectsOidActionsAid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 201
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultGetObjectsOidActionsAidTasksTid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "taskId": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string"
-              },
-              "createdAt": {
-                "type": "string",
-                "description": "date"
-              },
-              "startTime": {
-                "type": "string",
-                "description": "date"
-              },
-              "totalTime": {
-                "type": "number"
-              },
-              "returnValue": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultDeleteObjectsOidActionsAidTasksTid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultPostEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultPutEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultDeleteEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultGetObjectsOidEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "integer",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        },
-        "message": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "active": {
-                "type": "boolean"
-              }
-            }
-          }
-        }
-      }
-    },
-    "ResultPostObjectsOidEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "ResultDeleteObjectsOidEventsEid": {
-      "type": "object",
-      "properties": {
-        "error": {
-          "type": "boolean",
-          "default": false
-        },
-        "statusCode": {
-          "type": "number",
-          "default": 200
-        },
-        "statusCodeReason": {
-          "type": "string"
-        }
-      }
-    },
-    "TD": {
-      "type": "object",
-      "properties": {
-        "adapter_id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "oid": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string"
-        },
-        "actions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "description": "Flexible schema - see agent documentation"
-          }
-        },
-        "properties": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "description": "Flexible schema - see agent documentation"
-          }
-        },
-        "events": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "description": "Flexible schema - see agent documentation"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
