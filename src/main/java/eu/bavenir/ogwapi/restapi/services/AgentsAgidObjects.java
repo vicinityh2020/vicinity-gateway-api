@@ -55,7 +55,7 @@ public class AgentsAgidObjects extends ServerResource {
 	/**
 	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER } parameter. 
 	 */
-	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "vicinity.bavenir.eu";
+	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "commserver.vicinity.ws";
 	
 	
 	/**

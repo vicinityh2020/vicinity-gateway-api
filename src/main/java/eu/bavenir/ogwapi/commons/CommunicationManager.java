@@ -450,7 +450,7 @@ public class CommunicationManager {
 				logger.info("Reconnecting '" + objectId + "' to network.");
 			}
 			
-			descriptor = new ConnectionDescriptor(objectId, password, config, logger);
+			descriptor = new ConnectionDescriptor(objectId, password, config, logger, this);
 			
 			verifiedOrConnected = descriptor.connect();
 		}
@@ -1329,6 +1329,45 @@ public class CommunicationManager {
 		
 		return descriptor.performSemanticQuery(semanticQuery, parameters);
 	}
+	
+	
+	/* === METHODS AVAILABLE ONLY TO CLASSES FROM THIS PACKAGE === */
+	
+	/**
+	 * This methods directly inserts a message into the respective {@link ConnectionDescriptor}'s incoming queue, 
+	 * bypassing the communication server when the destination OID is connected through this CommunicationManager.
+	 * This saves overall resources of the whole communication . 
+	 *  
+	 * @param sourceObjectId The message source.
+	 * @param destinationObjectId Message destination.
+	 * @param message Message to be sent. 
+	 * @return True if it was possible to send the message this way. False if the destination is not connected through
+	 * 	this CommunicationManager.
+	 */
+	boolean tryToSendLocalMessage(String sourceObjectId, String destinationObjectId, String message) {
+		
+		// is the object connected through this CommunicationManager?
+		if (!descriptorPool.containsKey(destinationObjectId)) {	
+			
+			logger.finer("Can't send the message locally, the destination OID is not from this infrastructure.");
+			return false;
+		}
+			
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(destinationObjectId);
+		
+		if (descriptor == null){
+			
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + destinationObjectId + "'.");
+			return false;
+		}
+		
+		
+		descriptor.processIncommingMessage(sourceObjectId, message);
+		
+		return true;
+	}
+	
 	
 	
 	/* === PRIVATE METHODS === */

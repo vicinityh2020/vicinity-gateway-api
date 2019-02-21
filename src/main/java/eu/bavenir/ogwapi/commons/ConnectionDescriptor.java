@@ -1,8 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
-import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -16,9 +14,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.json.JSONObject;
-
-import com.mashape.unirest.http.JsonNode;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
 import eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector;
@@ -113,6 +108,11 @@ public class ConnectionDescriptor {
 	private AgentConnector agentConnector;
 	
 	/**
+	 * Reference to the CommunicationManager that spawned this ConnectionDescriptor. 
+	 */
+	private CommunicationManager commManager;
+	
+	/**
 	 * Password.
 	 */
 	private String password;
@@ -149,20 +149,22 @@ public class ConnectionDescriptor {
 	 * the descriptor will not be able to connect (in the best case scenario, the other being a storm of null pointer 
 	 * exceptions).
 	 * 
-	 * @param objectId
-	 * @param password
-	 * @param config
-	 * @param logger
+	 * @param objectId Object ID used by this ConnectionDescriptor.
+	 * @param password Password to access the network.
+	 * @param config OGWAPI configuration.
+	 * @param logger OGWAPI logger.
+	 * @param commManager The main CommunicationManager.
 	 */
-	public ConnectionDescriptor(String objectId, String password, XMLConfiguration config, Logger logger){
-		
-		// TODO this all should probably happen after successful login, so it does not use resources for nothing
+	public ConnectionDescriptor(String objectId, String password, XMLConfiguration config, Logger logger, 
+			CommunicationManager commManager){
 		
 		this.objectId = objectId;
 		this.password = password;
 		
 		this.config = config;
 		this.logger = logger;
+		
+		this.commManager = commManager;
 		
 		this.sparql = new SparqlQuery(config, this, logger);
 		this.semantic = new SemanticQuery(config, logger);
@@ -444,7 +446,6 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = searchForEventChannel(eventId);
 		
 		if (eventChannel == null) {
-			// TODO don't allow this behaviour - if there is no such event channel, stop the processing (don't forget to alter javadoc)
 			
 			// if no event channel was found AND the caller wanted it to be active, create it
 			if (active) {
@@ -766,7 +767,7 @@ public class ConnectionDescriptor {
 		// send them
 		Set<String> subscribers = eventChannel.getSubscribersSet();
 		for (String destinationOid : subscribers) {
-			if(commEngine.sendMessage(destinationOid, message)) {
+			if(sendMessage(this.objectId, destinationOid, message)) {
 				sentMessages++;
 			} else {
 				logger.warning("ConnectionDescriptor#sendEventToSubscribers: Destination object ID " + destinationOid 
@@ -1122,7 +1123,7 @@ public class ConnectionDescriptor {
 			break;
 		}
 		
-		commEngine.sendMessage(requestMessage.getSourceOid(), response.buildMessageString());
+		sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
 		
 	}
 	
@@ -1533,8 +1534,6 @@ public class ConnectionDescriptor {
 			data.addProvidedAction(action);
 		}
 		
-		String statusString;
-		
 		// check whether the object is in our roster and whether or not the action already exists
 		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
 		if (action == null ) { // || security check
@@ -1908,13 +1907,11 @@ public class ConnectionDescriptor {
 		
 		request.setRequestBody(body);
 		
-		
-		// all set
-		if (!commEngine.sendMessage(destinationOid, request.buildMessageString())){
+		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
 			// TODO or something else wrong happened make a security check for outgoing messages
 			statusCodeReason = new String("Destination object " + destinationOid 
-					+ " is not in the list of available objects or it was not possible to send the message.");
+					+ " is either not in the list of available objects or it was not possible to send the message.");
 			
 			logger.warning(statusCodeReason);
 			
@@ -1926,6 +1923,7 @@ public class ConnectionDescriptor {
 			
 			return statusMessage;
 		}
+		
 		
 		// this will wait for response
 		NetworkMessageResponse response = (NetworkMessageResponse) retrieveMessage(requestId);
@@ -2014,5 +2012,28 @@ public class ConnectionDescriptor {
 		return builder.build().toString();
 	}
 
+	
+	/**
+	 * Private method capable of sending message, by first trying to distribute it locally, then via network.
+	 *  
+	 * @param sourceOid Source OID.
+	 * @param destinationOid Destination OID.
+	 * @param message Message to be sent.
+	 * @return True if the message was successfully sent via either local routing or by network. False otherwise.
+	 */
+	private boolean sendMessage(String sourceOid, String destinationOid, String message) {
+		// try internal routing first
+		if (commManager.tryToSendLocalMessage(sourceOid, destinationOid, message)) {
+			return true;
+		}
+		
+		// if not successful, try it via network 
+		if (commEngine.sendMessage(destinationOid, message)) {
+			return true;
+		}
+		
+		// both failed
+		return false;
+	}
 
 }

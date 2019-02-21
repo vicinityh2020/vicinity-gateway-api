@@ -6,7 +6,7 @@
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
 		-->
-		<server>commserver.vicinity.ws</server>
+		<server>development.vicinity.ws</server>
 		
 		<!--
 		Port of the communication server.
@@ -19,9 +19,9 @@
 		This parameter represents a URL to Neighbourhood Manager API. This value 
 		can't be just an IP address.
 		
-		Default is vicinity.bavenir.eu.
+		Default is commserver.vicinity.ws.
 		-->
-		<neighbourhoodManagerServer>vicinity.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>development.vicinity.ws</neighbourhoodManagerServer>
 		
 		<!-- 
 		Port on which the NM listens for incoming requests.
@@ -330,7 +330,7 @@
 			URL of the Gateway API Service facilitating the SPARQL search. Usually
 			there is no need to change this, unless informed that it is necessary. 
 			-->
-			<gwApiServicesUrl>http://vicinity-gateway-services.vicinity.linkeddata.es</gwApiServicesUrl>
+			<gwApiServicesUrl>http://vicinity-gateway-services.vicinity.linkeddata.es/advanced-discovery</gwApiServicesUrl>
 		</sparql>
 		
 		<semantic>

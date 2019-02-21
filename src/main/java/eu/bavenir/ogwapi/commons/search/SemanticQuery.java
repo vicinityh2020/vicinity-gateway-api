@@ -37,7 +37,7 @@ public class SemanticQuery {
 	/**
 	 * Configuration of the OGWAPI.
 	 */
-	private XMLConfiguration config;
+	//private XMLConfiguration config;
 	
 	/**
 	 * Logger of the OGWAPI.
@@ -51,7 +51,6 @@ public class SemanticQuery {
 	
 	public SemanticQuery(XMLConfiguration config, Logger logger) {
 
-		this.config = config;
 		this.logger = logger;
 		
 		semanticSearchAPIURL = config.getString(CONFIG_PARAM_SEMANTICSEARCHAPI, CONFIG_DEF_SEMANTICSEARCHAPI);
