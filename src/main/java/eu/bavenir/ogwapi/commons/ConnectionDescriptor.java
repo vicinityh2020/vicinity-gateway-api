@@ -1178,15 +1178,20 @@ public class ConnectionDescriptor {
 					eventMessage.getParameters()
 					);
 			
-			// if the return code is different than 2xx, make it visible
-			if ((response.getResponseCode() / 200) != 1){
-				
-				logger.warning("Event was not forwarded successfully. Response code: " + response.getResponseCode() 
-											+ ". Response reason: " + response.getResponseCodeReason());
-											
+			if (response != null) {
+				// if the return code is different than 2xx, make it visible
+				if ((response.getResponseCode() / 200) != 1){
+					
+					logger.warning("Event was not forwarded successfully. Response code: " + response.getResponseCode() 
+												+ ". Response reason: " + response.getResponseCodeReason());
+												
+				} else {
+					logger.info("Event forwarded successfully.");
+				}
 			} else {
-				logger.info("Event forwarded successfully.");
+				 // TODO log ze to bolo null
 			}
+			
 		}
 		
 		// no need to send the response message back to sender
