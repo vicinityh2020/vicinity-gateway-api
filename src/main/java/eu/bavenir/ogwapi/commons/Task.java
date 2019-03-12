@@ -339,10 +339,10 @@ public class Task {
 	/**
 	 * Cancels a running or pending task.
 	 * 
-	 * @param body Body to be sent to the object when canceling.
+	 * @param body Body to be sent to the object when cancelling.
 	 * @param parameters Parameters to be sent along with the body.
 	 * @return Response from the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector} or 
-	 * null if the task is not in a state that permits canceling. 
+	 * null if the task is not in a state that permits cancelling. 
 	 */
 	public NetworkMessageResponse cancel(String body, Map<String, String> parameters) {
 		

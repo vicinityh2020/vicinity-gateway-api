@@ -1,21 +1,30 @@
 package eu.bavenir.ogwapi.commons.connectors.http;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObjectBuilder;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.restlet.data.MediaType;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
+
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
+import com.mashape.unirest.request.HttpRequestWithBody;
 
 import eu.bavenir.ogwapi.commons.connectors.AgentConnector;
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
@@ -64,26 +73,70 @@ public class RestAgentConnector extends AgentConnector {
 	 */
 	private static final String CONFIG_PARAM_CONNECTORRESTUSEHTTPS = "connector.restAgentConnector.useHttps";
 	
-	/*
-	private static final String CONFIG_PARAM_HTTPSACCEPTSALLCERTIFICATES = 
-														"connector.restAgentConnector.acceptAllCertificates";
+	/**
+	 * Name of the configuration parameter for whether Agent should accept self signed certificate.
+	 */
+	private static final String CONFIG_PARAM_HTTPSACCEPTSELFSIGNED = "connector.restAgentConnector.acceptSelfSignedCertificate";
 	
-	private static final String CONFIG_PARAM_AUTHENTICATIONSCHEMA = "connector.restAgentConnector.authenticationSchema";
+	/**
+	 * Name of the configuration parameter for authentication method should be used when connecting to Agent.
+	 */
+	private static final String CONFIG_PARAM_AUTHMETHOD = "connector.restAgentConnector.agentAuthenticationMethod";
 	
-	private static final String CONFIG_PARAM_LOGIN = "connector.restAgentConnector.login";
+	/**
+	 * Name of the configuration parameter for user name.
+	 */
+	private static final String CONFIG_PARAM_AGENTUSERNAME = "connector.restAgentConnector.agentUsername";
+
+	/**
+	 * Name of the configuration parameter for password.
+	 */
+	private static final String CONFIG_PARAM_AGENTPASSWORD = "connector.restAgentConnector.agentPassword";
 	
-	private static final String CONFIG_PARAM_PASSWORD = "connector.restAgentConnector.password";
+	/**
+	 * Name of the configuration parameter for Agent timeout.
+	 */
+	private static final String CONFIG_PARAM_AGENTTIMEOUT = "connector.restAgentConnector.agentTimeout";
 	
-	*/
 	/**
 	 * Name of the configuration parameter for Agent IP.
 	 */
-	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agentIp";
+	private static final String CONFIG_PARAM_CONNECTORRESTIP = "connector.restAgentConnector.agent";
 	
 	/**
 	 * Name of the configuration parameter for Agent port.
 	 */
 	private static final String CONFIG_PARAM_CONNECTORRESTPORT = "connector.restAgentConnector.agentPort";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_AGENTTIMEOUT CONFIG_PARAM_AGENTTIMEOUT} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final int CONFIG_DEF_AGENTTIMEOUT = 60;
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_AGENTUSERNAME CONFIG_PARAM_AGENTUSERNAME} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_AGENTUSERNAME = "";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_AGENTPASSWORD CONFIG_PARAM_AGENTPASSWORD} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_AGENTPASSWORD = "";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_AUTHMETHOD CONFIG_PARAM_AUTHMETHOD} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final String CONFIG_DEF_AUTHMETHOD = "none";
+	
+	/**
+	 * Default value of {@link #CONFIG_PARAM_HTTPSACCEPTSELFSIGNED CONFIG_PARAM_HTTPSACCEPTSELFSIGNED} configuration parameter. 
+	 * This value is taken into account when no suitable value is found in the configuration file.
+	 */
+	private static final boolean CONFIG_DEF_HTTPSACCEPTSELFSIGNED = true;
 	
 	/**
 	 * Default value of {@link #CONFIG_PARAM_CONNECTORRESTDUMMY CONFIG_PARAM_APIRESTAGENTDUMMY} configuration parameter. 
@@ -179,6 +232,31 @@ public class RestAgentConnector extends AgentConnector {
 	private boolean useHttps;
 	
 	/**
+	 * Configuration flag for accepting self signed certificate.
+	 */
+	private boolean acceptSelfSigned;
+	
+	/**
+	 * Agent timeout.
+	 */
+	private int agentTimeout;
+	
+	/**
+	 * Agent authentication method.
+	 */
+	private String agentAuthMethod;
+	
+	/**
+	 * User name.
+	 */
+	private String agentUsername;
+	
+	/**
+	 * Password.
+	 */
+	private String agentPassword;
+	
+	/**
 	 * Configuration flag for using dummy operations instead of the real ones.
 	 */
 	private boolean dummyCalls;
@@ -202,6 +280,7 @@ public class RestAgentConnector extends AgentConnector {
 	public RestAgentConnector(XMLConfiguration config, Logger logger){
 		super(config, logger);
 		
+		// load configuration for dummy connector
 		if (config.getBoolean(CONFIG_PARAM_CONNECTORRESTDUMMY, CONFIG_DEF_APIRESTAGENTDUMMY)) {
 			logger.config("REST Agent Connector: Dummy payloads enabled, all calls to an Agent via this connector "
 					+ "will be simulated.");
@@ -211,13 +290,29 @@ public class RestAgentConnector extends AgentConnector {
 					+ "will be real.");
 		}
 		
+		// load configuration for https
 		if (config.getBoolean(CONFIG_PARAM_CONNECTORRESTUSEHTTPS, CONFIG_DEF_APIAGENTUSEHTTPS)){
 			logger.config("REST Agent Connector: HTTPS protocol enabled for Agent communication.");
 			useHttps = true;
+			
+			acceptSelfSigned = config.getBoolean(CONFIG_PARAM_HTTPSACCEPTSELFSIGNED, CONFIG_DEF_HTTPSACCEPTSELFSIGNED);
+			
 		} else {
 			logger.config("REST Agent Connector: HTTPS protocol disabled for Agent communication.");
 			useHttps = false;
+			acceptSelfSigned = false;
 		}
+		
+		// load authentication method
+		agentAuthMethod = config.getString(CONFIG_PARAM_AUTHMETHOD, CONFIG_DEF_AUTHMETHOD);
+		if (!agentAuthMethod.equals(CONFIG_DEF_AUTHMETHOD)) {
+			// log it
+		}
+		agentUsername = config.getString(CONFIG_PARAM_AGENTUSERNAME, CONFIG_DEF_AGENTUSERNAME);
+		agentPassword = config.getString(CONFIG_PARAM_AGENTPASSWORD, CONFIG_DEF_AGENTPASSWORD);
+		
+		// load timeout
+		agentTimeout = config.getInt(CONFIG_PARAM_AGENTTIMEOUT, CONFIG_DEF_AGENTTIMEOUT);
 		
 		agentServiceUrl = assembleAgentServiceUrl();
 		
@@ -328,11 +423,233 @@ public class RestAgentConnector extends AgentConnector {
 	 * 
 	 * @param operationCode Code of the HTTP operation, see the constants.
 	 * @param sourceOid The object ID of the source. 
-	 * @param fullUrl Full URL of the Agent's endpoint to be reached. 
+	 * @param fullUrl Full URL of the Agent's end point to be reached. 
 	 * @param body Body of the request.
 	 * @param parameters Parameters passed in the request.
 	 * @return Response message with the results.
 	 */
+	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
+			Map<String, String> parameters){
+		
+		// don't forget to put source OID as one of the parameters (this will also overwrite any previous such 
+		// parameter that someone maliciously could have thrown in)
+		parameters.put(PARAM_SOURCEOID, sourceOid);
+		
+		logger.fine("REST Agent Connector:\nOperation code: " + operationCode
+				+ "\nAssembled full URL: " + fullUrl
+				+ "\nParameters: " + parameters.toString()
+				+ "\nBody: " + body
+				);
+		
+		// is this for real, or just simulation
+		if (dummyCalls) {
+			return performDummyOperation(operationCode, sourceOid, fullUrl, body, parameters);
+		}
+		
+		// Unirest needs Map<String, Object>, but all we have is Map<String, String>. We have to do something...
+		Map<String, Object> convertedParams = Collections.<String, Object>unmodifiableMap(parameters);
+		
+		// create stuff
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+
+		// accept snake oil
+		if (useHttps && acceptSelfSigned) {
+			SSLContext sslcontext = null;
+			try {
+				sslcontext = SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
+			} catch (KeyManagementException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (KeyStoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (sslcontext != null) {
+				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
+				CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build(); 
+				Unirest.setHttpClient(httpClient);
+			}
+		}
+		
+		// set timeouts
+		Unirest.setTimeouts(agentTimeout * 1000, agentTimeout * 1000);
+		
+		HttpResponse<JsonNode> responseNode = null;
+		
+
+		switch (operationCode){
+		
+		case OPERATION_GET:
+		
+			GetRequest getRequest = Unirest.get(fullUrl);
+			
+			// fill the parameters
+			getRequest.queryString(convertedParams);
+			
+			// if authentication is not 'none'
+			if (!agentAuthMethod.equals(CONFIG_DEF_AUTHMETHOD)) {
+				getRequest.basicAuth(agentUsername, agentPassword);
+			}
+			
+			getRequest.header("accept", "application/json");
+			
+			try {
+				responseNode = getRequest.asJson();
+			} catch (UnirestException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		
+			break;
+			
+		case OPERATION_POST:
+		
+			HttpRequestWithBody postRequest = Unirest.post(fullUrl);
+			
+			// fill the parameters
+			postRequest.queryString(convertedParams);
+				
+			// if authentication is not 'none'
+			if (!agentAuthMethod.equals(CONFIG_DEF_AUTHMETHOD)) {
+				postRequest.basicAuth(agentUsername, agentPassword);
+			}
+			
+			postRequest.header("accept", "application/json");
+			
+			postRequest.body(body);
+			
+			try {
+				responseNode = postRequest.asJson();
+			} catch (UnirestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			break;
+			
+		case OPERATION_PUT:
+
+			HttpRequestWithBody putRequest = Unirest.put(fullUrl);
+			
+			// fill the parameters
+			putRequest.queryString(convertedParams);
+			
+			// if authentication is not 'none'
+			if (!agentAuthMethod.equals(CONFIG_DEF_AUTHMETHOD)) {
+				putRequest.basicAuth(agentUsername, agentPassword);
+			}
+			
+			putRequest.header("accept", "application/json");
+			
+			putRequest.body(body);
+			
+			try {
+				responseNode = putRequest.asJson();
+			} catch (UnirestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			break;
+			
+		case OPERATION_DELETE:
+			
+			HttpRequestWithBody deleteRequest = Unirest.delete(fullUrl);
+			
+			// fill the parameters
+			deleteRequest.queryString(convertedParams);
+			
+			// if authentication is not 'none'
+			if (!agentAuthMethod.equals(CONFIG_DEF_AUTHMETHOD)) {
+				deleteRequest.basicAuth(agentUsername, agentPassword);
+			}
+			
+			deleteRequest.header("accept", "application/json");
+			
+			try {
+				responseNode = deleteRequest.asJson();
+			} catch (UnirestException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			break;
+			
+		}
+		
+		if (responseNode.getBody() != null) {
+			response.setResponseBody(responseNode.getBody().toString());
+		}
+		
+		if (responseNode.getHeaders().containsKey("Content-type")) {
+			response.setContentType(responseNode.getHeaders().get("Content-type").toString());
+		}
+		
+		// save the status code and reason
+		if (responseNode.getStatus() / 200 == 1) {
+			response.setError(false);
+		} else {
+			response.setError(true);
+		}
+		
+		response.setResponseCode(responseNode.getStatus());
+		response.setResponseCodeReason(responseNode.getStatusText());
+
+		return response;
+	}
+	
+	
+
+	/**
+	 * Very handy testing method that, if set in the configuration file, can be used instead of performOperation. This one does 
+	 * not rely on functional agent and always returns positive results.
+	 * 
+	 * @param operationCode Code of the HTTP operation, see the constants.
+	 * @param sourceOid The object ID of the source. 
+	 * @param fullUrl Full URL of the Agent's end point to be reached. 
+	 * @param body Body of the request.
+	 * @param parameters Parameters passed in the request.
+	 * @return Response message with the results.
+	 */
+	private NetworkMessageResponse performDummyOperation (byte operationCode, String sourceOid, String fullUrl, 
+			String body, Map<String, String> parameters) {
+		
+		// don't forget to put source OID as one of the parameters
+		parameters.put(PARAM_SOURCEOID, sourceOid);
+		
+		String dummyResponseMessage = 
+				new String("Dummy REST Agent Connector received following data to perform request:"
+						+ "\nOperation code: " + operationCode
+						+ "\nParameters: " + parameters.toString()
+						+ "\nFull URL: " + fullUrl
+						+ "\nBody: " + body);
+		
+		logger.info(dummyResponseMessage);
+		
+		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
+		
+		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
+		
+		builder.add(ATTR_DUMMY, dummyResponseMessage);
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK);
+		response.setResponseBody(builder.build().toString());
+		
+		return response;
+	}
+	
+	
+	
+	/*
+	
 	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
 			Map<String, String> parameters){
 		
@@ -359,6 +676,9 @@ public class RestAgentConnector extends AgentConnector {
 		
 		// fill the parameters
 		if (parameters != null) {
+			
+			//TODO log parameters
+			
 			for (String paramName : parameters.keySet()) {
 				clientResource.addQueryParameter(paramName, parameters.get(paramName));
 			}
@@ -461,48 +781,7 @@ public class RestAgentConnector extends AgentConnector {
 		return response;
 	}
 	
-	
-
-	/**
-	 * Very handy testing method that, if set in the configuration file, can be used instead of performOperation. This one does 
-	 * not rely on functional agent and always returns positive results.
-	 * 
-	 * @param operationCode Code of the HTTP operation, see the constants.
-	 * @param sourceOid The object ID of the source. 
-	 * @param fullUrl Full URL of the Agent's end point to be reached. 
-	 * @param body Body of the request.
-	 * @param parameters Parameters passed in the request.
-	 * @return Response message with the results.
-	 */
-	private NetworkMessageResponse performDummyOperation (byte operationCode, String sourceOid, String fullUrl, 
-			String body, Map<String, String> parameters) {
-		
-		// don't forget to put source OID as one of the parameters
-		parameters.put(PARAM_SOURCEOID, sourceOid);
-		
-		String dummyResponseMessage = 
-				new String("Dummy REST Agent Connector received following data to perform request:"
-						+ "\nOperation code: " + operationCode
-						+ "\nFull URL: " + fullUrl
-						+ "\nBody: " + body);
-		
-		logger.info(dummyResponseMessage);
-		
-		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
-		
-		JsonObjectBuilder builder = jsonBuilderFactory.createObjectBuilder();
-		
-		builder.add(ATTR_DUMMY, dummyResponseMessage);
-		
-		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		
-		response.setError(false);
-		response.setResponseCode(CodesAndReasons.CODE_200_OK);
-		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK);
-		response.setResponseBody(builder.build().toString());
-		
-		return response;
-	}
+	*/
 	
 	
 	

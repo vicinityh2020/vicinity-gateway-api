@@ -83,7 +83,7 @@ public class Api extends Application {
 	/**
 	 * Default value for setting the realm of RESTLET BEARER authentication schema.
 	 */
-	private static final String CONF_DEF_AUTHREALM = "vicinity.eu";
+	private static final String CONF_DEF_AUTHREALM = "bavenir.eu";
 	
 	/**
 	 * Default value for setting the authentication method.

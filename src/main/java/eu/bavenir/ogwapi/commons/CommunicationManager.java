@@ -10,6 +10,7 @@ import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.representation.Representation;
 
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
@@ -22,7 +23,6 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  * - private methods
  */
 
-//TODO unit testing
 /*
  * Unit testing:
  * 1. connecting multiple users
@@ -224,6 +224,11 @@ public class CommunicationManager {
 	 */
 	private Logger logger;
 	
+	/**
+	 * A connector used for connecting to NM Manager.
+	 */
+	private NeighbourhoodManagerConnector nmConnector;
+	
 	
 	/* === PUBLIC METHODS === */
 	
@@ -236,7 +241,9 @@ public class CommunicationManager {
 	 * @param logger Java logger.
 	 */
 	public CommunicationManager(XMLConfiguration config, Logger logger){
-		descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
+		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
+		
+		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		
 		
 		this.sessionExpiration = 0;
 		
@@ -717,7 +724,7 @@ public class CommunicationManager {
 	 * @return Status message. 
 	 */
 	public StatusMessage setPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
-			String body, Map<String,String> parameters) {
+			String body, Map<String, String> parameters) {
 		
 		if (sourceOid == null){
 			logger.warning("Error when setting property of remote object. Source object ID is null.");
@@ -910,7 +917,7 @@ public class CommunicationManager {
 	 * @return Status message.
 	 */
 	public StatusMessage cancelRunningTask(String sourceOid, String destinationOid, String actionId, String taskId, 
-			Map<String,String> parameters, String body) {
+			Map<String, String> parameters, String body) {
 		
 		if (sourceOid == null){
 			logger.warning("Error when canceling task. Source object ID is null.");
@@ -1268,9 +1275,94 @@ public class CommunicationManager {
 	
 	// REGISTRY INTERFACE
 	
+	/**
+	 * Retrieves the list of IoT objects registered under given Agent from the Neighbourhood Manager. 
+	 * 
+	 * @param agid The ID of the Agent in question.
+	 * @return All VICINITY identifiers of objects registered under specified agent.
+	 */
+	public Representation getAgentObjects(String agid) {
+		
+		if (agid == null) {
+			
+			return null;
+		}
+		
+		return nmConnector.getAgentObjects(agid);
+	}
 	
 	
+	/**
+	 * Register the IoT object(s) of the underlying eco system e.g. devices, VA service.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be registered 
+	 * (from request).
+	 * @return All VICINITY identifiers of objects registered the Agent by this call.
+	 */
+	public Representation storeObjects(Representation json) {
+		
+		if (json == null) {
+			
+			return null;
+		}
+		
+		return nmConnector.storeObjects(json);
+		
+	}
 	
+	
+	/**
+	 * Update the thing descriptions of objects registered under the Agent. This will delete the old records and 
+	 * replace them with new ones.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be updated 
+	 * (from request).
+	 * @return The list of approved devices to be registered in agent configuration. Approved devices means only 
+	 * devices, that passed the validation in semantic repository and their instances were created. 
+	 */
+	public Representation heavyweightUpdate(Representation json) {
+		if (json == null) {
+			
+			return null;
+		}
+		
+		return nmConnector.heavyweightUpdate(json);
+	}
+	
+	
+	/**
+	 * Update the thing descriptions of objects registered under the Agent. This will only change the required fields.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be updated 
+	 * (from request).
+	 * @return The list of approved devices to be registered in agent configuration. Approved devices means only 
+	 * devices, that passed the validation in semantic repository and their instances were created. 
+	 */
+	public Representation lightweightUpdate(Representation json){
+		if (json == null) {
+			
+			return null;
+		}
+		
+		return nmConnector.lightweightUpdate(json);
+	}
+	
+	
+	/**
+	 * Deletes - unregisters the IoT object(s).
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be removed 
+	 * (taken from request).
+	 * @return Notification of success or failure.
+	 */
+	public Representation deleteObjects(Representation json){
+		if (json == null) {
+			
+			return null;
+		}
+		
+		return nmConnector.deleteObjects(json);
+	}
 	
 	
 	
@@ -1476,7 +1568,7 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Periodically called to recover sessions according to the confgiuration file. 
+	 * Periodically called to recover sessions according to the configuration file. 
 	 */
 	private void recoverSessions() {
 		

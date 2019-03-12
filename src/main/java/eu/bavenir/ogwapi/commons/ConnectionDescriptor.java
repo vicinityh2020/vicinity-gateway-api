@@ -974,17 +974,15 @@ public class ConnectionDescriptor {
 		
 		if (networkMessage != null){
 			
-			// TODO deal with this security issue
-			/* next time dont forget to put everywhere the source oids into the response messages omfg
 			// just a check whether or not somebody was tampering the message (and forgot to do it properly)
 			if (!sourceOid.equals(networkMessage.getSourceOid())) {
-				logger.severe("ConnectionDescriptor#processIncommingMessage: The source OID "
+				logger.severe("The source OID "
 						+ sourceOid + " returned by communication engine "
 						+ "does not match the internal source OID in the message " + networkMessage.getSourceOid() 
 						+ ". Possible message tampering! Discarding the message and aborting.");
 				
 				return;
-			}*/
+			}
 
 			switch (networkMessage.getMessageType()){
 			
@@ -1059,71 +1057,82 @@ public class ConnectionDescriptor {
 		
 		NetworkMessageResponse response = null;
 		
-		// create response and send it back
-		switch (requestMessage.getRequestOperation()){
+		if (objectIsInMyRoster(requestMessage.getSourceOid())) {
+			
+			// create response and send it back
+			switch (requestMessage.getRequestOperation()){
+			
+			case NetworkMessageRequest.OPERATION_CANCELTASK:
+				
+				response = respondToCancelRunningTask(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
+				
+				response = respondToEventChannelStatusQuery(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
+				
+				response = respondToGetObjectActions(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
+				
+				response = respondToGetObjectEvents(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
+				
+				response = respondToGetObjectProperties(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
+				
+				response = respondToGetObjectProperty(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
+				
+				response = respondToGetTaskStatus(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
+				
+				response = respondToSetObjectProperty(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_STARTACTION:
+				
+				response = respondToStartActionRequest(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
+				
+				response = respondToEventSubscriptionRequest(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
+				
+				response = respondToCancelSubscriptionRequest(requestMessage);
+				break;
+				
+			case NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION:
+				
+				response = respondToGetObjectThingDescription(requestMessage);
+				break;
+			}
 		
-		case NetworkMessageRequest.OPERATION_CANCELTASK:
+			sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
 			
-			response = respondToCancelRunningTask(requestMessage);
-			break;
+		} else {
 			
-		case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
-			
-			response = respondToEventChannelStatusQuery(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
-			
-			response = respondToGetObjectActions(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
-			
-			response = respondToGetObjectEvents(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
-			
-			response = respondToGetObjectProperties(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
-			
-			response = respondToGetObjectProperty(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
-			
-			response = respondToGetTaskStatus(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
-			
-			response = respondToSetObjectProperty(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_STARTACTION:
-			
-			response = respondToStartActionRequest(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
-			
-			response = respondToEventSubscriptionRequest(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
-			
-			response = respondToCancelSubscriptionRequest(requestMessage);
-			break;
-			
-		case NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION:
-			
-			response = respondToGetObjectThingDescription(requestMessage);
-			break;
+			logger.warning("The source OID " + requestMessage.getSourceOid() + " of the request " 
+					+ requestMessage.getRequestId() + " is not in the roster of the object that should process the request (" 
+					+ this.objectId + ").");
 		}
 		
-		sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
+		
 		
 	}
 	
@@ -1411,10 +1420,8 @@ public class ConnectionDescriptor {
 			eventChannel = searchForEventChannel(eventId);
 		}
 		
-		// check whether the object is in our roster and whether or not it is already in the list of subscribers
-		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
-		
-		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
+		// check whether the object is already in the list of subscribers
+		if (eventChannel == null || !eventChannel.isActive()) {
 			logger.info("Object ID " + this.objectId + " received a request for subscription to invalid event channel " + eventId 
 					+ ". Request came from: " + requestMessage.getSourceOid());
 			
@@ -1470,10 +1477,7 @@ public class ConnectionDescriptor {
 			eventChannel = searchForEventChannel(eventId);
 		}
 		
-		// check whether the object is in our roster and whether or not it is already in the list of subscribers
-		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
-		
-		if (eventChannel == null || !eventChannel.isActive()) { // || !security check
+		if (eventChannel == null || !eventChannel.isActive()) {
 			logger.info("Object ID " + this.objectId + " received a request to cancel subscription to invalid event "
 					+ "channel " + eventId + ". Request came from: " + requestMessage.getSourceOid());
 			
@@ -1533,10 +1537,9 @@ public class ConnectionDescriptor {
 			action = new Action (config, this.objectId, actionId, agentConnector, logger);
 			data.addProvidedAction(action);
 		}
+		// end of workaround
 		
-		// check whether the object is in our roster and whether or not the action already exists
-		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
-		if (action == null ) { // || security check
+		if (action == null ) {
 			logger.info("Object ID " + this.objectId + " received a request to start non existing action " + actionId 
 					+ ". Request came from: " + requestMessage.getSourceOid());
 			
@@ -1607,12 +1610,9 @@ public class ConnectionDescriptor {
 			action = searchForAction(actionId);
 		}
 		
-		
 		String statusString;
 		
-		// check whether the object is in our roster and whether or not the action already exists
-		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
-		if (action == null ) { // || security check
+		if (action == null ) {
 			logger.info("Object ID " + this.objectId + " received a request for status report on non existing action " 
 					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
@@ -1687,10 +1687,7 @@ public class ConnectionDescriptor {
 			action = searchForAction(actionId);
 		}
 		
-		
-		// check whether the object is in our roster and whether or not the action already exists
-		// TODO refuse to work if the object is not in the roster - this would need a new class to observe security
-		if (action == null ) { // || security check
+		if (action == null ) {
 			logger.info("Object ID " + this.objectId + " received a request for stopping a task of non existing action " 
 					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
@@ -1909,7 +1906,6 @@ public class ConnectionDescriptor {
 		
 		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
-			// TODO or something else wrong happened make a security check for outgoing messages
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
 			
@@ -2022,18 +2018,42 @@ public class ConnectionDescriptor {
 	 * @return True if the message was successfully sent via either local routing or by network. False otherwise.
 	 */
 	private boolean sendMessage(String sourceOid, String destinationOid, String message) {
+		
+		logger.fine("Sending message: \n" + message);
+		
 		// try internal routing first
 		if (commManager.tryToSendLocalMessage(sourceOid, destinationOid, message)) {
+			
+			logger.fine("Message was routed locally.");
 			return true;
 		}
 		
 		// if not successful, try it via network 
 		if (commEngine.sendMessage(destinationOid, message)) {
+			
+			logger.fine("Message was sent through network.");
 			return true;
 		}
 		
+		logger.warning("Error while sending message: \n" + message + "\nMessage could not be sent.");
+		
 		// both failed
 		return false;
+	}
+	
+	
+	/**
+	 * Verifies that the destination is in our roster. This check is done to make sure the communication is performed
+	 * only between objects that know each other and have signed contracts. 
+	 * 
+	 * @param destiantionOid Destination OID.
+	 * @return True if the destination OID is in the roster, false otherwise.  
+	 */
+	private boolean objectIsInMyRoster(String destiantionOid) {
+		
+		Set<String> roster = commEngine.getRoster();
+		
+		return roster.contains(destiantionOid);
 	}
 
 }

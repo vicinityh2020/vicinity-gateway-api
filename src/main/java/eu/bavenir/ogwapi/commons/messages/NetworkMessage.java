@@ -90,7 +90,7 @@ public class NetworkMessage {
 	 * configuration parameter. This value is taken into account when no suitable value is found in the configuration
 	 * file.
 	 */
-	public static final int CONFIG_DEF_REQUESTMESSAGETIMEOUT = 60;
+	public static final int CONFIG_DEF_REQUESTMESSAGETIMEOUT = 90;
 	
 	
 	/* === FIELDS === */

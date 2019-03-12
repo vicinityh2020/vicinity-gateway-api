@@ -6,13 +6,13 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
 
@@ -45,70 +45,6 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private static final String ATTR_AGID = "agid";
 	
-	
-	/**
-	 * Name of the configuration parameter for URL path to Neighbourhood Manager server.
-	 */
-	private static final String CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER = "general.neighbourhoodManagerServer";
-	
-	
-	/**
-	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER } parameter. 
-	 */
-	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "commserver.vicinity.ws";
-	
-	
-	/**
-	 * Name of the configuration parameter for Neighbourhood Manager port.
-	 */
-	private static final String CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT = "general.neighourhoodManagerPort";
-	
-	
-	/**
-	 * Default value for {@link #CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT } parameter.
-	 */
-	private static final int CONFIG_DEF_NEIGHBOURHOODMANAGERPORT = 3000;
-	
-	
-	/**
-	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
-	 * SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 + someOtherAttribute + etc...
-	 * 
-	 *  Example for discovery service:
-	 *  SERVER_PROTOCOL + SERVER + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
-	 *  
-	 */
-	private static final String SERVER_PROTOCOL = "https://"; 
-	
-	
-	/**
-	 * The part of the URL containing the API path.
-	 */
-	private static final String API_PATH = "/commServer/";
-	
-	
-	/**
-	 * Discovery service part 1 of the string.
-	 */
-	private static final String DISCOVERY_SERVICE_1 = "agent/";
-	
-	
-	/**
-	 * Discovery service part 2 of the string.
-	 */
-	private static final String DISCOVERY_SERVICE_2 = "/items";
-	
-	
-	/**
-	 * Registration service string.
-	 */
-	private static final String REGISTRATION_SERVICE = "items/register";
-	
-	
-	/**
-	 * Modify service string.
-	 */
-	private static final String HEAVYWEIGHTUPDATE_SERVICE = "items/modify";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -221,17 +157,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation heavyweightUpdate(Representation json, Logger logger, XMLConfiguration config){
 		
-		String neighbourhoodManagerServer = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER);
-		
-		int port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
-		
-		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + HEAVYWEIGHTUPDATE_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-
-		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+	
+		return communicationManager.heavyweightUpdate(json);
 	}
 	
 	
@@ -246,17 +175,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation storeObjects(Representation json, Logger logger, XMLConfiguration config){
 		
-		String neighbourhoodManagerServer = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER);
-		
-		int port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
-		
-		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + REGISTRATION_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
+		return communicationManager.storeObjects(json);
 	}
 	
 	
@@ -270,17 +192,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation getAgentObjects(String agid, Logger logger, XMLConfiguration config){
 		
-		String neighbourhoodManagerServer = config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER);
-		
-		int port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
-		
-		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-		
-		Representation representation = clientResource.get(MediaType.APPLICATION_JSON);
-		
-		return representation;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return communicationManager.getAgentObjects(agid);
 	
 	}
 }

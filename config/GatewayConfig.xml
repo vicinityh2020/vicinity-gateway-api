@@ -30,6 +30,16 @@
 		-->
 		<neighourhoodManagerPort>3000</neighourhoodManagerPort>
 		
+		<!--
+		User name to be used with NM communication.   
+		-->
+		<neighbourhoodManagerUsername></neighbourhoodManagerUsername>
+		
+		<!-- 
+		Password to be used with NM communication.
+		-->
+		<neighbourhoodManagerPassword></neighbourhoodManagerPassword>
+		
 		<!-- 
 		Setting this parameter to true will enable encryption of communication. 
 		The policy is to try the strongest mechanisms first.
@@ -45,9 +55,16 @@
 		response. If the response does not arrive until this timeout expires, 
 		point B is considered unreachable. If the response arrives after this
 		happens, the response is ignored and discarded and a new request has
-		to be sent.
+		to be sent. 
 		
-		Default is 60 seconds. 
+		IMPORTANT: Please take into account also the fact that another 
+		timeout is in the game, the timeout of Agent connector on the remote 
+		OGWAPI. If the administrator of the remote OGWAPI knows that a call to
+		his/her Agent takes a long time, and subsequently sets the Agent timeout
+		to 120 seconds, your 90 seconds message timeout may not be sufficient to
+		cover the request. Watch the logs.  
+		
+		Default is 90 seconds. 
 		-->
 		<requestMessageTimeout>90</requestMessageTimeout>
 		
@@ -224,7 +241,7 @@
 		<!--
 		XMPP domain that is served by the server. Defaults to bavenir.eu.
 		-->
-		<domain>bavenir.eu</domain>
+		<domain>vicinity.ws</domain>
 		
 		<!--
 		Enables debugging of the XMPP communication between the Gateway and the
@@ -248,10 +265,36 @@
 		
 		<!--
 		Set whether the API will be served via HTTP or HTTPS. Takes either true
-		or false value. Default is true, however in some installations it might
-		not be supported.
+		or false value. Default is false.
 		-->
 		<enableHttps>false</enableHttps>
+		
+		<!--
+		Path to the keystore file. This parameter is only read when the 
+		enableHttps parameter is set to true. If it is, but there is no keystore
+		file specified, it will default to 'keystore/ogwapi.keystore' in the 
+		installation directory of OGWAPI.
+		-->
+		<keystoreFile>keystore/ogwapi.keystore</keystoreFile>
+		
+		<!--
+		Password for the keystore. This parameter is only read when the 
+		enableHttps parameter is set to true. No defaults are specified, so watch
+		for exceptions. 
+		-->
+		<keystorePassword>password</keystorePassword>
+		
+		<!--
+		Password for the key. This parameter is only read when the 
+		enableHttps parameter is set to true. No defaults are specified, so watch
+		for exceptions. 
+		-->
+		<keyPassword>password</keyPassword>
+		
+		<!--
+		The type of the keystore. The default (and recommended) type is PKCS12.
+		-->
+		<keystoreType>PKCS12</keystoreType>
 		
 		<!--
 		Authentication realm for the RESTLET BEARER authentication schema. It 
@@ -274,7 +317,7 @@
 		none	-	No authentication. Experimental, for debugging purposes only.
 					Without authentication, there is no way of logging into the
 					network other than hard coded credentials (or other
-					kind of customization).
+					kind of customisation).
 		
 		Defaults to basic.
 		
@@ -305,12 +348,56 @@
 			<useHttps>false</useHttps>
 			
 			<!--
+			Setting this to true will make OGWAPI accept self signed certificates
+			('snake oil') from the REST Agent. Please note that this does not mean
+			it will ignore certificate errors! If the Agent is running on localhost,
+			OGWAPI will still refuse connection to an Agent with self signed 
+			certificate with e.g. CN=mymachine.eu (because it will look for CN=localhost).
+			
+			Default is true.  
+			-->
+			<acceptSelfSignedCertificate>true</acceptSelfSignedCertificate>
+			
+			<!--
+			If the Agent requests authentication, set this parameter to appropriate
+			value. Accepted values are:
+			
+			none - The Agent does not request authentication.
+			
+			basic - The Agent requests authentication, the method is Basic HTTP.
+			
+			NOTE: For now, no more authentication methods are supported.
+			
+			Default is none.
+			-->
+			<agentAuthenticationMethod>none</agentAuthenticationMethod>
+			
+			<!--
+			User name for authentication with Agent.  
+			-->
+			<agentUsername>username</agentUsername>
+			
+			<!--
+			Password for authentication with Agent. 
+			-->
+			<agentPassword>password</agentPassword>
+			
+			<!--
+			Number of seconds the OGWAPI is supposed to wait for an answer from
+			the Agent. 
+			
+			Default is 60, as in most of the HTTP clients. 
+			-->
+			<agentTimeout>60</agentTimeout>
+			
+			<!--
 			If the REST Agent listens on a different interface (or a different machine),
-			it is necessary to set its IP address with this parameter.
+			it is necessary to set its address with this parameter (both IP and name
+			are accepted).
 			
 			Defaults to localhost.
 			-->
-			<agentIp>localhost</agentIp>
+			<agent>localhost</agent>
 			
 			<!-- 
 			Port on which the REST Agent listens.

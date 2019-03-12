@@ -96,6 +96,8 @@ public class ObjectsOidActions extends ServerResource {
 		return new JsonRepresentation(communicationManager.getActionsOfRemoteObject(sourceOid, destinationOid, body, queryParams).buildMessage().toString());
 	}
 	
+	
+	
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {
