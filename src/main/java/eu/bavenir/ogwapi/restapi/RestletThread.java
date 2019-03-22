@@ -119,6 +119,36 @@ public class RestletThread extends Thread {
 	 */
 	private Logger logger;
 	
+	/**
+	 * Port on which the OGWAPI listens.
+	 */
+	private int port;
+	
+	/**
+	 * Indicates whether or not to use HTTPS.
+	 */
+	private boolean enableHttps;
+	
+	/**
+	 * A path to key store file.
+	 */
+	private String keystoreFile;
+	
+	/**
+	 * Password for the key store.
+	 */
+	private String keystorePassword;
+	
+	/**
+	 * Password for the key.
+	 */
+	private String keyPassword;
+	
+	/**
+	 * Type of the key store.
+	 */
+	private String keystoreType;
+	
 	
 	/* === PUBLIC METHODS === */
 	
@@ -134,6 +164,26 @@ public class RestletThread extends Thread {
 		this.logger = logger;
 		
 		threadRunning = true;
+		
+		enableHttps = config.getBoolean(CONF_PARAM_APIENABLEHTTPS, CONF_DEF_APIENABLEHTTPS);
+		if (enableHttps) {
+			logger.config("HTTPS enabled.");
+			
+			keystoreFile = config.getString(CONF_PARAM_KEYSTOREFILE, CONF_DEF_KEYSTOREFILE);
+			logger.config("Path to keystore file: " + keystoreFile);
+			
+			keystorePassword = config.getString(CONF_PARAM_KEYSTOREPASSWORD, CONF_DEF_KEYSTOREPASSWORD);
+			keyPassword = config.getString(CONF_PARAM_KEYPASSWORD, CONF_DEF_KEYPASSWORD);
+			
+			keystoreType = config.getString(CONF_PARAM_KEYSTORETYPE, CONF_DEF_KEYSTORETYPE);
+			logger.config("Keystore type is " + keystoreType);
+			
+		} else {
+			logger.config("HTTPS disabled.");
+		}
+		
+		port = config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT);
+		logger.config("Set to listen on port " + port);
 	}
 	
 	
@@ -160,26 +210,22 @@ public class RestletThread extends Thread {
 		String serverType;
 		
 		// add a new HTTP/HTTPS server listening on set port
-		if (config.getBoolean(CONF_PARAM_APIENABLEHTTPS, CONF_DEF_APIENABLEHTTPS) == true){
-			server = component.getServers().add(Protocol.HTTPS, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));
+		if (enableHttps == true){
+			
+			server = component.getServers().add(Protocol.HTTPS, port);
 			
 			server.getContext().getParameters().add("sslContextFactory", "org.restlet.engine.ssl.DefaultSslContextFactory");
+			server.getContext().getParameters().add("keyStorePath", keystoreFile);
 			
-			server.getContext().getParameters().add("keyStorePath", 
-						config.getString(CONF_PARAM_KEYSTOREFILE, CONF_DEF_KEYSTOREFILE));
+			server.getContext().getParameters().add("keyStorePassword", keystorePassword);
 			
-			server.getContext().getParameters().add("keyStorePassword", 
-						config.getString(CONF_PARAM_KEYSTOREPASSWORD, CONF_DEF_KEYSTOREPASSWORD));
+			server.getContext().getParameters().add("keyPassword", keyPassword);
 			
-			server.getContext().getParameters().add("keyPassword", 
-						config.getString(CONF_PARAM_KEYPASSWORD, CONF_DEF_KEYPASSWORD));
-			
-			server.getContext().getParameters().add("keyStoreType", 
-						config.getString(CONF_PARAM_KEYSTORETYPE, CONF_DEF_KEYSTORETYPE));
+			server.getContext().getParameters().add("keyStoreType", keystoreType);
 			
 			serverType = "HTTPS";
 		} else {
-			server = component.getServers().add(Protocol.HTTP, config.getInt(CONF_PARAM_APIPORT, CONF_DEF_APIPORT));
+			server = component.getServers().add(Protocol.HTTP, port);
 			serverType = "HTTP";
 		}
 		
@@ -189,13 +235,10 @@ public class RestletThread extends Thread {
 		// attach the API application  
 		component.getDefaultHost().attach(API_URL_PATH, new Api(config, logger));  
 
-		// log message
-		logger.config(serverType + " server configured.");
-		
 		// start the component
 		try {
 			component.start();
-			logger.fine(serverType + " server component started.");
+			logger.info(serverType + " server configured and started.");
 		} catch (Exception e) {
 			logger.severe("Can't start RESTLET component. Exited with exception:\n" + e.getMessage());
 		}
@@ -211,7 +254,7 @@ public class RestletThread extends Thread {
 			try {
 				component.stop();
 				// this logger call will probably never execute on OpenJDK VM because of the shutdown hook...
-				logger.fine("RESTLET thread stopping.");
+				logger.info("RESTLET thread stopping.");
 				
 				// ...but this should execute without too much of a fuss				
 				System.out.println("Vicinity Gateway API: Stopping RESTLET component.");

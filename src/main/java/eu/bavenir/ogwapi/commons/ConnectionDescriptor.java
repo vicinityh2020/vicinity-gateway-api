@@ -142,6 +142,8 @@ public class ConnectionDescriptor {
 	 */
 	private Data data;
 	
+	
+	
 	/* === PUBLIC METHODS === */
 	
 	/**
@@ -289,6 +291,9 @@ public class ConnectionDescriptor {
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
 		
+		logger.info(this.objectId + ": Sending request to start action " + actionId + " on " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_STARTACTION, 
 				destinationOid, 
@@ -322,7 +327,7 @@ public class ConnectionDescriptor {
 			
 			statusCodeReason = new String("No such action " + actionId + ".");
 			
-			logger.warning(statusCodeReason);
+			logger.warning(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -335,10 +340,10 @@ public class ConnectionDescriptor {
 		
 		if (!action.updateTask(newStatus, returnValue, parameters)) {
 			
-			statusCodeReason = "Running task of action " + actionId + " is not in a state allowing update, "
-					+ "or the requested new state is not applicable.";
+			statusCodeReason = new String("Running task of action " + actionId + " is not in a state allowing update, "
+					+ "or the requested new state is not applicable.");
 			
-			logger.warning(statusCodeReason);
+			logger.warning(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -350,9 +355,9 @@ public class ConnectionDescriptor {
 			
 		}
 		
-		statusCodeReason = "Running task of action " + actionId + " was updated to " + newStatus + ".";
+		statusCodeReason = new String ("Running task of action " + actionId + " was updated to " + newStatus + ".");
 		
-		logger.info(statusCodeReason);
+		logger.info(this.objectId + ": " + statusCodeReason);
 		
 		statusMessage = new StatusMessage(
 				false, 
@@ -383,6 +388,9 @@ public class ConnectionDescriptor {
 		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
 		attributes.put(NetworkMessageRequest.ATTR_TID, taskId);
 		
+		logger.info(this.objectId + ": Sending request to retrieve status of task " + taskId + " of action " + actionId 
+				+ " on " + destinationOid + " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETTASKSTATUS, 
 				destinationOid, 
@@ -411,6 +419,9 @@ public class ConnectionDescriptor {
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_AID, actionId);
 		attributes.put(NetworkMessageRequest.ATTR_TID, taskId);
+		
+		logger.info(this.objectId + ": Sending request to cancel task " + taskId + " of action " + actionId 
+				+ " on " + destinationOid + " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_CANCELTASK, 
@@ -451,8 +462,8 @@ public class ConnectionDescriptor {
 			if (active) {
 				data.addProvidedEventChannel(new EventChannel(objectId, eventId, true));
 				
-				statusCodeReason = new String("Object '" + objectId + "' created active event channel '" + eventId + "'");
-				logger.info(statusCodeReason);
+				statusCodeReason = new String("Created active event channel " + eventId + ".");
+				logger.info(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
 						false, 
@@ -464,10 +475,10 @@ public class ConnectionDescriptor {
 				
 				
 			} else {
-				statusCodeReason = new String("Could not deactivate the event channel '" + eventId + "' of the object '" + objectId 
-						+ "'. The event channel does not exist.");
+				statusCodeReason = new String("Could not deactivate the event channel " 
+						+ eventId + ". The event channel does not exist.");
 				
-				logger.info(statusCodeReason);
+				logger.warning(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
 						true, 
@@ -485,10 +496,10 @@ public class ConnectionDescriptor {
 		// write to the file manually (persistence)
 		data.saveData();
 		
-		statusCodeReason = new String("Object '" + objectId + "' changed the activity of event channel '" 
-					+ eventId + "' to " + active);
+		statusCodeReason = new String("Changed the activity of event channel " 
+					+ eventId + " to " + active);
 		
-		logger.info(statusCodeReason);
+		logger.info(this.objectId + ": " + statusCodeReason);
 		statusMessage = new StatusMessage(
 				false, 
 				CodesAndReasons.CODE_200_OK, 
@@ -520,10 +531,10 @@ public class ConnectionDescriptor {
 			EventChannel eventChannel = searchForEventChannel(eventId);
 			
 			if (eventChannel == null) {
-				statusCodeReason = new String("Received a request to provide status of invalid event channel. Request came locally from: "
-						+ this.objectId);
+				statusCodeReason = new String("Local request for providing status of invalid event "
+						+ "channel was received.");
 				
-				logger.info(statusCodeReason);
+				logger.info(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
 						true, 
@@ -535,8 +546,10 @@ public class ConnectionDescriptor {
 
 			} else {
 				
-				statusCodeReason = new String("Received a request to provide status of event channel " 
-						 + eventId + " from " + this.getObjectId() + "(owner).");
+				statusCodeReason = new String("Local request for providing status of event channel " 
+						 + eventId + ".");
+				
+				logger.info(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
 						false, 
@@ -562,6 +575,9 @@ public class ConnectionDescriptor {
 		
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
+		
+		logger.info(this.objectId + ": Sending request to get status of remote event channel " + eventId + " on " 
+					+ destinationOid + " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS, 
@@ -590,10 +606,9 @@ public class ConnectionDescriptor {
 		
 		// first check whether or not this is an attempt to subscribe to our own channel and stop if yes
 		if (destinationOid.equals(this.objectId)) {
-			statusCodeReason = new String("Can't subscribe to one's own event channel. Object ID " 
-					+ destinationOid + ", event ID " + eventId);
+			statusCodeReason = new String("Can't subscribe to one's own event channel. Event ID " + eventId);
 			
-			logger.info(statusCodeReason);
+			logger.info(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -613,7 +628,7 @@ public class ConnectionDescriptor {
 				statusCodeReason = 
 						new String("Already subscribed to " + destinationOid + " event channel " + eventId + ".");
 				
-				logger.info(statusCodeReason);
+				logger.info(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
 						false, 
@@ -630,6 +645,9 @@ public class ConnectionDescriptor {
 		
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
+		
+		logger.info(this.objectId + ": Sending request for subscribing to remote event channel " + eventId + " on " 
+				+ destinationOid + " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		statusMessage = sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL, 
@@ -666,10 +684,9 @@ public class ConnectionDescriptor {
 		
 		// first check whether or not this is an attempt to subscribe to our own channel and stop if yes
 		if (destinationOid.equals(this.objectId)) {
-			statusCodeReason = new String("Can't unsubscribe from one's own event channel. Object ID " 
-					+ destinationOid + ", event ID " + eventId);
+			statusCodeReason = new String("Can't unsubscribe from one's own event channel. Event ID " + eventId);
 			
-			logger.info(statusCodeReason);
+			logger.info(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -688,7 +705,7 @@ public class ConnectionDescriptor {
 			statusCodeReason = 
 					new String("No subscription to " + destinationOid + " event channel " + eventId + " exists.");
 			
-			logger.info(statusCodeReason);
+			logger.info(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					false, 
@@ -703,6 +720,9 @@ public class ConnectionDescriptor {
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_EID, eventId);
 		
+		logger.info(this.objectId + ": Sending request to cancel subscription to remote event channel " + eventId + " on " 
+				+ destinationOid + " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		statusMessage = sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL, 
 				destinationOid, 
@@ -713,6 +733,8 @@ public class ConnectionDescriptor {
 		if (!statusMessage.isError()) {
 			// keep the track
 			subscription.removeFromSubscriptions(eventId);
+			
+			logger.fine(this.objectId + ": Unsubscribed from event channel " + eventId + " on " + destinationOid + ".");
 		}
 		
 		// clean up
@@ -742,10 +764,10 @@ public class ConnectionDescriptor {
 		
 		if (eventChannel == null || !eventChannel.isActive()) {
 			
-			statusCodeReason = new String("Could not distribute an event to the channel '" + eventId 
-					+ "' of the object '" + objectId + "'. The event channel does not exist or is not active.");
+			statusCodeReason = new String("Could not distribute an event to the channel " + eventId 
+					+ ". The event channel does not exist or is not active.");
 			
-			logger.info(statusCodeReason);
+			logger.info(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -770,8 +792,8 @@ public class ConnectionDescriptor {
 			if(sendMessage(this.objectId, destinationOid, message)) {
 				sentMessages++;
 			} else {
-				logger.warning("ConnectionDescriptor#sendEventToSubscribers: Destination object ID " + destinationOid 
-						+ " is not in the contact list of the sender " + this.objectId + ".");
+				logger.warning(this.objectId + ": Destination object ID " + destinationOid 
+						+ " is not in the contact list during event distribution.");
 			}
 		}
 		
@@ -779,7 +801,7 @@ public class ConnectionDescriptor {
 				+ sentMessages + " out of " 
 				+ subscribers.size() + " subscribers.");
 		
-		logger.info(statusCodeReason);
+		logger.info(this.objectId + ": " + statusCodeReason);
 		
 		statusMessage = new StatusMessage(
 				false, 
@@ -789,7 +811,6 @@ public class ConnectionDescriptor {
 		
 		return statusMessage;
 	}
-	
 	
 	
 	/**
@@ -804,10 +825,16 @@ public class ConnectionDescriptor {
 		EventChannel eventChannel = searchForEventChannel(eventId);
 		
 		if (eventChannel == null) {
+			
+			logger.warning(this.objectId + ": No such event channel when checking for number of subscribers " + eventId);
 			return -1;
 		}
 		
-		return eventChannel.getSubscribersSet().size();
+		int size = eventChannel.getSubscribersSet().size();
+		
+		logger.info(this.objectId + ": Received a request to retreive number of subscribers on event channel " + eventId);
+		
+		return size;
 	}
 	
 	/**
@@ -822,6 +849,9 @@ public class ConnectionDescriptor {
 			Map<String, String> parameters, String body) {
 				
 		Map<String, String> attributes = new HashMap<String,String>();
+		
+		logger.info(this.objectId + ": Sending request to get events of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETLISTOFEVENTS, 
@@ -845,6 +875,9 @@ public class ConnectionDescriptor {
 				
 		Map<String, String> attributes = new HashMap<String,String>();
 		
+		logger.info(this.objectId + ": Sending request to get actions of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETLISTOFACTIONS, 
 				destinationOid, 
@@ -867,6 +900,9 @@ public class ConnectionDescriptor {
 				
 		Map<String, String> attributes = new HashMap<String,String>();
 		
+		logger.info(this.objectId + ": Sending request to get thing description of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION, 
 				destinationOid, 
@@ -888,6 +924,9 @@ public class ConnectionDescriptor {
 			Map<String, String> parameters, String body) {
 				
 		Map<String, String> attributes = new HashMap<String,String>();
+		
+		logger.info(this.objectId + ": Sending request to get events of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES, 
@@ -914,6 +953,9 @@ public class ConnectionDescriptor {
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_PID, propertyId);
 		
+		logger.info(this.objectId + ": Sending request to get property " + propertyId + " of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
+		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_GETPROPERTYVALUE, 
 				destinationOid, 
@@ -939,6 +981,9 @@ public class ConnectionDescriptor {
 		
 		Map<String, String> attributes = new HashMap<String,String>();
 		attributes.put(NetworkMessageRequest.ATTR_PID, propertyId);
+		
+		logger.info(this.objectId + ": Sending request to set property " + propertyId + " of remote object " + destinationOid 
+				+ " with parameters: \n" + parameters.toString() + "\nand body: \n" + body);
 		
 		return sendRequestForRemoteOperation(
 				NetworkMessageRequest.OPERATION_SETPROPERTYVALUE, 
@@ -967,7 +1012,9 @@ public class ConnectionDescriptor {
 	 */
 	public void processIncommingMessage(String sourceOid, String messageString){
 		
-		logger.finest("New message from " + sourceOid + ": " + messageString);
+		logger.info(this.objectId + ": New message from " + sourceOid);
+		
+		logger.fine(this.objectId + ": Message string: \n" + messageString + "\n");
 		
 		// let's resolve the message 
 		NetworkMessage networkMessage = messageResolver.resolveNetworkMessage(messageString);
@@ -976,7 +1023,7 @@ public class ConnectionDescriptor {
 			
 			// just a check whether or not somebody was tampering the message (and forgot to do it properly)
 			if (!sourceOid.equals(networkMessage.getSourceOid())) {
-				logger.severe("The source OID "
+				logger.warning(this.objectId + ": The source OID "
 						+ sourceOid + " returned by communication engine "
 						+ "does not match the internal source OID in the message " + networkMessage.getSourceOid() 
 						+ ". Possible message tampering! Discarding the message and aborting.");
@@ -987,22 +1034,22 @@ public class ConnectionDescriptor {
 			switch (networkMessage.getMessageType()){
 			
 			case NetworkMessageRequest.MESSAGE_TYPE:
-				logger.finest("The message is a request. Processing...");
+				logger.info(this.objectId + ": The message is a request. Processing...");
 				processMessageRequest(networkMessage);
 				break;
 				
 			case NetworkMessageResponse.MESSAGE_TYPE:
-				logger.finest("This message is a response. Adding to incoming queue - message count: " 
+				logger.info(this.objectId + ": This message is a response. Adding to incoming queue - message count: " 
 						+ messageQueue.size());
 				processMessageResponse(networkMessage);
 				break;
 				
 			case NetworkMessageEvent.MESSAGE_TYPE:
-				logger.finest("This message is an event. Forwarding...");
+				logger.info(this.objectId + ": This message is an event. Forwarding to agent...");
 				processMessageEvent(networkMessage);
 			}
 		} else {
-			logger.warning("Invalid message received from the network.");
+			logger.warning(this.objectId + ": Invalid message received from the network.");
 		}
 		
 	}
@@ -1018,12 +1065,18 @@ public class ConnectionDescriptor {
 	public String performSparqlQuery(String query, Map<String, String> parameters) {
 		
 		if (query == null) {
+			
+			logger.warning(this.objectId + ": Can't execute null SPARQL query with parameters: \n" + parameters.toString());
+			
 			return null;
 		}
+		
+		logger.info(this.objectId + ": Executing SPARQL query: \n" + query + "\nwith parameters: \n" + parameters.toString());
 		
 		return sparql.performQuery(query, parameters);
 	}
 
+	
 	/**
 	 * Performs a Semantic search 
 	 * 
@@ -1034,8 +1087,13 @@ public class ConnectionDescriptor {
 	public String performSemanticQuery(String query, Map<String, String> parameters) {
 		
 		if (query == null) {
+			
+			logger.warning(this.objectId + ": Can't execute null Semantic query with parameters: \n" + parameters.toString());
+			
 			return null;
 		}
+		
+		logger.info(this.objectId + ": Executing Semantic query: \n" + query + "\nwith parameters: \n" + parameters.toString());
 		
 		return semantic.performQuery(query, parameters);
 	}
@@ -1064,72 +1122,95 @@ public class ConnectionDescriptor {
 			
 			case NetworkMessageRequest.OPERATION_CANCELTASK:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is CANCELTASK.");
+				
 				response = respondToCancelRunningTask(requestMessage);
+				
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
+				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETEVENTCHANNELSTATUS.");
 				
 				response = respondToEventChannelStatusQuery(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFACTIONS.");
 				response = respondToGetObjectActions(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFEVENTS.");
 				response = respondToGetObjectEvents(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
+				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFPROPERTIES.");
 				
 				response = respondToGetObjectProperties(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETPROPERTYVALUE.");
+				
 				response = respondToGetObjectProperty(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETTASKSTATUS.");
 				response = respondToGetTaskStatus(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is SETPROPERTYVALUE.");
 				response = respondToSetObjectProperty(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_STARTACTION:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is STARTACTION.");
 				response = respondToStartActionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is SUBSCRIBETOEVENTCHANNEL.");
 				response = respondToEventSubscriptionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is UNSUBSCRIBEFROMEVENTCHANNEL.");
 				response = respondToCancelSubscriptionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION:
 				
+				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETTHINGDESCRIPTION.");
 				response = respondToGetObjectThingDescription(requestMessage);
 				break;
 			}
 		
+			
+			if (response != null) {
+				response.setSourceOid(objectId);
+				// don't get confused, our response destination is the request source ;) 
+				response.setDestinationOid(requestMessage.getSourceOid());
+			}
+			
 			sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
 			
 		} else {
 			
-			logger.warning("The source OID " + requestMessage.getSourceOid() + " of the request " 
-					+ requestMessage.getRequestId() + " is not in the roster of the object that should process the request (" 
-					+ this.objectId + ").");
+			logger.warning(this.objectId + ": The source OID " + requestMessage.getSourceOid() + " of the request " 
+					+ requestMessage.getRequestId() + " is not in the roster of this object.");
 		}
 		
 		
@@ -1145,6 +1226,9 @@ public class ConnectionDescriptor {
 	 * @param networkMessage Message parsed from the incoming message.
 	 */
 	private void processMessageResponse(NetworkMessage networkMessage){
+		
+		logger.info(this.objectId + ": This is a response to request ID " + networkMessage.getRequestId());
+		
 		messageQueue.add(networkMessage);
 	}
 	
@@ -1161,7 +1245,7 @@ public class ConnectionDescriptor {
 		// cast it to event message first (it is safe and also necessary)
 		NetworkMessageEvent eventMessage = (NetworkMessageEvent) networkMessage;
 		
-		logger.info("Event " + eventMessage.getEventId() + " arrived from " + eventMessage.getSourceOid() 
+		logger.info(this.objectId + ": Event " + eventMessage.getEventId() + " arrived from " + eventMessage.getSourceOid() 
 							+ ". Event body: " + eventMessage.getEventBody());
 		
 		
@@ -1182,14 +1266,16 @@ public class ConnectionDescriptor {
 				// if the return code is different than 2xx, make it visible
 				if ((response.getResponseCode() / 200) != 1){
 					
-					logger.warning("Event was not forwarded successfully. Response code: " + response.getResponseCode() 
+					logger.warning(this.objectId + ": Event was not forwarded successfully. Response code: " + response.getResponseCode() 
 												+ ". Response reason: " + response.getResponseCodeReason());
 												
 				} else {
-					logger.info("Event forwarded successfully.");
+					logger.info(this.objectId + ": Event forwarded successfully.");
 				}
 			} else {
-				 // TODO log ze to bolo null
+				
+				logger.warning(this.objectId + ": Null response received from the Agent after event frowarding. Moving "
+						+ "on, it'd get discarded anyway.");
 			}
 			
 		}
@@ -1373,20 +1459,19 @@ public class ConnectionDescriptor {
 		}
 		
 		if (eventChannel == null) {
-			logger.info("Object ID " + this.objectId + " received a request to provide status of invalid event channel "
+			logger.warning(this.objectId + ": Received a request to provide status of invalid event channel "
 					+ eventId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			response.setError(true);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 					+ "Invalid event channel specified.");
 
 		} else {
 			
-			logger.fine("Object ID " + this.objectId + " received a request to provide status of event channel " 
-					+ eventId + " from " + requestMessage.getSourceOid() + ".");
-			
 			response.setError(false);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);
 			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Event channel status retrieved.");
 			response.setResponseBody(createSimpleJsonString(EventChannel.ATTR_ACTIVE, eventChannel.isActive()));
@@ -1427,18 +1512,17 @@ public class ConnectionDescriptor {
 		
 		// check whether the object is already in the list of subscribers
 		if (eventChannel == null || !eventChannel.isActive()) {
-			logger.info("Object ID " + this.objectId + " received a request for subscription to invalid event channel " + eventId 
+			logger.warning(this.objectId + ": Received a request for subscription to invalid event channel " + eventId 
 					+ ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
 			response.setError(true);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 					+ "Invalid event channel specified.");
 			
 		} else {
-			logger.fine("Object ID " + this.objectId + " received a request for subscription to event channel " 
-					+ eventId + " from " + requestMessage.getSourceOid() + ".");
 			
 			eventChannel.addToSubscribers(requestMessage.getSourceOid());
 			
@@ -1446,8 +1530,10 @@ public class ConnectionDescriptor {
 			data.saveData();
 			
 			response.setError(false);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);
 			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Subscribed.");
+			
 		}
 		
 		// set the correlation id so the other side can identify what request does this response belong to
@@ -1483,26 +1569,27 @@ public class ConnectionDescriptor {
 		}
 		
 		if (eventChannel == null || !eventChannel.isActive()) {
-			logger.info("Object ID " + this.objectId + " received a request to cancel subscription to invalid event "
+			logger.warning(this.objectId + ": Received a request to cancel subscription to invalid event "
 					+ "channel " + eventId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
 			response.setError(true);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 					+ "Invalid event channel specified.");
 		} else {
 			
-			logger.fine("Object ID " + this.objectId + " received a request to cancel subscription to event channel " 
-					+ eventId + " from " + requestMessage.getSourceOid() + ".");
-			
 			eventChannel.removeFromSubscribers(requestMessage.getSourceOid());
 			
 			response.setError(false);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);
 			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Unsubscribed.");
+			
+			logger.info(this.objectId + ": Object " + requestMessage.getSourceOid() + " unsubscribed from event channel " 
+					+ eventId);
 		}
-		
 
 		// don't forget to set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
@@ -1536,16 +1623,19 @@ public class ConnectionDescriptor {
 			action = searchForAction(actionId);
 		}
 		
-		// TODO delete this workaround - the actions should be loaded at the startup and no new action should 
-		// be possible
+		// the workaround
 		if (action == null) {
 			action = new Action (config, this.objectId, actionId, agentConnector, logger);
 			data.addProvidedAction(action);
 		}
 		// end of workaround
 		
+		/*
+		 * Uncomment this if you want the OGWAPI behaviour, where no new actions are possible and delete the 
+		 * workaround a few lines higher. 
+		 
 		if (action == null ) {
-			logger.info("Object ID " + this.objectId + " received a request to start non existing action " + actionId 
+			logger.warning(this.objectId + ": Received a request to start non existing action " + actionId 
 					+ ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
@@ -1554,33 +1644,34 @@ public class ConnectionDescriptor {
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 								+ "Invalid action specified.");
 		} else {
-			logger.fine("Object ID " + this.objectId + " received a request to start action " + actionId + " from " 
-						+ requestMessage.getSourceOid() + ".");
-			
+		
+		*/
+		
 			String taskId = action.createNewTask(requestMessage.getSourceOid(), 
 					requestMessage.getRequestBody(), requestMessage.getParameters());
 			
 			if (taskId == null) {
 				
-				logger.warning("Cannot start action " + actionId + ", too many tasks in queue.");
+				logger.warning(this.objectId + ": Cannot start action " + actionId + ", too many tasks in queue.");
 				
 				// responding with error
 				response.setError(true);
+				response.setContentType("application/json");
 				response.setResponseCode(CodesAndReasons.CODE_503_SERVICEUNAVAILABLE);
 				response.setResponseCodeReason(CodesAndReasons.REASON_503_SERVICENAVAILABLE 
 						+ "Too many tasks waiting in queue.");
 
 			} else {
 				
-				logger.fine("Object " + this.objectId + " created task " + taskId + " of action " 
-						+ actionId + " and added it to the queue.");
+				logger.info(this.objectId + ": Created task " + taskId + " of action " + actionId + " and added it to the queue.");
 				
 				response.setError(false);
+				response.setContentType("application/json");
 				response.setResponseCode(CodesAndReasons.CODE_201_CREATED);
 				response.setResponseCodeReason(CodesAndReasons.REASON_201_CREATED + "New task added to the queue.");
 				response.setResponseBody(createSimpleJsonString(Action.ATTR_TASKID, taskId));
 			}
-		}
+		// }
 		
 		// set the correlation id so the other side can identify what request does this response belong to
 		response.setRequestId(requestMessage.getRequestId());
@@ -1618,17 +1709,16 @@ public class ConnectionDescriptor {
 		String statusString;
 		
 		if (action == null ) {
-			logger.info("Object ID " + this.objectId + " received a request for status report on non existing action " 
+			logger.warning(this.objectId + ": Received a request for status report on non existing action " 
 					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
 			response.setError(true);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 								+ "Invalid action specified.");
 		} else {
-			logger.fine("Object ID " + this.objectId + " received a request for status report on action " + actionId 
-					+ " task " + taskId + " from " + requestMessage.getSourceOid() + ".");
 			
 			byte statusCode = action.getTaskStatus(taskId);
 
@@ -1637,19 +1727,21 @@ public class ConnectionDescriptor {
 				statusString = new String("Object ID " + this.objectId + " can't find task " + taskId 
 						+ ". Its status is unknown.");
 				
-				logger.warning(statusString);
+				logger.warning(this.objectId + ": " + statusString);
 				
 				// responding with error
 				response.setError(true);
+				response.setContentType("application/json");
 				response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 				response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 									+ "Invalid task specified.");
 			} else {
 				
-				logger.fine("Object ID " + this.objectId + " task " + taskId + " of action " + actionId 
-						+ " status " + action.getTaskStatusString(taskId) + ".");
+				logger.info(this.objectId + ": Task " + taskId + " of the action " + actionId 
+						+ " has status " + action.getTaskStatusString(taskId) + ".");
 				
 				response.setError(false);
+				response.setContentType("application/json");
 				response.setResponseCode(CodesAndReasons.CODE_200_OK);
 				response.setResponseCodeReason(CodesAndReasons.REASON_200_OK 
 									+ "Task status retrieved.");
@@ -1665,7 +1757,7 @@ public class ConnectionDescriptor {
 		
 	}
 	
-	
+
 	/**
 	 * Responds to a request for cancelling a running {@link eu.bavenir.ogwapi.commons.Task Task}.
 	 * 
@@ -1693,38 +1785,40 @@ public class ConnectionDescriptor {
 		}
 		
 		if (action == null ) {
-			logger.info("Object ID " + this.objectId + " received a request for stopping a task of non existing action " 
+			logger.warning(this.objectId + ": Received a request for stopping a task of non existing action " 
 					+ actionId + ". Request came from: " + requestMessage.getSourceOid());
 			
 			// responding with error
 			response.setError(true);
+			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_404_NOTFOUND);
 			response.setResponseCodeReason(CodesAndReasons.REASON_404_NOTFOUND 
 								+ "Invalid action specified.");
 		} else {
-			logger.fine("Object ID " + this.objectId + " received a request for stopping an action ID " 
-					+ actionId + " task ID " + taskId + " from object ID " + requestMessage.getSourceOid() + ".");
+			logger.info(this.objectId + ": Stopping an task ID " + taskId + " of the action " + actionId);
 			
 			response = action.cancelTask(taskId, requestMessage.getRequestBody(), requestMessage.getParameters());
 			
 			if (response == null) {
 				
-				logger.warning("Task ID " + taskId + " is in a state that does not allow it to be cancelled. It either does not exist, is already finished, or failed.");
+				logger.warning(this.objectId + ": Task ID " + taskId + " is in a state that does not allow it to be "
+						+ "cancelled. It either does not exist, is already finished, or failed.");
 				
 				response = new NetworkMessageResponse(config, logger);
 				
 				// responding with error
 				response.setError(false);
+				response.setContentType("application/json");
 				response.setResponseCode(CodesAndReasons.CODE_200_OK);
 				response.setResponseCodeReason(CodesAndReasons.REASON_200_OK 
 									+ "Invalid task specified.");
 			} else {
 				if (response.isError()) {
-					logger.warning("Object ID " + this.objectId + " received an error from agent connector while "
+					logger.warning(this.objectId + ": Received an error from agent connector while "
 							+ "attempting to stop task ID " + taskId + ". Code " + response.getResponseCode() 
 							+ " reason " + response.getResponseCodeReason());
 				} else {
-					logger.info("Object ID " + this.objectId + " task " + taskId + "stopped.");
+					logger.info(this.objectId + ": Task " + taskId + "stopped.");
 				}
 				
 			}
@@ -1746,13 +1840,24 @@ public class ConnectionDescriptor {
 	private EventChannel searchForEventChannel(String eventId) {
 		// search for given event channel
 		
+		if (eventId == null) {
+			
+			logger.warning(this.objectId + ": Null event ID provided for search.");
+			
+			return null;
+		}
+		
+		logger.finer(this.objectId + ": Searching for event channel " + eventId);
+		
 		for (EventChannel eventChannel : data.getProvidedEventChannels()) {
 			if (eventChannel.getEventId().equals(eventId)) {
 				// found it
+				logger.finer(this.objectId + ": Event channel found.");
 				return eventChannel;
 			}
 		}
 
+		logger.finer(this.objectId + ": Event channel not found.");
 		return null;
 	}
 	
@@ -1766,17 +1871,25 @@ public class ConnectionDescriptor {
 	private Action searchForAction(String actionId) {
 		
 		if (actionId == null) {
+			
+			logger.warning(this.objectId + ": Null action ID provided for search.");
+			
 			return null;
 		}
+		
+		logger.finer(this.objectId + ": Searching for action " + actionId);
 		
 		// search for given action
 		
 		for (Action action : data.getProvidedActions()) {
 			if (action.getActionId().equals(actionId)) {
 				// found it
+				logger.finer(this.objectId + ": Action found.");
 				return action;
 			}
 		}
+		
+		logger.finer(this.objectId + ": Action not found.");
 
 		return null;
 	}
@@ -1790,12 +1903,24 @@ public class ConnectionDescriptor {
 	 */
 	private Subscription searchForSubscription(String remoteObjectId) {
 		
+		if (remoteObjectId == null) {
+			
+			logger.warning(this.objectId + ": Null remote object ID provided for subscription search.");
+			
+			return null;
+		}
+		
+		logger.finer(this.objectId + ": Searching for subscriptions to " + remoteObjectId);
+		
 		for (Subscription subscription : data.getSubscribedEventChannels()) {
 			if (subscription.getObjectId().equals(remoteObjectId)) {
 				// found it
+				logger.finer(this.objectId + ": Subscription found.");
 				return subscription;
 			}
 		}
+		
+		logger.finer(this.objectId + ": Subscription not found.");
 
 		return null;
 	}
@@ -1914,7 +2039,7 @@ public class ConnectionDescriptor {
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
 			
-			logger.warning(statusCodeReason);
+			logger.warning(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -1935,7 +2060,7 @@ public class ConnectionDescriptor {
 			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
 					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
 			
-			logger.warning(statusCodeReason);
+			logger.warning(this.objectId + ": " + statusCodeReason);
 			
 			statusMessage = new StatusMessage(
 					true, 
@@ -1958,10 +2083,9 @@ public class ConnectionDescriptor {
 		if (json != null) {
 			statusMessage.addMessageJson(json);
 		} else {
-			logger.info("It was not possible to turn response body into a valid JSON. Original string: " 
+			logger.warning(this.objectId + ": It was not possible to turn response body into a valid JSON. Original string: " 
 							+ response.getResponseBody());
 		}
-		
 		
 		return statusMessage;
 		
@@ -2024,23 +2148,23 @@ public class ConnectionDescriptor {
 	 */
 	private boolean sendMessage(String sourceOid, String destinationOid, String message) {
 		
-		logger.fine("Sending message: \n" + message);
+		logger.info(this.objectId + ": Sending message: \n" + message);
 		
 		// try internal routing first
 		if (commManager.tryToSendLocalMessage(sourceOid, destinationOid, message)) {
 			
-			logger.fine("Message was routed locally.");
+			logger.fine(this.objectId + ": Message was routed locally.");
 			return true;
 		}
 		
 		// if not successful, try it via network 
 		if (commEngine.sendMessage(destinationOid, message)) {
 			
-			logger.fine("Message was sent through network.");
+			logger.fine(this.objectId + ": Message was sent through network.");
 			return true;
 		}
 		
-		logger.warning("Error while sending message: \n" + message + "\nMessage could not be sent.");
+		logger.warning(this.objectId + ": Error while sending message: \n" + message + "\nMessage could not be sent.");
 		
 		// both failed
 		return false;

@@ -1,9 +1,9 @@
 package eu.bavenir.ogwapi.commons.connectors.http;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -18,9 +18,9 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
+import org.json.JSONObject;
 
 import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
@@ -221,6 +221,18 @@ public class RestAgentConnector extends AgentConnector {
 	 * Operation code for DELETE.
 	 */
 	private static final byte OPERATION_DELETE = 0x03;
+	
+	/**
+	 * Status code that will be returned when HTTP/HTTPS client will throw an exception and there is no code available 
+	 * to be returned. 
+	 */
+	private static final int CLIENT_ERR_STATUSCODE = 400;
+	
+	/**
+	 * Status code reason that will be returned when HTTP/HTTPS client will throw an exception and there is no reason available 
+	 * to be returned. 
+	 */
+	private static final String CLIENT_ERR_STATUSREASON = "An error occured when connecting to Agent: ";
 	
 	
 	
@@ -431,6 +443,10 @@ public class RestAgentConnector extends AgentConnector {
 	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
 			Map<String, String> parameters){
 		
+		// prepare for error
+		boolean clientError = false;
+		String exceptionString = null;
+		
 		// don't forget to put source OID as one of the parameters (this will also overwrite any previous such 
 		// parameter that someone maliciously could have thrown in)
 		parameters.put(PARAM_SOURCEOID, sourceOid);
@@ -453,34 +469,44 @@ public class RestAgentConnector extends AgentConnector {
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
 
 		// accept snake oil
+		boolean customClientInUse = false;
+		
 		if (useHttps && acceptSelfSigned) {
+			
 			SSLContext sslcontext = null;
 			try {
 				sslcontext = SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
-			} catch (KeyManagementException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (KeyStoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} catch (Exception e) {
+				logger.warning("Exception during configuration of SSL for Agent Connector. Reverting to HTTP. "
+						+ "Exception message: " + e.getMessage());
+			} 
 			
 			if (sslcontext != null) {
 				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
 				CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build(); 
+								
 				Unirest.setHttpClient(httpClient);
-			}
+				
+				customClientInUse = true;
+			} 
+		} 
+		
+		if (!customClientInUse) {
+			// set timeouts - we are not using custom client, we have to do it this way
+			Unirest.setTimeouts(agentTimeout * 1000, agentTimeout * 1000);
 		}
 		
-		// set timeouts
-		Unirest.setTimeouts(agentTimeout * 1000, agentTimeout * 1000);
+		HttpResponse<String> responseNode = null;
 		
-		HttpResponse<JsonNode> responseNode = null;
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Accept", "application/json");
+		headers.put("Content-Type", "application/json");
 		
-
+		JSONObject jsonBody = null;
+		if (body != null && !body.isEmpty()) {
+			jsonBody = new JSONObject(body);
+		}
+		
 		switch (operationCode){
 		
 		case OPERATION_GET:
@@ -495,13 +521,20 @@ public class RestAgentConnector extends AgentConnector {
 				getRequest.basicAuth(agentUsername, agentPassword);
 			}
 			
-			getRequest.header("accept", "application/json");
+			getRequest.headers(headers);
 			
 			try {
-				responseNode = getRequest.asJson();
-			} catch (UnirestException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				responseNode = getRequest.asString();
+			} catch (UnirestException e) {
+				
+				clientError = true;
+				exceptionString = e.getMessage();
+				
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				String exceptionAsString = sw.toString();
+				
+				logger.warning("Exception when connecting to Agent: " + exceptionString + "\nThe whole exception: " + exceptionAsString);
 			}
 		
 			break;
@@ -518,15 +551,23 @@ public class RestAgentConnector extends AgentConnector {
 				postRequest.basicAuth(agentUsername, agentPassword);
 			}
 			
-			postRequest.header("accept", "application/json");
+			postRequest.headers(headers);
 			
-			postRequest.body(body);
+			if (jsonBody != null) {
+				postRequest.body(jsonBody);
+			}
 			
 			try {
-				responseNode = postRequest.asJson();
+				responseNode = postRequest.asString();
 			} catch (UnirestException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				clientError = true;
+				exceptionString = e.getMessage();
+				
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				String exceptionAsString = sw.toString();
+				
+				logger.warning("Exception when connecting to Agent: " + exceptionString + "\nThe whole exception: " + exceptionAsString);
 			}
 			
 			break;
@@ -543,15 +584,23 @@ public class RestAgentConnector extends AgentConnector {
 				putRequest.basicAuth(agentUsername, agentPassword);
 			}
 			
-			putRequest.header("accept", "application/json");
+			putRequest.headers(headers);
 			
-			putRequest.body(body);
+			if (jsonBody != null) {
+				putRequest.body(jsonBody);
+			}
 			
 			try {
-				responseNode = putRequest.asJson();
+				responseNode = putRequest.asString();
 			} catch (UnirestException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				clientError = true;
+				exceptionString = e.getMessage();
+				
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				String exceptionAsString = sw.toString();
+				
+				logger.warning("Exception when connecting to Agent: " + exceptionString + "\nThe whole exception: " + exceptionAsString);
 			}
 			
 			break;
@@ -568,36 +617,55 @@ public class RestAgentConnector extends AgentConnector {
 				deleteRequest.basicAuth(agentUsername, agentPassword);
 			}
 			
-			deleteRequest.header("accept", "application/json");
+			deleteRequest.headers(headers);
 			
 			try {
-				responseNode = deleteRequest.asJson();
+				responseNode = deleteRequest.asString();
 			} catch (UnirestException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				clientError = true;
+				exceptionString = e.getMessage();
+				
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				String exceptionAsString = sw.toString();
+				
+				logger.warning("Exception when connecting to Agent: " + exceptionString + "\nThe whole exception: " + exceptionAsString);
 			}
 		
 			break;
 			
 		}
 		
-		if (responseNode.getBody() != null) {
-			response.setResponseBody(responseNode.getBody().toString());
-		}
-		
-		if (responseNode.getHeaders().containsKey("Content-type")) {
-			response.setContentType(responseNode.getHeaders().get("Content-type").toString());
-		}
-		
-		// save the status code and reason
-		if (responseNode.getStatus() / 200 == 1) {
-			response.setError(false);
-		} else {
+		if (clientError) {
+			
+			//the responseNode is null now
 			response.setError(true);
+			response.setResponseCode(CLIENT_ERR_STATUSCODE);
+			response.setResponseCodeReason(CLIENT_ERR_STATUSREASON + exceptionString);
+			
+			
+		} else {
+			
+			if (responseNode.getBody() != null) {
+				response.setResponseBody(responseNode.getBody().toString());
+			}
+			
+			if (responseNode.getHeaders().containsKey("Content-type")) {
+				response.setContentType(responseNode.getHeaders().get("Content-type").toString());
+			}
+			
+			// save the status code and reason
+			if (responseNode.getStatus() / 200 == 1) {
+				response.setError(false);
+			} else {
+				response.setError(true);
+			}
+			
+			response.setResponseCode(responseNode.getStatus());
+			response.setResponseCodeReason(responseNode.getStatusText());
 		}
 		
-		response.setResponseCode(responseNode.getStatus());
-		response.setResponseCodeReason(responseNode.getStatusText());
+		
 
 		return response;
 	}
@@ -628,7 +696,7 @@ public class RestAgentConnector extends AgentConnector {
 						+ "\nFull URL: " + fullUrl
 						+ "\nBody: " + body);
 		
-		logger.info(dummyResponseMessage);
+		logger.fine(dummyResponseMessage);
 		
 		JsonBuilderFactory jsonBuilderFactory = Json.createBuilderFactory(null);
 		
@@ -644,145 +712,6 @@ public class RestAgentConnector extends AgentConnector {
 		response.setResponseBody(builder.build().toString());
 		
 		return response;
-	}
-	
-	
-	
-	/*
-	
-	private NetworkMessageResponse performOperation(byte operationCode, String sourceOid, String fullUrl, String body, 
-			Map<String, String> parameters){
-		
-		if (dummyCalls) {
-			return performDummyOperation(operationCode, sourceOid, fullUrl, body, parameters);
-		}
-		
-		// don't forget to put source OID as one of the parameters
-		parameters.put(PARAM_SOURCEOID, sourceOid);
-		
-		logger.finest("REST Agent Connector:\nOperation code: " + operationCode
-				+ "\nAssembled full URL: " + fullUrl
-				+ "\nParameters: " + parameters.toString()
-				+ "\nBody: " + body
-				);
-		
-		// create stuff
-		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-
-		Writer writer = new StringWriter();
-		Representation responseRepresentation = null;
-		
-		ClientResource clientResource = new ClientResource(fullUrl);
-		
-		// fill the parameters
-		if (parameters != null) {
-			
-			//TODO log parameters
-			
-			for (String paramName : parameters.keySet()) {
-				clientResource.addQueryParameter(paramName, parameters.get(paramName));
-			}
-		}
-	
-		try {
-			
-			switch (operationCode){
-			
-			case OPERATION_GET:
-			
-				// parameters
-				responseRepresentation = clientResource.get();
-			
-				break;
-				
-			case OPERATION_POST:
-			
-				if (body != null){
-					logger.finest("REST Agent Connector: POST request contains following body: " + body);
-					
-					// this should always be json string
-					responseRepresentation = clientResource.post(new JsonRepresentation(body), 
-							MediaType.APPLICATION_JSON);
-				} else {
-					logger.finest("REST Agent Connector: POST request contains no body.");
-					responseRepresentation = clientResource.post(null);
-				}
-				
-				break;
-				
-			case OPERATION_PUT:
-
-				if (body != null){
-					logger.finest("REST Agent Connector: PUT request contains following body: " + body);
-					
-					// this should always be json string
-					responseRepresentation = clientResource.put(new JsonRepresentation(body), 
-							MediaType.APPLICATION_JSON);
-				} else {
-					logger.finest("REST Agent Connector: PUT request contains no body.");
-					responseRepresentation = clientResource.put(null);
-				}
-				
-				break;
-				
-			case OPERATION_DELETE:
-				responseRepresentation = clientResource.delete();
-				break;
-				
-			}
-			
-		} catch (ResourceException e) {
-			
-			// this is what happens when something else than 2xx got returned - in that case we don't have access
-			// to response body the regular way...
-			
-			logger.warning("Exception from the RESTLET client: " + e.getMessage());
-			
-			responseRepresentation = clientResource.getResponseEntity();
-
-		} finally {
-			
-			MediaType type = responseRepresentation.getMediaType();
-			
-			// save the body
-			if (responseRepresentation != null){
-				try {
-					responseRepresentation.write(writer);
-					response.setResponseBody(writer.toString());
-					
-					if (type != null && !type.getName().isEmpty()) {
-						response.setContentType(type.getName());
-					}
-					
-				} catch (IOException e) {
-					
-					logger.warning("Exception during writing the response body: " + e.getMessage());
-				}
-				
-			} 
-			
-			// save the status code and reason
-			if (clientResource.getStatus().getCode() / 200 == 1) {
-				response.setError(false);
-			} else {
-				response.setError(true);
-			}
-			
-			response.setResponseCode(clientResource.getStatus().getCode());
-			response.setResponseCodeReason(clientResource.getStatus().getReasonPhrase());
-			
-			try {
-				writer.close();
-			} catch (IOException e) {
-				logger.severe("IO exception during writer closure: " + e.getMessage());
-			}
-		}
-
-		return response;
-	}
-	
-	*/
-	
-	
+	}	
 	
 }

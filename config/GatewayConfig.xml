@@ -222,7 +222,7 @@
 		which the Vicinity Gateway utilises for event logging. This value can also
 		be set to OFF, which will disable the logging mechanism completely. 
 		-->
-		<level>FINER</level>
+		<level>FINE</level>
 		
 		<!-- 
 		Setting this value to 'true' will cause the application to log its output
@@ -267,7 +267,7 @@
 		Set whether the API will be served via HTTP or HTTPS. Takes either true
 		or false value. Default is false.
 		-->
-		<enableHttps>false</enableHttps>
+		<enableHttps>true</enableHttps>
 		
 		<!--
 		Path to the keystore file. This parameter is only read when the 
@@ -345,7 +345,7 @@
 			
 			Defaults to false.
 			-->
-			<useHttps>false</useHttps>
+			<useHttps>true</useHttps>
 			
 			<!--
 			Setting this to true will make OGWAPI accept self signed certificates

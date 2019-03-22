@@ -23,7 +23,6 @@ import org.apache.commons.configuration2.XMLConfiguration;
  */
 
 
-// TODO make events capable of carrying content type
 /**
  * This extension of {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage} is adapted to facilitate
  * event mechanism. Event messages are different from {@link eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest requests}

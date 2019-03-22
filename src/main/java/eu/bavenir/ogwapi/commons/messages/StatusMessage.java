@@ -328,7 +328,13 @@ public class StatusMessage {
 		
 		mainBuilder.add(ATTR_ERROR, error);
 		mainBuilder.add(ATTR_STATUSCODE, statusCode);
-		mainBuilder.add(ATTR_STATUSCODEREASON, statusCodeReason);
+		
+		if (statusCodeReason == null) {
+			mainBuilder.addNull(ATTR_STATUSCODEREASON);
+		} else {
+			mainBuilder.add(ATTR_STATUSCODEREASON, statusCodeReason);
+		}
+		
 		
 		if (contentType == null) {
 			mainBuilder.addNull(ATTR_CONTENTTYPE);

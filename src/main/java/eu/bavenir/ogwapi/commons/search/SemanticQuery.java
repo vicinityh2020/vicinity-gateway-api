@@ -22,7 +22,7 @@ public class SemanticQuery {
 	/* === CONSTANTS === */
 	
 	/**
-	 * Name of the configuration parameter for URL path to Neighborhood Manager API.
+	 * Name of the configuration parameter for URL path to Neighbourhood Manager API.
 	 */
 	private static final String CONFIG_PARAM_SEMANTICSEARCHAPI = "search.semantic.semanticSearchAPI";
 	
@@ -65,8 +65,7 @@ public class SemanticQuery {
 			json = jsonReader.readObject();
 		} catch (Exception e) {
 			
-			logger.severe("SemanticQuery#performQuery: Exception during reading JSON object: " 
-						+ e.getMessage());
+			logger.warning("Exception during reading JSON object: " + e.getMessage());
 			
 			return null;
 		} finally {
@@ -88,14 +87,13 @@ public class SemanticQuery {
 							  .asJson()
 							  .getBody();
 			
-			logger.info("Semantic Search endpoint successfully reached.");
+			logger.fine("Semantic Search endpoint successfully reached.");
 			
 		} catch (UnirestException e) {
 			
 			response = null;
-			e.printStackTrace();
 			
-			logger.warning("Can't reach Semantic Search endpoint.");
+			logger.warning("Can't reach Semantic Search endpoint. Exception: " + e.getMessage());
 		}
 		
 		return response.toString();

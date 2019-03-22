@@ -68,7 +68,7 @@ public class Data implements Serializable {
 	 * 
 	 * @Serialize
 	 */
-	private Set<Action> providedActions;
+	private transient Set<Action> providedActions;
 
 	/**
 	 * ID of the object connected through this ConnectionDescriptor.
@@ -152,7 +152,7 @@ public class Data implements Serializable {
 	 */
 	public void addProvidedAction(Action action) {
 		providedActions.add(action);
-		saveData();
+		//saveData();
 	}
 
 	/**

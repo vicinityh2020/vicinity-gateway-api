@@ -226,6 +226,8 @@ public class Api extends Application {
 		
 		String realm = config.getString(CONF_PARAM_AUTHREALM, CONF_DEF_AUTHREALM);
 		
+		logger.config("Authentication realm: " + realm);
+		
 		AuthenticationVerifier authVerifier = new AuthenticationVerifier(communicationManager, logger);
 
 		ChallengeAuthenticator auth = new ChallengeAuthenticator(
@@ -274,8 +276,8 @@ public class Api extends Application {
 			break;
 			
 			default:
-				logger.config("Invalid API authentication scheme.");
-				this.challengeScheme = null;
+				logger.warning("Invalid API authentication scheme, reverting to basic.");
+				this.challengeScheme = ChallengeScheme.HTTP_BASIC;
 		}
 	}
 }

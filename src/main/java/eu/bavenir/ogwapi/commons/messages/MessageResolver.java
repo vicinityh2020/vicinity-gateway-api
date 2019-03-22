@@ -98,23 +98,28 @@ public class MessageResolver {
 			return null;
 		}
 		
-		// check for message duplication
-		if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
-			return null;
-		}
-		
 		// ok seems legit
 		switch (json.getInt(NetworkMessage.ATTR_MESSAGETYPE)){
 		
 		case NetworkMessageRequest.MESSAGE_TYPE:
-						
+			// check for message duplication
+			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+				return null;
+			}
+			
 			return new NetworkMessageRequest(json, config, logger);
 			
 		case NetworkMessageResponse.MESSAGE_TYPE:
+			// check for message duplication
+			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+				return null;
+			}
 			
 			return new NetworkMessageResponse(json, config, logger);
 			
 		case NetworkMessageEvent.MESSAGE_TYPE:
+			
+			// no duplication checking for events! there is no request ID
 			
 			return new NetworkMessageEvent(json, config, logger);
 			
@@ -185,7 +190,7 @@ public class MessageResolver {
 			return false;
 		}
 		
-		logger.info("Duplicated message detected. Request ID: " + requestId);
+		logger.fine("Duplicated message detected. Request ID: " + requestId);
 		
 		return true;
 	}

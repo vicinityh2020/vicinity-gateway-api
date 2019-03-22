@@ -257,7 +257,7 @@ public class CommunicationManager {
 		
 		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_ERROR) {
 			// wrong configuration parameter entered - set it to default
-			logger.severe("Wrong parameter entered for " + CONFIG_PARAM_SESSIONRECOVERY + " in the configuration file: "  
+			logger.warning("Wrong parameter entered for " + CONFIG_PARAM_SESSIONRECOVERY + " in the configuration file: "  
 					+ sessionRecoveryPolicyString + ". Setting to default: " + CONFIG_DEF_SESSIONRECOVERY);
 			
 			translateSessionRecoveryConf(CONFIG_DEF_SESSIONRECOVERY);
@@ -279,6 +279,8 @@ public class CommunicationManager {
 				
 				// if somebody put there too small number, we will turn it to default
 				if (sessionExpiration < SESSIONEXPIRATION_MINIMAL_VALUE) {
+					logger.warning("Wrong parameter entered for " + CONFIG_PARAM_SESSIONEXPIRATION + " in the configuration file: "  
+							+ sessionRecoveryPolicyString + ". Setting to default: " + CONFIG_DEF_SESSIONEXPIRATION);
 					sessionExpiration = CONFIG_DEF_SESSIONEXPIRATION;
 				}
 				
@@ -319,14 +321,7 @@ public class CommunicationManager {
 	 */
 	public Set<String> getConnectionList(){
 		
-		Set<String> usernames = descriptorPool.keySet();
-		
-		logger.finest("-- Object IDs connected to network through this CommunicationManager: --");
-		for (String string : usernames) {
-			logger.finest(string);
-		}
-		logger.finest("-- End of list. --");
-		return usernames;
+		return descriptorPool.keySet();
 	}
 	
 	
@@ -405,7 +400,7 @@ public class CommunicationManager {
 		}
 		
 		descriptorPoolClear();
-		logger.finest("Connection descriptor pool flushed.");
+		logger.fine("Connection descriptor pool flushed.");
 	}
 	
 	
@@ -434,18 +429,23 @@ public class CommunicationManager {
 		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_PASSIVE) {
 			descriptor = descriptorPoolGet(objectId);
 			
-			if (descriptor.isConnected()) {
-				
-				if (descriptor.verifyPassword(password)) {
-					descriptor.resetConnectionTimer();
-					verifiedOrConnected = true;
+			if (descriptor != null) {
+				if (descriptor.isConnected()) {
+					
+					if (descriptor.verifyPassword(password)) {
+						descriptor.resetConnectionTimer();
+						verifiedOrConnected = true;
+					} else {
+						verifiedOrConnected = false;
+					}
+					
 				} else {
-					verifiedOrConnected = false;
+					verifiedOrConnected = descriptor.connect();
 				}
-				
 			} else {
-				verifiedOrConnected = descriptor.connect();
+				verifiedOrConnected = false;
 			}
+			
 			
 		} else {
 			// if there is a previous descriptor we should close the connection first, before reopening it again
@@ -993,11 +993,11 @@ public class CommunicationManager {
 		}
 		
 		// log it
-		logger.finest("-- Roster for '" + objectId +"' --");
+		logger.fine("-- Roster for '" + objectId +"' --");
 		for (String entry : entries) {
-			logger.finest(entry + " Presence: " + "UNKNOWN");
+			logger.fine(entry + " Presence: " + "UNKNOWN");
 		}
-		logger.finest("-- End of roster --");
+		logger.fine("-- End of roster --");
 		
 		return entries;
 	}
@@ -1284,6 +1284,7 @@ public class CommunicationManager {
 	public Representation getAgentObjects(String agid) {
 		
 		if (agid == null) {
+			logger.warning("Error when retrieving objects registered under local agent. Agent ID is null.");
 			
 			return null;
 		}
@@ -1302,6 +1303,8 @@ public class CommunicationManager {
 	public Representation storeObjects(Representation json) {
 		
 		if (json == null) {
+			
+			logger.warning("Error when registering objects under local agent. JSON with TDs is null.");
 			
 			return null;
 		}
@@ -1323,6 +1326,8 @@ public class CommunicationManager {
 	public Representation heavyweightUpdate(Representation json) {
 		if (json == null) {
 			
+			logger.warning("Error when updating objects under local agent. JSON with TDs is null.");
+			
 			return null;
 		}
 		
@@ -1341,6 +1346,8 @@ public class CommunicationManager {
 	public Representation lightweightUpdate(Representation json){
 		if (json == null) {
 			
+			logger.warning("Error when updating objects under local agent. JSON with TDs is null.");
+			
 			return null;
 		}
 		
@@ -1357,6 +1364,8 @@ public class CommunicationManager {
 	 */
 	public Representation deleteObjects(Representation json){
 		if (json == null) {
+			
+			logger.warning("Error when deleting objects under local agent. JSON with TDs is null.");
 			
 			return null;
 		}
@@ -1441,7 +1450,7 @@ public class CommunicationManager {
 		// is the object connected through this CommunicationManager?
 		if (!descriptorPool.containsKey(destinationObjectId)) {	
 			
-			logger.finer("Can't send the message locally, the destination OID is not from this infrastructure.");
+			logger.fine("Can't send the message locally, the destination OID is not from this infrastructure.");
 			return false;
 		}
 			

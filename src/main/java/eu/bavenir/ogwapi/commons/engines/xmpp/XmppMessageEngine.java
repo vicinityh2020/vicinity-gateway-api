@@ -188,7 +188,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		long timeForRosterRenewal = (long) ((Math.random() * ((ROSTER_RELOAD_TIME_MAX - ROSTER_RELOAD_TIME_MIN) + 1)) 
 				+ ROSTER_RELOAD_TIME_MIN) * 1000;
 		
-		logger.finest("XmppMessageEngine: The roster for " + objectId + " will be renewed every " 
+		logger.finest("The roster for " + objectId + " will be renewed every " 
 				+ timeForRosterRenewal + "ms.");
 		
 		
@@ -225,11 +225,11 @@ public class XmppMessageEngine extends CommunicationEngine {
 	public boolean connect() {
 		
 		if (connection == null) {
-			logger.fine("XmppMessageEngine: Connection object not yet exists for " + objectId 
+			logger.finest("Connection object not yet exists for " + objectId 
 					+ ". Attempting to build a new one.");
 			connection = buildNewConnection(objectId, password);
 		} else {
-			logger.fine("XmppMessageEngine: Connection object already exists for " + objectId 
+			logger.finest("Connection object already exists for " + objectId 
 					+ ". Not attempting to build a new one.");
 		}
 		
@@ -246,7 +246,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			
 		} catch (SmackException | IOException | XMPPException | InterruptedException e) {
 			
-			logger.severe("Exiting due to exception during establishing a connection to XMPP server. Message: " 
+			logger.warning("Exiting due to exception during establishing a connection to XMPP server. Message: " 
 					+ e.getMessage());
 			
 			return false;
@@ -305,9 +305,9 @@ public class XmppMessageEngine extends CommunicationEngine {
 			
 			connection.disconnect();
 			
-			logger.fine("XMPP user '" + objectId + "' disconnected.");
+			logger.finest("XMPP user '" + objectId + "' disconnected.");
 		} else {
-			logger.fine("XMPP user '" + objectId + "' is already disconnected.");
+			logger.finest("XMPP user '" + objectId + "' is already disconnected.");
 		}		
 	}
 
@@ -366,21 +366,21 @@ public class XmppMessageEngine extends CommunicationEngine {
 		try {
 			jid = JidCreate.entityBareFrom(destinationObjectID);
 		} catch (XmppStringprepException e) {
-			logger.warning("XMPPMessageEngine: Destination can't be resolved. Exception: " + e.getMessage());
+			logger.warning("Destination can't be resolved. Exception: " + e.getMessage());
 			return false;
 		}
 
 		
 		// better do this
 		if (roster.isLoaded()) {
-			logger.finest("XMPPMessageEngine: Status of the roster before message is sent: ready");
+			logger.finest("Status of the roster before message is sent: ready");
 		} else {
-			logger.finest("XMPPMessageEngine: Roster is not loaded yet when sending message. Attempting a reload...");
+			logger.finest("Roster is not loaded yet when sending message. Attempting a reload...");
 			try {
 				roster.reloadAndWait();
-				logger.finest("XMPPMessageEngine: Roster reloaded.");
+				logger.finest("Roster reloaded.");
 			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-				logger.warning("XMPPMessageEngine: Roster could not be reloaded. Exception: " + e.getMessage());
+				logger.warning("Roster could not be reloaded. Exception: " + e.getMessage());
 			}
 		}
 		
@@ -414,7 +414,6 @@ public class XmppMessageEngine extends CommunicationEngine {
 			return false;
 		}
 		
-		logger.finest("XMPPMessageEngine: Message sent. Content: " + message);
 		return true;
 	}
 	
@@ -451,7 +450,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 		try {
 			xmppConfigBuilder.setResource(XMPP_RESOURCE);
 		} catch (XmppStringprepException e) {
-			logger.severe("Exiting due to exception during building a connection to XMPP server. Message: " 
+			logger.warning("Exiting due to exception during building a connection to XMPP server. Message: " 
 					+ e.getMessage());
 			
 			return null;
@@ -476,7 +475,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			return new XMPPTCPConnection(xmppConnConfig);
 			
 		} catch (IOException e) {
-			logger.severe("Exiting due to exception during building a connection to XMPP server. Message: " 
+			logger.warning("Exiting due to exception during building a connection to XMPP server. Message: " 
 					+ e.getMessage());
 			
 			return null;	
@@ -535,7 +534,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 			try {
 				roster.reloadAndWait();
 				
-				logger.finest("XmppMessageEngine: The roster for " + objectId + " was renewed.");
+				logger.finest("The roster for " + objectId + " was renewed.");
 				
 			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
 				logger.warning("Roster could not be reloaded for " + objectId + ". Exception: " + e.getMessage());
