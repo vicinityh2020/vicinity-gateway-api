@@ -108,9 +108,23 @@ public class Data implements Serializable {
 		Data loadedData = loadData();
 		if (loadedData != null) {
 			
-			this.providedEventChannels = loadedData.getProvidedEventChannels();
-			this.subscribedEventChannels = loadedData.getSubscribedEventChannels();
-			this.providedActions = loadedData.getProvidedActions();
+			if (loadedData.getProvidedEventChannels() != null) {
+				this.providedEventChannels = loadedData.getProvidedEventChannels();
+			} else {
+				providedEventChannels = new HashSet<EventChannel>();
+			}
+
+			if (loadedData.getSubscribedEventChannels() != null) {
+				this.subscribedEventChannels = loadedData.getSubscribedEventChannels();
+			} else {
+				subscribedEventChannels = new HashSet<Subscription>();
+			}
+
+			if (loadedData.getProvidedActions() != null) {
+				this.providedActions = loadedData.getProvidedActions();
+			} else {
+				providedActions = new HashSet<Action>();
+			}
 			
 		} else {
 			
