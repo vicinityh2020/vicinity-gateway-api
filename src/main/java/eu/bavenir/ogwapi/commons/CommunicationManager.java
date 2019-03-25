@@ -65,6 +65,10 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  */
 public class CommunicationManager {
 
+	/**
+	 * This records the build and version number.
+	 */
+	private static final String OGWAPI_VERSION = "0.7";
 	
 	/* === CONSTANTS === */
 	
@@ -241,6 +245,9 @@ public class CommunicationManager {
 	 * @param logger Java logger.
 	 */
 	public CommunicationManager(XMLConfiguration config, Logger logger){
+		
+		logger.config("OGWAPI version: " + OGWAPI_VERSION);
+		
 		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
 		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		

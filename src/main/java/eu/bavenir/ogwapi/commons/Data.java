@@ -12,32 +12,30 @@ import javax.json.JsonObject;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.json.JSONException;
 
+/*
+ * STRUCTURE:
+ * - constants
+ * - fields
+ * - public methods
+ * - private methods
+ * - getters
+ */
 
+/**
+ * Class for storing data, which need to be persistence.
+ * Instance of this class exist for each object which is logged in OGWAPI.
+ * 
+ * Persistence manager {@link u.bavenir.ogwapi.commons.PersistenceManager PersistenceManager} 
+ * is used for loading data from file, or in TD json file case first from server.
+ * 
+ * Loading is called in constructor and if this persistence data exist, create itself from loaded data.
+ *  
+ * @author Andrej
+ *
+ */
 public class Data implements Serializable {
 
-	/*
-	 * STRUCTURE:
-	 * - constants
-	 * - fields
-	 * - public methods
-	 * - private methods
-	 * - getters
-	 */
 
-
-	/**
-	 * Class for storing data, which need to be persistence.
-	 * Instance of this class exist for each object which is logged in OGWAPI.
-	 * 
-	 * Persistence manager {@link u.bavenir.ogwapi.commons.PersistenceManager PersistenceManager} 
-	 * is used for loading data from file, or in TD json file case first from server.
-	 * 
-	 * Loading is called in constructor and if this persistence data exist, create itself from loaded data.
-	 *  
-	 * @author Andrej
-	 *
-	 */
-	
 	
 	/* === CONSTANTS === */
 

@@ -30,7 +30,7 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/objects/{oid}/actions/{aid}/tasks/{tid}
  *   METHODS: 			GET, DELETE
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		oid - VICINITY identifier of the object (e.g. 0729a580-2240-11e6-9eb5-0002a5d5c51b).
  *   					aid - Action identifier (as in object description) (e.g. switch).
  *   					tid - Task identifier (e.g. ca43b079-0818-4c39-b896-699c2d31f2db).
@@ -140,7 +140,17 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	}
 	
 	
-	// TODO documentation
+	/**
+	 * Cancels the task. The task must be either in pending or running state. Finished or failed tasks can't be stopped.
+	 * 
+	 * @param sourceOid OID of the caller.
+	 * @param destinationOid OID of the destination.
+	 * @param actionId ID of the Action.
+	 * @param taskId ID of the Task.
+	 * @param queryParams Parameters to be sent along with the body.
+	 * @param body Request body.
+	 * @return Response from the remote station.
+	 */
 	private Representation deleteActionTask(String sourceOid, String destinationOid, String actionId, 
 			String taskId, Map<String, String> queryParams, String body){
 		
@@ -154,6 +164,13 @@ public class ObjectsOidActionsAidTasksTid extends ServerResource {
 	
 	
 	// === PRIVATE METHODS ===
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

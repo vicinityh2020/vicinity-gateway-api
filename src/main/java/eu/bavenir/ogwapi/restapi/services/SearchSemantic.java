@@ -33,7 +33,6 @@ import eu.bavenir.ogwapi.restapi.Api;
  * @author Andrej
  *
  */
-
 public class SearchSemantic extends ServerResource {
 
 	
@@ -42,6 +41,12 @@ public class SearchSemantic extends ServerResource {
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
+	/**
+	 * Used by the Agent / Adapter to post a semantic seaqrch query.
+	 * 
+	 * @param entity The query packaged as JSON entity.
+	 * @return Response after the search.
+	 */
 	@Post("json")
 	public Representation accept(Representation entity) {
 		
@@ -60,7 +65,14 @@ public class SearchSemantic extends ServerResource {
 	
 	
 	// === PRIVATE METHODS ===
-	
+	/**
+	 * This makes the actual search.
+	 * 
+	 * @param sourceOid OID of the caller.
+	 * @param semanticQuery The query string.
+	 * @param parameters Any parameters to be sent along with the request.
+	 * @return Search results.
+	 */
 	private Representation performSearch(String sourceOid, String semanticQuery, Map<String, String> parameters){
 
 		CommunicationManager communicationManager 
@@ -72,6 +84,13 @@ public class SearchSemantic extends ServerResource {
 	}
 	
 	
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

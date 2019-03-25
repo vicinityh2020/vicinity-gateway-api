@@ -6,7 +6,7 @@
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
 		-->
-		<server>development.vicinity.ws</server>
+		<server>commserver.vicinity.ws</server>
 		
 		<!--
 		Port of the communication server.
@@ -21,7 +21,7 @@
 		
 		Default is commserver.vicinity.ws.
 		-->
-		<neighbourhoodManagerServer>development.vicinity.ws</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>commserver.vicinity.ws</neighbourhoodManagerServer>
 		
 		<!-- 
 		Port on which the NM listens for incoming requests.
@@ -47,7 +47,7 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<encryption>false</encryption>
+		<encryption>true</encryption>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
@@ -146,7 +146,7 @@
 		This parameter is for debug reason.
 		Default is true.
 		-->
-		<loadTDFromServer>false</loadTDFromServer>
+		<loadTDFromServer>true</loadTDFromServer>
 		
 	</general>
 
@@ -239,7 +239,7 @@
 	<xmpp>
 		
 		<!--
-		XMPP domain that is served by the server. Defaults to bavenir.eu.
+		XMPP domain that is served by the server. Defaults to vicinity.ws.
 		-->
 		<domain>vicinity.ws</domain>
 		
@@ -267,7 +267,7 @@
 		Set whether the API will be served via HTTP or HTTPS. Takes either true
 		or false value. Default is false.
 		-->
-		<enableHttps>true</enableHttps>
+		<enableHttps>false</enableHttps>
 		
 		<!--
 		Path to the keystore file. This parameter is only read when the 
@@ -345,7 +345,7 @@
 			
 			Defaults to false.
 			-->
-			<useHttps>true</useHttps>
+			<useHttps>false</useHttps>
 			
 			<!--
 			Setting this to true will make OGWAPI accept self signed certificates

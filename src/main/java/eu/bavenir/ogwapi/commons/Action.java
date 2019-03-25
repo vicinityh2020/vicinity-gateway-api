@@ -33,7 +33,6 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
  * - private methods
  */
 
-// TODO don't remove timedout pending tasks, but put them as failed
 /**
  * This class represents an action a local infrastructure can execute. It keeps a list of {@link eu.bavenir.ogwapi.commons.Task tasks}
  * that are waiting to be executed (pending), is currently being executed (running) and a set of tasks and their return 

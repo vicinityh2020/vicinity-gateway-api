@@ -132,12 +132,12 @@ public class NeighbourhoodManagerConnector {
 	
 	// === FIELDS ===
 	
-	/**
+	/*
 	 * Configuration of the OGWAPI.
 	 */
 	// private XMLConfiguration config;
 	
-	/**
+	/*
 	 * Logger of the OGWAPI.
 	 */
 	//private Logger logger;

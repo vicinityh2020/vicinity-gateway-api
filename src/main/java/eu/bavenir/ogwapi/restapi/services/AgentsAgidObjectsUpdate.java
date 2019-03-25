@@ -13,6 +13,19 @@ import org.restlet.resource.ServerResource;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
+/**
+ * This class implements a {@link org.restlet.resource.ServerResource ServerResource} interface for following
+ * Gateway API calls:
+ * 
+ *   URL: 				[server]:[port]/api/agents/{agid}/objects/update
+ *   METHODS: 			PUT
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
+ *   ATTRIBUTES:		agid - VICINITY Identifier of the Agent, that is in control of the Adapters 
+ *   					(e.g. 1dae4326-44ae-4b98-bb75-15aa82516cc3).
+ *   
+ * @author sulfo
+ *
+ */
 public class AgentsAgidObjectsUpdate extends ServerResource {
 
 	/**

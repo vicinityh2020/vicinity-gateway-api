@@ -28,6 +28,7 @@ import eu.bavenir.ogwapi.commons.CommunicationManager;
  * 
  *   URL: 				[server]:[port]/api/objects
  *   METHODS: 			GET
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   
  * @author sulfo
  *

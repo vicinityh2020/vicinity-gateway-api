@@ -26,34 +26,32 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+/*
+ * STRUCTURE:
+ * - constants
+ * - fields
+ * - public methods
+ */
 
+
+/**
+ * This class serves to work with data files, which are used for ensure persistence.
+ * 
+ * There are two types of data files:
+ * 		1. Data which is using for remembering gateway current state (EventChannels, Subscriptions and Actions)
+ * 		2. JSON file with information called thing description (TD)
+ * For first type of data is used serialisation for storing them.
+ * Second type is storing in JSON format and this JSON file is getting from server by Unirest post.
+ * 
+ * Mentioned data exist for each object which is logged in OGWAPI.
+ * Data class {@link u.bavenir.ogwapi.commons.Data Data}. 
+ * 
+ * 
+ * @author Andrej
+ *
+ */
 public class PersistenceManager {
 
-	/*
-	 * STRUCTURE:
-	 * - constants
-	 * - fields
-	 * - public methods
-	 */
-
-
-	/**
-	 * This class serves to work with data files, which are used for ensure persistence.
-	 * 
-	 * There are two types of data files:
-	 * 		1. Data which is using for remembering gateway current state (EventChannels, Subscriptions and Actions)
-	 * 		2. JSON file with information called thing description (TD)
-	 * For first type of data is used serialisation for storing them.
-	 * Second type is storing in JSON format and this JSON file is getting from server by Unirest post.
-	 * 
-	 * Mentioned data exist for each object which is logged in OGWAPI.
-	 * Data class {@link u.bavenir.ogwapi.commons.Data Data}. 
-	 * 
-	 * 
-	 * @author Andrej
-	 *
-	 */
-	
 	
 	/* === CONSTANTS === */
 

@@ -30,7 +30,7 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/objects/{oid}/actions/{aid}
  *   METHODS: 			POST, PUT
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		oid - VICINITY identifier of the object (e.g. 0729a580-2240-11e6-9eb5-0002a5d5c51b).
  *   					aid - Action identifier (as in object description) (e.g. switch).
  *   
@@ -51,6 +51,9 @@ public class ObjectsOidActionsAid extends ServerResource {
 	 */
 	private static final String ATTR_AID = "aid";
 	
+	/**
+	 * Name of the 'status' parameter.
+	 */
 	private static final String PARAM_STATUS = "status";
 	
 
@@ -168,6 +171,13 @@ public class ObjectsOidActionsAid extends ServerResource {
 	}
 	
 	// === PRIVATE METHODS ===
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

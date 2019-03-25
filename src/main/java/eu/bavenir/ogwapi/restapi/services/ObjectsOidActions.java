@@ -28,13 +28,12 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/objects/{oid}/actions
  *   METHODS: 			GET
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		oid - VICINITY identifier of the object (e.g. 0729a580-2240-11e6-9eb5-0002a5d5c51b).
  *   
  * @author Andrej
  *
  */
-
 public class ObjectsOidActions extends ServerResource {
 
 	// === CONSTANTS ===
@@ -97,7 +96,13 @@ public class ObjectsOidActions extends ServerResource {
 	}
 	
 	
-	
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

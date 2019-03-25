@@ -66,7 +66,7 @@ public class XmppMessageEngine extends CommunicationEngine {
 	 * Default value of {@link #CONFIG_PARAM_XMPPDOMAIN CONFIG_PARAM_XMPPDOMAIN} configuration parameter. This value is
 	 * taken into account when no suitable value is found in the configuration file. 
 	 */
-	public static final String CONFIG_DEF_XMPPDOMAIN = "bavenir.eu";
+	public static final String CONFIG_DEF_XMPPDOMAIN = "vicinity.ws";
 	
 	/**
 	 * Enables debugging of the XMPP communication between the Gateway and the

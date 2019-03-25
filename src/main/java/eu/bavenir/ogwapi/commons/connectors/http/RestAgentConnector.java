@@ -331,6 +331,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 	
 
+	/**
+	 * This will make a call to PUT http://<agent IP>:<agent port>/agent/objects/<destination OID>/events/<event ID>
+	 */
 	@Override
 	public NetworkMessageResponse forwardEventToObject(String sourceOid, String destinationOid, String eventId, 
 			String body, Map<String, String> parameters) {
@@ -343,7 +346,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 
 	
-
+	/**
+	 * This will make a call to GET http://<agent IP>:<agent port>/agent/objects/<destination OID>/properties/<property ID>
+	 */
 	@Override
 	public NetworkMessageResponse getObjectProperty(String sourceOid, String destinationOid, String propertyId, 
 			String body, Map<String, String> parameters) {
@@ -358,6 +363,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 
 
+	/**
+	 * This will make a call to PUT http://<agent IP>:<agent port>/agent/objects/<destination OID>/properties/<property ID>
+	 */
 	@Override
 	public NetworkMessageResponse setObjectProperty(String sourceOid, String destinationOid, String propertyId, 
 			String body, Map<String, String> parameters) {
@@ -371,6 +379,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 
 
+	/**
+	 * This will make a call to POST http://<agent IP>:<agent port>/agent/objects/<destination OID>/actions/<action ID>
+	 */
 	@Override
 	public NetworkMessageResponse startObjectAction(String sourceOid, String destinationOid, String actionId, 
 			String body, Map<String, String> parameters) {
@@ -383,7 +394,9 @@ public class RestAgentConnector extends AgentConnector {
 	}
 
 
-
+	/**
+	 * This will make a call to DELETE http://<agent IP>:<agent port>/agent/objects/<destination OID>/actions/<action ID>
+	 */
 	@Override
 	public NetworkMessageResponse stopObjectAction(String sourceOid, String destinationOid, String actionId, String body, 
 			Map<String, String> parameters) {

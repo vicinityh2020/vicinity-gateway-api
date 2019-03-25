@@ -33,7 +33,7 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/events/{eid}
  *   METHODS: 			POST, PUT, DELETE
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		eid - Alpha numerical Event identifier (as in object description) (e.g. fullyCharged).
  *   
  * @author sulfo
@@ -154,6 +154,13 @@ public class EventsEid extends ServerResource {
 	
 	
 	// === PRIVATE METHODS ===
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

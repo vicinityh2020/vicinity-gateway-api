@@ -28,6 +28,7 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  * 
  *   URL: 				[server]:[port]/api/objects/login
  *   METHODS: 			GET
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   
  * @author sulfo
  *
