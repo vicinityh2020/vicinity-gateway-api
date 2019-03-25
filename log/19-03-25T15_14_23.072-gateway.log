@@ -1,0 +1,30 @@
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-03-25T15_14_23.072-gateway.log
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: HTTPS disabled.
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: Set to listen on port 8181
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.App main
+INFO: Vicinity Gateway API initialized.
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+mar 25, 2019 3:14:23 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.restapi.Api createAuthenticator
+CONFIG: Authentication realm: bavenir.eu
+mar 25, 2019 3:14:23 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+mar 25, 2019 3:14:23 PM eu.bavenir.ogwapi.restapi.RestletThread run
+INFO: HTTP server configured and started.
+mar 25, 2019 3:14:28 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' is not connected yet.
+mar 25, 2019 3:14:28 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+mar 25, 2019 3:14:28 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol enabled for Agent communication.
+mar 25, 2019 3:14:34 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: Data was loaded from file - ecb96b72-24b1-45b2-a16b-83f0b41471e2-data.ser

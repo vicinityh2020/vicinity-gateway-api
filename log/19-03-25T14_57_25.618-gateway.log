@@ -1,0 +1,100 @@
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-03-25T14_57_25.618-gateway.log
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: HTTPS disabled.
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: Set to listen on port 8181
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.App main
+INFO: Vicinity Gateway API initialized.
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+mar 25, 2019 2:57:25 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+mar 25, 2019 2:57:25 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+mar 25, 2019 2:57:26 PM eu.bavenir.ogwapi.restapi.Api createAuthenticator
+CONFIG: Authentication realm: bavenir.eu
+mar 25, 2019 2:57:26 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+mar 25, 2019 2:57:26 PM eu.bavenir.ogwapi.restapi.RestletThread run
+INFO: HTTP server configured and started.
+mar 25, 2019 2:57:40 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' is not connected yet.
+mar 25, 2019 2:57:40 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+mar 25, 2019 2:57:40 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol enabled for Agent communication.
+mar 25, 2019 2:57:44 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+mar 25, 2019 2:57:45 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromServer
+INFO: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was loaded from server.
+mar 25, 2019 2:57:45 PM eu.bavenir.ogwapi.commons.PersistenceManager saveThingDescription
+FINE: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 is saved in data/ecb96b72-24b1-45b2-a16b-83f0b41471e2-TD.json
+mar 25, 2019 2:57:45 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'development.vicinity.ws:5222' as 'ecb96b72-24b1-45b2-a16b-83f0b41471e2@vicinity.ws'
+mar 25, 2019 2:57:45 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+mar 25, 2019 2:57:46 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' was established.
+mar 25, 2019 2:57:46 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 2:57:46 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 2:57:46 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 2:57:46 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+mar 25, 2019 2:57:46 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+mar 25, 2019 2:57:46 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+mar 25, 2019 2:57:46 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 2:57:46 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 2:58:25 PM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was interrupted. Reconnecting.
+mar 25, 2019 2:58:30 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Reconnecting 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' to network.
+mar 25, 2019 2:58:30 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+mar 25, 2019 2:58:30 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol enabled for Agent communication.
+mar 25, 2019 2:59:03 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+mar 25, 2019 2:59:08 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromServer
+INFO: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was loaded from server.
+mar 25, 2019 2:59:09 PM eu.bavenir.ogwapi.commons.PersistenceManager saveThingDescription
+FINE: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 is saved in data/ecb96b72-24b1-45b2-a16b-83f0b41471e2-TD.json
+mar 25, 2019 2:59:11 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'development.vicinity.ws:5222' as 'ecb96b72-24b1-45b2-a16b-83f0b41471e2@vicinity.ws'
+mar 25, 2019 2:59:11 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+mar 25, 2019 2:59:12 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' was established.
+mar 25, 2019 2:59:12 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 2:59:12 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 2:59:12 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 2:59:12 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/events/{eid}" -> Finder for EventsEid
+mar 25, 2019 2:59:12 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/events/event-1". No remaining part to match
+mar 25, 2019 2:59:12 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.EventsEid.store(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.EventsEid, restletMethod: PUT, input: "json", value: "json", output: "json", query: null]"= 0.5
+mar 25, 2019 2:59:12 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 2:59:12 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@12898736
+mar 25, 2019 2:59:12 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendEventToSubscribers
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Could not distribute an event to the channel event-1. The event channel does not exist or is not active.
+mar 25, 2019 2:59:12 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 2:59:55 PM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was interrupted. Reconnecting.
+mar 25, 2019 3:00:25 PM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was interrupted. Reconnecting.

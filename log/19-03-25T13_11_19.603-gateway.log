@@ -1,0 +1,246 @@
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-03-25T13_11_19.603-gateway.log
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: HTTPS enabled.
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: Path to keystore file: keystore/ogwapi.keystore
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: Keystore type is PKCS12
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.restapi.RestletThread <init>
+CONFIG: Set to listen on port 8181
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.App main
+INFO: Vicinity Gateway API initialized.
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+mar 25, 2019 1:11:19 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+mar 25, 2019 1:11:20 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+mar 25, 2019 1:11:20 PM eu.bavenir.ogwapi.restapi.Api createAuthenticator
+CONFIG: Authentication realm: bavenir.eu
+mar 25, 2019 1:11:20 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+mar 25, 2019 1:11:20 PM eu.bavenir.ogwapi.restapi.RestletThread run
+INFO: HTTPS server configured and started.
+mar 25, 2019 1:11:31 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' is not connected yet.
+mar 25, 2019 1:11:31 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+mar 25, 2019 1:11:31 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol enabled for Agent communication.
+mar 25, 2019 1:11:37 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+mar 25, 2019 1:11:56 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromServer
+INFO: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 was loaded from server.
+mar 25, 2019 1:11:57 PM eu.bavenir.ogwapi.commons.PersistenceManager saveThingDescription
+FINE: TD json for ecb96b72-24b1-45b2-a16b-83f0b41471e2 is saved in data/ecb96b72-24b1-45b2-a16b-83f0b41471e2-TD.json
+mar 25, 2019 1:16:11 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'development.vicinity.ws:5222' as 'ecb96b72-24b1-45b2-a16b-83f0b41471e2@vicinity.ws'
+mar 25, 2019 1:16:12 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+mar 25, 2019 1:16:12 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'ecb96b72-24b1-45b2-a16b-83f0b41471e2' was established.
+mar 25, 2019 1:16:12 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:16:12 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:16:12 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:16:12 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+mar 25, 2019 1:16:12 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/login". No remaining part to match
+mar 25, 2019 1:16:12 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+mar 25, 2019 1:16:12 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:16:12 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:16:57 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:16:57 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:16:57 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/events/{eid}" -> Finder for ObjectsOidEventsEid
+mar 25, 2019 1:16:57 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/test_vcnt0/events/event-1". No remaining part to match
+mar 25, 2019 1:16:57 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid.represent(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+mar 25, 2019 1:16:57 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor getEventChannelStatus
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending request to get status of remote event channel event-1 on test_vcnt0 with parameters: 
+{}
+and body: 
+null
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending message: 
+{"messageType":1,"requestId":1198750620,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"test_vcnt0","requestOperation":8,"requestBody":null,"attributes":{"eid":"event-1"},"parameters":{}}
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.CommunicationManager tryToSendLocalMessage
+FINE: Can't send the message locally, the destination OID is not from this infrastructure.
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message was sent through network.
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: New message from test_vcnt0
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message string: 
+{"messageType":2,"requestId":1198750620,"sourceOid":"test_vcnt0","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","error":false,"responseCode":200,"responseCodeReason":"OK. Event channel status retrieved.","contentType":"application/json","responseBody":"{\"active\":true}","responseBodySupplement":null}
+
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This message is a response. Adding to incoming queue - message count: 0
+mar 25, 2019 1:16:57 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processMessageResponse
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This is a response to request ID 1198750620
+mar 25, 2019 1:16:57 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:19:20 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:19:20 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:19:20 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/events/{eid}" -> Finder for ObjectsOidEventsEid
+mar 25, 2019 1:19:20 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/test_vcnt0/events/event-1". No remaining part to match
+mar 25, 2019 1:19:20 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidEventsEid, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+mar 25, 2019 1:19:20 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor subscribeToEventChannel
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending request for subscribing to remote event channel event-1 on test_vcnt0 with parameters: 
+{}
+and body: 
+null
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending message: 
+{"messageType":1,"requestId":1901916819,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"test_vcnt0","requestOperation":9,"requestBody":null,"attributes":{"eid":"event-1"},"parameters":{}}
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.CommunicationManager tryToSendLocalMessage
+FINE: Can't send the message locally, the destination OID is not from this infrastructure.
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message was sent through network.
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: New message from test_vcnt0
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message string: 
+{"messageType":2,"requestId":1901916819,"sourceOid":"test_vcnt0","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","error":false,"responseCode":200,"responseCodeReason":"OK. Subscribed.","contentType":"application/json","responseBody":null,"responseBodySupplement":null}
+
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This message is a response. Adding to incoming queue - message count: 0
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processMessageResponse
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This is a response to request ID 1901916819
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendRequestForRemoteOperation
+WARNING: ecb96b72-24b1-45b2-a16b-83f0b41471e2: It was not possible to turn response body into a valid JSON. Original string: null
+mar 25, 2019 1:19:20 PM eu.bavenir.ogwapi.commons.PersistenceManager saveData
+FINE: Serialized data for ecb96b72-24b1-45b2-a16b-83f0b41471e2 is saved in data/ecb96b72-24b1-45b2-a16b-83f0b41471e2-data.ser
+mar 25, 2019 1:19:20 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:21:09 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:21:09 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:21:09 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/actions/{aid}" -> Finder for ObjectsOidActionsAid
+mar 25, 2019 1:21:09 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/test_vcnt0/actions/action-1". No remaining part to match
+mar 25, 2019 1:21:09 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+mar 25, 2019 1:21:09 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor startAction
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending request to start action action-1 on test_vcnt0 with parameters: 
+{}
+and body: 
+null
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending message: 
+{"messageType":1,"requestId":1791560251,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"test_vcnt0","requestOperation":4,"requestBody":null,"attributes":{"aid":"action-1"},"parameters":{}}
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.CommunicationManager tryToSendLocalMessage
+FINE: Can't send the message locally, the destination OID is not from this infrastructure.
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message was sent through network.
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: New message from test_vcnt0
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message string: 
+{"messageType":2,"requestId":1791560251,"sourceOid":"test_vcnt0","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","error":false,"responseCode":201,"responseCodeReason":"Created. New task added to the queue.","contentType":"application/json","responseBody":"{\"taskId\":\"545eed42-e688-40ad-9a71-d87b4b8b8d41\"}","responseBodySupplement":null}
+
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This message is a response. Adding to incoming queue - message count: 0
+mar 25, 2019 1:21:09 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processMessageResponse
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: This is a response to request ID 1791560251
+mar 25, 2019 1:21:09 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:22:16 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:22:16 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:22:16 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/actions/{aid}" -> Finder for ObjectsOidActionsAid
+mar 25, 2019 1:22:16 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/ecb96b72-24b1-45b2-a16b-83f0b41471e2/actions/action-1". No remaining part to match
+mar 25, 2019 1:22:16 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+mar 25, 2019 1:22:16 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor startAction
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending request to start action action-1 on ecb96b72-24b1-45b2-a16b-83f0b41471e2 with parameters: 
+{}
+and body: 
+null
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending message: 
+{"messageType":1,"requestId":819902118,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","requestOperation":4,"requestBody":null,"attributes":{"aid":"action-1"},"parameters":{}}
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: New message from ecb96b72-24b1-45b2-a16b-83f0b41471e2
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message string: 
+{"messageType":1,"requestId":819902118,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","requestOperation":4,"requestBody":null,"attributes":{"aid":"action-1"},"parameters":{}}
+
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: The message is a request. Processing...
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processMessageRequest
+WARNING: ecb96b72-24b1-45b2-a16b-83f0b41471e2: The source OID ecb96b72-24b1-45b2-a16b-83f0b41471e2 of the request 819902118 is not in the roster of this object.
+mar 25, 2019 1:22:16 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message was routed locally.
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+INFO: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 25, 2019 1:22:47 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: ecb96b72-24b1-45b2-a16b-83f0b41471e2.
+mar 25, 2019 1:22:47 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "ecb96b72-24b1-45b2-a16b-83f0b41471e2" using the HTTP_Basic scheme.
+mar 25, 2019 1:22:47 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/{oid}/actions/{aid}" -> Finder for ObjectsOidActionsAid
+mar 25, 2019 1:22:47 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "https://localhost:8181/api/objects/ecb96b72-24b1-45b2-a16b-83f0b41471e2/actions/action-1". No remaining part to match
+mar 25, 2019 1:22:47 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsOidActionsAid, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+mar 25, 2019 1:22:47 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor startAction
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending request to start action action-1 on ecb96b72-24b1-45b2-a16b-83f0b41471e2 with parameters: 
+{}
+and body: 
+null
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Sending message: 
+{"messageType":1,"requestId":1844537668,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","requestOperation":4,"requestBody":null,"attributes":{"aid":"action-1"},"parameters":{}}
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: New message from ecb96b72-24b1-45b2-a16b-83f0b41471e2
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message string: 
+{"messageType":1,"requestId":1844537668,"sourceOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","destinationOid":"ecb96b72-24b1-45b2-a16b-83f0b41471e2","requestOperation":4,"requestBody":null,"attributes":{"aid":"action-1"},"parameters":{}}
+
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processIncommingMessage
+INFO: ecb96b72-24b1-45b2-a16b-83f0b41471e2: The message is a request. Processing...
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor processMessageRequest
+WARNING: ecb96b72-24b1-45b2-a16b-83f0b41471e2: The source OID ecb96b72-24b1-45b2-a16b-83f0b41471e2 of the request 1844537668 is not in the roster of this object.
+mar 25, 2019 1:22:47 PM eu.bavenir.ogwapi.commons.ConnectionDescriptor sendMessage
+FINE: ecb96b72-24b1-45b2-a16b-83f0b41471e2: Message was routed locally.

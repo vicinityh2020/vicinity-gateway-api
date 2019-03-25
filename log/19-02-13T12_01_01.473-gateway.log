@@ -1,0 +1,98 @@
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-02-13T12_01_01.473-gateway.log
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+feb 13, 2019 12:01:01 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+feb 13, 2019 12:01:01 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+feb 13, 2019 12:01:01 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org2dev1' is not connected yet.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromFile
+INFO: TD json not found!
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescription
+WARNING: TD json for org2dev1 could not be loaded.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for org2dev1. Attempting to build a new one.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'vicinity.bavenir.eu:5222' as 'org2dev1@bavenir.eu'
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'org2dev1' was established.
+feb 13, 2019 12:01:10 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 13, 2019 12:01:10 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org2dev1.
+feb 13, 2019 12:01:10 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org2dev1" using the HTTP_Basic scheme.
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/update" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects/delete" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/search/sparql" URI pattern: 0.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/search/semantic" URI pattern: 1.0
+feb 13, 2019 12:01:10 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/search/semantic" -> Finder for SearchSemantic
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 16 characters were matched
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/search/semantic". No remaining part to match
+feb 13, 2019 12:01:10 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 13, 2019 12:01:10 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.SearchSemantic.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.SearchSemantic, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 13, 2019 12:01:10 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 13, 2019 12:01:10 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@28930bb1
+feb 13, 2019 12:01:12 PM eu.bavenir.ogwapi.commons.search.SemanticQuery performQuery
+INFO: Semantic Search endpoint successfully reached.
+feb 13, 2019 12:01:12 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter

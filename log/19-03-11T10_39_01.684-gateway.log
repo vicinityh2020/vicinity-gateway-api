@@ -1,0 +1,92 @@
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-03-11T10_39_01.684-gateway.log
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+mar 11, 2019 10:39:01 AM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+mar 11, 2019 10:39:02 AM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+mar 11, 2019 10:39:02 AM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+mar 11, 2019 10:39:02 AM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org1dev1' is not connected yet.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromFile
+INFO: TD json not found!
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescription
+WARNING: TD json for org1dev1 could not be loaded.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for org1dev1. Attempting to build a new one.
+mar 11, 2019 10:43:16 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'commserver.vicinity.ws:5222' as 'org1dev1@bavenir.eu'
+mar 11, 2019 10:43:17 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+mar 11, 2019 10:43:17 AM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'org1dev1' was established.
+mar 11, 2019 10:43:17 AM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+mar 11, 2019 10:43:17 AM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+mar 11, 2019 10:43:17 AM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 1.0
+mar 11, 2019 10:43:17 AM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects" -> Finder for Objects
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 8 characters were matched
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects". No remaining part to match
+mar 11, 2019 10:43:17 AM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+mar 11, 2019 10:43:17 AM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.Objects.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.Objects, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+mar 11, 2019 10:43:17 AM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 11, 2019 10:43:17 AM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 11, 2019 10:43:31 AM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for org1dev1 was interrupted. Reconnecting.
+mar 11, 2019 10:43:31 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object already exists for org1dev1. Not attempting to build a new one.
+mar 11, 2019 10:44:01 AM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for org1dev1 was interrupted. Reconnecting.
+mar 11, 2019 10:44:01 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object already exists for org1dev1. Not attempting to build a new one.
+mar 11, 2019 10:44:32 AM eu.bavenir.ogwapi.commons.CommunicationManager recoverSessions
+WARNING: Connection for org1dev1 was interrupted. Reconnecting.
+mar 11, 2019 10:44:32 AM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object already exists for org1dev1. Not attempting to build a new one.

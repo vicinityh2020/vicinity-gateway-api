@@ -1,0 +1,88 @@
+mar 18, 2019 12:33:26 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-03-18T12_33_26.724-gateway.log
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+mar 18, 2019 12:33:27 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+mar 18, 2019 12:33:27 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+mar 18, 2019 12:33:27 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+mar 18, 2019 12:33:55 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: 'org1dev1' is not connected yet.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads enabled, all calls to an Agent via this connector will be simulated.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine <init>
+FINEST: XmppMessageEngine: The roster for org1dev1 will be renewed every 108000ms.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.PersistenceManager loadData
+INFO: File not found!
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescriptionFromFile
+INFO: TD json not found!
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.PersistenceManager loadThingDescription
+WARNING: TD json for org1dev1 could not be loaded.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for org1dev1. Attempting to build a new one.
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'commserver.vicinity.ws:5222' as 'org1dev1@vicinity.ws'
+mar 18, 2019 12:33:56 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is disabled.
+mar 18, 2019 12:33:57 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+mar 18, 2019 12:33:57 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+mar 18, 2019 12:33:57 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for org1dev1 was renewed.
+mar 18, 2019 12:33:57 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for 'org1dev1' was established.
+mar 18, 2019 12:33:57 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 127.0.0.1.
+mar 18, 2019 12:33:57 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: org1dev1.
+mar 18, 2019 12:33:57 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "org1dev1" using the HTTP_Basic scheme.
+mar 18, 2019 12:33:57 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 1.0
+mar 18, 2019 12:33:57 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/objects/login" -> Finder for ObjectsLogin
+mar 18, 2019 12:33:57 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 14 characters were matched
+mar 18, 2019 12:33:57 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/objects/login". No remaining part to match
+mar 18, 2019 12:33:57 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+mar 18, 2019 12:33:57 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.ObjectsLogin.represent(), javaClass: class eu.bavenir.ogwapi.restapi.services.ObjectsLogin, restletMethod: GET, input: "", value: "", output: "", query: null]"= 0.5
+mar 18, 2019 12:33:57 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+mar 18, 2019 12:34:11 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for JsonRepresentation: DefaultConverter
+mar 18, 2019 12:34:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+mar 18, 2019 12:34:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: org1dev1
+mar 18, 2019 12:34:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+mar 18, 2019 12:34:57 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+mar 18, 2019 12:34:57 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: org1dev1
+mar 18, 2019 12:34:57 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+mar 18, 2019 12:35:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+mar 18, 2019 12:35:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: org1dev1
+mar 18, 2019 12:35:27 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+mar 18, 2019 12:35:44 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for org1dev1 was renewed.

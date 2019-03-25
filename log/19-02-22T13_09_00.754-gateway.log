@@ -1,0 +1,1184 @@
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.App initialize
+CONFIG: Log file: log/19-02-22T13_09_00.754-gateway.log
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.App main
+FINE: Vicinity Gateway API initialized.
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.App main
+FINE: API thread started.
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.restapi.RestletThread run
+CONFIG: HTTP server configured.
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.commons.CommunicationManager <init>
+CONFIG: The session recovery policy is set to proactive.
+feb 22, 2019 1:09:00 PM eu.bavenir.ogwapi.restapi.Api configureChallengeScheme
+CONFIG: HTTP Basic challenge authentication scheme configured.
+feb 22, 2019 1:09:01 PM org.restlet.Application start
+INFO: Starting eu.bavenir.ogwapi.restapi.Api application
+feb 22, 2019 1:09:01 PM org.restlet.engine.application.ApplicationHelper start
+FINE: By default, an application should be attached to a parent component in order to let application's outbound root handle calls properly.
+feb 22, 2019 1:09:01 PM eu.bavenir.ogwapi.restapi.RestletThread run
+FINE: HTTP server component started.
+feb 22, 2019 1:09:08 PM eu.bavenir.ogwapi.commons.CommunicationManager isConnected
+INFO: Object ID: '0c0e2397-b25c-4b8f-bf31-f66117801bf8' is not connected yet.
+feb 22, 2019 1:09:09 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: Dummy payloads disabled, all calls to an Agent via this connector will be real.
+feb 22, 2019 1:09:09 PM eu.bavenir.ogwapi.commons.connectors.http.RestAgentConnector <init>
+CONFIG: REST Agent Connector: HTTPS protocol disabled for Agent communication.
+feb 22, 2019 1:09:09 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine <init>
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 will be renewed every 104000ms.
+feb 22, 2019 1:09:09 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine connect
+FINE: XmppMessageEngine: Connection object not yet exists for 0c0e2397-b25c-4b8f-bf31-f66117801bf8. Attempting to build a new one.
+feb 22, 2019 1:09:17 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: Creating a new connection to XMPP server 'commserver.vicinity.ws:5222' as '0c0e2397-b25c-4b8f-bf31-f66117801bf8@vicinity.ws'
+feb 22, 2019 1:09:18 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine buildNewConnection
+CONFIG: XMPP secure connection is enabled.
+feb 22, 2019 1:09:19 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:09:19 PM eu.bavenir.ogwapi.commons.CommunicationManager establishConnection
+INFO: Connection for '0c0e2397-b25c-4b8f-bf31-f66117801bf8' was established.
+feb 22, 2019 1:09:19 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:09:19 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:09:19 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:09:19 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:09:19 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:09:19 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:09:19 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:09:19 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:09:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:09:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:09:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:09:48 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:09:48 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:09:48 PM org.restlet.engine.application.ApplicationHelper$1 handle
+FINE: Added runtime client for protocol: HTTPS
+feb 22, 2019 1:09:48 PM org.restlet.engine.connector.HttpClientHelper start
+INFO: Starting the internal HTTP client
+feb 22, 2019 1:09:48 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:09:48 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:09:48 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:09:48 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:10:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:10:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:10:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:10:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:10:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:10:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:10:53 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:11:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:11:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:11:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:11:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:11:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:11:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:12:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:12:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:12:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:12:30 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:12:30 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:12:30 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:12:30 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:12:30 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:12:30 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:12:30 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:12:30 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:12:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:12:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:12:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:12:32 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:12:32 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:12:33 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:12:33 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:12:33 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:12:33 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:12:37 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:13:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:13:00 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:13:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:13:30 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:13:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:13:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:14:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:14:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:14:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:14:21 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:14:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:14:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:14:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:14:58 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:14:58 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:14:58 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:14:58 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:14:58 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:14:58 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:14:58 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:14:58 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:15:00 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:15:00 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:15:00 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:15:00 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:15:00 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:15:00 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:15:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:15:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:15:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:15:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:15:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:15:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:15:46 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:15:46 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:15:46 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:15:46 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:15:46 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:15:46 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:15:46 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:15:46 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:16:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:16:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:16:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:16:05 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:16:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:16:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:16:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:17:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:17:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:17:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:17:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:17:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:17:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:17:38 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:17:38 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:17:49 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:17:59 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:17:59 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:17:59 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:17:59 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:18:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:18:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:18:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:18:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:18:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:18:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:18:39 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:18:39 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:18:39 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:18:39 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:18:40 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:18:40 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:18:40 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:18:40 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:18:40 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:18:42 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:18:42 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:18:42 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:18:42 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:18:42 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:18:42 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:19:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:19:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:19:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:19:03 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:19:03 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:19:03 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:19:03 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:19:03 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:19:03 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:19:03 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:19:03 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:19:09 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:19:09 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:19:09 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:19:09 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:19:09 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:19:09 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:19:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:19:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:19:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:19:33 PM eu.bavenir.ogwapi.commons.engines.xmpp.XmppMessageEngine renewPresenceAndRoster
+FINEST: XmppMessageEngine: The roster for 0c0e2397-b25c-4b8f-bf31-f66117801bf8 was renewed.
+feb 22, 2019 1:19:37 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:19:37 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:19:37 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:19:37 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:19:37 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:19:37 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:19:37 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:19:37 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:19:37 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:19:37 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:19:37 PM org.restlet.engine.connector.HttpClientHelper start
+INFO: Starting the internal HTTP client
+feb 22, 2019 1:19:37 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:19:37 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:19:37 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:19:37 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:20:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:20:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:20:01 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
+feb 22, 2019 1:20:02 PM eu.bavenir.ogwapi.restapi.security.AuthenticationVerifier verify
+FINE: Valid credentials received from a client with IP 0:0:0:0:0:0:0:1.
+feb 22, 2019 1:20:02 PM org.restlet.security.ChallengeAuthenticator authenticate
+FINE: Authentication succeeded. Valid credentials provided for identifier: 0c0e2397-b25c-4b8f-bf31-f66117801bf8.
+feb 22, 2019 1:20:02 PM org.restlet.security.Authenticator authenticated
+FINE: The authentication succeeded for the identifer "0c0e2397-b25c-4b8f-bf31-f66117801bf8" using the HTTP_Basic scheme.
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/login" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/logout" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/properties/{pid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/actions/{aid}/tasks/{tid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/events/{eid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/objects/{oid}" URI pattern: 0.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute score
+FINER: Call score for the "/agents/{agid}/objects" URI pattern: 1.0
+feb 22, 2019 1:20:02 PM org.restlet.routing.Router logRoute
+FINE: Selected route: "/agents/{agid}/objects" -> Finder for AgentsAgidObjects
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: 52 characters were matched
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINE: New base URI: "http://localhost:8181/api/agents/0c0e2397-b25c-4b8f-bf31-f66117801bf8/objects". No remaining part to match
+feb 22, 2019 1:20:02 PM org.restlet.routing.TemplateRoute beforeHandle
+FINER: Delegating the call to the target Restlet
+feb 22, 2019 1:20:02 PM org.restlet.engine.application.StrictConneg scoreAnnotation
+FINE: Score of annotation "MethodAnnotationInfo [javaMethod: public org.restlet.representation.Representation eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(org.restlet.representation.Representation), javaClass: class eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects, restletMethod: POST, input: "json", value: "json", output: "json", query: null]"= 0.5
+feb 22, 2019 1:20:02 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 0.041791666
+feb 22, 2019 1:20:02 PM org.restlet.service.ConverterService toObject
+FINE: The following converter was selected for the [application/json] representation: org.restlet.engine.converter.DefaultConverter@261ae830
+feb 22, 2019 1:20:02 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for InputRepresentation: DefaultConverter
+feb 22, 2019 1:20:02 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[*/*]"= 2.5E-4
+feb 22, 2019 1:20:03 PM org.restlet.resource.ServerResource doCatch
+FINE: Exception or error caught in server resource
+org.restlet.resource.ResourceException: Bad Request (400) - The request could not be understood by the server due to malformed syntax
+	at org.restlet.resource.ClientResource.doError(ClientResource.java:592)
+	at org.restlet.resource.ClientResource.handleInbound(ClientResource.java:1156)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1049)
+	at org.restlet.resource.ClientResource.handle(ClientResource.java:1066)
+	at org.restlet.resource.ClientResource.post(ClientResource.java:1469)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.storeObjects(AgentsAgidObjects.java:237)
+	at eu.bavenir.ogwapi.restapi.services.AgentsAgidObjects.accept(AgentsAgidObjects.java:155)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:508)
+	at org.restlet.resource.ServerResource.post(ServerResource.java:1341)
+	at org.restlet.resource.ServerResource.doHandle(ServerResource.java:606)
+	at org.restlet.resource.ServerResource.doNegotiatedHandle(ServerResource.java:662)
+	at org.restlet.resource.ServerResource.doConditionalHandle(ServerResource.java:348)
+	at org.restlet.resource.ServerResource.handle(ServerResource.java:1020)
+	at org.restlet.resource.Finder.handle(Finder.java:236)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.engine.application.ApplicationHelper.handle(ApplicationHelper.java:77)
+	at org.restlet.Application.handle(Application.java:385)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Router.doHandle(Router.java:422)
+	at org.restlet.routing.Router.handle(Router.java:641)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.engine.application.StatusFilter.doHandle(StatusFilter.java:140)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.routing.Filter.doHandle(Filter.java:150)
+	at org.restlet.routing.Filter.handle(Filter.java:197)
+	at org.restlet.engine.CompositeHelper.handle(CompositeHelper.java:202)
+	at org.restlet.Component.handle(Component.java:408)
+	at org.restlet.Server.handle(Server.java:507)
+	at org.restlet.engine.connector.ServerHelper.handle(ServerHelper.java:63)
+	at org.restlet.engine.adapter.HttpServerHelper.handle(HttpServerHelper.java:143)
+	at org.restlet.engine.connector.HttpServerHelper$1.handle(HttpServerHelper.java:64)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:80)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:692)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:77)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:664)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+feb 22, 2019 1:20:03 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[text/html]"= 2.5E-4
+feb 22, 2019 1:20:03 PM org.restlet.engine.application.StrictConneg scoreVariant
+FINE: Total score of variant "[application/xhtml+xml]"= 5.0E-4
+feb 22, 2019 1:20:03 PM org.restlet.service.ConverterService toRepresentation
+FINE: Converter selected for StatusInfo: StatusInfoHtmlConverter
+feb 22, 2019 1:20:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- Object IDs connected to network through this CommunicationManager: --
+feb 22, 2019 1:20:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: 0c0e2397-b25c-4b8f-bf31-f66117801bf8
+feb 22, 2019 1:20:31 PM eu.bavenir.ogwapi.commons.CommunicationManager getConnectionList
+FINEST: -- End of list. --
