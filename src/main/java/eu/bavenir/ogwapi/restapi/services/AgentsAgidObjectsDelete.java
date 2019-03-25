@@ -6,11 +6,11 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
 /*
@@ -27,13 +27,13 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/agents/{agid}/objects/delete
  *   METHODS: 			POST
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		agid - VICINITY Identifier of the Agent, that is in control of the Adapters 
  *   					(e.g. 1dae4326-44ae-4b98-bb75-15aa82516cc3).
  *   
  * @author sulfo
  *
  */
-
 public class AgentsAgidObjectsDelete extends ServerResource{
 
 	// === CONSTANTS ===
@@ -42,37 +42,6 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 	 * Name of the Agent ID attribute.
 	 */
 	private static final String ATTR_AGID = "agid";
-	
-
-	/**
-	 * Name of the configuration parameter for server URL.
-	 */
-	private static final String CONFIG_PARAM_SERVER = "general.server";
-	
-	/**
-	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
-	 * taken into account when no suitable value is found in the configuration file. 
-	 */
-	private static final String CONFIG_DEF_SERVER = "";
-
-	/**
-	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
-	 * SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 + someOtherAttribute + etc...
-	 * 
-	 *  Example for discovery service:
-	 *  SERVER_PROTOCOL + SERVER + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
-	 *  
-	 */
-	private static final String SERVER_PROTOCOL = "https://"; 
-	
-	
-	private static final String SERVER_PART2 = ":3000/commServer/";
-	
-	
-	/**
-	 * Delete service string.
-	 */
-	private static final String DELETE_SERVICE = "items/remove";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -122,14 +91,9 @@ public class AgentsAgidObjectsDelete extends ServerResource{
 	 */
 	private Representation deleteObjects(Representation json, Logger logger, XMLConfiguration config){
 		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
-		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + DELETE_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-		
-		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return communicationManager.deleteObjects(json);
 	}
 }

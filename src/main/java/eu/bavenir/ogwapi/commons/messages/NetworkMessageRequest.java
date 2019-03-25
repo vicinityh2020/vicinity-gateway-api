@@ -165,6 +165,11 @@ public class NetworkMessageRequest extends NetworkMessage {
 	 */
 	public static final byte OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL = 0x0A;
 	
+	/**
+	 * Operation ID for getting a thing description.
+	 */
+	public static final byte OPERATION_GETTHINGDESCRIPTION = 0x0B;
+	
 	// IMPORTANT NOTE: If adding new operation codes, add them also to the verification method at the end 
 	// of this class - in the private methods section. 
 	
@@ -563,7 +568,8 @@ public class NetworkMessageRequest extends NetworkMessage {
 				|| requestOperation == NetworkMessageRequest.OPERATION_STARTACTION
 				|| requestOperation == NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL
 				|| requestOperation == NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL
-
+				|| requestOperation == NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION
+				
 				)
 			){
 			

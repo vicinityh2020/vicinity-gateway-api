@@ -30,7 +30,7 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/search/sparql
  *   METHODS: 			POST
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   
  * @author sulfo
  *
@@ -46,7 +46,7 @@ public class SearchSparql extends ServerResource {
 	/**
 	 * Queries the network as if it were the VICINITY triple store of all objects’ data.
 	 * 
-	 * @param query New description for an already registered object (from request).
+	 * @param query The SPARQL query as JSON.
 	 */
 	@Post("json")
 	public Representation accept(Representation entity) {
@@ -65,7 +65,14 @@ public class SearchSparql extends ServerResource {
 	
 	
 	// === PRIVATE METHODS ===
-	
+	/**
+	 * Performs the actual search.
+	 * 
+	 * @param sourceOid OID of the caller.
+	 * @param sparqlQuery Textual representation of the SPARQL query.
+	 * @param parameters Any parameters to be sent along with the request.
+	 * @return Search results.
+	 */
 	private Representation performSearch(String sourceOid, String sparqlQuery, Map<String, String> parameters){
 
 		CommunicationManager communicationManager 
@@ -76,6 +83,13 @@ public class SearchSparql extends ServerResource {
 	}
 	
 	
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

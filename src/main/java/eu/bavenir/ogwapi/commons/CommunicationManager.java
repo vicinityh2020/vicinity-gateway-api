@@ -10,6 +10,7 @@ import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.restlet.representation.Representation;
 
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
@@ -22,7 +23,6 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  * - private methods
  */
 
-//TODO unit testing
 /*
  * Unit testing:
  * 1. connecting multiple users
@@ -65,6 +65,10 @@ import eu.bavenir.ogwapi.commons.messages.StatusMessage;
  */
 public class CommunicationManager {
 
+	/**
+	 * This records the build and version number.
+	 */
+	private static final String OGWAPI_VERSION = "0.7";
 	
 	/* === CONSTANTS === */
 	
@@ -224,6 +228,10 @@ public class CommunicationManager {
 	 */
 	private Logger logger;
 	
+	/**
+	 * A connector used for connecting to NM Manager.
+	 */
+	private NeighbourhoodManagerConnector nmConnector;
 	
 	
 	/* === PUBLIC METHODS === */
@@ -237,7 +245,12 @@ public class CommunicationManager {
 	 * @param logger Java logger.
 	 */
 	public CommunicationManager(XMLConfiguration config, Logger logger){
-		descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
+		
+		logger.config("OGWAPI version: " + OGWAPI_VERSION);
+		
+		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
+		
+		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		
 		
 		this.sessionExpiration = 0;
 		
@@ -251,7 +264,7 @@ public class CommunicationManager {
 		
 		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_ERROR) {
 			// wrong configuration parameter entered - set it to default
-			logger.severe("Wrong parameter entered for " + CONFIG_PARAM_SESSIONRECOVERY + " in the configuration file: "  
+			logger.warning("Wrong parameter entered for " + CONFIG_PARAM_SESSIONRECOVERY + " in the configuration file: "  
 					+ sessionRecoveryPolicyString + ". Setting to default: " + CONFIG_DEF_SESSIONRECOVERY);
 			
 			translateSessionRecoveryConf(CONFIG_DEF_SESSIONRECOVERY);
@@ -273,6 +286,8 @@ public class CommunicationManager {
 				
 				// if somebody put there too small number, we will turn it to default
 				if (sessionExpiration < SESSIONEXPIRATION_MINIMAL_VALUE) {
+					logger.warning("Wrong parameter entered for " + CONFIG_PARAM_SESSIONEXPIRATION + " in the configuration file: "  
+							+ sessionRecoveryPolicyString + ". Setting to default: " + CONFIG_DEF_SESSIONEXPIRATION);
 					sessionExpiration = CONFIG_DEF_SESSIONEXPIRATION;
 				}
 				
@@ -313,14 +328,7 @@ public class CommunicationManager {
 	 */
 	public Set<String> getConnectionList(){
 		
-		Set<String> usernames = descriptorPool.keySet();
-		
-		logger.finest("-- Object IDs connected to network through this CommunicationManager: --");
-		for (String string : usernames) {
-			logger.finest(string);
-		}
-		logger.finest("-- End of list. --");
-		return usernames;
+		return descriptorPool.keySet();
 	}
 	
 	
@@ -399,7 +407,7 @@ public class CommunicationManager {
 		}
 		
 		descriptorPoolClear();
-		logger.finest("Connection descriptor pool flushed.");
+		logger.fine("Connection descriptor pool flushed.");
 	}
 	
 	
@@ -428,18 +436,23 @@ public class CommunicationManager {
 		if (sessionRecoveryPolicy == SESSIONRECOVERYPOLICY_INT_PASSIVE) {
 			descriptor = descriptorPoolGet(objectId);
 			
-			if (descriptor.isConnected()) {
-				
-				if (descriptor.verifyPassword(password)) {
-					descriptor.resetConnectionTimer();
-					verifiedOrConnected = true;
+			if (descriptor != null) {
+				if (descriptor.isConnected()) {
+					
+					if (descriptor.verifyPassword(password)) {
+						descriptor.resetConnectionTimer();
+						verifiedOrConnected = true;
+					} else {
+						verifiedOrConnected = false;
+					}
+					
 				} else {
-					verifiedOrConnected = false;
+					verifiedOrConnected = descriptor.connect();
 				}
-				
 			} else {
-				verifiedOrConnected = descriptor.connect();
+				verifiedOrConnected = false;
 			}
+			
 			
 		} else {
 			// if there is a previous descriptor we should close the connection first, before reopening it again
@@ -451,7 +464,7 @@ public class CommunicationManager {
 				logger.info("Reconnecting '" + objectId + "' to network.");
 			}
 			
-			descriptor = new ConnectionDescriptor(objectId, password, config, logger);
+			descriptor = new ConnectionDescriptor(objectId, password, config, logger, this);
 			
 			verifiedOrConnected = descriptor.connect();
 		}
@@ -513,6 +526,153 @@ public class CommunicationManager {
 	
 	// CONSUMPTION INTERFACE
 
+	/**
+	 * Retrieves a events of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the events. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getEventsOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting events of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting events of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getEventsOfRemoteObject(destinationOid, parameters, body);
+		
+	}
+	
+	/**
+	 * Retrieves a actions of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the actions. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getActionsOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting actions of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting actions of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getActionsOfRemoteObject(destinationOid, parameters, body);
+		
+	}
+	
+	/**
+	 * Retrieves a thing description of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the thing description. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getThingDescriptionOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting thing description of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting thing description of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getThingDescriptionOfRemoteObject(destinationOid, parameters, body);
+		
+	}
+	
+	/**
+	 * Retrieves a properties of a remote object. The source object must be logged in first. 
+	 * 
+	 * @param sourceOid ID of the source object.
+	 * @param destinationOid ID of the object that owns the properties. 
+	 * @param parameters Any parameters to be sent with the request (if needed).
+	 * @param body Body to be sent (if needed).
+	 * @return Status message. 
+	 */
+	public StatusMessage getPropertiesOfRemoteObject(String sourceOid, String destinationOid, 
+			String body, Map<String, String> parameters) {
+		
+		if (sourceOid == null){
+			logger.warning("Error when getting properties of remote object. Source object ID is null.");
+			
+			return null;
+		}
+		
+		if (destinationOid == null){
+			logger.warning("Error when getting properties of remote object. Destination object ID is null. "
+					+ "Source object: '" + sourceOid + "'.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceOid);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceOid + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.getPropertiesOfRemoteObject(destinationOid, parameters, body);
+		
+	}
 	
 	/**
 	 * Retrieves a property of a remote object. The source object must be logged in first. 
@@ -571,7 +731,7 @@ public class CommunicationManager {
 	 * @return Status message. 
 	 */
 	public StatusMessage setPropertyOfRemoteObject(String sourceOid, String destinationOid, String propertyId, 
-			String body, Map<String,String> parameters) {
+			String body, Map<String, String> parameters) {
 		
 		if (sourceOid == null){
 			logger.warning("Error when setting property of remote object. Source object ID is null.");
@@ -764,7 +924,7 @@ public class CommunicationManager {
 	 * @return Status message.
 	 */
 	public StatusMessage cancelRunningTask(String sourceOid, String destinationOid, String actionId, String taskId, 
-			Map<String,String> parameters, String body) {
+			Map<String, String> parameters, String body) {
 		
 		if (sourceOid == null){
 			logger.warning("Error when canceling task. Source object ID is null.");
@@ -840,11 +1000,11 @@ public class CommunicationManager {
 		}
 		
 		// log it
-		logger.finest("-- Roster for '" + objectId +"' --");
+		logger.fine("-- Roster for '" + objectId +"' --");
 		for (String entry : entries) {
-			logger.finest(entry + " Presence: " + "UNKNOWN");
+			logger.fine(entry + " Presence: " + "UNKNOWN");
 		}
-		logger.finest("-- End of roster --");
+		logger.fine("-- End of roster --");
 		
 		return entries;
 	}
@@ -1122,9 +1282,103 @@ public class CommunicationManager {
 	
 	// REGISTRY INTERFACE
 	
+	/**
+	 * Retrieves the list of IoT objects registered under given Agent from the Neighbourhood Manager. 
+	 * 
+	 * @param agid The ID of the Agent in question.
+	 * @return All VICINITY identifiers of objects registered under specified agent.
+	 */
+	public Representation getAgentObjects(String agid) {
+		
+		if (agid == null) {
+			logger.warning("Error when retrieving objects registered under local agent. Agent ID is null.");
+			
+			return null;
+		}
+		
+		return nmConnector.getAgentObjects(agid);
+	}
 	
 	
+	/**
+	 * Register the IoT object(s) of the underlying eco system e.g. devices, VA service.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be registered 
+	 * (from request).
+	 * @return All VICINITY identifiers of objects registered the Agent by this call.
+	 */
+	public Representation storeObjects(Representation json) {
+		
+		if (json == null) {
+			
+			logger.warning("Error when registering objects under local agent. JSON with TDs is null.");
+			
+			return null;
+		}
+		
+		return nmConnector.storeObjects(json);
+		
+	}
 	
+	
+	/**
+	 * Update the thing descriptions of objects registered under the Agent. This will delete the old records and 
+	 * replace them with new ones.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be updated 
+	 * (from request).
+	 * @return The list of approved devices to be registered in agent configuration. Approved devices means only 
+	 * devices, that passed the validation in semantic repository and their instances were created. 
+	 */
+	public Representation heavyweightUpdate(Representation json) {
+		if (json == null) {
+			
+			logger.warning("Error when updating objects under local agent. JSON with TDs is null.");
+			
+			return null;
+		}
+		
+		return nmConnector.heavyweightUpdate(json);
+	}
+	
+	
+	/**
+	 * Update the thing descriptions of objects registered under the Agent. This will only change the required fields.
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be updated 
+	 * (from request).
+	 * @return The list of approved devices to be registered in agent configuration. Approved devices means only 
+	 * devices, that passed the validation in semantic repository and their instances were created. 
+	 */
+	public Representation lightweightUpdate(Representation json){
+		if (json == null) {
+			
+			logger.warning("Error when updating objects under local agent. JSON with TDs is null.");
+			
+			return null;
+		}
+		
+		return nmConnector.lightweightUpdate(json);
+	}
+	
+	
+	/**
+	 * Deletes - unregisters the IoT object(s).
+	 * 
+	 * @param json Representation of the incoming JSON. List of IoT thing descriptions that are to be removed 
+	 * (taken from request).
+	 * @return Notification of success or failure.
+	 */
+	public Representation deleteObjects(Representation json){
+		if (json == null) {
+			
+			logger.warning("Error when deleting objects under local agent. JSON with TDs is null.");
+			
+			return null;
+		}
+		
+		return nmConnector.deleteObjects(json);
+	}
 	
 	
 	
@@ -1157,6 +1411,70 @@ public class CommunicationManager {
 		return descriptor.performSparqlQuery(sparqlQuery, parameters);
 	}
 	
+	/**
+	 * Performs a Semantic search 
+	 * 
+	 * @param sourceOid ID of the source object. 
+	 * @param query Semantic query.
+	 * @param parameters Any parameters (if needed).
+	 * @return JSON with results. 
+	 */
+	public String performSemanticSearch(String sourceObjectId, String semanticQuery, Map<String, String> parameters) {
+		
+		if (sourceObjectId == null || sourceObjectId.isEmpty() || semanticQuery == null || semanticQuery.isEmpty()) {
+			logger.warning("Method parameters can't be null nor empty.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(sourceObjectId);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectId + "'.");
+			
+			return null;
+		} 
+		
+		return descriptor.performSemanticQuery(semanticQuery, parameters);
+	}
+	
+	
+	/* === METHODS AVAILABLE ONLY TO CLASSES FROM THIS PACKAGE === */
+	
+	/**
+	 * This methods directly inserts a message into the respective {@link ConnectionDescriptor}'s incoming queue, 
+	 * bypassing the communication server when the destination OID is connected through this CommunicationManager.
+	 * This saves overall resources of the whole communication . 
+	 *  
+	 * @param sourceObjectId The message source.
+	 * @param destinationObjectId Message destination.
+	 * @param message Message to be sent. 
+	 * @return True if it was possible to send the message this way. False if the destination is not connected through
+	 * 	this CommunicationManager.
+	 */
+	boolean tryToSendLocalMessage(String sourceObjectId, String destinationObjectId, String message) {
+		
+		// is the object connected through this CommunicationManager?
+		if (!descriptorPool.containsKey(destinationObjectId)) {	
+			
+			logger.fine("Can't send the message locally, the destination OID is not from this infrastructure.");
+			return false;
+		}
+			
+		// check the validity of the calling object
+		ConnectionDescriptor descriptor = descriptorPoolGet(destinationObjectId);
+		
+		if (descriptor == null){
+			
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + destinationObjectId + "'.");
+			return false;
+		}
+		
+		
+		descriptor.processIncommingMessage(sourceObjectId, message);
+		
+		return true;
+	}
 	
 	
 	
@@ -1266,7 +1584,7 @@ public class CommunicationManager {
 	
 	
 	/**
-	 * Periodically called to recover sessions according to the confgiuration file. 
+	 * Periodically called to recover sessions according to the configuration file. 
 	 */
 	private void recoverSessions() {
 		

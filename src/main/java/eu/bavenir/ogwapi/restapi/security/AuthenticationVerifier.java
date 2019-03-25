@@ -91,7 +91,7 @@ public class AuthenticationVerifier implements Verifier {
 			}
 		}
 		
-		logger.fine("Valid credentials received from a client with IP " + request.getClientInfo().getAddress() + ".");
+		logger.info("Valid credentials received from a client with IP " + request.getClientInfo().getAddress() + ".");
 		return Verifier.RESULT_VALID;
 	}
 }

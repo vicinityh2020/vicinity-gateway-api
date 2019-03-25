@@ -1,22 +1,18 @@
 package eu.bavenir.ogwapi.restapi.services;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
 
@@ -33,152 +29,107 @@ import eu.bavenir.ogwapi.restapi.Api;
  * Gateway API calls:
  * 
  *   URL: 				[server]:[port]/api/objects/{oid}
- *   METHODS: 			GET, PUT, DELETE
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   METHODS: 			GET
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		oid - VICINITY identifier of the object (e.g. 0729a580-2240-11e6-9eb5-0002a5d5c51b).
  *   
- * @author sulfo
+ * @author Andrej
  *
  */
 public class ObjectsOid extends ServerResource{
 
 	// === CONSTANTS ===
 	
-	private int needReview;
-	
 	/**
 	 * Name of the Object ID attribute.
 	 */
 	private static final String ATTR_OID = "oid";
-
+	
 	
 	// === OVERRIDEN HTTP METHODS ===
-
+	
 	/**
-	 * Returns the description of an available IoT object.
+	 * Answers the GET call
 	 * 
-	 * @return Object description.
+	 * @return A {@link StatusMessage StatusMessage} 
 	 */
 	@Get
-	public String represent() {
+	public Representation represent(Representation entity) {
+		
 		String attrOid = getAttribute(ATTR_OID);
-			
-		if (attrOid != null){
-			return getObject(attrOid);
-		} else {
-			return null;
-		}
-	}
-	
-	
-	/**
-	 * Updates the description of an already registered exposed IoT object.
-	 * 
-	 * @param entity Representation of the incoming JSON.
-	 * 
-	 */
-	@Put("json")
-	public void store(Representation entity) {
-		String attrOid = getAttribute(ATTR_OID);
+		String callerOid = getRequest().getChallengeResponse().getIdentifier();
+		Map<String, String> queryParams = getQuery().getValuesMap();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		if (attrOid == null){
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Object does not exist under given identifier.");
-		}
-		
-		
-		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			
+			logger.info("OID: " + attrOid + " Given identifier does not exist.");
+			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid object description");
+					"Given identifier does not exist.");
 		}
 		
-		// get the json
-		String objectJsonString = null;
-		try {
-			objectJsonString = entity.getText();
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid object description");
-		}
+
+		String body = getRequestBody(entity, logger);
 		
-		updateObject(objectJsonString);
+		return getObjectThingDescription(callerOid, attrOid, body, queryParams);
 		
-	}
-	
-	
-	
-	/**
-	 * Unregisters an exposed IoT object.
-	 * 
-	 */
-	@Delete
-	public void remove() {
-		String attrOid = getAttribute(ATTR_OID);
-		
-		if (attrOid != null){
-			deleteObject(attrOid);
-		} else {			
-			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid IoT object identifier.");
-		}
 	}
 	
 	
 	// === PRIVATE METHODS ===
 	
-	
-	// TODO documentation
-	private String getObject(String oid){
-		if (oid.equals("0729a580-2240-11e6-9eb5-0002a5d5c51b")){
-			
-			return new String("{\"type\": \"Thermostate\",\"base\": \"http://gateway.vicinity.example.com/objects/0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"oid\": \"0729a580-2240-11e6-9eb5-0002a5d5c51b\",\"owner\": \"d27ad211-cf1f-4cc9-9c22-238e7b46677d\",\"properties\": [{\"type\": [\"Property\"],\"pid\": \"temp1\",\"monitors\": \"Temperature\",\"output\": {\"units\": \"Celsius\",\"datatype\": \"float\"},\"writable\": false,\"links\": [{\"href\": \"properties/temp1\",\"mediaType\": \"application/json\"}]}],\"actions\": [{\"type\": [\"Action\"],\"aid\": \"switch\",\"affects\": \"OnOffStatus\",\"links\": [{\"href\": \"actions/switch\",\"mediaType\": \"application/json\"}],\"input\": {\"units\": \"Adimensional\",\"datatype\": \"boolean\"}}],\"location\": {\"latitude\": 34.43234,\"longitude\": -3.869}}");
-			/*
-			JsonObject json = Json.createObjectBuilder()
-					.add(ATTR_TYPE, "generic.adapter.vicinity.eu")
-					.add(ATTR_NAME, "My VICINITY Adapter")
-					.add(ATTR_ID, "5603ff1b-e6cc-4897-8045-3724e8a3a56c")
-					.add(ATTR_ADID, "1dae4326-44ae-4b98-bb75-15aa82516cc3")
-					.add(ATTR_EVENTURI, "adapter007.vicinity.exemple.org/eventHandler")
-					.build();
-			
-			return json.toString();
-			*/
-		} else {
-			
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
-		}
+	/**
+	 * Retrieves thing description of specific object
+	 * 
+	 * @param sourceOid Caller OID.
+	 * @param attrOid Called OID.
+	 * @param logger Logger taken previously from Context.
+	 * @return Response text.
+	 */ 
+	private Representation getObjectThingDescription(String sourceOid, String destinationOid, String body, 
+			Map<String, String> queryParams){
+		
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+		
+		return new JsonRepresentation(communicationManager.getThingDescriptionOfRemoteObject(sourceOid, destinationOid, body, queryParams).buildMessage().toString());
 	}
 	
 	
-	// TODO documentation
-	private void updateObject(String jsonString){
-		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
-		JsonObject jsonRequest = jsonReader.readObject();
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
+	private String getRequestBody(Representation entity, Logger logger) {
 		
-		if (jsonRequest.containsKey(ATTR_OID)){
-			// do something
-		} else {
-			jsonReader.close();
+		if (entity == null) {
+			return null;
+		}
+		
+		// check the body of the event to be sent
+		if (!entity.getMediaType().equals(MediaType.APPLICATION_JSON)){
+			logger.warning("Invalid request body - must be a valid JSON.");
+			
 			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
-					"Invalid object description");
+					"Invalid request body - must be a valid JSON.");
 		}
 		
-		jsonReader.close();
-	}
-	
-	
-	// TODO documentation
-	private void deleteObject(String oid){
-		if (oid.equals("0729a580-2240-11e6-9eb5-0002a5d5c51b")){
-			//return "Object deleted.";
-		} else {
-			throw new ResourceException(Status.CLIENT_ERROR_NOT_FOUND, 
-					"Given identifier does not exist.");
+		// get the json
+		String eventJsonString = null;
+		try {
+			eventJsonString = entity.getText();
+		} catch (IOException e) {
+			logger.info(e.getMessage());
+			throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, 
+					"Invalid request body");
 		}
+		
+		return eventJsonString;
 	}
 	
 }

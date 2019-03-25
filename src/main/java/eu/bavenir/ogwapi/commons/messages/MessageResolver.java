@@ -1,6 +1,8 @@
 package eu.bavenir.ogwapi.commons.messages;
 
 import java.io.StringReader;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -20,7 +22,8 @@ import org.apache.commons.configuration2.XMLConfiguration;
 
 /**
  * Resolver to create a valid {@link NetworkMessage NetworkMessage} objects. After parsing it will try to return the 
- * suitable subclass.
+ * suitable subclass. During the resolving process it also watches for duplicated messages (a flaw in some XMPP 
+ * server implementations) and discards any such duplicate. 
  * 
  *    
  * @author sulfo
@@ -30,6 +33,13 @@ public class MessageResolver {
 
 	/* === CONSTANTS === */
 	
+	/**
+	 * Size of the array that keeps record of the request IDs. In other words, how many recent request IDs should
+	 * the OGWAPI keep in memory to effectively defend against the duplicated messages. This number should be big 
+	 * enough to cover at least 10 minutes of intensive traffic and small enough not to fill the RAM of a machine 
+	 * that has many objects connected to its OGWAPI.  
+	 */
+	private static final int REQUEST_ID_ARRAY_SIZE = 6000;
 	
 	/* === FIELDS === */
 	
@@ -43,6 +53,11 @@ public class MessageResolver {
 	 */
 	private Logger logger;
 	
+	/**
+	 * Queue that keeps record of recent received request IDs, for protection the underlying infrastructure against
+	 * duplicated messages. 
+	 */
+	private Queue<Integer> requestIds;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -55,6 +70,8 @@ public class MessageResolver {
 	public MessageResolver(XMLConfiguration config, Logger logger){
 		this.config = config;
 		this.logger = logger;
+		
+		requestIds = new LinkedList<Integer>();
 	}
 	
 	
@@ -85,14 +102,24 @@ public class MessageResolver {
 		switch (json.getInt(NetworkMessage.ATTR_MESSAGETYPE)){
 		
 		case NetworkMessageRequest.MESSAGE_TYPE:
-						
+			// check for message duplication
+			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+				return null;
+			}
+			
 			return new NetworkMessageRequest(json, config, logger);
 			
 		case NetworkMessageResponse.MESSAGE_TYPE:
+			// check for message duplication
+			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+				return null;
+			}
 			
 			return new NetworkMessageResponse(json, config, logger);
 			
 		case NetworkMessageEvent.MESSAGE_TYPE:
+			
+			// no duplication checking for events! there is no request ID
 			
 			return new NetworkMessageEvent(json, config, logger);
 			
@@ -123,7 +150,7 @@ public class MessageResolver {
 		try {
 			json = jsonReader.readObject();
 		} catch (Exception e) {
-			logger.severe("MessageResolver#readJsonObject: Exception during reading JSON object: " 
+			logger.severe("Exception during reading JSON object: " 
 						+ e.getMessage());
 			
 			return null;
@@ -136,5 +163,36 @@ public class MessageResolver {
 	
 	
 	/* === PRIVATE METHODS === */
+	
+	/**
+	 * Duplicated messages were discovered when using XMPP engine, however they are not necessarily bound solely to 
+	 * XMPP and can possibly manifest themselves in other engines as well. The probable cause seems to be lost 
+	 * ACK packet on low quality lines, causing the server to re-send the last packet again, resulting in two
+	 * identical messages being received. This class keeps track of recent request IDs (the number is configurable by
+	 * {@link #REQUEST_ID_ARRAY_SIZE REQUEST_ID_ARRAY_SIZE} constant) and this method serves the purpose of verifying
+	 * whether or not a message with such request ID has already been recently received. 
+	 *   
+	 * @param requestId The request ID to be checked for duplicates.
+	 * @return True if there already was a message with such request ID received recently, false otherwise.
+	 */
+	private boolean checkForDuplicates(int requestId) {
+		
+		// if there is no such request ID existing in the queue, add it and watch for overflow
+		if (!requestIds.contains(requestId)) {
+			
+			if (requestIds.size() >= REQUEST_ID_ARRAY_SIZE) {
+				
+				requestIds.poll();
+			}
+			
+			requestIds.add(requestId);
+			
+			return false;
+		}
+		
+		logger.fine("Duplicated message detected. Request ID: " + requestId);
+		
+		return true;
+	}
 
 }

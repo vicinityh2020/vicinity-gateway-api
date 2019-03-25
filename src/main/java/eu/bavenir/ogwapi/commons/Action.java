@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
  * - private methods
  */
 
-// TODO don't remove timedout pending tasks, but put them as failed
 /**
  * This class represents an action a local infrastructure can execute. It keeps a list of {@link eu.bavenir.ogwapi.commons.Task tasks}
  * that are waiting to be executed (pending), is currently being executed (running) and a set of tasks and their return 
@@ -73,9 +73,15 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
  * @author sulfo
  *
  */
-public class Action {
+public class Action implements Serializable {
 
 	/* === CONSTANTS === */
+	
+	/**
+	 * A unique serial version identifier
+	 * @see Serializable
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * This parameter sets how long (in minutes) after successful or failed 
@@ -86,12 +92,12 @@ public class Action {
 	 * 
 	 * If not set, it defaults to 1440 minutes (24 hours).
 	 */
-	private static final String CONF_PARAM_TIMETOKEEPRETURNVALUES = "actions.timeToKeepReturnValues";
+	private transient static final String CONF_PARAM_TIMETOKEEPRETURNVALUES = "actions.timeToKeepReturnValues";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_TIMETOKEEPRETURNVALUES CONF_PARAM_TIMETOKEEPRETURNVALUES} configuration parameter.
 	 */
-	private static final int CONF_DEF_TIMETOKEEPRETURNVALUES = 1440;
+	private transient static final int CONF_DEF_TIMETOKEEPRETURNVALUES = 1440;
 	
 	/**
 	 * If a task is pending to be run, how long (in minutes) it should remain in the 
@@ -102,12 +108,12 @@ public class Action {
 	 * highly depends on what the action is about and integrator's common sense.  
 	 * Default value is 120 minutes (2 hours).
 	 */
-	private static final String CONF_PARAM_PENDINGTASKTIMEOUT = "actions.pendingTaskTimeout";
+	private transient static final String CONF_PARAM_PENDINGTASKTIMEOUT = "actions.pendingTaskTimeout";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration parameter.
 	 */
-	private static final int CONF_DEF_PENDINGTASKTIMEOUT = 120;
+	private transient static final int CONF_DEF_PENDINGTASKTIMEOUT = 120;
 	
 	/**
 	 * Maximum number of tasks being queued in pending status, waiting to be
@@ -120,72 +126,62 @@ public class Action {
 	 * 
 	 * Default is 128.  
 	 */
-	private static final String CONF_PARAM_MAXNUMBEROFPENDINGTASKS = "actions.maxNumberOfPendingTasks";
+	private transient static final String CONF_PARAM_MAXNUMBEROFPENDINGTASKS = "actions.maxNumberOfPendingTasks";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration parameter.
 	 */
-	private static final int CONF_DEF_MAXNUMBEROFPENDINGTASKS = 128;
+	private transient static final int CONF_DEF_MAXNUMBEROFPENDINGTASKS = 128;
 	
 	/**
 	 * Defines when should a timer start its count.
 	 */
-	private static final int TIMER1_START = 1000;
-	
-	/**
-	 * Defines when should a timer start its count.
-	 */
-	private static final int TIMER2_START = 30000;
-	
-	/**
-	 * Defines when should a timer start its count.
-	 */
-	private static final int TIMER3_START = 60000;
+	private transient static final int TIMER1_START = 1000;
 	
 	/**
 	 * Number of milliseconds in a minute.
 	 */
-	private static final int MINUTE = 60000;
+	private transient static final int MINUTE = 60000;
 	
 	/**
 	 * Number of milliseconds in a second.
 	 */
-	private static final int SECOND = 1000;
+	private transient static final int SECOND = 1000;
 	
 	/**
 	 * JSON attribute name for task ID.
 	 */
-	public static final String ATTR_TASKID = "taskId";
+	public transient static final String ATTR_TASKID = "taskId";
 	
 	/**
 	 * JSON attribute name for status.
 	 */
-	public static final String ATTR_STATUS = "status";
+	public transient static final String ATTR_STATUS = "status";
 	
 	/**
 	 * JSON attribute name for creation time.
 	 */
-	public static final String ATTR_CREATIONTIME = "createdAt";
+	public transient static final String ATTR_CREATIONTIME = "createdAt";
 	
 	/**
 	 * JSON attribute name for start time.
 	 */
-	public static final String ATTR_STARTTIME = "startTime";
+	public transient static final String ATTR_STARTTIME = "startTime";
 	
 	/**
 	 * JSON attribute name for end time.
 	 */
-	public static final String ATTR_ENDTIME = "endTime";
+	public transient static final String ATTR_ENDTIME = "endTime";
 	
 	/**
 	 * JSON attribute name for total time.
 	 */
-	public static final String ATTR_TOTALTIME = "totalTime";
+	public transient static final String ATTR_TOTALTIME = "totalTime";
 	
 	/**
 	 * JSON attribute name for return value.
 	 */
-	public static final String ATTR_RETURNVALUE = "returnValue";
+	public transient static final String ATTR_RETURNVALUE = "returnValue";
 	
 	
 	/* === FIELDS === */
@@ -193,61 +189,65 @@ public class Action {
 	/**
 	 * This is the object ID of the action owner (usually the local object, represented by its 
 	 * {@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor}). 
+	 * 
+	 * @Serialize
 	 */
 	private String objectId;
 	
 	/**
 	 * The ID of the action. 
+	 * 
+	 * @Serialize
 	 */
 	private String actionId;
 	
 	/**
 	 * List of pending {@link eu.bavenir.ogwapi.commons.Task tasks}.
 	 */
-	private List<Task> pendingTasks;
+	private transient List<Task> pendingTasks;
 	
 	/**
 	 * List of finished {@link eu.bavenir.ogwapi.commons.Task tasks} (also a place for failed tasks).
 	 */
-	private Set<Task> finishedTasks;
+	private transient Set<Task> finishedTasks;
 	
 	/**
 	 * The running {@link eu.bavenir.ogwapi.commons.Task task}.
 	 */
-	private Task runningTask;
+	private transient Task runningTask;
 	
 	/**
 	 * The number obtained from the {@link #CONF_PARAM_TIMETOKEEPRETURNVALUES CONF_PARAM_TIMETOKEEPRETURNVALUES} 
 	 * configuration parameter.
 	 */
-	private long timeToKeepReturnValues;
+	private transient long timeToKeepReturnValues;
 	
 	/**
 	 * Number obtained from the {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration 
 	 * parameter. 
 	 */
-	private long pendingTaskTimeout;
+	private transient long pendingTaskTimeout;
 	
 	/**
 	 * Number obtained from the {@link #CONF_PARAM_MAXNUMBEROFPENDINGTASKS CONF_PARAM_MAXNUMBEROFPENDINGTASKS} configuration 
 	 * parameter. 
 	 */
-	private int maxNumberOfPendingTasks;
+	private transient int maxNumberOfPendingTasks;
 	
 	/**
 	 * Instance of the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}. 
 	 */
-	private AgentConnector connector;
+	private transient AgentConnector connector;
 	
 	/**
 	 * Logger of the OGWAPI.
 	 */
-	private Logger logger;
+	private transient Logger logger;
 	
 	/**
 	 * Configuration of the OGWAPI. 
 	 */
-	private XMLConfiguration config;
+	private transient XMLConfiguration config;
 
 	
 	
@@ -280,15 +280,20 @@ public class Action {
 		timeToKeepReturnValues = // turn into ms
 				config.getInt(CONF_PARAM_TIMETOKEEPRETURNVALUES, CONF_DEF_TIMETOKEEPRETURNVALUES) * MINUTE;
 		
+		logger.config("Action " + actionId + " time to keep return values set to (ms): " + timeToKeepReturnValues);
+		
 		pendingTaskTimeout = // turn into ms
 				config.getInt(CONF_PARAM_PENDINGTASKTIMEOUT, CONF_DEF_PENDINGTASKTIMEOUT) * MINUTE;
 		
+		logger.config("Action " + actionId + " pending tasks timeout set to (ms): " + pendingTaskTimeout);
+		
 		maxNumberOfPendingTasks = config.getInt(CONF_PARAM_MAXNUMBEROFPENDINGTASKS, CONF_DEF_MAXNUMBEROFPENDINGTASKS);
 		
+		logger.config("Action " + actionId + " max number of pending tasks set to: " + maxNumberOfPendingTasks);
 		
-		// TODO make it two timers instead of three... one is totally redundand. Also, it can be optimised 
-		// down to one... if thought a little deeper, there can be just one such timer for all actions in the connection
-		// descriptor... or one timer in the whole comm manager for everything (the best thing achievable)
+		// TODO if thought a little deeper, there can be just one such timer for all actions in the connection
+		// descriptor... or one timer in the whole comm manager for everything (the best thing achievable) - it will 
+		// save a number of threads 
 		
 		// schedule a timer for running tasks that are queueing
 		Timer timerForTaskScheduling = new Timer();
@@ -297,31 +302,10 @@ public class Action {
 			@Override
 			public void run() {
 				workThroughTasks();
+				purgeOutdatedReturnValues();
+				purgeTimedOutPendingTasks();
 			}
 		}, TIMER1_START, SECOND);
-		
-		
-		// schedule a timer for keeping the return values of tasks
-		Timer timerForReturnValues = new Timer();
-		
-		timerForReturnValues.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				purgeOutdatedReturnValues();
-			}
-		}, TIMER2_START, MINUTE);
-		
-		
-		// schedule a timer for timing out the pending tasks
-		Timer timerForPendingTasks = new Timer();
-		
-		timerForPendingTasks.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				purgeTimedOutPendingTasks();
-				
-			}
-		}, TIMER3_START, MINUTE);
 		
 	}
 	
@@ -389,17 +373,17 @@ public class Action {
 		
 		if (task == null) {
 			
-			// TODO delete after test
-			System.out.println("Task does not exist.");
+			logger.fine(this.actionId + ": Task " + taskId + " not found.");
 			
 			// if the task is not there, return unknown status
 			return Task.TASKSTATUS_UNKNOWN;
 		}
 		
-		// TODO delete after test
-		System.out.println("Task status is " + task.getTaskStatus());
+		byte status = task.getTaskStatus();
 		
-		return task.getTaskStatus();
+		logger.fine(this.actionId + ": Task " + taskId + " status is " + status);
+		
+		return status;
 	}
 	
 	
@@ -419,17 +403,17 @@ public class Action {
 		
 		if (task == null) {
 			
-			// TODO delete after test
-			System.out.println("Task does not exist.");
+			logger.fine(this.actionId + ": Task " + taskId + " not found.");
 			
 			// if the task is not there, return unknown status
 			return Task.TASKSTATUS_STRING_UNKNOWN;
 		}
 		
-		// TODO delete after test
-		System.out.println("Task status is " + task.getTaskStatusString());
+		String statusString = task.getTaskStatusString();
 		
-		return task.getTaskStatusString();
+		logger.fine(this.actionId + ": Task " + taskId + " status string: " + statusString);
+		
+		return statusString;
 	}
 	
 	
@@ -446,14 +430,17 @@ public class Action {
 		
 		if (task == null) {
 			
-			// TODO delete after test
-			System.out.println("Task does not exist.");
+			logger.fine(this.actionId + ": Task " + taskId + " not found.");
 			
 			// if the task is not there, return null
 			return null;
 		}
 		
-		return task.getReturnValue();
+		String returnValue = task.getReturnValue();
+		
+		logger.finest(this.actionId + ": Task " + taskId + " return value: " + returnValue);
+		
+		return returnValue;
 	}
 	
 	
@@ -468,10 +455,10 @@ public class Action {
 	 */
 	public String createNewTask(String sourceOid, String body, Map<String, String> parameters) {
 		
+		
 		if (pendingTasks.size() >= maxNumberOfPendingTasks) {
 			
-			// TODO delete after test
-			System.out.println("Too many pending tasks.");
+			logger.finest(this.actionId + ": Too many tasks in the queue.");
 			
 			return null;
 		}
@@ -481,8 +468,7 @@ public class Action {
 		
 		pendingTasks.add(task);
 		
-		// TODO delete after test
-		System.out.println("Task created.");
+		logger.finest(this.actionId + ": Task created.");
 		
 		return task.getTaskId();
 	}
@@ -507,16 +493,14 @@ public class Action {
 		
 		// only running task can be updated
 		if (runningTask == null) {
-			// TODO delete after test and use the params
-			System.out.println("There is no running task.");
 			
+			logger.finest(this.actionId + ": No running task.");
 			return false;
 		}
 		
 		if (!runningTask.updateRunningTask(taskStatus, returnValue)) {
 			
-			// TODO delete after test
-			System.out.println("The runnning task can't be put into desired state.");
+			logger.finest(this.actionId + ": The runnning task can't be put into desired state.");
 			return false;
 		}
 		
@@ -527,6 +511,9 @@ public class Action {
 			
 			// clear the place for the next task to be run
 			runningTask = null;
+			
+			logger.finest(this.actionId + ": New task status is either failed or finished, moving task to the set"
+					+ "of finished tasks.");
 			
 		}
 		
@@ -552,6 +539,8 @@ public class Action {
 		
 		if (task == null) {
 			
+			logger.finest(this.actionId + ": Task " + taskId + " not found.");
+			
 			return null;
 		}
 		
@@ -559,6 +548,8 @@ public class Action {
 	
 		if (response == null) {
 
+			logger.finest(this.actionId + ": Task " + taskId + " is in a state that forbids cancelling.");
+			
 			// the task is in a state that forbids cancelling 
 			return null;
 		}
@@ -566,6 +557,8 @@ public class Action {
 		
 		if (response.isError()) {
 
+			logger.finest(this.actionId + ": Something happened when the Agent was asked to abort the task " 
+								+ taskId + " not found.");
 			// something happened when the agent was asked to abort the action
 			return response;
 		}
@@ -594,6 +587,9 @@ public class Action {
 		Task task = searchForTask(taskId, true);
 		
 		if (task == null) {
+			
+			logger.finest(this.actionId + ": Task " + taskId + " not found.");
+			
 			return null;
 		}
 		
@@ -609,17 +605,17 @@ public class Action {
 		Date taskCreationTime = new Date(task.getCreationTime());
 		mainBuilder.add(ATTR_CREATIONTIME, df.format(taskCreationTime).toString());
 		
-		if (task.getRunningTime() > 0) {
+		if (task.getStartTime() > 0) {
 			Date taskStartTime = new Date(task.getStartTime());
 			mainBuilder.add(ATTR_STARTTIME, df.format(taskStartTime).toString());
-			
-			if (task.getEndTime() > 0) {
-				Date taskEndTime = new Date(task.getEndTime());
-				mainBuilder.add(ATTR_ENDTIME, df.format(taskEndTime).toString());
-			}
-			
-			mainBuilder.add(ATTR_TOTALTIME, task.getRunningTime());
 		}
+		
+		if (task.getEndTime() > 0) {
+			Date taskEndTime = new Date(task.getEndTime());
+			mainBuilder.add(ATTR_ENDTIME, df.format(taskEndTime).toString());
+		}
+		
+		mainBuilder.add(ATTR_TOTALTIME, task.getRunningTime());
 		
 		
 	
@@ -628,7 +624,7 @@ public class Action {
 		} else {
 			mainBuilder.add(ATTR_RETURNVALUE, task.getReturnValue());
 		}
-	
+	 
 		return mainBuilder.build();
 		
 	}
@@ -644,22 +640,37 @@ public class Action {
 	 */
 	private void workThroughTasks() {
 		
+		printStatusOfAllTasks();
+		
 		// check whether or not a task is already running and if not, check if there are some tasks pending
 		if (runningTask == null && !pendingTasks.isEmpty()) {
 			
-			// take one non pending task from the queue
-			for (int i = 0; i < pendingTasks.size(); i++) {
-				
+			logger.fine("AID " + this.actionId + ": There is no task running, yet there are tasks pending. Taking the next task.");
+			
+			// take one pending task from the queue			
+			int i = 0;
+			do {
 				if (pendingTasks.get(i).getTaskStatus() == Task.TASKSTATUS_PENDING) {
 					runningTask = pendingTasks.remove(i);
 				}
+				
+				i++;
+			} while (runningTask == null && i < pendingTasks.size());
+			
+			if (runningTask != null) {
+				
+				
+				// if it failed to start, put it into a set of failed tasks
+				if (!runningTask.start()) {
+					
+					logger.warning("AID " + this.actionId + ": Task " + runningTask.getTaskId() + " failed to start.");
+					
+					finishedTasks.add(runningTask);
+					
+					runningTask = null;
+				}
 			}
 			
-			// TODO put to logger
-			System.out.println("There is no task running, yet there are tasks pending. Taking the next task: " 
-						+ runningTask.getTaskId());
-			
-			runningTask.start();
 		}
 	}
 	
@@ -672,8 +683,8 @@ public class Action {
 		for (Task task : finishedTasks) {	
 			if ((System.currentTimeMillis() - task.getEndTime()) > timeToKeepReturnValues) {
 				
-				//TODO delete after test
-				System.out.println("Finished/failed task " + task.getTaskId() + " was removed from the pool of finished tasks.");
+				logger.finest(this.actionId + ": Finished/failed task " + task.getTaskId() 
+														+ " was removed from the pool of finished tasks.");
 				finishedTasks.remove(task);
 			}
 		}
@@ -688,8 +699,8 @@ public class Action {
 		for (Task task : pendingTasks) {
 			if ((System.currentTimeMillis() - task.getCreationTime()) > pendingTaskTimeout) {
 				
-				//TODO delete after test
-				System.out.println("Pending task " + task.getTaskId() + " was removed from the pool of pending tasks.");
+				logger.finest(this.actionId + ": Pending task " + task.getTaskId() 
+												+ " was removed from the pool of pending tasks.");
 				
 				pendingTasks.remove(task);
 			}
@@ -710,12 +721,15 @@ public class Action {
 		
 		// is it the running task?
 		if (runningTask != null && runningTask.getTaskId().equals(taskId)) {
+			
+			logger.finest(this.actionId + ": Searching for task " + taskId + ", found it as running.");
 			return runningTask;
 		}
 		
 		// or among pending tasks?
 		for (Task task : pendingTasks) {	
 			if (task.getTaskId().equals(taskId)) {
+				logger.finest(this.actionId + ": Searching for task " + taskId + ", found it as pending.");
 				return task;
 			}
 		}
@@ -724,13 +738,49 @@ public class Action {
 			// or among finished tasks?
 			for (Task task : finishedTasks) {
 				if (task.getTaskId().equals(taskId)) {
+					logger.finest(this.actionId + ": Searching for task " + taskId + ", found it as finished.");
 					return task;
 				}
 			}
 		}
 		
+		logger.finest(this.actionId + ": Searching for task " + taskId + ", but was out of luck.");
 		// it is gone
 		return null;
+	}
+
+	
+	/**
+	 * Debugging method for convenient printout of all tasks for this particular action. In order to be useful,
+	 * the debugging level has to be set to finest.
+	 */
+	private void printStatusOfAllTasks() {
+		
+		String logMessage = new String();
+		
+		logMessage = "Tasks of object " + objectId + " / action " + actionId + "\n";
+		
+		if (runningTask == null) {
+			logMessage += "Running task: null\n";
+		} else {
+			logMessage += "Running task: " + runningTask.getTaskId() + " status " + runningTask.getTaskStatus() + " " 
+						+ runningTask.getTaskStatusString() + "\n";
+		}
+		
+		logMessage += "Pending tasks:\n";
+		for (Task task : pendingTasks) {	
+			logMessage += "ID " + task.getTaskId() + " status " + task.getTaskStatus() + " " + task.getTaskStatusString() + "\n";
+
+		}
+		
+		logMessage += "Finished tasks:\n";
+		for (Task task : finishedTasks) {
+			logMessage += "ID " + task.getTaskId() + " status " + task.getTaskStatus() + " " + task.getTaskStatusString() + "\n";
+		}
+		
+		logMessage += "Done";
+		
+		logger.finest(logMessage);
 	}
 	
 }

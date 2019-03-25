@@ -6,13 +6,13 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
 
 
@@ -30,6 +30,7 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/agents/{agid}/objects
  *   METHODS: 			GET, POST, PUT
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   ATTRIBUTES:		agid - VICINITY Identifier of the Agent, that is in control of the Adapters 
  *   					(e.g. 1dae4326-44ae-4b98-bb75-15aa82516cc3).
  *   
@@ -45,54 +46,6 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private static final String ATTR_AGID = "agid";
 	
-	/**
-	 * Name of the configuration parameter for server URL.
-	 */
-	private static final String CONFIG_PARAM_SERVER = "general.server";
-	
-	/**
-	 * Default value of {@link #CONFIG_PARAM_SERVER CONFIG_PARAM_SERVER} configuration parameter. This value is
-	 * taken into account when no suitable value is found in the configuration file. 
-	 */
-	private static final String CONFIG_DEF_SERVER = "";
-
-	/**
-	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
-	 * SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 + someOtherAttribute + etc...
-	 * 
-	 *  Example for discovery service:
-	 *  SERVER_PROTOCOL + SERVER + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2
-	 *  
-	 */
-	private static final String SERVER_PROTOCOL = "https://"; 
-	
-	
-	private static final String SERVER_PART2 = ":3000/commServer/";
-	
-	/**
-	 * Discovery service part 1 of the string.
-	 */
-	private static final String DISCOVERY_SERVICE_1 = "agent/";
-	
-	
-	/**
-	 * Discovery service part 2 of the string.
-	 */
-	private static final String DISCOVERY_SERVICE_2 = "/items";
-	
-	
-	/**
-	 * Registration service string.
-	 */
-	private static final String REGISTRATION_SERVICE = "items/register";
-	
-	
-
-	
-	/**
-	 * Modify service string.
-	 */
-	private static final String HEAVYWEIGHTUPDATE_SERVICE = "items/modify";
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
@@ -205,15 +158,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation heavyweightUpdate(Representation json, Logger logger, XMLConfiguration config){
 		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
-		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + HEAVYWEIGHTUPDATE_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-
-		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+	
+		return communicationManager.heavyweightUpdate(json);
 	}
 	
 	
@@ -228,15 +176,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation storeObjects(Representation json, Logger logger, XMLConfiguration config){
 		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
-		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + REGISTRATION_SERVICE;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
-		
-		return responseRepresentation;
+		return communicationManager.storeObjects(json);
 	}
 	
 	
@@ -250,16 +193,10 @@ public class AgentsAgidObjects extends ServerResource {
 	 */
 	private Representation getAgentObjects(String agid, Logger logger, XMLConfiguration config){
 		
-		String xmppServer = config.getString(CONFIG_PARAM_SERVER, CONFIG_DEF_SERVER);
-		
-		
-		String endpointUrl = SERVER_PROTOCOL + xmppServer + SERVER_PART2 + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2;
-		
-		ClientResource clientResource = new ClientResource(endpointUrl);
-		
-		Representation representation = clientResource.get(MediaType.APPLICATION_JSON);
-		
-		return representation;
+		CommunicationManager communicationManager 
+			= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+
+		return communicationManager.getAgentObjects(agid);
 	
 	}
 }

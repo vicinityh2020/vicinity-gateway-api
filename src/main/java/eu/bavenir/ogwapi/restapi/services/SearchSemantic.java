@@ -12,9 +12,8 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import eu.bavenir.ogwapi.commons.CommunicationManager;
 import eu.bavenir.ogwapi.restapi.Api;
-
-
 
 /*
  * STRUCTURE
@@ -29,45 +28,69 @@ import eu.bavenir.ogwapi.restapi.Api;
  * 
  *   URL: 				[server]:[port]/api/search/semantic
  *   METHODS: 			POST
- *   SPECIFICATION:		@see <a href="https://app.swaggerhub.com/apis/fserena/vicinity_gateway_api/">Gateway API</a>
+ *   SPECIFICATION:		@see <a href="https://vicinityh2020.github.io/vicinity-gateway-api/#/">Gateway API</a>
  *   
- * @author sulfo
+ * @author Andrej
  *
  */
 public class SearchSemantic extends ServerResource {
+
 	
 	// === CONSTANTS ===
 	
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
+	/**
+	 * Used by the Agent / Adapter to post a semantic seaqrch query.
+	 * 
+	 * @param entity The query packaged as JSON entity.
+	 * @return Response after the search.
+	 */
 	@Post("json")
 	public Representation accept(Representation entity) {
+		
 		String callerOid = getRequest().getChallengeResponse().getIdentifier();
 		
 		Logger logger = (Logger) getContext().getAttributes().get(Api.CONTEXT_LOGGER);
 		
 		// get the query in body
-		String sparqlQuery = getRequestBody(entity, logger);
+		String semanticQuery = getRequestBody(entity, logger);
 		
 		// and perhaps parameters
 		Map<String, String> queryParams = getQuery().getValuesMap();
 		
-		return performSearch(callerOid, sparqlQuery, queryParams);
+		return performSearch(callerOid, semanticQuery, queryParams);
 	}
 	
 	
 	// === PRIVATE METHODS ===
-	
-	private Representation performSearch(String sourceOid, String sparqlQuery, Map<String, String> parameters){
+	/**
+	 * This makes the actual search.
+	 * 
+	 * @param sourceOid OID of the caller.
+	 * @param semanticQuery The query string.
+	 * @param parameters Any parameters to be sent along with the request.
+	 * @return Search results.
+	 */
+	private Representation performSearch(String sourceOid, String semanticQuery, Map<String, String> parameters){
 
-		String jsonString = "{ \"semanticInterfaces\":[\" eu.shar_q.bat:genericBat:0.0.1\",\" eu.shar_q.bat:genericBat:0.0.2\",\" eu.shar_q.bat:FroniuscBat:0.0.1\"] }";
+		CommunicationManager communicationManager 
+		= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
-		return new JsonRepresentation(jsonString);
+		return new JsonRepresentation(communicationManager.performSemanticSearch(sourceOid, semanticQuery, parameters));
+
 	
 	}
 	
 	
+	/**
+	 * Retrieves a request body.
+	 * 
+	 * @param entity Entity to extract the body from.
+	 * @param logger Logger.
+	 * @return Text representation of the body.
+	 */
 	private String getRequestBody(Representation entity, Logger logger) {
 		
 		if (entity == null) {

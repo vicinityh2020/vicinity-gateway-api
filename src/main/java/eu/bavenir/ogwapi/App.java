@@ -74,7 +74,7 @@ public class App {
 			+ "for given directory.";
 	
 	/**
-	 * Error message for initialization failure.
+	 * Error message for initialisation failure.
 	 */
 	private static final String ERR_INIT = "Initialization failed. See standard error stream.";
 	
@@ -104,9 +104,9 @@ public class App {
 	/* === METHODS === */
 	
 	/**
-	 * Initialization method called during application startup. Loads program configuration and sets logging facilities.
+	 * Initialisation method called during application startup. Loads program configuration and sets logging facilities.
 	 * 
-	 * @return True if initialization is successful. False otherwise.
+	 * @return True if initialisation is successful. False otherwise.
 	 */
 	private static boolean initialize(){
 		
@@ -241,14 +241,14 @@ public class App {
 	 */
 	public static void main( String[] args ){
 		
-		// attempt to initialize
+		// attempt to initialise
 		if (!initialize()){
 			System.out.println(ERR_INIT);
 			System.exit(1);
 		}
 		
 		// log message
-		logger.fine("Vicinity Gateway API initialized.");
+		logger.info("Vicinity Gateway API initialized.");
 		
 		// start threads
 		restletThread.start();

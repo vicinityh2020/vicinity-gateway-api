@@ -85,17 +85,17 @@ public class SparqlQuery {
 		// 1. Retrieve TED
 		
 		Set<String> neighbours = descriptor.getRoster();
-		logger.info("Neighbours: "+neighbours.toString());
-		logger.info("Requesting TED");
+		logger.fine("Neighbours: "+neighbours.toString());
+		logger.fine("Requesting TED");
 		String jsonTED = retrieveTED(query, neighbours);
-		logger.info("TED retrieved");
-		System.out.println(jsonTED.length());
+		logger.fine("TED retrieved, length " + jsonTED.length());
+		
 		// 2. Init the client
 		VicinityClient client = new VicinityAgoraClient(jsonTED, neighbours, query);
-		System.out.println(query);
+
 		// 3. Retrieve remote data
 		List<Entry<String,String>> remoteEndpoints = client.getRelevantGatewayAPIAddresses();
-		logger.info("Remote endpoints to retrieve data from "+remoteEndpoints.size());
+		logger.fine("Remote endpoints to retrieve data from "+remoteEndpoints.size());
 		// 3.1 Prepare Futures
 		ExecutorService executor = Executors.newFixedThreadPool(MAX_PARALLEL_REQUESTS);
         List<Future<String>> list = new ArrayList<Future<String>>();
@@ -134,12 +134,13 @@ public class SparqlQuery {
         executor.shutdown();
         // 3.4 Filter those remote enpoints without json
         remoteEndpoints = remoteEndpoints.stream().filter(entry -> isCorrectJSON(entry.getValue())).collect(Collectors.toList());
-        System.out.println("===== DATA RETRIEVAL FINISHED =======");
+        
+        logger.fine("Data retrieval finished");
         for(Entry<String, String> entry:remoteEndpoints) {
-        		System.out.println("Remote JSON documents retrieved: "+entry.getValue());
+        		logger.fine("Remote JSON documents retrieved: "+entry.getValue());
         }
         
-        System.out.println("===== Solving query =======");		
+        logger.fine("Solving query");		
 		List<Map<String,String>> queryResults = new ArrayList<>();
 		try {
 			QueryFactory.create(query) ;
@@ -164,9 +165,8 @@ public class SparqlQuery {
 		}
 		mainBuilder.add(StatusMessage.ATTR_MESSAGE, arrayBuilder);
 		
-		// TODO remove after test
 		String returnValue = mainBuilder.build().toString();
-		System.out.println("RETURN VALUE: \n" + returnValue);
+		logger.fine("RETURN VALUE: \n" + returnValue);
 		
 		return returnValue;
 		
@@ -207,7 +207,7 @@ public class SparqlQuery {
 		JsonObject jsonObject  = statusMessage.buildMessage();
 		JsonArray jsonArray = jsonObject.getJsonArray(StatusMessage.ATTR_MESSAGE);
 		
-		System.out.println("!!!THE JSON STRING: " + jsonArray.get(0).toString());
+		logger.fine("JSON String: " + jsonArray.get(0).toString());
 		
 		return jsonArray.get(0).toString();
 	}

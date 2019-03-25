@@ -219,34 +219,38 @@ public class Task {
 	/**
 	 * Starts the execution of this task. 
 	 * 
-	 * @return Response from the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector} or 
-	 * null if the task is not in a state that permits starting. 
+	 * @return True if the response from the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}
+	 * was positive, or false if either the task is not in a state that permits starting, or the Agent returned an error. 
 	 */
-	public NetworkMessageResponse start() {
+	public boolean start() {
 		
 		// only pending task can be started
 		if (taskStatus != TASKSTATUS_PENDING) {
-			return null;
+			return false;
 		}
 		
 		NetworkMessageResponse response = connector.startObjectAction(sourceOid, destinationOid, actionId, body, 
 							parameters);
 		
+		startTime = System.currentTimeMillis();
 		
-		if (response == null) {
+		if (response == null || (response.getResponseCode() / 200) != 1) {
 			
-			return null;
+			logger.warning("Task " + taskId + " could not be executed - AgentConnector returned error or null repsponse.");
+			
+			endTime = System.currentTimeMillis();
+			
+			taskStatus = TASKSTATUS_FAILED;
+			
+			return false;
 		}
 		
-		if ((response.getResponseCode() / 200) == 1){
-			
-			startTime = System.currentTimeMillis();
-			
-			taskStatus = TASKSTATUS_RUNNING;
-			
-		}
 		
-		return response;
+		logger.fine("Task " + taskId + " was send to Agent for execution.");
+		
+		taskStatus = TASKSTATUS_RUNNING;
+		
+		return true;
 	}
 	
 	
@@ -339,10 +343,10 @@ public class Task {
 	/**
 	 * Cancels a running or pending task.
 	 * 
-	 * @param body Body to be sent to the object when canceling.
+	 * @param body Body to be sent to the object when cancelling.
 	 * @param parameters Parameters to be sent along with the body.
 	 * @return Response from the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector} or 
-	 * null if the task is not in a state that permits canceling. 
+	 * null if the task is not in a state that permits cancelling. 
 	 */
 	public NetworkMessageResponse cancel(String body, Map<String, String> parameters) {
 		
@@ -373,14 +377,18 @@ public class Task {
 		
 		if (taskStatus == TASKSTATUS_PENDING) {
 			
+			// stop the clock - this has to be done in order not to get purged in the next check for outdated return values
+			endTime = System.currentTimeMillis();
+			startTime = System.currentTimeMillis();
+			
 			taskStatus = TASKSTATUS_FINISHED;
 			returnValue = CANCELED_RETURN_VALUE;
 			
 			response = new NetworkMessageResponse(config, logger, 
 					false, 
 					CodesAndReasons.CODE_200_OK,
-					null,
-					CodesAndReasons.REASON_200_OK + "Canceled pending task", 
+					CodesAndReasons.REASON_200_OK + "Canceled pending task",
+					"application/json",
 					null);
 		}
 		
@@ -397,7 +405,6 @@ public class Task {
 	 */
 	public long getRunningTime() {
 		
-		// TODO this is inaccurate
 		if (taskStatus == TASKSTATUS_RUNNING) {
 			return runningTime + (System.currentTimeMillis() - startTime);
 		} else {

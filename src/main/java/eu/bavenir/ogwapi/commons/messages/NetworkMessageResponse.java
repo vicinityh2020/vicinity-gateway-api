@@ -332,9 +332,10 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		// first check out whether or not the message has everything it is supposed to have and stop if not
 		if (
-				//TODO make it also check the destination and source oids if possible
 				!json.containsKey(ATTR_MESSAGETYPE) ||
 				!json.containsKey(ATTR_REQUESTID) ||
+				!json.containsKey(ATTR_SOURCEOID) ||
+				!json.containsKey(ATTR_DESTINATIONOID) ||
 				!json.containsKey(ATTR_ERROR) ||
 				!json.containsKey(ATTR_RESPONSECODE) ||
 				!json.containsKey(ATTR_RESPONSECODEREASON) ||
@@ -357,6 +358,14 @@ public class NetworkMessageResponse extends NetworkMessage {
 				responseCodeReason = json.getString(ATTR_RESPONSECODEREASON);
 			}
 			
+			if (!json.isNull(ATTR_SOURCEOID)) {
+				sourceOid = json.getString(ATTR_SOURCEOID);
+			}
+			
+			if (!json.isNull(ATTR_DESTINATIONOID)) {
+				destinationOid = json.getString(ATTR_DESTINATIONOID);
+			}
+			
 			if (!json.isNull(ATTR_CONTENTTYPE)) {
 				contentType = json.getString(ATTR_CONTENTTYPE);
 			}
@@ -376,6 +385,8 @@ public class NetworkMessageResponse extends NetworkMessage {
 		}
 		
 		// process non primitives
+		sourceOid = removeQuotes(sourceOid);
+		destinationOid = removeQuotes(destinationOid);
 		responseCodeReason = removeQuotes(responseCodeReason);
 		contentType = removeQuotes(contentType);
 		responseBody = removeQuotes(responseBody);
@@ -398,10 +409,23 @@ public class NetworkMessageResponse extends NetworkMessage {
 		
 		mainBuilder.add(ATTR_MESSAGETYPE, messageType);
 		mainBuilder.add(ATTR_REQUESTID, requestId);
-		//mainBuilder.add(ATTR_SOURCEOID, sourceOid);
-		//mainBuilder.add(ATTR_DESTINATIONOID, destinationOid);
+		mainBuilder.add(ATTR_SOURCEOID, sourceOid);
+		mainBuilder.add(ATTR_DESTINATIONOID, destinationOid);
 		mainBuilder.add(ATTR_ERROR, error);
 		mainBuilder.add(ATTR_RESPONSECODE, responseCode);
+		
+		
+		if (sourceOid == null){
+			mainBuilder.addNull(ATTR_SOURCEOID);
+		} else {
+			mainBuilder.add(ATTR_SOURCEOID, sourceOid);
+		}
+		
+		if (destinationOid == null){
+			mainBuilder.addNull(ATTR_DESTINATIONOID);
+		} else {
+			mainBuilder.add(ATTR_DESTINATIONOID, destinationOid);
+		}
 		
 		if (responseCodeReason == null){
 			mainBuilder.addNull(ATTR_RESPONSECODEREASON);
