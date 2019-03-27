@@ -13,9 +13,11 @@ import javax.json.JsonObjectBuilder;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.json.JSONObject;
@@ -495,8 +497,21 @@ public class RestAgentConnector extends AgentConnector {
 			} 
 			
 			if (sslcontext != null) {
+				
 				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
-				CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build(); 
+				
+				// create request config builder
+				RequestConfig.Builder requestBuilder = RequestConfig.custom();
+				requestBuilder = requestBuilder.setConnectTimeout(agentTimeout * 1000);
+
+				// create client builder
+				HttpClientBuilder clientBuilder = HttpClients.custom(); 
+				
+				// set request configuration
+				clientBuilder.setDefaultRequestConfig(requestBuilder.build());
+				clientBuilder.setSSLSocketFactory(sslsf);
+
+				CloseableHttpClient httpClient = clientBuilder.build();
 								
 				Unirest.setHttpClient(httpClient);
 				

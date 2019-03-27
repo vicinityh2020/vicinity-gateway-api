@@ -6,7 +6,7 @@
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
 		-->
-		<server>commserver.vicinity.ws</server>
+		<server>development.vicinity.ws</server>
 		
 		<!--
 		Port of the communication server.
@@ -21,7 +21,7 @@
 		
 		Default is commserver.vicinity.ws.
 		-->
-		<neighbourhoodManagerServer>commserver.vicinity.ws</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>development.vicinity.ws</neighbourhoodManagerServer>
 		
 		<!-- 
 		Port on which the NM listens for incoming requests.
@@ -47,7 +47,7 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<encryption>true</encryption>
+		<encryption>false</encryption>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
