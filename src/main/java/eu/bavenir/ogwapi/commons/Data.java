@@ -64,7 +64,6 @@ public class Data implements Serializable {
 	/**
 	 * A set of actions served by this object.
 	 * 
-	 * @Serialize
 	 */
 	private transient Set<Action> providedActions;
 
@@ -120,11 +119,7 @@ public class Data implements Serializable {
 				subscribedEventChannels = new HashSet<Subscription>();
 			}
 
-			if (loadedData.getProvidedActions() != null) {
-				this.providedActions = loadedData.getProvidedActions();
-			} else {
-				providedActions = new HashSet<Action>();
-			}
+			providedActions = new HashSet<Action>();
 			
 		} else {
 			
@@ -164,7 +159,6 @@ public class Data implements Serializable {
 	 */
 	public void addProvidedAction(Action action) {
 		providedActions.add(action);
-		//saveData();
 	}
 
 	/**

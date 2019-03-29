@@ -32,6 +32,18 @@
 
 	<dependencies>
 	
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.6</version>
+		</dependency>
+			
+		<dependency>
+		    <groupId>com.github.jsonld-java</groupId>
+		    <artifactId>jsonld-java</artifactId>
+		    <version>0.2</version>
+		</dependency>
+		
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -56,7 +68,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.2.0</version>
+			<version>3.4.0</version>
 		</dependency>
 		
 		<!-- Json -->

@@ -73,15 +73,9 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
  * @author sulfo
  *
  */
-public class Action implements Serializable {
+public class Action {
 
 	/* === CONSTANTS === */
-	
-	/**
-	 * A unique serial version identifier
-	 * @see Serializable
-	 */
-	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * This parameter sets how long (in minutes) after successful or failed 
@@ -92,12 +86,12 @@ public class Action implements Serializable {
 	 * 
 	 * If not set, it defaults to 1440 minutes (24 hours).
 	 */
-	private transient static final String CONF_PARAM_TIMETOKEEPRETURNVALUES = "actions.timeToKeepReturnValues";
+	private static final String CONF_PARAM_TIMETOKEEPRETURNVALUES = "actions.timeToKeepReturnValues";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_TIMETOKEEPRETURNVALUES CONF_PARAM_TIMETOKEEPRETURNVALUES} configuration parameter.
 	 */
-	private transient static final int CONF_DEF_TIMETOKEEPRETURNVALUES = 1440;
+	private static final int CONF_DEF_TIMETOKEEPRETURNVALUES = 1440;
 	
 	/**
 	 * If a task is pending to be run, how long (in minutes) it should remain in the 
@@ -108,12 +102,12 @@ public class Action implements Serializable {
 	 * highly depends on what the action is about and integrator's common sense.  
 	 * Default value is 120 minutes (2 hours).
 	 */
-	private transient static final String CONF_PARAM_PENDINGTASKTIMEOUT = "actions.pendingTaskTimeout";
+	private static final String CONF_PARAM_PENDINGTASKTIMEOUT = "actions.pendingTaskTimeout";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration parameter.
 	 */
-	private transient static final int CONF_DEF_PENDINGTASKTIMEOUT = 120;
+	private static final int CONF_DEF_PENDINGTASKTIMEOUT = 120;
 	
 	/**
 	 * Maximum number of tasks being queued in pending status, waiting to be
@@ -126,62 +120,62 @@ public class Action implements Serializable {
 	 * 
 	 * Default is 128.  
 	 */
-	private transient static final String CONF_PARAM_MAXNUMBEROFPENDINGTASKS = "actions.maxNumberOfPendingTasks";
+	private static final String CONF_PARAM_MAXNUMBEROFPENDINGTASKS = "actions.maxNumberOfPendingTasks";
 	
 	/**
 	 * Default value for {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration parameter.
 	 */
-	private transient static final int CONF_DEF_MAXNUMBEROFPENDINGTASKS = 128;
+	private static final int CONF_DEF_MAXNUMBEROFPENDINGTASKS = 128;
 	
 	/**
 	 * Defines when should a timer start its count.
 	 */
-	private transient static final int TIMER1_START = 1000;
+	private static final int TIMER1_START = 1000;
 	
 	/**
 	 * Number of milliseconds in a minute.
 	 */
-	private transient static final int MINUTE = 60000;
+	private static final int MINUTE = 60000;
 	
 	/**
 	 * Number of milliseconds in a second.
 	 */
-	private transient static final int SECOND = 1000;
+	private static final int SECOND = 1000;
 	
 	/**
 	 * JSON attribute name for task ID.
 	 */
-	public transient static final String ATTR_TASKID = "taskId";
+	public static final String ATTR_TASKID = "taskId";
 	
 	/**
 	 * JSON attribute name for status.
 	 */
-	public transient static final String ATTR_STATUS = "status";
+	public static final String ATTR_STATUS = "status";
 	
 	/**
 	 * JSON attribute name for creation time.
 	 */
-	public transient static final String ATTR_CREATIONTIME = "createdAt";
+	public static final String ATTR_CREATIONTIME = "createdAt";
 	
 	/**
 	 * JSON attribute name for start time.
 	 */
-	public transient static final String ATTR_STARTTIME = "startTime";
+	public static final String ATTR_STARTTIME = "startTime";
 	
 	/**
 	 * JSON attribute name for end time.
 	 */
-	public transient static final String ATTR_ENDTIME = "endTime";
+	public static final String ATTR_ENDTIME = "endTime";
 	
 	/**
 	 * JSON attribute name for total time.
 	 */
-	public transient static final String ATTR_TOTALTIME = "totalTime";
+	public static final String ATTR_TOTALTIME = "totalTime";
 	
 	/**
 	 * JSON attribute name for return value.
 	 */
-	public transient static final String ATTR_RETURNVALUE = "returnValue";
+	public static final String ATTR_RETURNVALUE = "returnValue";
 	
 	
 	/* === FIELDS === */
@@ -190,64 +184,62 @@ public class Action implements Serializable {
 	 * This is the object ID of the action owner (usually the local object, represented by its 
 	 * {@link eu.bavenir.ogwapi.commons.ConnectionDescriptor ConnectionDescriptor}). 
 	 * 
-	 * @Serialize
 	 */
 	private String objectId;
 	
 	/**
 	 * The ID of the action. 
 	 * 
-	 * @Serialize
 	 */
 	private String actionId;
 	
 	/**
 	 * List of pending {@link eu.bavenir.ogwapi.commons.Task tasks}.
 	 */
-	private transient List<Task> pendingTasks;
+	private List<Task> pendingTasks;
 	
 	/**
 	 * List of finished {@link eu.bavenir.ogwapi.commons.Task tasks} (also a place for failed tasks).
 	 */
-	private transient Set<Task> finishedTasks;
+	private Set<Task> finishedTasks;
 	
 	/**
 	 * The running {@link eu.bavenir.ogwapi.commons.Task task}.
 	 */
-	private transient Task runningTask;
+	private Task runningTask;
 	
 	/**
 	 * The number obtained from the {@link #CONF_PARAM_TIMETOKEEPRETURNVALUES CONF_PARAM_TIMETOKEEPRETURNVALUES} 
 	 * configuration parameter.
 	 */
-	private transient long timeToKeepReturnValues;
+	private long timeToKeepReturnValues;
 	
 	/**
 	 * Number obtained from the {@link #CONF_PARAM_PENDINGTASKTIMEOUT CONF_PARAM_PENDINGTASKTIMEOUT} configuration 
 	 * parameter. 
 	 */
-	private transient long pendingTaskTimeout;
+	private long pendingTaskTimeout;
 	
 	/**
 	 * Number obtained from the {@link #CONF_PARAM_MAXNUMBEROFPENDINGTASKS CONF_PARAM_MAXNUMBEROFPENDINGTASKS} configuration 
 	 * parameter. 
 	 */
-	private transient int maxNumberOfPendingTasks;
+	private int maxNumberOfPendingTasks;
 	
 	/**
 	 * Instance of the {@link eu.bavenir.ogwapi.commons.connectors.AgentConnector AgentConnector}. 
 	 */
-	private transient AgentConnector connector;
+	private AgentConnector connector;
 	
 	/**
 	 * Logger of the OGWAPI.
 	 */
-	private transient Logger logger;
+	private Logger logger;
 	
 	/**
 	 * Configuration of the OGWAPI. 
 	 */
-	private transient XMLConfiguration config;
+	private XMLConfiguration config;
 
 	
 	
