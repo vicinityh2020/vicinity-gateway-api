@@ -1,15 +1,9 @@
 var data = {
   "swagger": "2.0",
   "info": {
-<<<<<<< HEAD
     "description": "<p>The standalone VICINITY Open Gateway API enables your IoT infrastructure to Among its features there is retrieving and setting a property on remote interconnect with other IoT infrastructures and Services through VICINITY P2P network by using HTTP REST requests.</p><br> <p>This API is used as specification <ul><li>to expose your IoT infrastructure in VICINITY P2P network and</li><li>to consume (access) IoT infrastructure through VICINITY P2P network.</li></ul></p> <p>The only difference is that if your software component is calling these API endpoints (e.g. service is reading property from remote device) or your IoT infrastructure is providing these endpoints to Open Gateway API (e.g. IoT infrastructure is responding to service request on device property).</p> <p>VICINITY Open Gateway API is divided in the following groups: <ul>\n  <li>authentication: used to login device, service and adapter/agent;</li>\n  <li>discovery: to manage registry of devices and services in VICINITY P2P network;</li>\n  <li>properties: to expose or to consume (access) properties of the particular devices/services;</li>\n  <li>actions: to expose or to consume (access) action of the particular device/service;</li>\n  <li>events: to expose or to consume (access) events of the particular device/service.</li>\n</ul>\n<p>Note, for installation guide please refere the <a href=\"\">VICINITY Getting started guide</a></p>",
     "version": "0.6.4",
     "title": "VICINITY Open Gateway API",
-=======
-    "description": "\nThe standalone Open Gateway API (OGWAPI) enables your IoT infrastructure to interconnect with other IoT infrastructures by using HTTP REST requests. (more about [OGWAPI](https://vicinity-get-started.readthedocs.io/en/latest/open-gateway-api.html)). OGWAPI is one of few components, which represents VICINITY Node. (more about [VICINITY architecture](https://vicinity-get-started.readthedocs.io/en/latest/architecture.html)).\n\nEvery IoT infrastructure is composed of objects (e.g. smart devices, smart meters etc.) and this infrastructure components have to be registrated in Neighbourhood manager which store information about permitions of devices (e.g. device A can request property of device B from another infrastructure). There are also assigned identifiers and passwords to individual devices. This credentials are using in every HTTP requests (Basic Authentication), whether the device is eligible to make request. (more about [Neighbourhood manager](https://vicinity-get-started.readthedocs.io/en/latest/neighbourhood.html))\n\nAmong features of OGWAPI there is:\n  * getting and setting a property of remote objects (e.g. brightness of bulb)\n  * executing an action (e.g. raising curtains)\n  * subscribing to an event channel and receiving asynchronously fired event whenever one is published. (e.g. door were opened)\n\nAfter installation and start, the OGWAPI serves the following REST API on your local host's port as configured in the configuration file (default is 8181).\n",
-    "version": "0.6.3",
-    "title": "Open Gateway API",
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "email": "sales@bavenir.eu"
@@ -35,7 +29,6 @@ var data = {
   "tags": [
     {
       "name": "authentication",
-<<<<<<< HEAD
       "description": "Authentication endpoints are used to login and logout the devices and services to and from VICINITY P2P network. If device is not logged it will not be reachable from P2P network (e.g. VICINITY Gateway API will not be able to send property request through the P2P network unless the devices is not logged in)."
     },
     {
@@ -61,33 +54,6 @@ var data = {
   ],
   "schemes": [
     "https"
-=======
-      "description": "Endpoints that let you login or logout your objects.\n\nThis can get confusing in the beginning, because you have to send credentials in every request anyways, making the object logged in automatically. However objects that are not logged in will not be visible/reachable on the network and although an object is logged in automatically after it makes its first request to OGWAPI (provided it has correct credentials), it is wise to explicitly log them in before it happens.\n"
-    },
-    {
-      "name": "discovery",
-      "description": "Endpoints for registering your objects and perform a discovery of new\nones.\n\nIt is very likely that your IoT infrastructure possesses many objects. In order to avoid setting up each one of your objects manually, you can register automatically several objects at once. For this purpose, it serves the discovery endpoints, which use agent. Agent is component which provides common functionalities, such as automatic objects discovery, log in/out of objects into P2P network. (more about [Agent](https://github.com/vicinityh2020/vicinity-agent)).\n\nThe basic data type that describes objects is a thing descriptions (TDs). Example TD of [light bulb](https://github.com/bAvenir/thing_description_common_format/blob/master/device/vicinity/lightbulb.js)\n"
-    },
-    {
-      "name": "properties",
-      "description": "Setting and retrieving properties of remote objects.\n"
-    },
-    {
-      "name": "actions",
-      "description": "Starting, stopping and retrieving a status of remotely executed action."
-    },
-    {
-      "name": "events",
-      "description": "Subscribing a remote event channel and receiving published events."
-    },
-    {
-      "name": "query",
-      "description": "Endpoints for providing intelligent querying the P2P network for specific data."
-    }
-  ],
-  "schemes": [
-    "http"
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
   ],
   "paths": {
     "/objects/login": {
@@ -228,13 +194,8 @@ var data = {
         "tags": [
           "registry"
         ],
-<<<<<<< HEAD
         "summary": "Retrieve a list of object TDs connected through your VICINITY Gateway API.",
         "description": "Retrieves a list of object TDs that are connected to this particular VICINITY Gateway API. The service is athenticated with credentials of agent/adapter requested from VICINITY Neighbourhood Manager.\n",
-=======
-        "summary": "Retrieve a list of object TDs connected to this agent.",
-        "description": "Retrieves a list of object TDs that are connected to this particular Agent (identified by his AGID – Agent ID). It is necessary to call this endpoint before an automatic registration is attempted, so you know which objects need to be registered.\n",
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
         "operationId": "getAgentsAgidObjects",
         "produces": [
           "application/json"
@@ -603,11 +564,7 @@ var data = {
           "properties"
         ],
         "summary": "Get a property value from a remote object.",
-<<<<<<< HEAD
         "description": "Retrieves a value of a given property from a remote object. Only object with valid data contract are available. You can create data contract in VICINITY Neighbourhood Manager. First parameter <code>oid</code> determines remote object and second identify the property af remote object, both parameters are mandatory and can be extracted from TD from <code>/objects</code>.\n\nReception of this request will cause the receiving OGWAPI to fire following request to an Agent - GET http://[agent IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent capable of receving such requests and retrieving given property from the object.",
-=======
-        "description": "Retrieves a value of a given property from a remote object. Object from property is retrieves has to be visible for object, which is requesting. This visibiliti is configurable in neighbourhood manager. First parameter oid determines remote object and secound identify the property af remote object, both parameters are mandatory.\n\nReception of this request will cause the receiving OGWAPI to fire following request to an Agent - GET http://[agent IP address]:[port]/agent/objects/[destination ID]/properties/[property ID] with one of the parameters being 'sourceId', containing a string with the source identifier. Therefore, an endpoint needs to be implemented on the Agent capable of receving such requests and retrieving given property from the object.\n",
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
         "operationId": "getObjectsOidPropertiesPid",
         "produces": [
           "application/json"
@@ -1321,11 +1278,7 @@ var data = {
     "/search/sparql": {
       "post": {
         "tags": [
-<<<<<<< HEAD
           "discovery"
-=======
-          "query"
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
         ],
         "summary": "Query the VICINITY P2P Networ by using SPARQL.",
         "description": "Query  the  VICINITY  P2P  Network  by  means  of  a  combination  of  discovery  and  access functions, by using SPARQL and the VICINITY Ontology.",
@@ -1360,17 +1313,10 @@ var data = {
     "/search/semantic": {
       "post": {
         "tags": [
-<<<<<<< HEAD
           "discovery"
         ],
         "summary": "Query the available compatible SHAR-Q Semantic Interfaces.",
         "description": "<p>Retrieve all compatible interfaces for a given semantic interface. After obtaining the list of compatible semantic interfaces you can filter the list of TDs of devices or services from the <code>/objects</code> end-point using on semantic interface name. From each filter TD you can get <code>oid</code> of device or service with which you can interact through properties, actions and events endpoints.</p>",
-=======
-          "query"
-        ],
-        "summary": "Query the SHAR-Q P2P Networ by using semantic query.",
-        "description": "Retrieve all compatible interfaces for a given semantic interface. Semantic interface is sending in body of request in JSON object format, see below. \n\nResponse format is JSON array with string representation of the compatible interfaces.\n",
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
         "operationId": "postSearchSemantic",
         "produces": [
           "application/json"
@@ -1386,12 +1332,9 @@ var data = {
                 "semanticInterface": {
                   "type": "string"
                 }
-<<<<<<< HEAD
               },
               "example": {
                 "semanticInterface": "eu.shar_q.sim:BasicBattery:0.0.1"
-=======
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
               }
             }
           }
@@ -1399,7 +1342,6 @@ var data = {
         "responses": {
           "200": {
             "description": "Successful operation",
-<<<<<<< HEAD
             "examples": {
               "application/json": {
                 "error": false,
@@ -1413,12 +1355,6 @@ var data = {
                     ]
                   }
                 ]
-=======
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
->>>>>>> 0331c3e78005a52a0d4277e112fa8fe4a0f6c530
               }
             }
           },
