@@ -5,8 +5,13 @@
 		<!--
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
+		
+		DEV 	- vicinity.ws
+		PROD 	- commserver.vicinity.ws
+		
 		-->
 		<server>commserver.vicinity.ws</server>
+		
 		
 		<!--
 		Port of the communication server.
@@ -19,9 +24,11 @@
 		This parameter represents a URL to Neighbourhood Manager API. This value 
 		can't be just an IP address.
 		
-		Default is commserver.vicinity.ws.
+		DEV 	- api.vicinity.dev.bavenir.eu
+		PROD 	- api.vicinity.bavenir.eu
+		
 		-->
-		<neighbourhoodManagerServer>commserver.vicinity.ws</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
 		
 		<!-- 
 		Port on which the NM listens for incoming requests.

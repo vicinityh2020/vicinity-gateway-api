@@ -329,6 +329,8 @@ public class PersistenceManager {
 			e.printStackTrace();
 			
 			logger.warning("TD json for " + objectId + " could not be loaded from server.");
+			
+			return null;
 		}
 		
 		// transform to standart JsonObject
