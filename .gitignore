@@ -1,7 +1,0 @@
-log/*.log
-log/*.lck
-data/*.json
-data/*.ser
-target/*
-!target/ogwapi-jar-with-dependencies.jar
-/target/
