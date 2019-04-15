@@ -33,7 +33,7 @@
     <property name="java.class.version" value="55.0"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
-    <property name="os.version" value="10.14.3"/>
+    <property name="os.version" value="10.14.4"/>
     <property name="library.jansi.path" value="/Users/andrej/Downloads/apache-maven-3.6.0/lib/jansi-native"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="user.home" value="/Users/andrej"/>
