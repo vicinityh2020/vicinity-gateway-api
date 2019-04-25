@@ -1582,6 +1582,9 @@ public class ConnectionDescriptor {
 			
 			eventChannel.removeFromSubscribers(requestMessage.getSourceOid());
 			
+			// manually save data (persistence) (htofix/VIC-749)
+			data.saveData();
+			
 			response.setError(false);
 			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);

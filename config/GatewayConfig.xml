@@ -6,7 +6,7 @@
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
 		
-		DEV 	- vicinity.ws
+		DEV 	- development.vicinity.ws
 		PROD 	- commserver.vicinity.ws
 		
 		-->

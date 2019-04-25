@@ -38,7 +38,7 @@ public class NeighbourhoodManagerConnector {
 	/**
 	 * Default value for {@link #CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER } parameter. 
 	 */
-	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "commserver.vicinity.ws";
+	private static final String CONFIG_DEF_NEIGHBORHOODMANAGERSERVER = "api.vicinity.bavenir.eu";
 	
 	
 	/**
