@@ -283,10 +283,6 @@ public class Action {
 		
 		logger.config("Action " + actionId + " max number of pending tasks set to: " + maxNumberOfPendingTasks);
 		
-		// TODO if thought a little deeper, there can be just one such timer for all actions in the connection
-		// descriptor... or one timer in the whole comm manager for everything (the best thing achievable) - it will 
-		// save a number of threads 
-		
 		// schedule a timer for running tasks that are queueing
 		Timer timerForTaskScheduling = new Timer();
 		

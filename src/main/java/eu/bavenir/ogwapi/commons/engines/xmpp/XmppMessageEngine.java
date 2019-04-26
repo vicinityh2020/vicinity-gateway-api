@@ -537,7 +537,14 @@ public class XmppMessageEngine extends CommunicationEngine {
 				logger.finest("The roster for " + objectId + " was renewed.");
 				
 			} catch (NotLoggedInException | NotConnectedException | InterruptedException e) {
-				logger.warning("Roster could not be reloaded for " + objectId + ". Exception: " + e.getMessage());
+				
+				// the exception stack trace was removed from the logging after viktor told thanasis that we will
+				// remove it :) 
+				// https://bavenir.atlassian.net/browse/VIC-583
+				// previous way of logging:
+				// logger.warning("Roster could not be reloaded for " + objectId + ". Exception: " + e.getMessage());
+				
+				logger.warning("Roster could not be reloaded for " + objectId + ".");
 			}
 			
 			

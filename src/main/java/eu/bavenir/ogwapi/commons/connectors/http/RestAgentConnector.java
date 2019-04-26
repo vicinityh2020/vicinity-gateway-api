@@ -501,14 +501,14 @@ public class RestAgentConnector extends AgentConnector {
 
 			if (sslcontext != null) {
 
-				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
+				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
 
 				// create request config builder
 				RequestConfig.Builder requestBuilder = RequestConfig.custom();
 				requestBuilder = requestBuilder.setConnectTimeout(agentTimeout * 1000);
 
 				// create client builder
-				HttpClientBuilder clientBuilder = HttpClients.custom();
+				HttpClientBuilder clientBuilder = HttpClients.custom(); 
 
 				// set request configuration
 				clientBuilder.setDefaultRequestConfig(requestBuilder.build());

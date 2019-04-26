@@ -10,7 +10,7 @@
 		PROD 	- commserver.vicinity.ws
 		
 		-->
-		<server>commserver.vicinity.ws</server>
+		<server>development.vicinity.ws</server>
 		
 		
 		<!--
@@ -29,6 +29,7 @@
 		
 		-->
 		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
+
 		
 		<!-- 
 		Port on which the NM listens for incoming requests.
@@ -54,7 +55,7 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<encryption>true</encryption>
+		<encryption>false</encryption>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
