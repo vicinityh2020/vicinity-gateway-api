@@ -224,10 +224,13 @@ public class XmppMessageEngine extends CommunicationEngine {
 	@Override
 	public boolean connect() {
 		
+		boolean newConnection = false;
+		
 		if (connection == null) {
 			logger.finest("Connection object not yet exists for " + objectId 
 					+ ". Attempting to build a new one.");
 			connection = buildNewConnection(objectId, password);
+			newConnection = true;
 		} else {
 			logger.finest("Connection object already exists for " + objectId 
 					+ ". Not attempting to build a new one.");
@@ -253,14 +256,17 @@ public class XmppMessageEngine extends CommunicationEngine {
 		}
 		
 		chatManager = ChatManager.getInstanceFor(connection);
-		chatManager.addIncomingListener(new IncomingChatMessageListener(){
-			
-			@Override
-			public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
-				processMessage(from, message, chat);
-			}
-			
-		});
+		
+		if (newConnection) {
+			chatManager.addIncomingListener(new IncomingChatMessageListener(){
+				
+				@Override
+				public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
+					processMessage(from, message, chat);
+				}
+				
+			});
+		}
 		
 		// spawn a roster and associate calls for changes in roster - if necessary
 		roster = Roster.getInstanceFor(connection);
