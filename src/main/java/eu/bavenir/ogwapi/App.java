@@ -108,19 +108,30 @@ public class App {
 	 * 
 	 * @return True if initialisation is successful. False otherwise.
 	 */
-	private static boolean initialize(){
+	private static boolean initialize(String configPath){
 		
 		// === load the configuration file ===
-		
 		configurations = new Configurations();
+		
 		try {
-			config = configurations.xml(CONFIG_PATH);
+			
+			if (configPath != null) {
+				
+				System.out.println("Attempt to load configuration file from path: " + configPath);
+				config = configurations.xml(configPath);
+				
+			} else {
+				
+				System.out.println("Attempt to load configuration file from path: " + CONFIG_PATH);
+				config = configurations.xml(CONFIG_PATH);
+			}
+			
 		} catch (ConfigurationException e) {
+			
 			e.printStackTrace();
 			System.err.println(ERR_CONF);
 			return false;
 		}
-		
 		
 		// === set up the logger ===
 		
@@ -241,8 +252,33 @@ public class App {
 	 */
 	public static void main( String[] args ){
 		
+		//config path
+		String confPath = null;
+		//load args
+		if (args.length > 0) {
+			
+			for (int i = 0; i < args.length; i++) {
+		        if (args[i].equalsIgnoreCase ("-C")) {
+		        	
+		        	if (args.length <= i+1) {
+		        		System.out.println("You have to put the value (path) after -c option!");
+		        		System.exit(1);
+		        	}
+		        	confPath = args[++i];
+		        } else if (args[i].equalsIgnoreCase ("-H")) {
+		        	
+		        	System.out.println("-c pathToTheConfigurationFile");
+		        	System.exit(1);
+		        }
+	        	else {
+	        		System.out.println("Wrong Argument : " + args[i] + " :: -h for Help.");
+	        		System.exit(1);
+	        	}
+	        }
+		}
+		
 		// attempt to initialise
-		if (!initialize()){
+		if (!initialize(confPath)){
 			System.out.println(ERR_INIT);
 			System.exit(1);
 		}
