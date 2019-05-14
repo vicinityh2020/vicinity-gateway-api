@@ -28,6 +28,8 @@ WORKDIR /gateway
 RUN chmod 764 ./target/ogwapi-jar-with-dependencies.jar
 RUN mkdir ./log/
 RUN chmod -R 777  ./log/
+RUN mkdir ./data/
+RUN chmod -R 777  ./data/
 RUN chown -R app:app /gateway
 RUN chmod 764 ./config/GatewayConfig.xml
 USER app
