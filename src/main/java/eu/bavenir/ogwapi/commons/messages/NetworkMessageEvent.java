@@ -244,6 +244,9 @@ public class NetworkMessageEvent extends NetworkMessage{
 			mainBuilder.add(ATTR_EVENTBODY, eventBody);
 		}
 		
+		if (requestId != 0){
+			mainBuilder.add(ATTR_REQUESTID, requestId);
+		}
 		
 		// turn parameters into json
 		JsonObjectBuilder parametersBuilder = jsonBuilderFactory.createObjectBuilder();
@@ -309,6 +312,10 @@ public class NetworkMessageEvent extends NetworkMessage{
 			
 			if (!json.isNull(ATTR_PARAMETERS)) {
 				parametersJson = json.getJsonObject(ATTR_PARAMETERS);
+			}
+			
+			if (!json.isNull(ATTR_REQUESTID)) {
+				requestId = json.getInt(ATTR_REQUESTID);
 			}
 			
 		} catch (Exception e) {

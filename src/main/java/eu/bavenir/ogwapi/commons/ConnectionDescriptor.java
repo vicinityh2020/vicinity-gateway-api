@@ -781,6 +781,9 @@ public class ConnectionDescriptor {
 		// create the message
 		NetworkMessageEvent eventMessage = new NetworkMessageEvent(config, this.objectId, eventId, body, 
 				parameters, logger);
+		// set request ID
+		eventMessage.generateRequestId();
+		
 		String message = eventMessage.buildMessageString();
 		
 		// keep track of number of sent messages
@@ -797,9 +800,13 @@ public class ConnectionDescriptor {
 			}
 		}
 		
+		// VIC-761
+		int ACKs = countOfArrivedACKsInTimeout(eventMessage.getRequestId(), sentMessages);
+		
 		statusCodeReason = new String("Event " + eventId + " was successfully distributed to " 
 				+ sentMessages + " out of " 
-				+ subscribers.size() + " subscribers.");
+				+ subscribers.size() + " subscribers. "
+				+ ACKs + " acknowledgements arrived." );
 		
 		logger.info(this.objectId + ": " + statusCodeReason);
 		
@@ -811,7 +818,6 @@ public class ConnectionDescriptor {
 		
 		return statusMessage;
 	}
-	
 	
 	/**
 	 * Returns the number of subscribers for the {@link EventChannel EventChannel} specified by its event ID. 
@@ -1281,6 +1287,22 @@ public class ConnectionDescriptor {
 		}
 		
 		// no need to send the response message back to sender
+		
+		// VIC-761
+		
+		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
+		response.setResponseBody("Event arrived!");
+		response.setContentType("application/json");
+		response.setError(false);
+		response.setResponseCode(CodesAndReasons.CODE_200_OK);
+		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Event arrived.");
+		response.setDestinationOid(eventMessage.getSourceOid());
+		response.setSourceOid(this.objectId);
+		response.setRequestId(eventMessage.getRequestId());
+		
+		sendMessage(this.objectId, eventMessage.getSourceOid(), response.buildMessageString());
+		
+		logger.info(this.objectId + ": A respond (ACK) to event arrived has been sent.");
 	}
 	
 	/**
@@ -1928,6 +1950,68 @@ public class ConnectionDescriptor {
 		return null;
 	}
 
+
+	/**
+	 * Retrieves a count of messages (ACK) from the queue of incoming 
+	 * messages based on the correlation request ID. It will finish if it 
+	 * receive all ACKs (count of sentMessages) or 5 seconds before the 
+	 * timeout (CONFIG_DEF_REQUESTMESSAGETIMEOUT).
+	 * 
+	 * 
+	 * @param requestId Correlation request ID. 
+	 * @param sentMessages count of expect ACK. 
+	 * @return count of arrived ACKs.
+	 */
+	private int countOfArrivedACKsInTimeout(int requestId, int countOfSentMessages) {
+		
+		int arrivedACKs = 0;
+		
+		// retrieve the timeout from configuration
+		long startTime = System.currentTimeMillis();
+		boolean timeoutReached = false;
+		
+		do {
+			NetworkMessage helperMessage = null;
+			try {
+				// take the first element or wait for one
+				helperMessage = messageQueue.poll(POLL_INTERRUPT_INTERVAL_MILLIS, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// bail out
+				e.printStackTrace();
+			}
+			
+			if (helperMessage != null){
+				// we have a message now
+				if (helperMessage.getRequestId() != requestId){
+					// ... but is not our message. return it to queue
+					messageQueue.offer(helperMessage);
+					
+					// in order not to iterate thousand times a second over one single message, that don't belong
+					// to us (or anybody), let's sleep a little to optimise performance
+					if (messageQueue.size() == 1) {
+						try {
+							Thread.sleep(THREAD_SLEEP_MILLIS);
+						} catch (InterruptedException e) {
+							
+							e.printStackTrace();
+						}
+					}
+				} else {
+					// it is our message :-3
+					arrivedACKs++;
+					logger.info(this.objectId + ": ACK from object: " + helperMessage.getSourceOid() + " arrived.");
+				}
+			}
+			
+			timeoutReached = ((System.currentTimeMillis() - startTime) 
+							> ((config.getInt(NetworkMessage.CONFIG_PARAM_REQUESTMESSAGETIMEOUT, 
+									NetworkMessage.CONFIG_DEF_REQUESTMESSAGETIMEOUT)-5)*1000));
+			
+		// until we get all ACKs or the timeout expires
+		} while (arrivedACKs < countOfSentMessages && !timeoutReached);
+	
+		return arrivedACKs;	
+	}
 	
 	/**
 	 * Retrieves a {@link eu.bavenir.ogwapi.commons.messages.NetworkMessage NetworkMessage} from the queue of incoming 
@@ -1960,7 +2044,7 @@ public class ConnectionDescriptor {
 				// we have a message now
 				if (helperMessage.getRequestId() != requestId){
 					// ... but is not our message. let's see whether it is still valid and if it is, return it to queue
-					if (helperMessage.isValid()){
+					if (helperMessage.isValid()) {
 						messageQueue.offer(helperMessage);
 					} else {
 						logger.fine("Discarding stale message: ID = " + helperMessage.getRequestId() 

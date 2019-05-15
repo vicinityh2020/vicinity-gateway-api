@@ -103,17 +103,17 @@ public class MessageResolver {
 		
 		case NetworkMessageRequest.MESSAGE_TYPE:
 			// check for message duplication
-			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
-				return null;
-			}
+			//if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+			//	return null;
+			//}
 			
 			return new NetworkMessageRequest(json, config, logger);
 			
 		case NetworkMessageResponse.MESSAGE_TYPE:
 			// check for message duplication
-			if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
-				return null;
-			}
+			//if (checkForDuplicates(json.getInt(NetworkMessage.ATTR_REQUESTID))) {
+			//	return null;
+			//}
 			
 			return new NetworkMessageResponse(json, config, logger);
 			

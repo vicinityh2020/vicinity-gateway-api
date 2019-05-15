@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi.commons.messages;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.json.JsonObject;
@@ -338,5 +339,21 @@ public class NetworkMessage {
 	}
 	
 	
+	/**
+	 * This will generate random request ID of the message. 
+	 */
+	public void generateRequestId() {
+		
+		Random rand = new Random(); 
+		requestId = rand.nextInt(); 
+		
+		if (requestId < 0){
+			requestId = requestId * (-1);
+		}
+	}
+	
+
+
 	/* === PRIVATE METHODS === */
+	
 }

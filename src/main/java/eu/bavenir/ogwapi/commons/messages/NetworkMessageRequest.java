@@ -339,23 +339,6 @@ public class NetworkMessageRequest extends NetworkMessage {
 		this.attributes = attributes;
 	}
 	
-	
-	/* === PRIVATE METHODS === */
-	
-	/**
-	 * This will generate random request ID of the message. 
-	 */
-	private void generateRequestId() {
-		
-		Random rand = new Random(); 
-		requestId = rand.nextInt(); 
-		
-		if (requestId < 0){
-			requestId = requestId * (-1);
-		}
-	}
-	
-	
 	/**
 	 * Takes all the necessary fields, attributes and parameters and assembles a valid JSON that can be sent over the
 	 * network. 
