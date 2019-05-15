@@ -54,30 +54,6 @@ public class NeighbourhoodManagerConnector {
 	
 	
 	/**
-	 * Name of the configuration parameter for Neighbourhood Manager user name. 
-	 */
-	private static final String CONFIG_PARAM_NMUSERNAME = "general.neighbourhoodManagerUsername";
-	
-	
-	/**
-	 * Default value for {@link #CONFIG_PARAM_NMUSERNAME } parameter.
-	 */
-	private static final String CONFIG_DEF_NMUSERNAME = "";
-	
-	
-	/**
-	 * Name of the configuration parameter for Neighbourhood Manager password.
-	 */
-	private static final String CONFIG_PARAM_NMPASSWORD = "general.neighbourhoodManagerPassword";
-	
-	
-	/**
-	 * Default value for {@link #CONFIG_PARAM_NMPASSWORD } parameter.
-	 */
-	private static final String CONFIG_DEF_NMPASSWORD = "";
-	
-	
-	/**
 	 * Server URL/IP with port and API name. The final end point is then obtained by doing:
 	 * SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 + someOtherAttribute + etc...
 	 * 
@@ -182,15 +158,6 @@ public class NeighbourhoodManagerConnector {
 		
 		port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
 		
-		username = config.getString(CONFIG_PARAM_NMUSERNAME, CONFIG_DEF_NMUSERNAME);
-		
-		if (!username.equals(CONFIG_DEF_NMUSERNAME)){
-			password = config.getString(CONFIG_PARAM_NMPASSWORD, CONFIG_DEF_NMPASSWORD);
-		} else {
-			password = null;
-		}
-		
-		
 	}
 	
 	
@@ -205,10 +172,6 @@ public class NeighbourhoodManagerConnector {
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2;
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
-		
-		if (!username.equals(CONFIG_DEF_NMUSERNAME) && password != null ){
-			clientResource.setChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-		}
 		
 		Representation representation = clientResource.get(MediaType.APPLICATION_JSON);
 		
@@ -230,10 +193,6 @@ public class NeighbourhoodManagerConnector {
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
 
-		if (!username.equals(CONFIG_DEF_NMUSERNAME) && password != null ){
-			clientResource.setChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-		}
-		
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
 		return responseRepresentation;
@@ -255,10 +214,6 @@ public class NeighbourhoodManagerConnector {
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
 
-		if (!username.equals(CONFIG_DEF_NMUSERNAME) && password != null ){
-			clientResource.setChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-		}
-		
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
 		return responseRepresentation;
@@ -279,10 +234,6 @@ public class NeighbourhoodManagerConnector {
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
 
-		if (!username.equals(CONFIG_DEF_NMUSERNAME) && password != null ){
-			clientResource.setChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-		}
-		
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
 		return responseRepresentation;
@@ -301,10 +252,6 @@ public class NeighbourhoodManagerConnector {
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + DELETE_SERVICE;
 		
 		ClientResource clientResource = new ClientResource(endpointUrl);
-		
-		if (!username.equals(CONFIG_DEF_NMUSERNAME) && password != null ){
-			clientResource.setChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-		}
 		
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		

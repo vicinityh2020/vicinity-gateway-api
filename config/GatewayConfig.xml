@@ -10,7 +10,7 @@
 		PROD 	- commserver.vicinity.ws
 		
 		-->
-		<server>development.vicinity.ws</server>
+		<server>commserver.vicinity.ws</server>
 		
 		
 		<!--
@@ -28,7 +28,7 @@
 		PROD 	- api.vicinity.bavenir.eu
 		
 		-->
-		<neighbourhoodManagerServer>api.vicinity.dev.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
 
 		
 		<!-- 
@@ -37,16 +37,6 @@
 		Default is 3000.
 		-->
 		<neighourhoodManagerPort>3000</neighourhoodManagerPort>
-		
-		<!--
-		User name to be used with NM communication.   
-		-->
-		<neighbourhoodManagerUsername></neighbourhoodManagerUsername>
-		
-		<!-- 
-		Password to be used with NM communication.
-		-->
-		<neighbourhoodManagerPassword></neighbourhoodManagerPassword>
 		
 		<!-- 
 		Setting this parameter to true will enable encryption of communication. 
