@@ -98,6 +98,16 @@ public class EventChannel implements Serializable {
 	 */
 	private Set<String> subscribers;
 	
+	/**
+	 * Quality of service 
+	 * default = 1
+	 * 
+	 * 1 => don't send ACK
+	 * 2 => send ACK
+	 * 
+	 * @Serialize
+	 */
+	private int QoS;
 	
 	
 	/* === PUBLIC METHODS === */
@@ -107,12 +117,14 @@ public class EventChannel implements Serializable {
 	 * 
 	 * @param objectId Object ID of the owner of this event channel.
 	 * @param eventId ID of the event channel.
-	 * @param active Status of the channel. 
+	 * @param active Status of the channel.
+	 * @param Qos - quality of service 
 	 */
-	public EventChannel(String objectId, String eventId, boolean active) {
+	public EventChannel(String objectId, String eventId, boolean active, int Qos) {
 		this.objectId = objectId;
 		this.eventId = eventId;
 		this.active = active;
+		this.QoS = Qos;
 		subscribers = Collections.synchronizedSet(new HashSet<String>());
 	}
 	
@@ -124,11 +136,13 @@ public class EventChannel implements Serializable {
 	 * @param eventId ID of the event channel. 
 	 * @param active Status of the channel.
 	 * @param subscribers A set of subscribers to this EventChannel. 
+	 * @param Qos - quality of service
 	 */
-	public EventChannel(String objectId, String eventId, boolean active, Set<String> subscribers) {
+	public EventChannel(String objectId, String eventId, boolean active, int Qos, Set<String> subscribers) {
 		this.objectId = objectId;
 		this.eventId = eventId;
 		this.active = active;
+		this.QoS = Qos;
 		this.subscribers = Collections.synchronizedSet(subscribers);
 		
 	}
@@ -237,6 +251,15 @@ public class EventChannel implements Serializable {
 		this.active = active;
 	}
 
+	
+	/**
+	 * Returns a QoS. 
+	 *  
+	 * @return QoS integer. 
+	 */
+	public int getQoS() {
+		return QoS;
+	}
 	
 	/* === PRIVATE METHODS === */
 	

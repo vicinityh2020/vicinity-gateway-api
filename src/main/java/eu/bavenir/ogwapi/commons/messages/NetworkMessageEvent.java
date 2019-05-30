@@ -359,4 +359,5 @@ public class NetworkMessageEvent extends NetworkMessage{
 		
 		return true;
 	}
+
 }

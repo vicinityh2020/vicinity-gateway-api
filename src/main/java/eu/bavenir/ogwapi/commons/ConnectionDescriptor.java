@@ -460,9 +460,15 @@ public class ConnectionDescriptor {
 			
 			// if no event channel was found AND the caller wanted it to be active, create it
 			if (active) {
-				data.addProvidedEventChannel(new EventChannel(objectId, eventId, true));
+				int qos = 1;
 				
-				statusCodeReason = new String("Created active event channel " + eventId + ".");
+				if (parameters.containsKey("qos")) {
+					qos = Integer.parseInt(parameters.get("qos"));
+				}
+				
+				data.addProvidedEventChannel(new EventChannel(objectId, eventId, true, qos));
+				
+				statusCodeReason = new String("Created active event channel " + eventId + ". QoS = " + qos);
 				logger.info(this.objectId + ": " + statusCodeReason);
 				
 				statusMessage = new StatusMessage(
@@ -639,8 +645,15 @@ public class ConnectionDescriptor {
 				return statusMessage;
 			}
 		} else {
+			
+			int qos = 1;
+			
+			if (parameters.containsKey("qos")) {
+				qos = Integer.parseInt(parameters.get("qos"));
+			}
+			
 			// create a new subscription object (but don't actually add the subscription to a concrete event yet)
-			subscription = new Subscription(destinationOid);
+			subscription = new Subscription(destinationOid, qos);
 		}
 		
 		Map<String, String> attributes = new HashMap<String,String>();
@@ -800,13 +813,19 @@ public class ConnectionDescriptor {
 			}
 		}
 		
-		// VIC-761
-		int ACKs = countOfArrivedACKsInTimeout(eventMessage.getRequestId(), sentMessages);
-		
 		statusCodeReason = new String("Event " + eventId + " was successfully distributed to " 
 				+ sentMessages + " out of " 
-				+ subscribers.size() + " subscribers. "
-				+ ACKs + " acknowledgements arrived." );
+				+ subscribers.size() + " subscribers. " );
+		
+		// Quality of serice == 2 => wait for ACKs
+		if (eventChannel.getQoS() == 2) {
+			
+			// VIC-761
+			int ACKs = countOfArrivedACKsInTimeout(eventMessage.getRequestId(), sentMessages);
+			
+			statusCodeReason += ACKs + " acknowledgements arrived.";
+		}
+		
 		
 		logger.info(this.objectId + ": " + statusCodeReason);
 		
@@ -1268,41 +1287,62 @@ public class ConnectionDescriptor {
 					eventMessage.getParameters()
 					);
 			
+			// ACK
+			NetworkMessageResponse responseToSender = new NetworkMessageResponse(config, logger);
+			responseToSender.setDestinationOid(eventMessage.getSourceOid());
+			responseToSender.setSourceOid(this.objectId);
+			responseToSender.setRequestId(eventMessage.getRequestId());
+			responseToSender.setContentType("application/json");
+			
+			
 			if (response != null) {
 				// if the return code is different than 2xx, make it visible
 				if ((response.getResponseCode() / 200) != 1){
+					
+					// ACK
+					responseToSender.setError(true);
+					responseToSender.setResponseCode(response.getResponseCode());
+					responseToSender.setResponseCodeReason(response.getResponseCode() + "Event was not forwarded successfully. "
+							+ ". Response reason: " + response.getResponseCodeReason());
+					
 					
 					logger.warning(this.objectId + ": Event was not forwarded successfully. Response code: " + response.getResponseCode() 
 												+ ". Response reason: " + response.getResponseCodeReason());
 												
 				} else {
+					
+					// ACK
+					responseToSender.setError(false);
+					responseToSender.setResponseCode(CodesAndReasons.CODE_200_OK);
+					responseToSender.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Event arrived.");
+					
 					logger.info(this.objectId + ": Event forwarded successfully.");
 				}
+				
+				
+				
 			} else {
+				
+				// ACK
+				responseToSender.setError(true);
+				responseToSender.setResponseCode(CodesAndReasons.CODE_400_BADREQUEST);
+				responseToSender.setResponseCodeReason(CodesAndReasons.CODE_400_BADREQUEST + "Null response received from the Agent after event frowarding.");
 				
 				logger.warning(this.objectId + ": Null response received from the Agent after event frowarding. Moving "
 						+ "on, it'd get discarded anyway.");
 			}
 			
+			
+			// send the response message (ACK) back to sender if QoS == 2
+			if (subscription.getQoS() == 2) {
+				
+				sendMessage(this.objectId, eventMessage.getSourceOid(), responseToSender.buildMessageString());
+				
+				logger.info(this.objectId + ": A respond (ACK) has been sent.");
+			}
 		}
 		
-		// no need to send the response message back to sender
 		
-		// VIC-761
-		
-		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-		response.setResponseBody("Event arrived!");
-		response.setContentType("application/json");
-		response.setError(false);
-		response.setResponseCode(CodesAndReasons.CODE_200_OK);
-		response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Event arrived.");
-		response.setDestinationOid(eventMessage.getSourceOid());
-		response.setSourceOid(this.objectId);
-		response.setRequestId(eventMessage.getRequestId());
-		
-		sendMessage(this.objectId, eventMessage.getSourceOid(), response.buildMessageString());
-		
-		logger.info(this.objectId + ": A respond (ACK) to event arrived has been sent.");
 	}
 	
 	/**
@@ -1554,7 +1594,7 @@ public class ConnectionDescriptor {
 			response.setError(false);
 			response.setContentType("application/json");
 			response.setResponseCode(CodesAndReasons.CODE_200_OK);
-			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Subscribed.");
+			response.setResponseCodeReason(CodesAndReasons.REASON_200_OK + "Subscribed. QoS = " + eventChannel.getQoS());
 			
 		}
 		
@@ -1965,6 +2005,7 @@ public class ConnectionDescriptor {
 	private int countOfArrivedACKsInTimeout(int requestId, int countOfSentMessages) {
 		
 		int arrivedACKs = 0;
+		int validACKs = 0;
 		
 		// retrieve the timeout from configuration
 		long startTime = System.currentTimeMillis();
@@ -1998,8 +2039,18 @@ public class ConnectionDescriptor {
 					}
 				} else {
 					// it is our message :-3
+					NetworkMessageResponse response = (NetworkMessageResponse)helperMessage;
+					if (response.getResponseCode() == 200) {
+						
+						validACKs++;
+						logger.info(this.objectId + ": ACK from object: " + helperMessage.getSourceOid() + " arrived. StatusCode = 200.");
+					} else {
+						
+						logger.info(this.objectId + ": ACK from object: " + helperMessage.getSourceOid() + " arrived. StatusCode != 200.");
+					}
+					
 					arrivedACKs++;
-					logger.info(this.objectId + ": ACK from object: " + helperMessage.getSourceOid() + " arrived.");
+					
 				}
 			}
 			
@@ -2010,7 +2061,7 @@ public class ConnectionDescriptor {
 		// until we get all ACKs or the timeout expires
 		} while (arrivedACKs < countOfSentMessages && !timeoutReached);
 	
-		return arrivedACKs;	
+		return validACKs;	
 	}
 	
 	/**

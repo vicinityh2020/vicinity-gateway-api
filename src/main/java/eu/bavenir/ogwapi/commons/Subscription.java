@@ -50,7 +50,16 @@ public class Subscription implements Serializable {
 	 */ 
 	private Set<String> eventSubscriptions;
 	
-	
+	/**
+	 * Quality of service 
+	 * default = 1
+	 * 
+	 * 1 => don't send ACK
+	 * 2 => send ACK
+	 * 
+	 * @Serialize
+	 */
+	private int QoS;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -59,8 +68,9 @@ public class Subscription implements Serializable {
 	 * 
 	 * @param objectId ID of the remote publishing object.
 	 */
-	public Subscription(String objectId) {
+	public Subscription(String objectId, int QoS) {
 		this.objectId = objectId;
+		this.QoS = QoS;
 		eventSubscriptions = Collections.synchronizedSet(new HashSet<String>());
 	}
 	
@@ -70,8 +80,9 @@ public class Subscription implements Serializable {
 	 * @param objectId ID of the remote publishing object.
 	 * @param eventSubscriptions A set eventSubscriptions
 	 */
-	public Subscription(String objectId, Set<String> eventSubscriptions) {
+	public Subscription(String objectId, int QoS, Set<String> eventSubscriptions) {
 		this.objectId = objectId;
+		this.QoS = QoS;
 		this.eventSubscriptions = Collections.synchronizedSet(eventSubscriptions);
 	}
 	
@@ -149,6 +160,15 @@ public class Subscription implements Serializable {
 		return eventSubscriptions.size();
 	}
 	
+	
+	/**
+	 * Returns a QoS. 
+	 *  
+	 * @return QoS integer. 
+	 */
+	public int getQoS() {
+		return QoS;
+	}
 	
 	/* === PRIVATE METHODS === */
 	
