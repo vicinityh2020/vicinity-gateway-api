@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.http.options.Options;
 import com.mashape.unirest.request.GetRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 
@@ -701,7 +702,10 @@ public class RestAgentConnector extends AgentConnector {
 			if (httpClient != null) {
 				httpClient.close();
 			}
+			
 			Unirest.shutdown();
+			Options.refresh();
+			
 		} catch (IOException e) {
 
 			logger.warning("Exception when unirest shutdowning! \nThe whole exception: " + e);
