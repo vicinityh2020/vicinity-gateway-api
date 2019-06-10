@@ -14,6 +14,8 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
+import com.mashape.unirest.http.Unirest;
+
 import eu.bavenir.ogwapi.restapi.RestletThread;
 
 
@@ -271,8 +273,14 @@ public class App {
 					restletThread.terminateThread();				
 					restletThread.join();
 					
+					// close the Unirest
+					Unirest.shutdown();
+					
 				} catch (InterruptedException e) {
 					// nothing else to do
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
