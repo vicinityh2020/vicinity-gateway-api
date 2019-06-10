@@ -282,7 +282,10 @@ public class RestAgentConnector extends AgentConnector {
 	 */
 	private String agentServiceUrl;
 
-
+	/**
+	 * CloseableHttpClient
+	 */
+	private CloseableHttpClient httpClient = null;
 
 	/* === PUBLIC METHODS === */
 
@@ -332,6 +335,8 @@ public class RestAgentConnector extends AgentConnector {
 
 		agentServiceUrl = assembleAgentServiceUrl();
 
+		// initialize CloseableHttpClient
+		initialize();
 	}
 
 
@@ -445,6 +450,54 @@ public class RestAgentConnector extends AgentConnector {
 		return agentServiceUrl;
 	}
 
+	
+	/**
+	 * This method initialize CloseableHttpClient
+	 *
+	 */
+	private void initialize() {
+
+		// accept snake oil
+		boolean customClientInUse = false;
+
+		if (useHttps && acceptSelfSigned) {
+
+			SSLContext sslcontext = null;
+			try {
+				sslcontext = SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
+			} catch (Exception e) {
+				logger.warning("Exception during configuration of SSL for Agent Connector. Reverting to HTTP. "
+						+ "Exception message: " + e.getMessage());
+			}
+
+			if (sslcontext != null) {
+
+				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
+
+				// create request config builder
+				RequestConfig.Builder requestBuilder = RequestConfig.custom();
+				requestBuilder = requestBuilder.setConnectTimeout(agentTimeout * 1000);
+
+				// create client builder
+				HttpClientBuilder clientBuilder = HttpClients.custom(); 
+
+				// set request configuration
+				clientBuilder.setDefaultRequestConfig(requestBuilder.build());
+				clientBuilder.setSSLSocketFactory(sslsf);
+
+				httpClient = clientBuilder.build();
+
+				Unirest.setHttpClient(httpClient);
+
+				customClientInUse = true;
+			}
+		}
+
+		if (!customClientInUse) {
+			// set timeouts - we are not using custom client, we have to do it this way
+			Unirest.setTimeouts(agentTimeout * 1000, agentTimeout * 1000);
+		}
+	}
 
 	/**
 	 * Processes the {@link NetworkMessageRequest request} that arrived from the network. After the URL of the
@@ -484,49 +537,6 @@ public class RestAgentConnector extends AgentConnector {
 
 		// create stuff
 		NetworkMessageResponse response = new NetworkMessageResponse(config, logger);
-
-		// accept snake oil
-		boolean customClientInUse = false;
-
-		CloseableHttpClient httpClient = null;
-
-		if (useHttps && acceptSelfSigned) {
-
-			SSLContext sslcontext = null;
-			try {
-				sslcontext = SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build();
-			} catch (Exception e) {
-				logger.warning("Exception during configuration of SSL for Agent Connector. Reverting to HTTP. "
-						+ "Exception message: " + e.getMessage());
-			}
-
-			if (sslcontext != null) {
-
-				SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext); 
-
-				// create request config builder
-				RequestConfig.Builder requestBuilder = RequestConfig.custom();
-				requestBuilder = requestBuilder.setConnectTimeout(agentTimeout * 1000);
-
-				// create client builder
-				HttpClientBuilder clientBuilder = HttpClients.custom(); 
-
-				// set request configuration
-				clientBuilder.setDefaultRequestConfig(requestBuilder.build());
-				clientBuilder.setSSLSocketFactory(sslsf);
-
-				httpClient = clientBuilder.build();
-
-				Unirest.setHttpClient(httpClient);
-
-				customClientInUse = true;
-			}
-		}
-
-		if (!customClientInUse) {
-			// set timeouts - we are not using custom client, we have to do it this way
-			Unirest.setTimeouts(agentTimeout * 1000, agentTimeout * 1000);
-		}
 
 		HttpResponse<String> responseNode = null;
 
@@ -697,18 +707,13 @@ public class RestAgentConnector extends AgentConnector {
 			response.setResponseCodeReason(responseNode.getStatusText());
 		}
 
-		// shutdown unirest (free mem)
+		// close httpClient
 		try {
 			if (httpClient != null) {
 				httpClient.close();
 			}
-			
-			Unirest.shutdown();
-			Options.refresh();
-			
 		} catch (IOException e) {
-
-			logger.warning("Exception when unirest shutdowning! \nThe whole exception: " + e);
+			logger.warning("Exception when httpClient closing! \nThe whole exception: " + e);
 		}
 
 		return response;
