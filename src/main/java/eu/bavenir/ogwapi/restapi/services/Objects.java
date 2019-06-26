@@ -1,10 +1,17 @@
 package eu.bavenir.ogwapi.restapi.services;
 
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
 
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -13,6 +20,7 @@ import org.restlet.resource.ServerResource;
 
 import eu.bavenir.ogwapi.restapi.Api;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
+import eu.bavenir.ogwapi.commons.messages.MessageResolver;
 
 /*
  * STRUCTURE
@@ -47,6 +55,20 @@ public class Objects extends ServerResource {
 	 */
 	private static final String ATTR_OBJECTS = "objects";
 
+	/**
+	 * Name of the Thing descriptions attribute.
+	 */
+	private static final String ATTR_TDS = "thingDescriptions";
+	
+	/**
+	 * Name of the Thing description attribute.
+	 */
+	private static final String ATTR_TD = "thingDescription";
+	
+	/**
+	 * Name of the Pagen attribute.
+	 */
+	private static final String ATTR_PAGE = "page";
 	
 	// === OVERRIDEN HTTP METHODS ===
 	
@@ -61,8 +83,28 @@ public class Objects extends ServerResource {
 	 */
 	@Get
 	public Representation represent() {
-			
-		return getObjects();
+		
+		Map<String, String> queryParams = getQuery().getValuesMap();
+		
+		boolean attrObjectsWithTDs = false;
+		
+		if (queryParams.get(ATTR_TDS) != null) {
+			attrObjectsWithTDs = Boolean.parseBoolean(queryParams.get(ATTR_TDS));
+		}
+		
+		int attrPage = 0;
+		
+		if (queryParams.get(ATTR_PAGE) != null) {
+			attrPage = Integer.parseInt(queryParams.get(ATTR_PAGE));
+		}
+		
+		if (attrObjectsWithTDs) {
+			return getObjectsTDs(attrPage);
+		} else {
+			return getObjects();	
+		}
+		
+		
 	}
 	
 	
@@ -96,6 +138,47 @@ public class Objects extends ServerResource {
 		return new JsonRepresentation(mainObjectBuilder.build().toString());
 	}
 	
-	
+	/**
+	 * Goes through the object's roster and creates a JSON TDs from the visible records.
+	 * 
+	 * 
+	 * @return JSON representation of the list. 
+	 */
+	private Representation getObjectsTDs(int pageNumber){
+		
+		CommunicationManager communicationManager = (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
+		
+		return communicationManager.getThingDescriptions(getRequest().getChallengeResponse().getIdentifier(), pageNumber);
+	}
 
+	/**
+	 * Creates a JSON array from a string. 
+	 * 
+	 * @param jsonString A string that is to be decoded as a JSON.
+	 * @return JsonArray if the decoding was successful, or null if something went wrong (string is not a valid JSON etc.).  
+	 */
+	public JsonArray readJsonArray(String jsonString) {
+		
+		if (jsonString == null) {
+			return null;
+		}
+		
+		// make a JSON from the incoming String - any string that is not a valid JSON will throw exception
+		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+		
+		JsonArray json;
+		
+		try {
+			json = jsonReader.readArray();
+		} catch (Exception e) {
+			System.out.println("Exception during reading JSON array: " 
+						+ e.getMessage());
+			
+			return null;
+		} finally {
+			jsonReader.close();
+		}
+		
+		return json;
+	}
 }

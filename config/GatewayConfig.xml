@@ -10,7 +10,7 @@
 		PROD 	- commserver.vicinity.ws
 		
 		-->
-		<server>commserver.vicinity.ws</server>
+		<server>development.vicinity.ws</server>
 		
 		
 		<!--
@@ -28,7 +28,7 @@
 		PROD 	- api.vicinity.bavenir.eu
 		
 		-->
-		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.dev.bavenir.eu</neighbourhoodManagerServer>
 
 		
 		<!-- 
@@ -145,6 +145,11 @@
 		Default is true.
 		-->
 		<loadTDFromServer>true</loadTDFromServer>
+		
+		<!-- 
+		TODO - paging
+		-->
+		<pageSize>5</pageSize>
 		
 	</general>
 

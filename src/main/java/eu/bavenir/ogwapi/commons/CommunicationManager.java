@@ -1,19 +1,36 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
+import eu.bavenir.ogwapi.restapi.Api;
 
 /*
  * STRUCTURE:
@@ -199,7 +216,30 @@ public class CommunicationManager {
 	 */
 	private static final int SESSIONEXPIRATION_MINIMAL_VALUE = 5;
 	
+	/**
+	 * Name of the Object ID attribute.
+	 */
+	private static final String ATTR_OID = "oid";
 	
+	/**
+	 * Name of the Objects attribute. 
+	 */
+	private static final String ATTR_OBJECTS = "objects";
+	
+	/**
+	 * Name of the ThingDescriptions attribute. 
+	 */
+	private static final String ATTR_TDS = "thingDescriptions";
+	
+	/**
+	 * TODO
+	 */
+	private static final String CONFIG_PARAM_PAGE_SIZE = "general.pageSize";
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_PAGE_SIZE CONFIG_PARAM_PAGE_SIZE} parameter. 
+	 */
+	private static final int CONFIG_DEF_PAGE_SIZE = 5;
 	
 	/* === FIELDS === */
 	
@@ -233,6 +273,10 @@ public class CommunicationManager {
 	 */
 	private NeighbourhoodManagerConnector nmConnector;
 	
+	/**
+	 * TODO
+	 */
+	private int pageSize;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -251,6 +295,9 @@ public class CommunicationManager {
 		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
 		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		
+		
+		// load the configuration for the pageSize param
+		pageSize = config.getInt(CONFIG_PARAM_PAGE_SIZE, CONFIG_DEF_PAGE_SIZE);
 		
 		this.sessionExpiration = 0;
 		
@@ -1009,7 +1056,55 @@ public class CommunicationManager {
 		return entries;
 	}
 	
-	
+	/**
+	 * TODO
+	 */
+	public Set<String> getRosterEntriesForObject(String objectId, int pageNumber){
+		
+		if (objectId == null){
+			logger.warning("Error when retrieving contact list. Object ID is null.");
+			
+			return null;
+		}
+		
+		ConnectionDescriptor descriptor = descriptorPoolGet(objectId);
+		
+		if (descriptor == null){
+			logger.warning("Null record in the connection descriptor pool. Object ID: '" + objectId + "'.");
+			return Collections.emptySet();
+		}
+		
+		Set<String> entries = descriptor.getRoster();
+		
+		if (entries == null || entries.size() == 0) {
+			return null;
+		}
+		
+		Set<String> set = new HashSet<String>();
+		
+		//range 
+		int min = pageNumber * pageSize;
+		int max = min + pageSize;
+			
+		if (min+1 <= entries.size()) {
+			for (int i = min; i < max && i < entries.size(); i++) {
+				set.add(entries.toArray()[i].toString());
+			}
+		} else {
+			logger.warning("There are no avaliable object for objectId: " + objectId + " and page number: " + pageNumber);
+			
+			return null;
+		}
+		
+		// log it
+		logger.fine("-- Roster for '" + objectId +"' -- page number: " + pageNumber);
+		for (String entry : set) {
+			logger.fine(entry + " Presence: " + "UNKNOWN");
+		}
+		logger.fine("-- End of roster --");
+		
+		return set;
+	}
 	
 	
 	
@@ -1381,6 +1476,156 @@ public class CommunicationManager {
 	}
 	
 	
+	/**
+	 * getThingDescriptions - Return one page of the thing descriptions of IoT object(s).
+	 * 
+	 * @param page number (0 <-> countOfObjects/5 + 1)
+	 * @param sourceObjectId 
+	 * 
+	 * @return JsonObject with the list of thing descriptions 
+	 */
+	public Representation getThingDescriptions(String sourceObjectId, int pageNumber){
+		
+		if (sourceObjectId == null || sourceObjectId.isEmpty()) {
+			logger.warning("Method parameter sourceObjectId can't be null nor empty.");
+			
+			return null;
+		}
+		
+		if (pageNumber < 0) {
+			logger.warning("Method parameter pageNumber can't be smaller than 0;");
+			logger.warning("Set pageNumber to 0;");
+			
+			pageNumber = 0;
+		}
+		
+		Set<String> rosterObjects = getRosterEntriesForObject(sourceObjectId, pageNumber);
+		
+		if (rosterObjects == null) {
+			return null;
+		}
+		
+		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
+		
+		rosterObjects.forEach(item -> {
+			mainArrayBuilder.add(
+					Json.createObjectBuilder().add(ATTR_OID, item)
+				);
+		});
+		
+		mainObjectBuilder.add(ATTR_OBJECTS, mainArrayBuilder);
+		JsonObject json = mainObjectBuilder.build();
+		
+		return nmConnector.getThingDescriptions(new JsonRepresentation(json.toString()));
+	}
+	
+	/**
+	 * getThingDescriptions - Return all pages of the thing descriptions of IoT object(s).
+	 * 
+	 * @param sourceObjectId 
+	 * 
+	 * @return The list of thing descriptions 
+	 */
+	public Representation getThingDescriptions(String sourceObjectId) {
+		
+		if (sourceObjectId == null || sourceObjectId.isEmpty()) {
+			logger.warning("Method parameter sourceObjectId can't be null nor empty.");
+			
+			return null;
+		}
+		
+		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
+		
+		Representation r = null;
+		int i = 0;
+		
+		do {
+			
+			r = getThingDescriptions(sourceObjectId, i++);
+			
+			if (r == null) {
+				break;
+			}
+			
+			JsonArray tds = parseThingDescriptionsFromRepresentation(r);
+			tds.forEach(item -> {
+				mainArrayBuilder.add(item);
+			});
+		}
+		while (true);
+		
+		mainObjectBuilder.add(ATTR_TDS, mainArrayBuilder);
+		JsonObject json = mainObjectBuilder.build();
+		
+		return new JsonRepresentation(json.toString());
+	}
+	
+	public JsonArray parseThingDescriptionsFromRepresentation(Representation tds) {
+		
+		JsonObject json = null;
+		
+		try {
+			json = readJsonObject(tds.getText());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (json == null) {
+			logger.warning("Can't parse representation.");
+			return null;
+		}
+		
+		JsonArray thingDescriptions = null;
+		
+		JsonObject message = json.getJsonObject("message");
+		if (message == null) {
+			
+			thingDescriptions = json.getJsonArray("thingDescriptions");
+		} else {
+			thingDescriptions = message.getJsonArray("thingDescriptions");
+		}
+		
+		if (thingDescriptions == null) {
+			logger.warning("Can't parse representation.");
+			return null;
+		}
+		
+		return thingDescriptions;
+	}
+	
+	/**
+	 * Creates a JSON object from a string. 
+	 * 
+	 * @param jsonString A string that is to be decoded as a JSON.
+	 * @return JsonObject if the decoding was successful, or null if something went wrong (string is not a valid JSON etc.).  
+	 */
+	public JsonObject readJsonObject(String jsonString) {
+		
+		if (jsonString == null) {
+			return null;
+		}
+		
+		// make a JSON from the incoming String - any string that is not a valid JSON will throw exception
+		JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
+		
+		JsonObject json;
+		
+		try {
+			json = jsonReader.readObject();
+		} catch (Exception e) {
+			logger.severe("Exception during reading JSON object: " 
+						+ e.getMessage());
+			
+			return null;
+		} finally {
+			jsonReader.close();
+		}
+		
+		return json;
+	}
 	
 	// QUERY INTERFACE
 	
@@ -1433,9 +1678,12 @@ public class CommunicationManager {
 			logger.warning("Null record in the connection descriptor pool. Object ID: '" + sourceObjectId + "'.");
 			
 			return null;
-		} 
+		}
 		
-		return descriptor.performSemanticQuery(semanticQuery, parameters);
+		Representation r = getThingDescriptions(sourceObjectId);
+		JsonArray tds = parseThingDescriptionsFromRepresentation(r);
+		
+		return descriptor.performSemanticQuery(sourceObjectId, semanticQuery, parameters, tds);
 	}
 	
 	

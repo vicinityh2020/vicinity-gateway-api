@@ -2,14 +2,21 @@ package eu.bavenir.ogwapi.commons.search;
 
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
+import org.json.JSONArray;
 
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -56,7 +63,7 @@ public class SemanticQuery {
 		semanticSearchAPIURL = config.getString(CONFIG_PARAM_SEMANTICSEARCHAPI, CONFIG_DEF_SEMANTICSEARCHAPI);
 	}
 	
-	public String performQuery(String query, Map<String, String> parameters) {
+	public String performQuery(String sourceObjectId, String query, Map<String, String> parameters, JsonArray tds) {
 		
 		JsonReader jsonReader = Json.createReader(new StringReader(query));
 		JsonObject json;
@@ -78,7 +85,7 @@ public class SemanticQuery {
 		Map<String, String> headers = new HashMap<>();
 		headers.put("accept", "application/json");
 		
-		JsonNode response;
+		JsonNode response = null;
 		
 		try {
 			response = Unirest.get(semanticSearchAPIURL)
@@ -94,8 +101,74 @@ public class SemanticQuery {
 			response = null;
 			
 			logger.warning("Can't reach Semantic Search endpoint. Exception: " + e.getMessage());
+			
 		}
 		
-		return response.toString();
+		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
+		
+		Set<String> arr = new HashSet<>();
+		
+		response.getArray().forEach(item -> {
+			arr.add((String) item);
+		});
+		
+		tds.forEach(item -> {
+			
+			String currentSemanticInterface = getSemanticInterface(Json.createObjectBuilder().add("td", item).build());
+			
+			if (currentSemanticInterface != null) {
+				
+				arr.forEach(item2 -> {
+					
+					if (currentSemanticInterface.equals(item2.toString())) {
+						
+						JsonObjectBuilder innerObjectBuilder = Json.createObjectBuilder();
+						
+						innerObjectBuilder.add("oid", getOid(Json.createObjectBuilder().add("td", item).build()));
+						innerObjectBuilder.add("semanticInterface", item2.toString());
+						
+						mainArrayBuilder.add(innerObjectBuilder);
+					}
+				});
+			}
+			
+		});
+
+		mainObjectBuilder.add("semanticInterfaces", mainArrayBuilder);
+
+		return mainObjectBuilder.build().toString();
+	}
+	
+	public String getSemanticInterface(JsonObject td) {
+		
+		if (td == null) {
+			logger.warning("thingDescription is null.");
+			return null;
+		}
+		
+		JsonObject content = td.getJsonObject("td");
+		if (content == null) {
+			logger.warning("thingDescription is null.");
+			return null;
+		}
+		
+		return content.getString("semanticInterface", null);
+	}
+	
+	public String getOid(JsonObject td) {
+		
+		if (td == null) {
+			logger.warning("thingDescription is null.");
+			return null;
+		}
+		
+		JsonObject content = td.getJsonObject("td");
+		if (content == null) {
+			logger.warning("thingDescription is null.");
+			return null;
+		}
+		
+		return content.getString("oid", null);
 	}
 }

@@ -79,8 +79,6 @@ public class SearchSemantic extends ServerResource {
 		= (CommunicationManager) getContext().getAttributes().get(Api.CONTEXT_COMMMANAGER);
 
 		return new JsonRepresentation(communicationManager.performSemanticSearch(sourceOid, semanticQuery, parameters));
-
-	
 	}
 	
 	

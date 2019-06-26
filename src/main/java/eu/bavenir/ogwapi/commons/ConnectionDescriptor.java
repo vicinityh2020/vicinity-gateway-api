@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -1109,7 +1110,7 @@ public class ConnectionDescriptor {
 	 * @param parameters Any parameters (if needed).
 	 * @return JSON with results. 
 	 */
-	public String performSemanticQuery(String query, Map<String, String> parameters) {
+	public String performSemanticQuery(String sourceObjectId, String query, Map<String, String> parameters, JsonArray tds) {
 		
 		if (query == null) {
 			
@@ -1120,11 +1121,9 @@ public class ConnectionDescriptor {
 		
 		logger.info(this.objectId + ": Executing Semantic query: \n" + query + "\nwith parameters: \n" + parameters.toString());
 		
-		return semantic.performQuery(query, parameters);
+		return semantic.performQuery(sourceObjectId, query, parameters, tds);
 	}
 	
-	
-
 	/* === PRIVATE METHODS === */
 	
 	

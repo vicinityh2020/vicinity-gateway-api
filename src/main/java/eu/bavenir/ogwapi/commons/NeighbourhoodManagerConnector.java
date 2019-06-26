@@ -1,10 +1,15 @@
 package eu.bavenir.ogwapi.commons;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.restlet.data.ChallengeScheme;
+import org.apache.jena.atlas.json.JSON;
 import org.restlet.data.MediaType;
+import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
@@ -105,6 +110,11 @@ public class NeighbourhoodManagerConnector {
 	 */
 	private static final String LIGHTWEIGHTUPDATE_SERVICE = "items/update";
 	
+	
+	/**
+	 * Get thing descriptions string
+	 */
+	private static final String TD_SERVICE = "items/td";
 	
 	// === FIELDS ===
 	
@@ -259,6 +269,36 @@ public class NeighbourhoodManagerConnector {
 	}
 	
 	
+	/**
+	 * Retrieves the thing descriptions of list IoT objects from the Neighborhood Manager. 
+	 * 
+	 * @param Representation of the incoming JSON. List of OIDs
+	 * @return Thing descriptions of objects specified in payload.
+	 */
+	public synchronized Representation getThingDescriptions(Representation json){
+		
+		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
+		
+		ClientResource clientResource = new ClientResource(endpointUrl);
+		
+		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
+		
+		return responseRepresentation;
+		
+		/*
+		String ret;
+		
+		try {
+			ret = representation.getText();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			ret = null;
+		}
+	
+		return ret;
+		*/
+	}
 	
 	// === PRIVATE METHODS ===
 }
