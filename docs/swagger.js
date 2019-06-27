@@ -163,6 +163,22 @@ var data = {
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "name": "thingDescriptions",
+            "in": "query",
+            "description": "If the parameter is set to true, the output contains the whole thing descriptions, not just ids.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Additional parameter for the thingDescriptions parameter. The output is paging, due to size. An input is an integer value of a page, starting from zero.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -692,7 +708,7 @@ var data = {
                           "result": {
                             "type": "string"
                           },
-                          "error":  {
+                          "error": {
                             "type": "boolean",
                             "default": false
                           }
@@ -1502,8 +1518,18 @@ var data = {
                 "message": [
                   {
                     "semanticInterfaces": [
-                      "eu.shar_q.sim:BasicBattery:0.0.1",
-                      "eu.shar_q.sim:BatteryExample:0.0.1"
+                      {
+                        "oid": "OID1",
+                        "semanticInterface": "eu.shar_q.sim:BasicBattery:0.0.1"
+                      },
+                      {
+                        "oid": "OID2",
+                        "semanticInterface": "eu.shar_q.sim:BasicBattery:0.0.1"
+                      },
+                      {
+                        "oid": "OID3",
+                        "semanticInterface": "eu.shar_q.sim:BatteryExample:0.0.1"
+                      }
                     ]
                   }
                 ]
