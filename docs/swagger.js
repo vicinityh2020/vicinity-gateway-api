@@ -2,7 +2,7 @@ var data = {
   "swagger": "2.0",
   "info": {
     "description": "<p>The standalone VICINITY Open Gateway API enables your IoT infrastructure to Among its features there is retrieving and setting a property on remote interconnect with other IoT infrastructures and Services through VICINITY P2P network by using HTTP REST requests.</p><br> <p>This API is used as specification <ul><li>to expose your IoT infrastructure in VICINITY P2P network and</li><li>to consume (access) IoT infrastructure through VICINITY P2P network.</li></ul></p> <p>The only difference is that if your software component is calling these API endpoints (e.g. service is reading property from remote device) or your IoT infrastructure is providing these endpoints to Open Gateway API (e.g. IoT infrastructure is responding to service request on device property).</p> <p>VICINITY Open Gateway API is divided in the following groups: <ul>\n  <li>authentication: used to login device, service and adapter/agent;</li>\n  <li>discovery: to manage registry of devices and services in VICINITY P2P network;</li>\n  <li>properties: to expose or to consume (access) properties of the particular devices/services;</li>\n  <li>actions: to expose or to consume (access) action of the particular device/service;</li>\n  <li>events: to expose or to consume (access) events of the particular device/service.</li>\n</ul>\n<p>Note, for installation guide please refere the <a href=\"\">VICINITY Getting started guide</a></p>",
-    "version": "0.6.4",
+    "version": "0.7",
     "title": "VICINITY Open Gateway API",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
@@ -1161,6 +1161,13 @@ var data = {
             "description": "event id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "qos",
+            "in": "query",
+            "description": "quality of service - default value is 1. If the parameter is set to 2, an event channel is created, which is waiting for acknowledgment after the event is distributed.",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -1364,6 +1371,13 @@ var data = {
             "description": "event id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "qos",
+            "in": "query",
+            "description": "quality of service - default value is 1. If the parameter is set to 2, a subscription is created, which is waiting for acknowledgment after the event is distributed.",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -1544,3 +1558,4 @@ var data = {
     }
   }
 }
+
