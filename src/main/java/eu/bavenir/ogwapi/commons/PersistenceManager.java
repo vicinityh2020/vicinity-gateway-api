@@ -15,13 +15,18 @@ import java.util.logging.Logger;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -142,6 +147,11 @@ public class PersistenceManager {
 	 */
 	private Logger logger;
 	
+	/**
+	 * NM connector.
+	 */
+	private NeighbourhoodManagerConnector nmConnectionManager;
+	
 	
 	/* === PUBLIC METHODS === */
 	
@@ -155,15 +165,12 @@ public class PersistenceManager {
 		persistenceFile = config.getString(CONFIG_PARAM_DATADIR, CONFIG_DEF_PERSISTENCEFILE) + PERSISTENCE_FILENAME;
 		thingDescriptionFile = config.getString(CONFIG_PARAM_DATADIR, CONFIG_DEF_PERSISTENCEFILE) + TD_FILENAME;
 		
-		// lets compile something like this: https://vicinity.bavenir.eu:3000/commServer/items/searchItems
-		neighborhoodManagerAPIURL = 
-				PROTOCOL + 
-				config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER) +
-				":" +
-				config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT) +
-				NM_API_PATH;
+		// NM connector
+		nmConnectionManager = new NeighbourhoodManagerConnector(config, logger);
 		
 		loadTDFromServer = config.getBoolean(CONFIG_PARAM_LOADTDFROMSERVER, CONFIG_DEF_LOADTDFROMSERVER);
+		
+		
 	}
 	
 	/**
@@ -298,43 +305,27 @@ public class PersistenceManager {
 	 * @param objectId - specify object
 	 */
 	public JsonObject loadThingDescriptionFromServer(String objectId) {
-		
-		// create headers
-		Map<String, String> headers = new HashMap<>();
-		headers.put("Content-Type", "application/json");
-		
-		// create body (example: {"oids":["d52f2a03-09c7-46a3-b86c-cf885dd81dd7"]})
-		JSONObject body = new JSONObject();
-		JSONArray array = new JSONArray();
-		
-		array.put(objectId); 
-		// for DEBUG reason 
-		// array.put("d52f2a03-09c7-46a3-b86c-cf885dd81dd7"); 
-		body.put("oids", array);
-		
-		JsonNode response;
+		Representation resp;
+		String jsonStr;
 		
 		try {
-			response = Unirest.post(neighborhoodManagerAPIURL)
-						   	  .headers(headers)
-							  .body(body)
-							  .asJson()
-							  .getBody();
+			resp = nmConnectionManager.getThingDescription(objectId);
+			
+			// Get string from representation
+			jsonStr = resp.getText();
 			
 			logger.info("TD json for " + objectId + " was loaded from server.");
-			
-		} catch (UnirestException e) {
-			
-			response = null;
+		 }
+		 catch (Exception e) {
 			e.printStackTrace();
 			
 			logger.warning("TD json for " + objectId + " could not be loaded from server.");
 			
 			return null;
-		}
-		
-		// transform to standart JsonObject
-		JsonReader jsonReader = Json.createReader(new StringReader(response.getObject().toString()));
+		 };
+		 
+	// transform to standard JsonObject
+		JsonReader jsonReader = Json.createReader(new StringReader(jsonStr));
 		JsonObject json;
 		
 		try {
