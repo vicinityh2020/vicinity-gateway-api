@@ -9,7 +9,7 @@ ENV GID=${GID}
 
 # Install ALPINE packages
 RUN apk update && apk upgrade && \
-    apk add --no-cache shadow bash git openssh
+    apk add --no-cache shadow bash git openssh curl
     
 # Create group and user that will run the gateway
 RUN groupadd -r -g ${GID} app && useradd -r -u ${UID} -g app -d /gateway -s /sbin/nologin -c "Image user" app
