@@ -3,6 +3,8 @@ package eu.bavenir.ogwapi.commons;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -299,6 +301,36 @@ public class NeighbourhoodManagerConnector {
 		return ret;
 		*/
 	}
+	
+	/**
+	 * Retrieves the thing descriptions of list IoT objects from the Neighborhood Manager. 
+	 * 
+	 * @param Representation of the incoming JSON. List of OIDs
+	 * @return Thing descriptions of objects specified in payload.
+	 */
+	public synchronized Representation getThingDescription(String objectId){
+		
+		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
+		
+		ClientResource clientResource = new ClientResource(endpointUrl);
+		
+		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
+		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
+			
+		mainArrayBuilder.add(
+			Json.createObjectBuilder().add("oid", objectId)
+		);
+		
+		mainObjectBuilder.add("objects", mainArrayBuilder);
+		
+		JsonObject payload = mainObjectBuilder.build();
+		
+		Representation responseRepresentation = clientResource.post(new JsonRepresentation(payload.toString()), MediaType.APPLICATION_JSON);
+		
+		return responseRepresentation;
+		
+	}
+	
 	
 	// === PRIVATE METHODS ===
 }
