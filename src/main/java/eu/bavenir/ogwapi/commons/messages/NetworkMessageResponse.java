@@ -6,6 +6,7 @@ import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 
@@ -319,6 +320,16 @@ public class NetworkMessageResponse extends NetworkMessage {
 		return jsonRepresentation.toString();
 	}
 	
+
+	/**
+	 * Retrieves the json representation
+	 * 
+	 * @return jsonRepresentation of message
+	 */
+	public JsonObject getJsonRepresentation() {
+		
+		return jsonRepresentation;
+	}
 	
 	/* === PRIVATE METHODS === */
 	
@@ -467,5 +478,7 @@ public class NetworkMessageResponse extends NetworkMessage {
 		responseBody = null;
 		responseBodySupplement = null;
 	}
+	
+	
 
 }

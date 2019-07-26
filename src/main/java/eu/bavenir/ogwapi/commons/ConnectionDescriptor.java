@@ -27,6 +27,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageEvent;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
+import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
 import eu.bavenir.ogwapi.commons.search.SemanticQuery;
 import eu.bavenir.ogwapi.commons.search.SparqlQuery;
 
@@ -143,7 +144,10 @@ public class ConnectionDescriptor {
 	 */
 	private Data data;
 	
-	
+	/**
+	 * message counter
+	 */
+	private MessageCounter messageCounter;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -159,7 +163,7 @@ public class ConnectionDescriptor {
 	 * @param commManager The main CommunicationManager.
 	 */
 	public ConnectionDescriptor(String objectId, String password, XMLConfiguration config, Logger logger, 
-			CommunicationManager commManager){
+			CommunicationManager commManager, MessageCounter messageCounter){
 		
 		this.objectId = objectId;
 		this.password = password;
@@ -171,6 +175,8 @@ public class ConnectionDescriptor {
 		
 		this.sparql = new SparqlQuery(config, this, logger);
 		this.semantic = new SemanticQuery(config, logger);
+		
+		this.messageCounter = messageCounter;
 		
 		// TODO decide here what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);
@@ -2173,6 +2179,9 @@ public class ConnectionDescriptor {
 		
 		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
+			// monitoring 
+			messageCounter.addMessage(request, null, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND);
+			
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
 			
@@ -2194,6 +2203,9 @@ public class ConnectionDescriptor {
 		// nothing came through
 		if (response == null){
 
+			// monitoring 
+			messageCounter.addMessage(request, null, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED);
+			
 			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
 					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
 			
@@ -2207,6 +2219,9 @@ public class ConnectionDescriptor {
 			
 			return statusMessage;
 		}
+		
+		// monitoring 
+		messageCounter.addMessage(request, response, MessageCounter.RECORDTYPE_INT_OK);
 		
 		// response arrived
 		statusMessage = new StatusMessage(

@@ -318,7 +318,17 @@ public class NetworkMessageRequest extends NetworkMessage {
 	public Map<String, String> getParameters() {
 		return parameters;
 	}
-	
+
+
+	/**
+	 * Retrieves the json representation
+	 * 
+	 * @return jsonRepresentation of message
+	 */
+	public JsonObject getJsonRepresentation() {
+		
+		return jsonRepresentation;
+	}
 	
 	/**
 	 * Sets the {@link java.util.Map Map} filled with parameters.
@@ -572,5 +582,6 @@ public class NetworkMessageRequest extends NetworkMessage {
 		parameters = new LinkedHashMap<String, String>();
 		requestBody = null;
 	}
+
 	
 }

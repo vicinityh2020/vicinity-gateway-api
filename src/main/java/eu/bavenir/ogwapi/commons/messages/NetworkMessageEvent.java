@@ -360,4 +360,10 @@ public class NetworkMessageEvent extends NetworkMessage{
 		return true;
 	}
 
+
+	public void generateRequestId() {
+		
+		super.generateRequestId();
+	}
+
 }

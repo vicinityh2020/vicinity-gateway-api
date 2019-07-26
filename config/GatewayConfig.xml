@@ -431,5 +431,13 @@
 		</semantic>
 	</search>
 	
+	<messageCounter>
+		<countOfRecords>
+			<!--
+			The number of records that are sent to NM 
+			-->
+			100
+		</countOfRecords>
+	</messageCounter>
 
 </configuration>

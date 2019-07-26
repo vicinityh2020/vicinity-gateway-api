@@ -6,12 +6,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import javax.json.Json;
@@ -22,15 +20,12 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
-import eu.bavenir.ogwapi.restapi.Api;
+import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
 
 /*
  * STRUCTURE:
@@ -274,9 +269,14 @@ public class CommunicationManager {
 	private NeighbourhoodManagerConnector nmConnector;
 	
 	/**
-	 * TODO
+	 * pageSize parameter 
 	 */
 	private int pageSize;
+	
+	/**
+	 * MessageCounter
+	 */
+	private MessageCounter messageCounter;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -295,6 +295,8 @@ public class CommunicationManager {
 		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
 		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		
+		
+		this.messageCounter = new MessageCounter(config, logger);
 		
 		// load the configuration for the pageSize param
 		pageSize = config.getInt(CONFIG_PARAM_PAGE_SIZE, CONFIG_DEF_PAGE_SIZE);
@@ -511,7 +513,7 @@ public class CommunicationManager {
 				logger.info("Reconnecting '" + objectId + "' to network.");
 			}
 			
-			descriptor = new ConnectionDescriptor(objectId, password, config, logger, this);
+			descriptor = new ConnectionDescriptor(objectId, password, config, logger, this, messageCounter);
 			
 			verifiedOrConnected = descriptor.connect();
 		}
