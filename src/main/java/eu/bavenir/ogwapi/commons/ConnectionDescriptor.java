@@ -2180,7 +2180,7 @@ public class ConnectionDescriptor {
 		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
 			// monitoring 
-			messageCounter.addMessage(request, null, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, this.objectId, destinationOid);
 			
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
@@ -2204,7 +2204,7 @@ public class ConnectionDescriptor {
 		if (response == null){
 
 			// monitoring 
-			messageCounter.addMessage(request, null, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED, this.objectId, destinationOid);
 			
 			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
 					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
@@ -2221,7 +2221,7 @@ public class ConnectionDescriptor {
 		}
 		
 		// monitoring 
-		messageCounter.addMessage(request, response, MessageCounter.RECORDTYPE_INT_OK);
+		messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid);
 		
 		// response arrived
 		statusMessage = new StatusMessage(

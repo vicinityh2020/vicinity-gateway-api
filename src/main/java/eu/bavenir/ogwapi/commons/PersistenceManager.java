@@ -31,6 +31,8 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
+
 /*
  * STRUCTURE:
  * - constants

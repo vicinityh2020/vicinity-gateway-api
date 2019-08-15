@@ -23,6 +23,7 @@ import org.apache.commons.configuration2.XMLConfiguration;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 
+import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
 import eu.bavenir.ogwapi.commons.messages.CodesAndReasons;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;

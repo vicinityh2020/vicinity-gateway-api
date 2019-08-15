@@ -4,3 +4,7 @@
 .settings/
 .DS_Store
 data/
+/target/
+log/*.log
+log/*.log.lck
+bin/

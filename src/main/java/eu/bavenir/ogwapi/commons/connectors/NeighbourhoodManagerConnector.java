@@ -1,4 +1,4 @@
-package eu.bavenir.ogwapi.commons;
+package eu.bavenir.ogwapi.commons.connectors;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -14,6 +14,8 @@ import org.restlet.data.MediaType;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
+
+import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
 
 /*
  * STRUCTURE
@@ -117,6 +119,13 @@ public class NeighbourhoodManagerConnector {
 	 * Get thing descriptions string
 	 */
 	private static final String TD_SERVICE = "items/td";
+	
+	
+	/**
+	 * Get thing descriptions string
+	 */
+	private static final String SEND_COUNTERS = "counters";
+	
 	
 	// === FIELDS ===
 	
@@ -324,6 +333,24 @@ public class NeighbourhoodManagerConnector {
 		mainObjectBuilder.add("objects", mainArrayBuilder);
 		
 		JsonObject payload = mainObjectBuilder.build();
+		
+		Representation responseRepresentation = clientResource.post(new JsonRepresentation(payload.toString()), MediaType.APPLICATION_JSON);
+		
+		return responseRepresentation;
+		
+	}
+	
+	/**
+	 * Sends count of messages sent by the gateway.
+	 * 
+	 * @param JSON containing array records with all the messages 
+	 * @return Server acknowledgment
+	 */
+	public synchronized Representation sendCounters(JsonObject payload){
+		
+		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + SEND_COUNTERS;
+		
+		ClientResource clientResource = new ClientResource(endpointUrl);
 		
 		Representation responseRepresentation = clientResource.post(new JsonRepresentation(payload.toString()), MediaType.APPLICATION_JSON);
 		

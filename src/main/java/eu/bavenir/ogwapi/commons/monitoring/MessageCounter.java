@@ -3,6 +3,7 @@ package eu.bavenir.ogwapi.commons.monitoring;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPublicKeySpec;
@@ -14,13 +15,16 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.restlet.representation.Representation;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import java.security.interfaces.ECKey;
 
+import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 
@@ -92,6 +96,11 @@ public class MessageCounter {
 	private Logger logger;
 	
 	/**
+	* A connector used for connecting to NM Manager.
+	*/
+	private NeighbourhoodManagerConnector nmConnector;
+	
+	/**
 	 * List of messages
 	 */
 	private List<JsonObject> records;
@@ -117,6 +126,8 @@ public class MessageCounter {
 		this.config = config;
 		this.logger = logger;
 		
+		nmConnector = new NeighbourhoodManagerConnector(config, logger);
+		
 		records = new ArrayList<JsonObject>();
 		
 		count = 0;
@@ -126,10 +137,15 @@ public class MessageCounter {
 	/**
 	 * add message
 	 */
-	public void addMessage(NetworkMessageRequest request, NetworkMessageResponse response, int recordType) {
+	public void addMessage(int requestId, int recordType, String sourceOid, String destinationOid) {
 		
 		// record JsonObject
 		JsonObjectBuilder recordObjectBuilder = Json.createObjectBuilder();
+		recordObjectBuilder.add("destinationOid", destinationOid);
+		recordObjectBuilder.add("sourceOid", sourceOid);
+		recordObjectBuilder.add("requestId", requestId);
+		recordObjectBuilder.add("timestamp", System.currentTimeMillis());
+
 		
 		if (recordType == RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND) {
 			
@@ -147,23 +163,19 @@ public class MessageCounter {
 			recordObjectBuilder.add("messageStatus", RECORDTYPE_STRING_OK);
 		}
 		
-		request.buildMessageString();
-		recordObjectBuilder.add("request", request.getJsonRepresentation());
-		
-		if (response != null) {
-			response.buildMessageString();
-			recordObjectBuilder.add("response", response.getJsonRepresentation());
-		} else {
-			recordObjectBuilder.add("response", "null");
-		}
+//		request.buildMessageString();
+//		recordObjectBuilder.add("request", request.getJsonRepresentation());
+//		
+//		if (response != null) {
+//			response.buildMessageString();
+//			recordObjectBuilder.add("response", response.getJsonRepresentation());
+//		} else {
+//			recordObjectBuilder.add("response", "null");
+//		}
 		
 		records.add(recordObjectBuilder.build());
 		
-		//for testing
-		sendToNeighborhoodManager();
-		
-		
-		if (++count > countOfSendingRecords) {
+		if (++count >= countOfSendingRecords) {
 			
 			sendToNeighborhoodManager();
 			
@@ -177,10 +189,25 @@ public class MessageCounter {
 	 */
 	private void sendToNeighborhoodManager() {
 		
-		JsonObject json = createJsonFromRecords();
+		JsonObject payload = createJsonFromRecords();
+		Representation resp;
+//		String jsonStr;
 		
-		// send this json to NM
-		//TODO
+		logger.info("Sending counters to platform");
+		
+		try {
+			resp = nmConnector.sendCounters(payload);
+			
+			// Get string from representation
+//			jsonStr = resp.getText();
+			
+			logger.info("Counters were sent to platform");
+		 }
+		 catch (Exception e) {	 
+			e.printStackTrace();
+			
+			logger.warning("There was a problem sending counters to platform");
+		 };
 	}
 	
 	/**
@@ -195,7 +222,6 @@ public class MessageCounter {
 		
 		// main JsonObject
 		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
-		mainObjectBuilder.add("timeStamp", System.currentTimeMillis());
 		mainObjectBuilder.add("records", recordsArrayBuilder);
 		
 		return mainObjectBuilder.build();
