@@ -131,13 +131,18 @@ public class MessageCounter {
 		records = new ArrayList<JsonObject>();
 		
 		count = 0;
-		countOfSendingRecords = config.getInt(CONFIG_PARAM_MAXRECORDS, CONFIG_DEF_MAXRECORDS);
+		
+		// Initialize max counters stored before sending - MAX 500 - DEFAULT 100
+		countOfSendingRecords = config.getInt(CONFIG_PARAM_MAXRECORDS, CONFIG_DEF_MAXRECORDS);		
+		if(countOfSendingRecords > 500) {
+			countOfSendingRecords = 500;
+		} 
 	}
 	
 	/**
 	 * add message
 	 */
-	public void addMessage(int requestId, int recordType, String sourceOid, String destinationOid) {
+	public void addMessage(int requestId, int recordType, String sourceOid, String destinationOid, Boolean reqInitiator, String messageType) {
 		
 		// record JsonObject
 		JsonObjectBuilder recordObjectBuilder = Json.createObjectBuilder();
@@ -145,33 +150,28 @@ public class MessageCounter {
 		recordObjectBuilder.add("sourceOid", sourceOid);
 		recordObjectBuilder.add("requestId", requestId);
 		recordObjectBuilder.add("timestamp", System.currentTimeMillis());
+		recordObjectBuilder.add("reqInitiator", reqInitiator);  // True if I am initiating the communication
+		recordObjectBuilder.add("messageType", messageType);
 
 		
 		if (recordType == RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND) {
 			
 			// message status
 			recordObjectBuilder.add("messageStatus", RECORDTYPE_STRING_NOT_POSSIBLE_TO_SEND);
+			recordObjectBuilder.add("messageStatusCode", RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND);
 			
 		} else if (recordType == RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED) {
 			
 			// message status
 			recordObjectBuilder.add("messageStatus", RECORDTYPE_STRING_NO_RESPONSE_MESSAGE_RECEIVED);
+			recordObjectBuilder.add("messageStatusCode", RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED);
 			
 		} else if (recordType == RECORDTYPE_INT_OK) {
 			
 			// message status
 			recordObjectBuilder.add("messageStatus", RECORDTYPE_STRING_OK);
+			recordObjectBuilder.add("messageStatusCode", RECORDTYPE_INT_OK);
 		}
-		
-//		request.buildMessageString();
-//		recordObjectBuilder.add("request", request.getJsonRepresentation());
-//		
-//		if (response != null) {
-//			response.buildMessageString();
-//			recordObjectBuilder.add("response", response.getJsonRepresentation());
-//		} else {
-//			recordObjectBuilder.add("response", "null");
-//		}
 		
 		records.add(recordObjectBuilder.build());
 		

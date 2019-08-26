@@ -361,9 +361,4 @@ public class NetworkMessageEvent extends NetworkMessage{
 	}
 
 
-	public void generateRequestId() {
-		
-		super.generateRequestId();
-	}
-
 }

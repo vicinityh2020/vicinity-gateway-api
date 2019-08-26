@@ -172,4 +172,5 @@ public class SemanticQuery {
 		return content.getString("oid", null);
 	}
 
+
 }

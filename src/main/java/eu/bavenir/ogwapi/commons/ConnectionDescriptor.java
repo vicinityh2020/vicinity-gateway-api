@@ -306,7 +306,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters,
-				body);
+				body,
+				"STARTACTION");
 
 	}
 	
@@ -403,7 +404,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters,
-				body);
+				body,
+				"GETTASKSTATUS");
 		
 	}
 	
@@ -435,7 +437,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters,
-				body);	
+				body,
+				"CANCELTASK");	
 	}
 	
 	
@@ -597,7 +600,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters,
-				body);	
+				body,
+				"GETEVENTCHANNELSTATUS");	
 	}
 	
 	
@@ -674,7 +678,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"SUBSCRIBETOEVENTCHANNEL");
 	
 		if (!statusMessage.isError()) {
 			// keep the track
@@ -748,7 +753,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"UNSUBSCRIBEFROMEVENTCHANNEL");
 		
 		if (!statusMessage.isError()) {
 			// keep the track
@@ -890,7 +896,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"GETLISTOFEVENTS");
 
 	}
 	
@@ -915,7 +922,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"GETLISTOFACTIONS");
 
 	}
 	
@@ -940,7 +948,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"GETTHINGDESCRIPTION");
 
 	}
 	
@@ -965,7 +974,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"GETLISTOFPROPERTIES");
 
 	}
 	
@@ -993,7 +1003,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"GETPROPERTYVALUE");
 
 	}
 	
@@ -1022,7 +1033,8 @@ public class ConnectionDescriptor {
 				destinationOid, 
 				attributes, 
 				parameters, 
-				body);
+				body,
+				"SETPROPERTYVALUE");
 	}
 	
 	
@@ -1140,6 +1152,7 @@ public class ConnectionDescriptor {
 	 */
 	private void processMessageRequest(NetworkMessage networkMessage){
 		
+		String typeOfMessage = "Unknown";
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
 		
@@ -1153,7 +1166,7 @@ public class ConnectionDescriptor {
 			case NetworkMessageRequest.OPERATION_CANCELTASK:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is CANCELTASK.");
-				
+				typeOfMessage = "CANCELTASK";
 				response = respondToCancelRunningTask(requestMessage);
 				
 				break;
@@ -1161,69 +1174,77 @@ public class ConnectionDescriptor {
 			case NetworkMessageRequest.OPERATION_GETEVENTCHANNELSTATUS:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETEVENTCHANNELSTATUS.");
-				
+				typeOfMessage = "GETEVENTCHANNELSTATUS";
 				response = respondToEventChannelStatusQuery(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFACTIONS:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFACTIONS.");
+				typeOfMessage = "GETLISTOFACTIONS";
 				response = respondToGetObjectActions(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFEVENTS:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFEVENTS.");
+				typeOfMessage = "GETLISTOFEVENTS";
 				response = respondToGetObjectEvents(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETLISTOFPROPERTIES:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETLISTOFPROPERTIES.");
-				
+				typeOfMessage = "GETLISTOFPROPERTIES";
 				response = respondToGetObjectProperties(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETPROPERTYVALUE:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETPROPERTYVALUE.");
-				
+				typeOfMessage = "GETPROPERTYVALUE";
 				response = respondToGetObjectProperty(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETTASKSTATUS:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETTASKSTATUS.");
+				typeOfMessage = "GETTASKSTATUS";
 				response = respondToGetTaskStatus(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_SETPROPERTYVALUE:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is SETPROPERTYVALUE.");
+				typeOfMessage = "SETPROPERTYVALUE";
 				response = respondToSetObjectProperty(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_STARTACTION:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is STARTACTION.");
+				typeOfMessage = "STARTACTION";
 				response = respondToStartActionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_SUBSCRIBETOEVENTCHANNEL:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is SUBSCRIBETOEVENTCHANNEL.");
+				typeOfMessage = "SUBSCRIBETOEVENTCHANNEL";
 				response = respondToEventSubscriptionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_UNSUBSCRIBEFROMEVENTCHANNEL:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is UNSUBSCRIBEFROMEVENTCHANNEL.");
+				typeOfMessage = "UNSUBSCRIBEFROMEVENTCHANNEL";
 				response = respondToCancelSubscriptionRequest(requestMessage);
 				break;
 				
 			case NetworkMessageRequest.OPERATION_GETTHINGDESCRIPTION:
 				
 				logger.info(this.objectId + ": Request ID is " + requestMessage.getRequestId() + ", operation is GETTHINGDESCRIPTION.");
+				typeOfMessage = "GETTHINGDESCRIPTION";
 				response = respondToGetObjectThingDescription(requestMessage);
 				break;
 			}
@@ -1235,10 +1256,12 @@ public class ConnectionDescriptor {
 				response.setDestinationOid(requestMessage.getSourceOid());
 			}
 			
+			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage);
 			sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
 			
 		} else {
 			
+			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage);
 			logger.warning(this.objectId + ": The source OID " + requestMessage.getSourceOid() + " of the request " 
 					+ requestMessage.getRequestId() + " is not in the roster of this object.");
 		}
@@ -1341,6 +1364,9 @@ public class ConnectionDescriptor {
 			// send the response message (ACK) back to sender if QoS == 2
 			if (subscription.getQoS() == 2) {
 				
+				// TODO Enable message counter for event ACK
+				//messageCounter.addMessage(eventMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, eventMessage.getSourceOid(), this.objectId, false, "eventAck");
+
 				sendMessage(this.objectId, eventMessage.getSourceOid(), responseToSender.buildMessageString());
 				
 				logger.info(this.objectId + ": A respond (ACK) has been sent.");
@@ -2150,7 +2176,7 @@ public class ConnectionDescriptor {
 	 * @return Status message.
 	 */
 	private StatusMessage sendRequestForRemoteOperation(byte operationId, String destinationOid, 
-			Map<String, String> attributes, Map<String, String> parameters, String body) {
+			Map<String, String> attributes, Map<String, String> parameters, String body, String typeOfMessage) {
 		
 		if (destinationOid == null) {
 			return null;
@@ -2180,7 +2206,7 @@ public class ConnectionDescriptor {
 		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
 			// monitoring 
-			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, this.objectId, destinationOid);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, this.objectId, destinationOid, true, typeOfMessage);
 			
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
@@ -2204,7 +2230,7 @@ public class ConnectionDescriptor {
 		if (response == null){
 
 			// monitoring 
-			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED, this.objectId, destinationOid);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED, this.objectId, destinationOid, true, typeOfMessage);
 			
 			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
 					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
@@ -2221,7 +2247,7 @@ public class ConnectionDescriptor {
 		}
 		
 		// monitoring 
-		messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid);
+		messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid, true, typeOfMessage);
 		
 		// response arrived
 		statusMessage = new StatusMessage(
