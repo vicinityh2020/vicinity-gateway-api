@@ -28,6 +28,7 @@ import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.messages.StatusMessage;
 import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
+import eu.bavenir.ogwapi.commons.persistence.Data;
 import eu.bavenir.ogwapi.commons.search.SemanticQuery;
 import eu.bavenir.ogwapi.commons.search.SparqlQuery;
 
@@ -170,13 +171,13 @@ public class ConnectionDescriptor {
 		
 		this.config = config;
 		this.logger = logger;
+		this.messageCounter = messageCounter;
 		
 		this.commManager = commManager;
 		
 		this.sparql = new SparqlQuery(config, this, logger);
 		this.semantic = new SemanticQuery(config, logger);
-		
-		this.messageCounter = messageCounter;
+
 		
 		// TODO decide here what type of connector to use
 		agentConnector = new RestAgentConnector(config, logger);

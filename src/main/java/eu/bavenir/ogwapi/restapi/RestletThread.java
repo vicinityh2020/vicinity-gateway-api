@@ -7,6 +7,8 @@ import org.restlet.Component;
 import org.restlet.Server;
 import org.restlet.data.Protocol;
 
+import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
+
 
 /*
  * STRUCTURE:
@@ -149,6 +151,10 @@ public class RestletThread extends Thread {
 	 */
 	private String keystoreType;
 	
+	/**
+	 * Type of messageCounter
+	 */
+	private MessageCounter messageCounter;
 	
 	/* === PUBLIC METHODS === */
 	
@@ -158,10 +164,11 @@ public class RestletThread extends Thread {
 	 * @param config OGWAPI configuration.
 	 * @param logger OGWAPI Logger.
 	 */
-	public RestletThread(XMLConfiguration config, Logger logger){
+	public RestletThread(XMLConfiguration config, Logger logger, MessageCounter messageCounter){
 		
 		this.config = config;
 		this.logger = logger;
+		this.messageCounter = messageCounter;
 		
 		threadRunning = true;
 		
@@ -233,7 +240,7 @@ public class RestletThread extends Thread {
 		server.getContext().getParameters().add("threadPool.maxThreads", MAX_THREADS); 
 		
 		// attach the API application  
-		component.getDefaultHost().attach(API_URL_PATH, new Api(config, logger));  
+		component.getDefaultHost().attach(API_URL_PATH, new Api(config, logger, messageCounter));  
 
 		// start the component
 		try {

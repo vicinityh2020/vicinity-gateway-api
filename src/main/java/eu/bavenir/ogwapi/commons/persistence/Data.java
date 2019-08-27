@@ -1,4 +1,4 @@
-package eu.bavenir.ogwapi.commons;
+package eu.bavenir.ogwapi.commons.persistence;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -11,6 +11,10 @@ import javax.json.JsonObject;
 
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.json.JSONException;
+
+import eu.bavenir.ogwapi.commons.Action;
+import eu.bavenir.ogwapi.commons.EventChannel;
+import eu.bavenir.ogwapi.commons.Subscription;
 
 /*
  * STRUCTURE:

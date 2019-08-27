@@ -1,4 +1,4 @@
-package eu.bavenir.ogwapi.commons;
+package eu.bavenir.ogwapi.commons.persistence;
 
 import java.io.File;
 import java.io.FileInputStream;

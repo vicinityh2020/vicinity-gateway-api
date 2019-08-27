@@ -16,6 +16,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import com.mashape.unirest.http.Unirest;
 
+import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
 import eu.bavenir.ogwapi.restapi.RestletThread;
 
 
@@ -98,10 +99,9 @@ public class App {
 	private static Configurations configurations;
 	private static XMLConfiguration config;
 	
-	
 	// executing threads
 	private static RestletThread restletThread;
-	
+	private static MessageCounter messageCounter;	
 
 	/* === METHODS === */
 	
@@ -191,7 +191,8 @@ public class App {
 		}
 		
 		// === set up the API thread ===
-		restletThread = new RestletThread(config, logger);
+		messageCounter = new MessageCounter(config, logger);
+		restletThread = new RestletThread(config, logger, messageCounter);
 		
 		return true;
 	}
@@ -304,7 +305,9 @@ public class App {
 					
 					// only system.out style logging can be executed at this phase
 					// (but there's nothing too much interesting anyway...)
-					System.out.println("Vicinity Gateway API: Shutdown hook run, terminating threads.");
+					System.out.println("Vicinity Gateway API: Shutdown hook run, terminating threads and storing counters.");
+					
+					messageCounter.saveCounters();
 					
 					restletThread.terminateThread();				
 					restletThread.join();

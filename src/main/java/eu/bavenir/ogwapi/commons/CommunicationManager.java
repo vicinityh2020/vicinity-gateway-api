@@ -289,15 +289,13 @@ public class CommunicationManager {
 	 * @param config Configuration object.
 	 * @param logger Java logger.
 	 */
-	public CommunicationManager(XMLConfiguration config, Logger logger){
+	public CommunicationManager(XMLConfiguration config, Logger logger, MessageCounter messageCounter){
 		
 		logger.config("OGWAPI version: " + OGWAPI_VERSION);
 		
 		this.descriptorPool = Collections.synchronizedMap(new HashMap<String, ConnectionDescriptor>());
 		
 		this.nmConnector = new NeighbourhoodManagerConnector(config, logger);		
-		
-		this.messageCounter = new MessageCounter(config, logger);
 		
 		// load the configuration for the pageSize param
 		pageSize = config.getInt(CONFIG_PARAM_PAGE_SIZE, CONFIG_DEF_PAGE_SIZE);
@@ -306,6 +304,7 @@ public class CommunicationManager {
 		
 		this.config = config;
 		this.logger = logger;
+		this.messageCounter = messageCounter;
 		
 		// load the configuration for the session recovery policy
 		String sessionRecoveryPolicyString = config.getString(CONFIG_PARAM_SESSIONRECOVERY, CONFIG_DEF_SESSIONRECOVERY);

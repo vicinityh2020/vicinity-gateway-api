@@ -27,6 +27,7 @@ import java.security.interfaces.ECKey;
 import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
 import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
+import eu.bavenir.ogwapi.commons.persistence.Counters;
 
 /**
  * This class serves for monitoring count of messages
@@ -115,6 +116,11 @@ public class MessageCounter {
 	 */
 	private int count;
 	
+	/**
+	 * Counters file management
+	 */
+	private Counters CountersPersistence;
+	
 	
 	/* === PUBLIC METHODS === */
 	
@@ -128,15 +134,23 @@ public class MessageCounter {
 		
 		nmConnector = new NeighbourhoodManagerConnector(config, logger);
 		
-		records = new ArrayList<JsonObject>();
-		
-		count = 0;
+		logger.info("Trying to load counters from file...");
+		CountersPersistence = new Counters(config, logger);
+		records = CountersPersistence.getRecords();
+		count = CountersPersistence.getCountOfMessages();
 		
 		// Initialize max counters stored before sending - MAX 500 - DEFAULT 100
 		countOfSendingRecords = config.getInt(CONFIG_PARAM_MAXRECORDS, CONFIG_DEF_MAXRECORDS);		
 		if(countOfSendingRecords > 500) {
 			countOfSendingRecords = 500;
 		} 
+	}
+	
+	/**
+	 * Save messages in counters file
+	 */
+	public void saveCounters(){
+		CountersPersistence.saveCounters(records);
 	}
 	
 	/**
@@ -190,13 +204,14 @@ public class MessageCounter {
 	private void sendToNeighborhoodManager() {
 		
 		JsonObject payload = createJsonFromRecords();
-		Representation resp;
+//		Representation resp;
 //		String jsonStr;
 		
 		logger.info("Sending counters to platform");
 		
 		try {
-			resp = nmConnector.sendCounters(payload);
+//			resp = nmConnector.sendCounters(payload);
+			nmConnector.sendCounters(payload);
 			
 			// Get string from representation
 //			jsonStr = resp.getText();

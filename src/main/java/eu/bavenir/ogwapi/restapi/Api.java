@@ -29,6 +29,7 @@ import eu.bavenir.ogwapi.restapi.services.ObjectsOidPropertiesPid;
 import eu.bavenir.ogwapi.restapi.services.SearchSemantic;
 import eu.bavenir.ogwapi.restapi.services.SearchSparql;
 import eu.bavenir.ogwapi.commons.CommunicationManager;
+import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
 
 
 /*
@@ -125,12 +126,12 @@ public class Api extends Application {
 	 * @param config Configuration object.
 	 * @param logger Java logger.
 	 */
-	public Api(XMLConfiguration config, Logger logger){
+	public Api(XMLConfiguration config, Logger logger, MessageCounter messageCounter){
 		this.config = config;
 		this.logger = logger;
 		
 		// this will initialise the CommunicationNode
-		communicationManager = new CommunicationManager(config, logger);
+		communicationManager = new CommunicationManager(config, logger, messageCounter);
 		
 		// insert stuff into context
 		applicationContext = new Context();
