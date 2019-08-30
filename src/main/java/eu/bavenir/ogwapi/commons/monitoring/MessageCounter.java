@@ -1,13 +1,5 @@
 package eu.bavenir.ogwapi.commons.monitoring;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECPublicKeySpec;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,18 +7,10 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.io.IOUtils;
-import org.restlet.representation.Representation;
-
-import com.auth0.jwt.algorithms.Algorithm;
-import java.security.interfaces.ECKey;
 
 import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageRequest;
-import eu.bavenir.ogwapi.commons.messages.NetworkMessageResponse;
 import eu.bavenir.ogwapi.commons.persistence.Counters;
 
 /**
@@ -156,7 +140,7 @@ public class MessageCounter {
 	/**
 	 * add message
 	 */
-	public void addMessage(int requestId, int recordType, String sourceOid, String destinationOid, Boolean reqInitiator, String messageType) {
+	public void addMessage(int requestId, int recordType, String sourceOid, String destinationOid, Boolean reqInitiator, String messageType, int messageSize) {
 		
 		// record JsonObject
 		JsonObjectBuilder recordObjectBuilder = Json.createObjectBuilder();
@@ -166,6 +150,8 @@ public class MessageCounter {
 		recordObjectBuilder.add("timestamp", System.currentTimeMillis());
 		recordObjectBuilder.add("reqInitiator", reqInitiator);  // True if I am initiating the communication
 		recordObjectBuilder.add("messageType", messageType);
+		recordObjectBuilder.add("messageSize", messageSize);
+
 
 		
 		if (recordType == RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND) {

@@ -1157,6 +1157,10 @@ public class ConnectionDescriptor {
 		// cast it to request message first (it is safe and also necessary)
 		NetworkMessageRequest requestMessage = (NetworkMessageRequest) networkMessage;
 		
+		// Calculate message size
+		byte[] byteArray = requestMessage.buildMessageString().getBytes();
+		int sizeInBytes = byteArray.length;
+		
 		NetworkMessageResponse response = null;
 		
 		if (objectIsInMyRoster(requestMessage.getSourceOid())) {
@@ -1257,12 +1261,12 @@ public class ConnectionDescriptor {
 				response.setDestinationOid(requestMessage.getSourceOid());
 			}
 			
-			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage);
+			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage, sizeInBytes);
 			sendMessage(this.objectId, requestMessage.getSourceOid(), response.buildMessageString());
 			
 		} else {
 			
-			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage);
+			messageCounter.addMessage(requestMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, requestMessage.getSourceOid(), this.objectId, false, typeOfMessage, sizeInBytes);
 			logger.warning(this.objectId + ": The source OID " + requestMessage.getSourceOid() + " of the request " 
 					+ requestMessage.getRequestId() + " is not in the roster of this object.");
 		}
@@ -2204,10 +2208,14 @@ public class ConnectionDescriptor {
 		
 		request.setRequestBody(body);
 		
+		// Calculate message size
+		byte[] byteArray = request.buildMessageString().getBytes();
+		int sizeInBytes = byteArray.length;
+		
 		if (!sendMessage(this.objectId, destinationOid, request.buildMessageString())){
 			
 			// monitoring 
-			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, this.objectId, destinationOid, true, typeOfMessage);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NOT_POSSIBLE_TO_SEND, this.objectId, destinationOid, true, typeOfMessage, sizeInBytes);
 			
 			statusCodeReason = new String("Destination object " + destinationOid 
 					+ " is either not in the list of available objects or it was not possible to send the message.");
@@ -2231,7 +2239,7 @@ public class ConnectionDescriptor {
 		if (response == null){
 
 			// monitoring 
-			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED, this.objectId, destinationOid, true, typeOfMessage);
+			messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_NO_RESPONSE_MESSAGE_RECEIVED, this.objectId, destinationOid, true, typeOfMessage, sizeInBytes);
 			
 			statusCodeReason = new String("No response message received. The message might have got lost. Source ID: " 
 					+ objectId + " Destination ID: " + destinationOid + " Request ID: " + requestId);
@@ -2248,7 +2256,7 @@ public class ConnectionDescriptor {
 		}
 		
 		// monitoring 
-		messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid, true, typeOfMessage);
+		messageCounter.addMessage(requestId, MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid, true, typeOfMessage, sizeInBytes);
 		
 		// response arrived
 		statusMessage = new StatusMessage(
