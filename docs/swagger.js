@@ -2,7 +2,7 @@ var data = {
   "swagger": "2.0",
   "info": {
     "description": "<p>The standalone VICINITY Open Gateway API enables your IoT infrastructure to Among its features there is retrieving and setting a property on remote interconnect with other IoT infrastructures and Services through VICINITY P2P network by using HTTP REST requests.</p><br> <p>This API is used as specification <ul><li>to expose your IoT infrastructure in VICINITY P2P network and</li><li>to consume (access) IoT infrastructure through VICINITY P2P network.</li></ul></p> <p>The only difference is that if your software component is calling these API endpoints (e.g. service is reading property from remote device) or your IoT infrastructure is providing these endpoints to Open Gateway API (e.g. IoT infrastructure is responding to service request on device property).</p> <p>VICINITY Open Gateway API is divided in the following groups: <ul>\n  <li>authentication: used to login device, service and adapter/agent;</li>\n  <li>discovery: to manage registry of devices and services in VICINITY P2P network;</li>\n  <li>properties: to expose or to consume (access) properties of the particular devices/services;</li>\n  <li>actions: to expose or to consume (access) action of the particular device/service;</li>\n  <li>events: to expose or to consume (access) events of the particular device/service.</li>\n</ul>\n<p>Note, for installation guide please refere the <a href=\"\">VICINITY Getting started guide</a></p>",
-    "version": "0.6.4",
+    "version": "0.7",
     "title": "VICINITY Open Gateway API",
     "termsOfService": "http://swagger.io/terms/",
     "contact": {
@@ -163,6 +163,22 @@ var data = {
         "produces": [
           "application/json"
         ],
+        "parameters": [
+          {
+            "name": "thingDescriptions",
+            "in": "query",
+            "description": "If the parameter is set to true, the output contains the whole thing descriptions, not just ids.",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Additional parameter for the thingDescriptions parameter. The output is paging, due to size. An input is an integer value of a page, starting from zero.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful operation",
@@ -299,40 +315,42 @@ var data = {
             "schema": {
               "type": "object",
               "properties": {
+                "agid": {
+                  "type": "string"
+                },
                 "thingDescriptions": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "error": {
-                        "type": "boolean",
-                        "default": false
+                      "name": {
+                        "type": "string"
                       },
-                      "message": {
+                      "adapter_id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "actions": {
                         "type": "array",
                         "items": {
                           "type": "object",
-                          "properties": {
-                            "oid": {
-                              "type": "string"
-                            },
-                            "password": {
-                              "type": "string"
-                            },
-                            "infrastructure-id": {
-                              "type": "string"
-                            },
-                            "nm-id": {
-                              "type": "string"
-                            },
-                            "name": {
-                              "type": "string"
-                            },
-                            "error": {
-                              "type": "boolean",
-                              "default": false
-                            }
-                          }
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "properties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
                         }
                       }
                     }
@@ -370,9 +388,6 @@ var data = {
                       "password": {
                         "type": "string"
                       },
-                      "infrastructure-id": {
-                        "type": "string"
-                      },
                       "nm-id": {
                         "type": "string"
                       },
@@ -406,6 +421,60 @@ var data = {
         ],
         "parameters": [
           {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agid": {
+                  "type": "string"
+                },
+                "thingDescriptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "oid": {
+                        "type": "string"
+                      },
+                      "adapter_id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "properties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
             "name": "agid",
             "in": "path",
             "description": "agent id",
@@ -431,11 +500,26 @@ var data = {
                       "oid": {
                         "type": "string"
                       },
-                      "password": {
+                      "name": {
                         "type": "string"
                       },
-                      "infrastructure-id": {
+                      "nm-id": {
                         "type": "string"
+                      },
+                      "error": {
+                        "type": "boolean",
+                        "default": false
+                      },
+                      "contracts": {
+                        "type": "array",
+                        "items": {
+                          "type": "boolean",
+                          "default": false
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "default": "Success"
                       }
                     }
                   }
@@ -462,6 +546,60 @@ var data = {
         ],
         "parameters": [
           {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agid": {
+                  "type": "string"
+                },
+                "thingDescriptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "oid": {
+                        "type": "string"
+                      },
+                      "adapter_id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "actions": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "properties": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      },
+                      "events": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "description": "Flexible schema - see agent documentation"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
             "name": "agid",
             "in": "path",
             "description": "agent id",
@@ -487,11 +625,9 @@ var data = {
                       "oid": {
                         "type": "string"
                       },
-                      "password": {
-                        "type": "string"
-                      },
-                      "infrastructure-id": {
-                        "type": "string"
+                      "success": {
+                        "type": "boolean",
+                        "default": true
                       }
                     }
                   }
@@ -518,6 +654,25 @@ var data = {
         ],
         "parameters": [
           {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "agid": {
+                  "type": "string"
+                },
+                "oids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          {
             "name": "agid",
             "in": "path",
             "description": "agent id",
@@ -536,15 +691,28 @@ var data = {
                   "default": false
                 },
                 "message": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "value": {
-                        "type": "string"
-                      },
-                      "result": {
-                        "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "value": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "error": {
+                            "type": "boolean",
+                            "default": false
+                          }
+                        }
                       }
                     }
                   }
@@ -993,6 +1161,13 @@ var data = {
             "description": "event id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "qos",
+            "in": "query",
+            "description": "quality of service - default value is 1. If the parameter is set to 2, an event channel is created, which is waiting for acknowledgment after the event is distributed.",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -1196,6 +1371,13 @@ var data = {
             "description": "event id",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "qos",
+            "in": "query",
+            "description": "quality of service - default value is 1. If the parameter is set to 2, a subscription is created, which is waiting for acknowledgment after the event is distributed.",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -1350,8 +1532,18 @@ var data = {
                 "message": [
                   {
                     "semanticInterfaces": [
-                      "eu.shar_q.sim:BasicBattery:0.0.1",
-                      "eu.shar_q.sim:BatteryExample:0.0.1"
+                      {
+                        "oid": "OID1",
+                        "semanticInterface": "eu.shar_q.sim:BasicBattery:0.0.1"
+                      },
+                      {
+                        "oid": "OID2",
+                        "semanticInterface": "eu.shar_q.sim:BasicBattery:0.0.1"
+                      },
+                      {
+                        "oid": "OID3",
+                        "semanticInterface": "eu.shar_q.sim:BatteryExample:0.0.1"
+                      }
                     ]
                   }
                 ]
@@ -1366,3 +1558,4 @@ var data = {
     }
   }
 }
+
