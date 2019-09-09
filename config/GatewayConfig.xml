@@ -12,8 +12,7 @@
 		-->
 		<server>development.vicinity.ws</server>
 		
-		
-		<!--
+                <!--
 		Port of the communication server.
 		
 		Defaults to 5222.
@@ -436,7 +435,7 @@
 			<!--
 			The number of records that are sent to NM 
 			-->
-			100
+			50
 		</countOfRecords>
 	</messageCounter>
 
