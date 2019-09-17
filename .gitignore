@@ -7,3 +7,4 @@ data/
 log/*.log
 log/*.log.lck
 bin/
+/target/
