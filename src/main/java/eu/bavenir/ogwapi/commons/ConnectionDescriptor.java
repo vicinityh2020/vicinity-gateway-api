@@ -813,6 +813,10 @@ public class ConnectionDescriptor {
 		
 		String message = eventMessage.buildMessageString();
 		
+		// Calculate message size
+		byte[] byteArray = message.getBytes();
+		int sizeInBytes = byteArray.length;
+		
 		// keep track of number of sent messages
 		int sentMessages = 0;
 		
@@ -821,6 +825,8 @@ public class ConnectionDescriptor {
 		for (String destinationOid : subscribers) {
 			if(sendMessage(this.objectId, destinationOid, message)) {
 				sentMessages++;
+				// Count event
+				messageCounter.addMessage(eventMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, this.objectId, destinationOid, true, "EVENTMESSAGE", sizeInBytes);
 			} else {
 				logger.warning(this.objectId + ": Destination object ID " + destinationOid 
 						+ " is not in the contact list during event distribution.");
@@ -839,7 +845,6 @@ public class ConnectionDescriptor {
 			
 			statusCodeReason += ACKs + " acknowledgements arrived.";
 		}
-		
 		
 		logger.info(this.objectId + ": " + statusCodeReason);
 		
@@ -1311,7 +1316,7 @@ public class ConnectionDescriptor {
 		Subscription subscription = searchForSubscription(eventMessage.getSourceOid());
 		
 		if (subscription != null && subscription.subscriptionExists(eventMessage.getEventId())) {
-			
+
 			NetworkMessageResponse response = agentConnector.forwardEventToObject(
 					eventMessage.getSourceOid(),
 					this.objectId,
@@ -1319,6 +1324,13 @@ public class ConnectionDescriptor {
 					eventMessage.getEventBody(),
 					eventMessage.getParameters()
 					);
+			
+			// Calculate message size
+			byte[] byteArray = eventMessage.buildMessageString().getBytes();
+			int sizeInBytes = byteArray.length;
+			
+			// Count event
+			messageCounter.addMessage(eventMessage.getRequestId(), MessageCounter.RECORDTYPE_INT_OK, eventMessage.getSourceOid(), this.objectId, false, "EVENTMESSAGE", sizeInBytes);
 			
 			// ACK
 			NetworkMessageResponse responseToSender = new NetworkMessageResponse(config, logger);
