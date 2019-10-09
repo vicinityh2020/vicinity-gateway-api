@@ -8,6 +8,7 @@
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/commons/messages/NetworkMessageRequest.java
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/commons/messages/MessageResolver.java
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/commons/Action.java
+/Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/restapi/security/SecureServerComms.java
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/restapi/services/AgentsAgidObjectsDelete.java
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsLogout.java
 /Users/jorgealmela/eclipse-workspace/vicinity-gateway-api/src/main/java/eu/bavenir/ogwapi/restapi/services/ObjectsOidPropertiesPid.java

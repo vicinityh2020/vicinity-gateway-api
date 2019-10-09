@@ -1,6 +1,7 @@
 eu/bavenir/ogwapi/commons/messages/CodesAndReasons.class
 eu/bavenir/ogwapi/commons/engines/xmpp/XmppMessageEngine$2.class
 eu/bavenir/ogwapi/restapi/RestletThread.class
+eu/bavenir/ogwapi/restapi/security/SecureServerComms.class
 eu/bavenir/ogwapi/commons/ConnectionDescriptor.class
 eu/bavenir/ogwapi/restapi/services/AgentsAgidObjectsDelete.class
 eu/bavenir/ogwapi/restapi/Api.class
