@@ -18,7 +18,7 @@ import com.mashape.unirest.http.Unirest;
 
 import eu.bavenir.ogwapi.commons.monitoring.MessageCounter;
 import eu.bavenir.ogwapi.restapi.RestletThread;
-
+import eu.bavenir.ogwapi.commons.connectors.NeighbourhoodManagerConnector;
 
 
 /**
@@ -101,7 +101,10 @@ public class App {
 	
 	// executing threads
 	private static RestletThread restletThread;
-	private static MessageCounter messageCounter;	
+	
+	// Classes started on-init
+	private static MessageCounter messageCounter;
+	private static NeighbourhoodManagerConnector nmConnector;
 
 	/* === METHODS === */
 	
@@ -190,8 +193,14 @@ public class App {
 			
 		}
 		
-		// === set up the API thread ===
+		// Generate the JWT and perform the handshake with the NM
+		nmConnector = new NeighbourhoodManagerConnector(config, logger);
+		nmConnector.handshake();
+		
+		// Initialize counters
 		messageCounter = new MessageCounter(config, logger);
+		
+		// === set up the API thread ===
 		restletThread = new RestletThread(config, logger, messageCounter);
 		
 		return true;

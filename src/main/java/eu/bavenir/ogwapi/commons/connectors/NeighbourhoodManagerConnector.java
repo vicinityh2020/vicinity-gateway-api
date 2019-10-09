@@ -9,13 +9,16 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.jena.atlas.json.JSON;
+import org.json.JSONObject;
+import org.restlet.data.ChallengeResponse;
+import org.restlet.data.ChallengeScheme;
 import org.restlet.data.MediaType;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 
 import eu.bavenir.ogwapi.commons.ConnectionDescriptor;
+import eu.bavenir.ogwapi.restapi.security.SecureServerComms;
 
 /*
  * STRUCTURE
@@ -122,22 +125,40 @@ public class NeighbourhoodManagerConnector {
 	
 	
 	/**
-	 * Get thing descriptions string
+	 * Send counters
 	 */
 	private static final String SEND_COUNTERS = "counters";
 	
+	/**
+	 * Perform handshake with the platform
+	 */
+	private static final String HANDSHAKE = "handshake";
+	
+	/**
+	 * Name of the configuration parameter for Gateway platform identity.
+	 */
+	private static final String CONFIG_PARAM_PLATFORMIDENTITY = "platformSecurity.identity";
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_PLATFORMIDENTITY } parameter. 
+	 */
+	private static final String CONFIG_DEF_PLATFORMIDENTITY = "ANONYMOUS";
+	
+	/**
+	 * Name of the configuration parameter for setting encryption of the payload.
+	 */
+	private static final String CONFIG_PARAM_PLATFORMSECURITY = "platformSecurity.enable";
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_PLATFORMENCRYPTION } parameter. 
+	 */
+	private static final Boolean CONFIG_DEF_PLATFORMSECURITY = false;
 	
 	// === FIELDS ===
 	
-	/*
-	 * Configuration of the OGWAPI.
+	/** Class for secure comms with platform
 	 */
-	// private XMLConfiguration config;
-	
-	/*
-	 * Logger of the OGWAPI.
-	 */
-	//private Logger logger;
+	private static SecureServerComms secureComms;
 	
 	/**
 	 * User name to be used when communicating with NM. 
@@ -159,7 +180,20 @@ public class NeighbourhoodManagerConnector {
 	 */
 	private int port;
 	
+	/**
+	 * Logger.
+	 */
+	private Logger logger;
 	
+	/**
+	 * Gateway identity. 
+	 */
+	private String agid;
+	
+	/**
+	 * Send authorization token.
+	 */
+	private Boolean securityEnabled;
 	
 	// === PUBLIC METHODS ===
 	
@@ -171,14 +205,18 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public NeighbourhoodManagerConnector(XMLConfiguration config, Logger logger) {
 		
-		//this.config = config;
-		//this.logger = logger;
+		this.logger = logger;
+		
+		agid = config.getString(CONFIG_PARAM_PLATFORMIDENTITY, CONFIG_DEF_PLATFORMIDENTITY);
 		
 		neighbourhoodManagerServer = 
 				config.getString(CONFIG_PARAM_NEIGHBORHOODMANAGERSERVER, CONFIG_DEF_NEIGHBORHOODMANAGERSERVER);
 		
 		port = config.getInt(CONFIG_PARAM_NEIGHBOURHOODMANAGERPORT, CONFIG_DEF_NEIGHBOURHOODMANAGERPORT);
 		
+		securityEnabled = config.getBoolean(CONFIG_PARAM_PLATFORMSECURITY, CONFIG_DEF_PLATFORMSECURITY);
+
+		secureComms = new SecureServerComms(config, logger);
 	}
 	
 	
@@ -192,7 +230,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + DISCOVERY_SERVICE_1 + agid + DISCOVERY_SERVICE_2;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 		
 		Representation representation = clientResource.get(MediaType.APPLICATION_JSON);
 		
@@ -212,7 +250,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + REGISTRATION_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
@@ -233,7 +271,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + HEAVYWEIGHTUPDATE_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
@@ -253,7 +291,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + LIGHTWEIGHTUPDATE_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 
 		Representation responseRepresentation = clientResource.put(json, MediaType.APPLICATION_JSON);
 		
@@ -272,7 +310,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + DELETE_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 		
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
@@ -290,7 +328,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 		
 		Representation responseRepresentation = clientResource.post(json, MediaType.APPLICATION_JSON);
 		
@@ -321,7 +359,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 		
 		JsonObjectBuilder mainObjectBuilder = Json.createObjectBuilder();
 		JsonArrayBuilder mainArrayBuilder = Json.createArrayBuilder();
@@ -350,7 +388,7 @@ public class NeighbourhoodManagerConnector {
 		
 		String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + SEND_COUNTERS;
 		
-		ClientResource clientResource = new ClientResource(endpointUrl);
+		ClientResource clientResource = createRequest(endpointUrl);
 		
 		Representation responseRepresentation = clientResource.post(new JsonRepresentation(payload.toString()), MediaType.APPLICATION_JSON);
 		
@@ -358,6 +396,40 @@ public class NeighbourhoodManagerConnector {
 		
 	}
 	
+	/**
+	 * Perform handshake and expects NM to validate identity.
+	 * 
+	 * @param JSON containing array records with all the messages 
+	 * @return Server acknowledgment
+	 */
+	public synchronized void handshake(){
+		try {
+			String endpointUrl = SERVER_PROTOCOL + neighbourhoodManagerServer + ":" + port + API_PATH + HANDSHAKE;
+			ClientResource clientResource = createRequest(endpointUrl);
+			Representation responseRepresentation = clientResource.get(MediaType.APPLICATION_JSON);
+			JSONObject jsonDocument = new JSONObject(responseRepresentation.getText());
+			logger.info(jsonDocument.getString("message"));
+		} catch(IOException i) {
+			i.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	// === PRIVATE METHODS ===
+	
+	private ClientResource createRequest(String endpointUrl) {
+		ClientResource clientResource = new ClientResource(endpointUrl);
+		// Add auth token if security enabled
+		if(securityEnabled) {
+			String token = secureComms.getToken();
+			ChallengeResponse cr = new ChallengeResponse(ChallengeScheme.HTTP_OAUTH_BEARER);
+			cr.setRawValue(token);
+			clientResource.setChallengeResponse(cr);
+		}
+		return clientResource;
+	}
+	
 }

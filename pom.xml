@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.8.1</version>
+			<version>3.8.3</version>
 		</dependency>
 
 		<!-- Json -->
@@ -148,8 +148,8 @@
 			<artifactId>vicinity-open-gateway-api-distributed-query-client</artifactId>
 			<version>76f9dac9d7ca86d3219feb7c634fa653023d9f1e</version>
 		</dependency>
-	</dependencies>
 	
+	</dependencies>
 	<!-- Build an executable JAR -->
 	<build>
 		<finalName>ogwapi-jar-with-dependencies</finalName>

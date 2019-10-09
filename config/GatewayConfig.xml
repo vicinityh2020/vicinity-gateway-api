@@ -27,7 +27,7 @@
 		PROD 	- api.vicinity.bavenir.eu
 		
 		-->
-		<neighbourhoodManagerServer>api.vicinity.dev.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
 
 		
 		<!-- 
@@ -438,5 +438,32 @@
 			50
 		</countOfRecords>
 	</messageCounter>
+	
+	<platformSecurity>
+		<enable>
+			<!-- 
+			Tries to authenticate the gateway into the platform, if disabled the 
+			gateway functions in anonymous mode and restrictions might apply (true or false) 
+			-->
+			false
+		</enable>
+		<identity>
+			<!--
+			AGID of the Access Point used to authenticate the gateway (AGID string) 
+			-->
+			0-0-0-0
+		</identity>
+		<ttl>
+			<!-- 
+			Token time to live. Sets duration of the authentication token validity.
+			Default is one week. It is set in milliseconds.
+			 -->
+			 604800000
+		</ttl>
+		<path>
+			<!-- Security files path -->
+			keystore/
+		</path>
+	</platformSecurity>
 
 </configuration>
