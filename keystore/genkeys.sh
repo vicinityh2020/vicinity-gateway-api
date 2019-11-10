@@ -7,4 +7,4 @@ openssl pkcs8 -topk8 -inform PEM -outform DER -in platform-key.pem -out platform
 # Generate your public key in DER encoding for JAVA
 openssl rsa -in platform-key.pem -pubout -outform DER -out platform-pubkey.der
 # Encode your public key as PEM (ASCII) for uploading to the Platform
-openssl rsa -in platform-key.pem -pubout -outform DER -out platform-pubkey.der
+openssl rsa -in platform-key.pem -pubout -outform PEM -out platform-pubkey.pem

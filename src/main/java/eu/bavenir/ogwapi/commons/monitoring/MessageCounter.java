@@ -63,10 +63,6 @@ public class MessageCounter {
 	 */
 	public static final String RECORDTYPE_STRING_OK = "OK";
 	
-	
-	public static final String PRIVATE_KEY_FILE_PATH = "keystore/private.key.pem";
-	public static final String PUBLIC_KEY_FILE_PATH = "keystore/public.key.pem";
-	
 	/* === FIELDS === */
 	
 	

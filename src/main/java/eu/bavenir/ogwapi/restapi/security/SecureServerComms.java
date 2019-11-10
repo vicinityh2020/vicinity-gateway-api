@@ -33,9 +33,8 @@ import java.security.spec.*;
 
 
 /**
- * Provides methods for signing, encrypting and decrypting messages 
- * to/from the Cloud Platform. It uses JWT token to give proof of the
- * identity of the gateway against the Platform.
+ * Provides methods for signing and validating messages. 
+ * It uses JWT token to give proof of the identity of the gateway against the Platform.
  * 
  * @author jorge
  *
@@ -61,7 +60,7 @@ public class SecureServerComms {
 	private static final String CONFIG_PARAM_EXPIRE = "platformSecurity.ttl";
 	
 	/**
-	 * Default value for {@link #CONFIG_DEF_EXPIRE } parameter. 
+	 * Default value for {@link #CONFIG_PARAM_EXPIRE } parameter. 
 	 */
 	private static final int CONFIG_DEF_EXPIRE = 604800000;
 	
@@ -71,24 +70,30 @@ public class SecureServerComms {
 	private static final String CONFIG_PARAM_PATH = "platformSecurity.path";
 	
 	/**
-	 * Default value for {@link #CONFIG_DEF_PATH } parameter. 
+	 * Default value for {@link #CONFIG_PARAM_PATH } parameter. 
 	 */
 	private static final String CONFIG_DEF_PATH = "keystore/";
 	
 	/**
 	 * Default value for ogwapi private key. 
 	 */
-	private static final String CONFIG_DEF_OGWAPI_PRIV_KEY = "private-key.der";
+	private static final String CONFIG_PARAM_OGWAPI_PRIV_KEY = "platformSecurity.privatekey";
 	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_OGWAPI_PRIV_KEY } parameter. 
+	 */
+	private static final String CONFIG_DEF_OGWAPI_PRIV_KEY = "platform-key.der";
+
 	/**
 	 * Default value for ogwapi public key. 
 	 */
-	private static final String CONFIG_DEF_OGWAPI_PUB_KEY = "public-key.der";
+	private static final String CONFIG_PARAM_OGWAPI_PUB_KEY = "platformSecurity.publickey";
 	
 	/**
-	 * Default value for platform public key. 
+	 * Default value for{@link #CONFIG_PARAM_OGWAPI_PUB_KEY } parameter. 
 	 */
-	private static final String CONFIG_DEF_NM_PUB_KEY = "nm-public-key.der";
+	private static final String CONFIG_DEF_OGWAPI_PUB_KEY = "platform-pubkey.der";
+	
 	
 	/**
 	 * Default value for jwt token. 
@@ -106,6 +111,16 @@ public class SecureServerComms {
 	 * Define token time to live.
 	 */
 	private int ttl;
+	
+	/**
+	 * Define private key name.
+	 */
+	private String privKey;
+	
+	/**
+	 * Define public key name.
+	 */
+	private String pubKey;
 	
 	/**
 	 * Platform token and expiration.
@@ -137,6 +152,8 @@ public class SecureServerComms {
 		agid = config.getString(CONFIG_PARAM_PLATFORMIDENTITY, CONFIG_DEF_PLATFORMIDENTITY);
 		ttl = config.getInt(CONFIG_PARAM_EXPIRE, CONFIG_DEF_EXPIRE);
 		path = config.getString(CONFIG_PARAM_PATH, CONFIG_DEF_PATH);
+		privKey = config.getString(CONFIG_PARAM_OGWAPI_PUB_KEY, CONFIG_DEF_OGWAPI_PUB_KEY);
+		pubKey = config.getString(CONFIG_PARAM_OGWAPI_PRIV_KEY, CONFIG_DEF_OGWAPI_PRIV_KEY);
 		platform_token_expiration = System.currentTimeMillis() + ttl;
 	}
 	
@@ -170,7 +187,7 @@ public class SecureServerComms {
 	// Generate token
 	private String generateToken() {
 		String token = "";
-		String file = path + CONFIG_DEF_OGWAPI_PRIV_KEY;
+		String file = path + privKey;
 		try {
 			
 			RSAPrivateKey privateKey = readPrivateKey(file);
@@ -218,7 +235,7 @@ public class SecureServerComms {
 	
 	// Validate token
 	private void verifyToken(String token) throws JWTVerificationException, IOException{
-		String file = path + CONFIG_DEF_OGWAPI_PUB_KEY;
+		String file = path + pubKey;
 		try {
 			RSAPublicKey publicKey = readPublicKey(file); //Get the key instance
 		    Algorithm algorithm = Algorithm.RSA256(publicKey, null);

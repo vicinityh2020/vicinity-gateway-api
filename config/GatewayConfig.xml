@@ -10,7 +10,7 @@
 		PROD 	- commserver.vicinity.ws
 		
 		-->
-		<server>commserver.vicinity.ws</server>
+		<server>development.vicinity.ws</server>
 		
                 <!--
 		Port of the communication server.
@@ -27,7 +27,7 @@
 		PROD 	- api.vicinity.bavenir.eu
 		
 		-->
-		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.dev.bavenir.eu</neighbourhoodManagerServer>
 
 		
 		<!-- 
@@ -44,7 +44,7 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<encryption>true</encryption>
+		<encryption>false</encryption>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
@@ -464,6 +464,14 @@
 			<!-- Security files path -->
 			keystore/
 		</path>
+		<privkey>
+			<!-- Private Key file name -->
+			platform-key.der
+		</privkey>
+		<pubkey>
+			<!-- Public Key file name -->
+			platform-pubkey.der
+		</pubkey>
 	</platformSecurity>
 
 </configuration>

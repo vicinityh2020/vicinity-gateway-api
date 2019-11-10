@@ -21,8 +21,10 @@ RUN git clone -b develop --single-branch https://github.com/vicinityh2020/vicini
 RUN mkdir gateway \
     && mkdir gateway/target \
     && mkdir gateway/config \
+    && mkdir gateway/keystore \
     && mv vicinity-gateway-api/target/ogwapi-jar-with-dependencies.jar /gateway/target/ \
     && mv vicinity-gateway-api/config/* /gateway/config/ \
+    && mv vicinity-gateway-api/keystore/genkeys.sh /gateway/keystore/ \
     && rm -rf vicinity-gateway-api
 WORKDIR /gateway
 
@@ -33,7 +35,8 @@ RUN chmod 764 ./target/ogwapi-jar-with-dependencies.jar \
     && mkdir ./data/ \
     && chmod -R 777  ./data/ \
     && chown -R app:app /gateway \
-    && chmod 764 ./config/GatewayConfig.xml
+    && chmod 764 ./config/GatewayConfig.xml \
+    && chmod +x ./keystore/genkeys.sh
 USER app
 
 # Select port
