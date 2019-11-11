@@ -413,6 +413,7 @@ public class NeighbourhoodManagerConnector {
 			i.printStackTrace();
 		} catch(Exception e) {
 			e.printStackTrace();
+			logger.warning("There might be a problem authenticating your signature, please check that you uploaded the right public key to the server.");
 		}
 		
 	}

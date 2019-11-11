@@ -152,8 +152,8 @@ public class SecureServerComms {
 		agid = config.getString(CONFIG_PARAM_PLATFORMIDENTITY, CONFIG_DEF_PLATFORMIDENTITY);
 		ttl = config.getInt(CONFIG_PARAM_EXPIRE, CONFIG_DEF_EXPIRE);
 		path = config.getString(CONFIG_PARAM_PATH, CONFIG_DEF_PATH);
-		privKey = config.getString(CONFIG_PARAM_OGWAPI_PUB_KEY, CONFIG_DEF_OGWAPI_PUB_KEY);
-		pubKey = config.getString(CONFIG_PARAM_OGWAPI_PRIV_KEY, CONFIG_DEF_OGWAPI_PRIV_KEY);
+		privKey = config.getString(CONFIG_PARAM_OGWAPI_PRIV_KEY, CONFIG_DEF_OGWAPI_PRIV_KEY);
+		pubKey = config.getString(CONFIG_PARAM_OGWAPI_PUB_KEY, CONFIG_DEF_OGWAPI_PUB_KEY);
 		platform_token_expiration = System.currentTimeMillis() + ttl;
 	}
 	
