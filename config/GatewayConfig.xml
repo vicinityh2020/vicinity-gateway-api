@@ -10,7 +10,7 @@
 		PROD 	- commserver.vicinity.ws
 		
 		-->
-		<server>development.vicinity.ws</server>
+		<server>commserver.vicinity.ws</server>
 		
                 <!--
 		Port of the communication server.
@@ -27,7 +27,7 @@
 		PROD 	- api.vicinity.bavenir.eu
 		
 		-->
-		<neighbourhoodManagerServer>api.vicinity.dev.bavenir.eu</neighbourhoodManagerServer>
+		<neighbourhoodManagerServer>api.vicinity.bavenir.eu</neighbourhoodManagerServer>
 
 		
 		<!-- 
@@ -44,7 +44,7 @@
 		Setting it to false will disable the encryption (not 
 		recommended, only for debug purposes). Default is true.  
 		-->
-		<encryption>false</encryption>
+		<encryption>true</encryption>
 		
 		<!--
 		Number of seconds to consider request message as no longer relevant. 
