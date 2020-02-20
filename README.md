@@ -8,3 +8,6 @@ https://vicinity-get-started.readthedocs.io/en/latest/getstarted.html
 # VICINITY Open Gateway REST API description #
 For more information about HTTP REST requests please visit complete REST API description.
 https://vicinityh2020.github.io/vicinity-gateway-api/#/
+
+# VICINITY Gateway API issues #
+For the VICINITY Gateway API issues please follow: https://github.com/vicinityh2020/issue-tracking/issues?q=is%3Aissue+is%3Aclosed 
