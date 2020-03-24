@@ -6,7 +6,7 @@
 		Domain name of the communication server. If not set, the application exits.
 		This value can't be just an IP address if encryption is to be used.
 		
-		DEV 	- development.vicinity.ws
+		DEV 	- devlb.vicinity.sk
 		PROD 	- commserver.vicinity.ws
 		
 		-->
@@ -242,6 +242,7 @@
 		
 		<!--
 		XMPP domain that is served by the server. Defaults to vicinity.ws.
+		DEVELOPMENT server: vicinity.sk
 		-->
 		<domain>vicinity.ws</domain>
 		

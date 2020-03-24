@@ -161,10 +161,17 @@ public class SecureServerComms {
 	// Afterwards returns token
 	public String getToken() {
 		File file = new File(path + CONFIG_DEF_TOKEN);
+		String token = "";
 		if(platform_token_expiration < System.currentTimeMillis()) {
 			// If exists and it is expired, regenerate it
-			String token = generateToken();
-		    logger.fine("Token expired, new token created and stored");
+			if(file.delete()) { 
+				logger.fine("Old token expired, removing and generating new one...");
+				token = generateToken();
+			    logger.fine("New token created and stored!");
+	        } else { 
+	            logger.severe("Old token expired but there was an error removing it, please delete it manually and restart the gateway"); 
+	            System.exit(1);
+	        } 
 			return token;
 		} else if(platform_token != null) {
 		// Check if exists in class
@@ -176,7 +183,7 @@ public class SecureServerComms {
 			return loadToken(file);
 		} else {
 			// Otherwise regenerate
-			String token = generateToken();
+			token = generateToken();
 			logger.fine("Token generated and stored");
 			return token;
 		}		

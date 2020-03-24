@@ -1,5 +1,6 @@
 package eu.bavenir.ogwapi;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -86,6 +87,16 @@ public class App {
 	 */
 	private static final long THREAD_SLEEP = 100;
 	
+	/**
+	 * Name of the configuration parameter for keys path.
+	 */
+	private static final String CONFIG_PARAM_PATH = "platformSecurity.path";
+	
+	/**
+	 * Default value for {@link #CONFIG_PARAM_PATH } parameter. 
+	 */
+	private static final String CONFIG_DEF_PATH = "keystore/";
+	
 	
 	/* === OTHER FIELDS === */
 	
@@ -105,6 +116,10 @@ public class App {
 	// Classes started on-init
 	private static MessageCounter messageCounter;
 	private static NeighbourhoodManagerConnector nmConnector;
+	
+	// Security token temporary path
+	private static String path;
+	
 
 	/* === METHODS === */
 	
@@ -310,14 +325,19 @@ public class App {
 			public void run(){
 				
 				try {
-					
-					
 					// only system.out style logging can be executed at this phase
 					// (but there's nothing too much interesting anyway...)
 					System.out.println("Vicinity Gateway API: Shutdown hook run, terminating threads and storing counters.");
 					
+					// Save counters
 					messageCounter.saveCounters();
 					
+					// Remove token file
+					path = config.getString(CONFIG_PARAM_PATH, CONFIG_DEF_PATH) + "ogwapi-token";
+					File file = new File(path);
+					file.delete();
+					
+					// Terminate threads
 					restletThread.terminateThread();				
 					restletThread.join();
 					

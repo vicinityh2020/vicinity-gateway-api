@@ -4,7 +4,7 @@
   <groupId>eu.bavenir</groupId>
   <artifactId>OpenGatewayAPI</artifactId>
   <name>OpenGatewayAPI</name>
-  <version>1.1</version>
+  <version>0.8</version>
   <url>http://maven.apache.org</url>
   <build>
     <finalName>ogwapi-jar-with-dependencies</finalName>
