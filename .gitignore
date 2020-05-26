@@ -6,6 +6,7 @@
 data/
 log/*.log
 log/*.log.lck
+log/*.log.*
 bin/
 keystore/*.der
 keystore/*.pem
