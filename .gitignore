@@ -11,3 +11,4 @@ keystore/*.der
 keystore/*.pem
 keystore/ogwapi-token
 /target/
+.vscode/
