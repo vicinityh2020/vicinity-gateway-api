@@ -11,3 +11,5 @@ keystore/*.pem
 keystore/ogwapi-token
 target/
 .vscode/
+_run-static-analyzer.sh
+dependency-reduced-pom.xml

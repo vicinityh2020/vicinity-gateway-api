@@ -11,3 +11,12 @@ https://vicinityh2020.github.io/vicinity-gateway-api/#/
 
 # VICINITY Gateway API issues #
 For the VICINITY Gateway API issues please follow: https://github.com/vicinityh2020/issue-tracking/issues?q=is%3Aissue+is%3Aclosed 
+
+# Run static analyzer
+
+Run static analyzer SonarQube
+
+mvn sonar:sonar \
+  -Dsonar.projectKey=YOUR-PROJECT-NAME \
+  -Dsonar.host.url=YOUR-HOST \
+  -Dsonar.login=YOUR-TOKEN
