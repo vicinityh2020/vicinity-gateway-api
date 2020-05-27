@@ -8,3 +8,12 @@ https://vicinity-get-started.readthedocs.io/en/latest/getstarted.html
 # VICINITY Open Gateway REST API description #
 For more information about HTTP REST requests please visit complete REST API description.
 https://vicinityh2020.github.io/vicinity-gateway-api/#/
+
+# Run static analyzer
+
+Run static analyzer SonarQube
+
+mvn sonar:sonar \
+  -Dsonar.projectKey=YOUR-PROJECT-NAME \
+  -Dsonar.host.url=YOUR-HOST \
+  -Dsonar.login=YOUR-TOKEN
