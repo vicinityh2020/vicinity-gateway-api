@@ -12,9 +12,8 @@
 		-->
 		<server>commserver.vicinity.ws</server>
 		
-                <!--
+        <!--
 		Port of the communication server.
-		
 		Defaults to 5222.
 		-->
 		<port>5222</port>
@@ -235,6 +234,29 @@
 		events solely to log file. This is the default behaviour.
 		-->
 		<consoleOutput>true</consoleOutput>
+
+		<!-- 
+		Enable rotation of log files
+		If enabled, it is possible to specify max size of file and number of files to keep
+		Defaults TRUE
+		-->
+		<logRotation>true</logRotation>
+
+		<!-- 
+		Maximum size of a log size. Once the size is reached, a new file is opened.
+		Old files are stored until max number of files is reached (See below)
+		Size is defined in bytes
+		Defaults 10MB = 10485760
+		-->
+		<maxLogSize>10485760</maxLogSize>
+
+		<!-- 
+		Max number of rotated files that are stored
+		After max number is reached old files will be deleted
+		Defaults 7 files
+		-->
+		<maxNumFiles>7</maxNumFiles>
+
 	</logging>
 
 

@@ -4,11 +4,10 @@
 .settings/
 .DS_Store
 data/
-log/*.log
-log/*.log.lck
+log/
 bin/
 keystore/*.der
 keystore/*.pem
 keystore/ogwapi-token
-/target/
+target/
 .vscode/
