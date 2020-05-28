@@ -2,7 +2,7 @@
 FROM openjdk:8-slim-buster
 
 # Variables
-ARG MY_ENV=master
+ARG MY_ENV=develop
 ARG UID=1001
 ARG GID=1001
 ENV MY_ENV=${MY_ENV}
