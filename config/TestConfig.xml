@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- Configuration to run with the MockServer for the test environment -->
+	<general>
+		<neighbourhoodManagerServer>
+			localhost
+		</neighbourhoodManagerServer>
+		<neighourhoodManagerPort>
+			1080
+		</neighourhoodManagerPort>
+		<testProtocol>
+			http://
+		</testProtocol>
+	</general>
+</configuration>
