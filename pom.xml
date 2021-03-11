@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-extensions</artifactId>
-			<version>4.3.0</version>
+			<version>4.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
@@ -107,7 +107,7 @@
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack-java7</artifactId>
-			<version>4.3.0</version>
+			<version>4.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
@@ -178,8 +178,8 @@
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 							<mainClass>eu.bavenir.ogwapi.App</mainClass>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
 							<addHeader>false</addHeader>
 						</transformer>
