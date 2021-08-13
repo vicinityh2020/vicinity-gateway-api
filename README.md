@@ -9,6 +9,10 @@ https://vicinity-get-started.readthedocs.io/en/latest/getstarted.html
 For more information about HTTP REST requests please visit complete REST API description.
 https://vicinityh2020.github.io/vicinity-gateway-api/#/
 
+# Build binaries #
+
+mvn clean package
+
 # Run static analyzer
 
 Run static analyzer SonarQube

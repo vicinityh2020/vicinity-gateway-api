@@ -37,6 +37,13 @@
 		<neighourhoodManagerPort>3000</neighourhoodManagerPort>
 		
 		<!-- 
+		Base URI for connecting the NM from the gateway
+		
+		Default is /api/gtw/v1/ (AURORAL) or /commserver/ (VICINITY/SHARQ)
+		-->
+		<neighourhoodManagerBaseUri>/api/gtw/v1/</neighourhoodManagerBaseUri>
+
+		<!-- 
 		Setting this parameter to true will enable encryption of communication. 
 		The policy is to try the strongest mechanisms first.
 		

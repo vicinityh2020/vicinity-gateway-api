@@ -11,6 +11,7 @@ Run the gateway using one of the following options:
 ./_run.sh -e jar --> jar mode
 ./_run.sh -e test --> run tests
 ./_run.sh -e local --> docker local mode
+./_run.sh -e build --> build jar files
 Where:
   Flags:
       -h  Shows help
@@ -65,6 +66,12 @@ elif [ ${MY_ENV} == "test" ]; then
 
     docker run -v $(pwd)/config:/libs -p 1080:1080  mockserver/mockserver -serverPort 1080
     mvn test
+
+elif [ ${MY_ENV} == "test" ]; then
+
+    echo "Remember that tests use VICINITY base URI: /commserver/"
+    docker run -v $(pwd)/config:/libs -p 1080:1080  mockserver/mockserver -serverPort 1080
+    mvn clean package
 
 else 
     echo "Please choose some environment"

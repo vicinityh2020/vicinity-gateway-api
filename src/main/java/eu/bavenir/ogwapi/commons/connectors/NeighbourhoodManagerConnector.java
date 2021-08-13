@@ -63,6 +63,16 @@ public class NeighbourhoodManagerConnector {
 	private static final int CONFIG_DEF_NEIGHBOURHOODMANAGERPORT = 3000;
 
 	/**
+	 * Name of the configuration parameter for Neighbourhood Manager base URI.
+	 */
+	private static final String CONFIG_PARAM_NEIGHBOURHOODMANAGERBASEURI = "general.neighourhoodManagerBaseUri";
+
+	/**
+	 * Default value for {@link #CONFIG_PARAM_NEIGHBOURHOODMANAGERBASEURI } parameter.
+	 */
+	private static final String CONFIG_DEF_NEIGHBOURHOODMANAGERBASEURI = "/commserver/";
+
+	/**
 	 * Server URL/IP with port and API name. The final end point is then obtained by
 	 * doing: SERVER_URL + SOME_SERVICE_1 + someAttributeLikeID + SOME_SERVICE_2 +
 	 * someOtherAttribute + etc...
@@ -77,11 +87,6 @@ public class NeighbourhoodManagerConnector {
 	 */
 	private static final String CONFIG_PARAM_SERVER_PROTOCOL = "general.testProtocol";
 	private static final String CONFIG_DEF_SERVER_PROTOCOL = "https://";
-
-	/**
-	 * The part of the URL containing the API path.
-	 */
-	private static final String API_PATH = "/commServer/";
 
 	/**
 	 * Discovery service part 1 of the string.
@@ -161,6 +166,11 @@ public class NeighbourhoodManagerConnector {
 	private static SecureServerComms secureComms;
 
 	/**
+	 * The part of the URL containing the API base URI.
+	 */
+	private String api_base_uri;
+
+	/**
 	 * User name to be used when communicating with NM.
 	 */
 	private String username;
@@ -218,6 +228,8 @@ public class NeighbourhoodManagerConnector {
 
 		securityEnabled = config.getBoolean(CONFIG_PARAM_PLATFORMSECURITY, CONFIG_DEF_PLATFORMSECURITY);
 
+		api_base_uri = config.getString(CONFIG_PARAM_NEIGHBOURHOODMANAGERBASEURI, CONFIG_DEF_NEIGHBOURHOODMANAGERBASEURI);
+
 		secureComms = new SecureServerComms(config, logger);
 	}
 
@@ -230,7 +242,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation getAgentObjects(String agid) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + DISCOVERY_SERVICE_1
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + DISCOVERY_SERVICE_1
 				+ agid + DISCOVERY_SERVICE_2;
 
 		ClientResource clientResource = createRequest(endpointUrl);
@@ -252,7 +264,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation storeObjects(Representation json) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri
 				+ REGISTRATION_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
@@ -274,7 +286,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation heavyweightUpdate(Representation json) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri
 				+ HEAVYWEIGHTUPDATE_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
@@ -296,7 +308,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation lightweightUpdate(Representation json) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri
 				+ LIGHTWEIGHTUPDATE_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
@@ -315,7 +327,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation deleteObjects(Representation json) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + DELETE_SERVICE;
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + DELETE_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
 
@@ -333,7 +345,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation getThingDescriptions(Representation json) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + TD_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
 
@@ -360,7 +372,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation getThingDescription(String objectId) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + TD_SERVICE;
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + TD_SERVICE;
 
 		ClientResource clientResource = createRequest(endpointUrl);
 
@@ -388,7 +400,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized Representation sendCounters(JsonObject payload) {
 
-		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + SEND_COUNTERS;
+		String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + SEND_COUNTERS;
 
 		ClientResource clientResource = createRequest(endpointUrl);
 
@@ -407,7 +419,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized void handshake() {
 		try {
-			String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + API_PATH + HANDSHAKE;
+			String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + HANDSHAKE;
 			ClientResource clientResource = createRequest(endpointUrl);
 			Representation responseRepresentation = clientResource.get(MediaType.APPLICATION_JSON);
 			JSONObject jsonDocument = new JSONObject(responseRepresentation.getText());
