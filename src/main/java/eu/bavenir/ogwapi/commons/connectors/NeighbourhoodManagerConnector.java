@@ -419,6 +419,7 @@ public class NeighbourhoodManagerConnector {
 	 */
 	public synchronized void handshake() {
 		try {
+			logger.info("Connecting to NM in: " + neighbourhoodManagerServer + port + api_base_uri);
 			String endpointUrl = server_protocol + neighbourhoodManagerServer + ":" + port + api_base_uri + HANDSHAKE;
 			ClientResource clientResource = createRequest(endpointUrl);
 			Representation responseRepresentation = clientResource.get(MediaType.APPLICATION_JSON);
