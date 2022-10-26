@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
-			<version>3.8.3</version>
+			<version>3.19.3</version>
 		</dependency>
 
 		<!-- Json -->
@@ -178,8 +178,8 @@
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 							<mainClass>eu.bavenir.ogwapi.App</mainClass>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
 							<addHeader>false</addHeader>
 						</transformer>
